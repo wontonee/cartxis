@@ -1,0 +1,215 @@
+<?php
+
+namespace Vortex\Product\Models;
+
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Support\Str;
+
+class Product extends Model
+{
+    use HasFactory, SoftDeletes;
+
+    protected $fillable = [
+        'sku',
+        'name',
+        'slug',
+        'short_description',
+        'description',
+        'price',
+        'cost',
+        'special_price',
+        'special_price_from',
+        'special_price_to',
+        'status',
+        'visibility',
+        'featured',
+        'new',
+        'quantity',
+        'stock_status',
+        'manage_stock',
+        'min_quantity',
+        'max_quantity',
+        'notify_stock_qty',
+        'type',
+        'weight',
+        'length',
+        'width',
+        'height',
+        'meta_title',
+        'meta_description',
+        'meta_keywords',
+        'sort_order',
+        'views_count',
+        'sales_count',
+        'main_image_id',
+    ];
+
+    protected $casts = [
+        'price' => 'decimal:4',
+        'cost' => 'decimal:4',
+        'special_price' => 'decimal:4',
+        'special_price_from' => 'date',
+        'special_price_to' => 'date',
+        'featured' => 'boolean',
+        'new' => 'boolean',
+        'manage_stock' => 'boolean',
+        'quantity' => 'integer',
+        'min_quantity' => 'integer',
+        'max_quantity' => 'integer',
+        'notify_stock_qty' => 'integer',
+        'sort_order' => 'integer',
+        'views_count' => 'integer',
+        'sales_count' => 'integer',
+    ];
+
+    /**
+     * Boot the model
+     */
+    protected static function boot()
+    {
+        parent::boot();
+
+        static::creating(function ($product) {
+            if (empty($product->slug)) {
+                $product->slug = Str::slug($product->name);
+            }
+            if (empty($product->sku)) {
+                $product->sku = 'PRD-' . strtoupper(Str::random(8));
+            }
+        });
+    }
+
+    /**
+     * Get the images for the product
+     */
+    public function images(): HasMany
+    {
+        return $this->hasMany(ProductImage::class)->orderBy('position');
+    }
+
+    /**
+     * Get the main image
+     */
+    public function mainImage()
+    {
+        return $this->belongsTo(ProductImage::class, 'main_image_id');
+    }
+
+    /**
+     * Get the categories
+     */
+    public function categories(): BelongsToMany
+    {
+        return $this->belongsToMany(Category::class, 'category_product')
+            ->withTimestamps();
+    }
+
+    /**
+     * Get attribute values
+     */
+    public function attributeValues(): HasMany
+    {
+        return $this->hasMany(ProductAttributeValue::class);
+    }
+
+    /**
+     * Get variants (for configurable products)
+     */
+    public function variants(): BelongsToMany
+    {
+        return $this->belongsToMany(Product::class, 'product_variants', 'product_id', 'variant_id')
+            ->withTimestamps();
+    }
+
+    /**
+     * Get parent products (if this is a variant)
+     */
+    public function parentProducts(): BelongsToMany
+    {
+        return $this->belongsToMany(Product::class, 'product_variants', 'variant_id', 'product_id')
+            ->withTimestamps();
+    }
+
+    /**
+     * Check if product is in stock
+     */
+    public function isInStock(): bool
+    {
+        if (!$this->manage_stock) {
+            return true;
+        }
+
+        return $this->quantity > 0 && $this->stock_status === 'in_stock';
+    }
+
+    /**
+     * Check if product has special price active
+     */
+    public function hasSpecialPrice(): bool
+    {
+        if (!$this->special_price) {
+            return false;
+        }
+
+        $now = now();
+
+        if ($this->special_price_from && $now->lt($this->special_price_from)) {
+            return false;
+        }
+
+        if ($this->special_price_to && $now->gt($this->special_price_to)) {
+            return false;
+        }
+
+        return true;
+    }
+
+    /**
+     * Get final price (considering special price)
+     */
+    public function getFinalPrice()
+    {
+        if ($this->hasSpecialPrice()) {
+            return $this->special_price;
+        }
+
+        return $this->price;
+    }
+
+    /**
+     * Scope: Only enabled products
+     */
+    public function scopeEnabled($query)
+    {
+        return $query->where('status', 'enabled');
+    }
+
+    /**
+     * Scope: Featured products
+     */
+    public function scopeFeatured($query)
+    {
+        return $query->where('featured', true);
+    }
+
+    /**
+     * Scope: New products
+     */
+    public function scopeNew($query)
+    {
+        return $query->where('new', true);
+    }
+
+    /**
+     * Scope: In stock
+     */
+    public function scopeInStock($query)
+    {
+        return $query->where('stock_status', 'in_stock')
+            ->where('quantity', '>', 0);
+    }
+}
