@@ -40,6 +40,22 @@ class Category extends Model
     ];
 
     /**
+     * Get the status attribute as boolean for forms
+     */
+    public function getStatusAttribute($value): bool
+    {
+        return $value === 'enabled';
+    }
+
+    /**
+     * Set the status attribute from boolean to enum
+     */
+    public function setStatusAttribute($value): void
+    {
+        $this->attributes['status'] = $value ? 'enabled' : 'disabled';
+    }
+
+    /**
      * Boot the model
      */
     protected static function boot()

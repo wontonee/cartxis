@@ -43,13 +43,13 @@ class CategoryController extends Controller
         }
 
         // Sort
-        $sortBy = $request->get('sort_by', 'position');
+        $sortBy = $request->get('sort_by', 'sort_order');
         $sortOrder = $request->get('sort_order', 'asc');
         $query->orderBy($sortBy, $sortOrder);
 
         $categories = $query->paginate($request->get('per_page', 15))->withQueryString();
 
-        return Inertia::render('admin/catalog/categories/Index', [
+        return Inertia::render('Admin/Categories/Index', [
             'categories' => $categories,
             'filters' => $request->only(['search', 'status', 'parent_id', 'sort_by', 'sort_order']),
             'parentCategories' => Category::whereNull('parent_id')->get(['id', 'name']),
@@ -61,7 +61,7 @@ class CategoryController extends Controller
      */
     public function create(): Response
     {
-        return Inertia::render('admin/catalog/categories/Create', [
+        return Inertia::render('Admin/Categories/Create', [
             'parentCategories' => Category::whereNull('parent_id')->get(['id', 'name']),
         ]);
     }
@@ -77,7 +77,7 @@ class CategoryController extends Controller
             'description' => 'nullable|string',
             'parent_id' => 'nullable|exists:categories,id',
             'status' => 'required|boolean',
-            'position' => 'nullable|integer',
+            'sort_order' => 'nullable|integer',
             'meta_title' => 'nullable|string|max:255',
             'meta_description' => 'nullable|string',
             'meta_keywords' => 'nullable|string',
@@ -89,10 +89,10 @@ class CategoryController extends Controller
             $validated['slug'] = Str::slug($validated['name']);
         }
 
-        // Auto-set position if not provided
-        if (empty($validated['position'])) {
-            $maxPosition = Category::where('parent_id', $validated['parent_id'] ?? null)->max('position') ?? 0;
-            $validated['position'] = $maxPosition + 1;
+        // Auto-set sort_order if not provided
+        if (empty($validated['sort_order'])) {
+            $maxSortOrder = Category::where('parent_id', $validated['parent_id'] ?? null)->max('sort_order') ?? 0;
+            $validated['sort_order'] = $maxSortOrder + 1;
         }
 
         Category::create($validated);
@@ -108,7 +108,7 @@ class CategoryController extends Controller
     {
         $category->load('parent', 'children', 'products');
 
-        return Inertia::render('admin/catalog/categories/Show', [
+        return Inertia::render('Admin/Categories/Show', [
             'category' => $category,
         ]);
     }
@@ -118,7 +118,7 @@ class CategoryController extends Controller
      */
     public function edit(Category $category): Response
     {
-        return Inertia::render('admin/catalog/categories/Edit', [
+        return Inertia::render('Admin/Categories/Edit', [
             'category' => $category,
             'parentCategories' => Category::whereNull('parent_id')
                 ->where('id', '!=', $category->id)
@@ -137,7 +137,7 @@ class CategoryController extends Controller
             'description' => 'nullable|string',
             'parent_id' => 'nullable|exists:categories,id',
             'status' => 'required|boolean',
-            'position' => 'nullable|integer',
+            'sort_order' => 'nullable|integer',
             'meta_title' => 'nullable|string|max:255',
             'meta_description' => 'nullable|string',
             'meta_keywords' => 'nullable|string',
@@ -156,8 +156,15 @@ class CategoryController extends Controller
 
         $category->update($validated);
 
-        return redirect()->route('admin.catalog.categories.index')
-            ->with('success', 'Category updated successfully.');
+        // Flash the message to session
+        session()->flash('success', 'Category updated successfully.');
+
+        // If it's an AJAX/Inertia request, return back to stay on same page
+        if ($request->wantsJson() || $request->header('X-Inertia')) {
+            return redirect()->back();
+        }
+
+        return redirect()->route('admin.catalog.categories.index');
     }
 
     /**

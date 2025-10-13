@@ -5,6 +5,7 @@ namespace Vortex\Product\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use Vortex\Product\Models\Product;
 use Vortex\Product\Models\Category;
+use App\Models\InventoryAdjustment;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -125,9 +126,17 @@ class ProductController extends Controller
     {
         $product->load(['categories', 'images', 'attributeValues.attribute', 'attributeValues.option']);
 
+        // Load recent inventory adjustments
+        $adjustmentHistory = InventoryAdjustment::where('product_id', $product->id)
+            ->with('user:id,name')
+            ->orderBy('created_at', 'desc')
+            ->take(10)
+            ->get();
+
         return Inertia::render('Admin/Products/Edit', [
             'product' => $product,
             'categories' => Category::enabled()->with('children')->whereNull('parent_id')->orderBy('name')->get(),
+            'adjustmentHistory' => $adjustmentHistory,
         ]);
     }
 
@@ -168,12 +177,26 @@ class ProductController extends Controller
         $categoryIds = $validated['category_ids'] ?? [];
         unset($validated['category_ids']);
 
+        // Track inventory changes
+        $oldQuantity = $product->quantity;
+        $newQuantity = $validated['quantity'];
+
         $product->update($validated);
 
         $product->categories()->sync($categoryIds);
 
+        // Record inventory adjustment if quantity changed
+        if ($oldQuantity != $newQuantity && auth()->check()) {
+            $this->recordInventoryAdjustment($product, $oldQuantity, $newQuantity, $request);
+        }
+
         // Flash the message to session
         session()->flash('success', 'Product updated successfully!');
+
+        // If it's an AJAX/Inertia request, return back to stay on same page
+        if ($request->wantsJson() || $request->header('X-Inertia')) {
+            return redirect()->back();
+        }
 
         return redirect()->route('admin.catalog.products.index');
     }
@@ -223,5 +246,37 @@ class ProductController extends Controller
         return redirect()
             ->route('admin.catalog.products.index')
             ->with('success', count($request->ids) . ' products updated successfully!');
+    }
+
+    /**
+     * Record inventory adjustment
+     */
+    protected function recordInventoryAdjustment(Product $product, int $oldQuantity, int $newQuantity, Request $request)
+    {
+        // Determine adjustment type
+        if ($newQuantity > $oldQuantity) {
+            $type = 'addition';
+            $quantityAdjusted = $newQuantity - $oldQuantity;
+        } elseif ($newQuantity < $oldQuantity) {
+            $type = 'subtraction';
+            $quantityAdjusted = $oldQuantity - $newQuantity;
+        } else {
+            return; // No change
+        }
+
+        // Get reason from request or use default
+        $reason = $request->input('adjustment_reason', 'Stock adjustment via product edit');
+        $notes = $request->input('adjustment_notes');
+
+        InventoryAdjustment::create([
+            'product_id' => $product->id,
+            'type' => $type,
+            'quantity_before' => $oldQuantity,
+            'quantity_after' => $newQuantity,
+            'quantity_adjusted' => $quantityAdjusted,
+            'reason' => $reason,
+            'notes' => $notes,
+            'user_id' => $request->user()->id,
+        ]);
     }
 }

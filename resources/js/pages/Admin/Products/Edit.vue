@@ -54,6 +54,16 @@ interface Product {
 interface Props {
   product: Product;
   categories: Category[];
+  adjustmentHistory?: Array<{
+    id: number;
+    type: 'addition' | 'subtraction' | 'correction';
+    quantity: number;
+    quantity_adjusted: number;
+    reason: string;
+    notes: string | null;
+    created_at: string;
+    user?: { id: number; name: string };
+  }>;
   errors?: Record<string, string>;
 }
 
@@ -226,6 +236,29 @@ const toggleCategory = (categoryId: number) => {
 // Submit form
 const submitForm = () => {
   router.put(productRoutes.update({ product: props.product.id }), form.value);
+};
+
+// Handle stock adjustment (save immediately)
+const handleStockAdjustment = (data: { quantity: number; adjustment: any }) => {
+  // Update form quantity
+  form.value.quantity = data.quantity.toString();
+  
+  // Save to backend using Inertia router (preserves all form fields)
+  router.put(
+    productRoutes.update({ product: props.product.id }).url,
+    form.value,
+    {
+      preserveScroll: true,
+      preserveState: true,
+      onSuccess: () => {
+        // Success toast will be shown via flash message from backend
+      },
+      onError: (errors) => {
+        console.error('Failed to adjust stock:', errors);
+        // Error details logged to console for debugging
+      }
+    }
+  );
 };
 
 // Delete product
@@ -490,8 +523,8 @@ const deleteProduct = () => {
                   :notify-stock-qty="5"
                   :manage-stock="product.manage_stock"
                   :warehouses="[]"
-                  :adjustment-history="[]"
-                  @update:stock="(data) => form.quantity = data.quantity.toString()"
+                  :adjustment-history="adjustmentHistory || []"
+                  @update:stock="handleStockAdjustment"
                 />
                 
                 <!-- Pricing Section (moved from old inventory tab) -->
