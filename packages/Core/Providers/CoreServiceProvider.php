@@ -7,6 +7,7 @@ use Vortex\Core\Services\HookService;
 use Vortex\Core\Services\MenuService;
 use Vortex\Core\Services\ExtensionService;
 use Vortex\Core\Services\SettingService;
+use Packages\Core\Services\ThemeService;
 
 class CoreServiceProvider extends ServiceProvider
 {
@@ -36,6 +37,16 @@ class CoreServiceProvider extends ServiceProvider
                 $app->make('vortex.hook'),
                 $app->make('vortex.menu')
             );
+        });
+
+        // Register ThemeService as singleton
+        $this->app->singleton('vortex.theme', function ($app) {
+            return new ThemeService();
+        });
+        
+        // Bind ThemeService class to service container
+        $this->app->bind(ThemeService::class, function ($app) {
+            return $app->make('vortex.theme');
         });
     }
 

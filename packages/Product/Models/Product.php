@@ -46,6 +46,7 @@ class Product extends Model
         'views_count',
         'sales_count',
         'main_image_id',
+        'brand_id',
     ];
 
     protected $casts = [
@@ -106,6 +107,14 @@ class Product extends Model
     {
         return $this->belongsToMany(Category::class, 'category_product')
             ->withTimestamps();
+    }
+
+    /**
+     * Get the brand
+     */
+    public function brand()
+    {
+        return $this->belongsTo(Brand::class);
     }
 
     /**
@@ -211,5 +220,37 @@ class Product extends Model
     {
         return $query->where('stock_status', 'in_stock')
             ->where('quantity', '>', 0);
+    }
+
+    /**
+     * Get the reviews for the product.
+     */
+    public function reviews(): HasMany
+    {
+        return $this->hasMany(ProductReview::class);
+    }
+
+    /**
+     * Get approved reviews for the product.
+     */
+    public function approvedReviews(): HasMany
+    {
+        return $this->hasMany(ProductReview::class)->where('status', 'approved');
+    }
+
+    /**
+     * Get the average rating for the product.
+     */
+    public function getAverageRatingAttribute(): float
+    {
+        return round($this->approvedReviews()->avg('rating') ?? 0, 1);
+    }
+
+    /**
+     * Get the review count for the product.
+     */
+    public function getReviewCountAttribute(): int
+    {
+        return $this->approvedReviews()->count();
     }
 }

@@ -1,7 +1,10 @@
 <script setup lang="ts">
 import { Head, Link, useForm } from '@inertiajs/vue3';
 import AdminLayout from '@/Layouts/AdminLayout.vue';
-import { ref, watch } from 'vue';
+import ImageUploader from '@/Components/Admin/ImageUploader.vue';
+import { ref } from 'vue';
+import axios from 'axios';
+import { router } from '@inertiajs/vue3';
 import * as categoryRoutes from '@/routes/admin/catalog/categories';
 
 interface ParentCategory {
@@ -17,6 +20,9 @@ const props = defineProps<Props>();
 
 const activeTab = ref<'general' | 'seo'>('general');
 
+// Image upload handling (separate from form data)
+const images = ref<File[]>([]);
+
 const form = useForm({
   name: '',
   slug: '',
@@ -25,39 +31,101 @@ const form = useForm({
   status: true,
   show_in_menu: true,
   sort_order: null as number | null,
-  image: '',
   meta_title: '',
   meta_description: '',
   meta_keywords: '',
 });
 
 // Auto-generate slug from name
-watch(() => form.name, (newName) => {
-  if (newName && !form.slug) {
-    form.slug = newName
-      .toLowerCase()
-      .replace(/[^a-z0-9]+/g, '-')
-      .replace(/^-+|-+$/g, '');
-  }
-});
+const generateSlug = () => {
+  form.slug = form.name
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '');
+};
 
 const submit = () => {
-  form.post(categoryRoutes.store().url, {
-    preserveScroll: true,
-    onSuccess: () => {
-      // Success toast will be shown via flash message from backend
+  // If there's an image to upload, use FormData with axios
+  if (images.value.length > 0) {
+    const formData = new FormData();
+    
+    // Add all form fields
+    formData.append('name', form.name);
+    formData.append('slug', form.slug);
+    formData.append('description', form.description);
+    if (form.parent_id) {
+      formData.append('parent_id', form.parent_id.toString());
+    }
+    // Convert boolean to enum
+    formData.append('status', form.status ? 'enabled' : 'disabled');
+    formData.append('show_in_menu', form.show_in_menu ? '1' : '0');
+    if (form.sort_order) {
+      formData.append('sort_order', form.sort_order.toString());
+    }
+    formData.append('meta_title', form.meta_title);
+    formData.append('meta_description', form.meta_description);
+    formData.append('meta_keywords', form.meta_keywords);
+    formData.append('image', images.value[0]);
+    
+    // Use axios for file upload
+    form.processing = true;
+    form.clearErrors();
+    
+    axios.post(categoryRoutes.store().url, formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    })
+    .then((response) => {
+      form.processing = false;
       form.reset();
-    },
-    onError: (errors) => {
-      console.error('Validation errors:', errors);
-      // Scroll to first error
-      const firstErrorField = Object.keys(errors)[0];
-      const element = document.querySelector(`[name="${firstErrorField}"]`);
-      if (element) {
-        element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      images.value = [];
+      // Redirect to index with flash message
+      router.visit(categoryRoutes.index().url, {
+        onSuccess: () => {
+          // Flash message will be shown automatically by Toast component
+        }
+      });
+    })
+    .catch(error => {
+      form.processing = false;
+      if (error.response?.data?.errors) {
+        form.setError(error.response.data.errors);
+        console.error('Validation errors:', error.response.data.errors);
+      } else {
+        console.error('Error response:', error.response?.data);
       }
-    },
-  });
+      // Scroll to first error
+      if (error.response?.data?.errors) {
+        const firstErrorField = Object.keys(error.response.data.errors)[0];
+        const element = document.querySelector(`[name="${firstErrorField}"]`);
+        if (element) {
+          element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+      }
+    });
+  } else {
+    // No image, use regular Inertia post
+    form.transform((data) => ({
+      ...data,
+      status: data.status ? 'enabled' : 'disabled', // Convert boolean to enum
+    })).post(categoryRoutes.store().url, {
+      preserveScroll: true,
+      onSuccess: () => {
+        // Success toast will be shown via flash message from backend
+        form.reset();
+      },
+      onError: (errors) => {
+        console.error('Validation errors:', errors);
+        // Scroll to first error
+        const firstErrorField = Object.keys(errors)[0];
+        const element = document.querySelector(`[name="${firstErrorField}"]`);
+        if (element) {
+          element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+      },
+    });
+  }
 };
 </script>
 
@@ -132,6 +200,7 @@ const submit = () => {
                     id="name"
                     v-model="form.name"
                     type="text"
+                    @input="generateSlug"
                     class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                     :class="{ 'border-red-500': form.errors.name }"
                     placeholder="e.g., Electronics, Clothing, Books"
@@ -193,26 +262,21 @@ const submit = () => {
                   <p v-if="form.errors.parent_id" class="mt-1 text-sm text-red-600">{{ form.errors.parent_id }}</p>
                 </div>
 
-                <!-- Image Upload Placeholder -->
+                <!-- Image Upload -->
                 <div>
-                  <label class="block text-sm font-medium text-gray-700">Category Image</label>
-                  <div class="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-md">
-                    <div class="space-y-1 text-center">
-                      <svg class="mx-auto h-12 w-12 text-gray-400" stroke="currentColor" fill="none" viewBox="0 0 48 48">
-                        <path d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
-                      </svg>
-                      <div class="flex text-sm text-gray-600">
-                        <label class="relative cursor-pointer bg-white rounded-md font-medium text-blue-600 hover:text-blue-500 focus-within:outline-none focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-blue-500">
-                          <span>Upload a file</span>
-                          <input type="file" class="sr-only" accept="image/*" disabled />
-                        </label>
-                        <p class="pl-1">or drag and drop</p>
-                      </div>
-                      <p class="text-xs text-gray-500">PNG, JPG, GIF up to 2MB</p>
-                      <p class="text-xs text-gray-500 italic">(Image upload coming soon)</p>
-                    </div>
-                  </div>
-                  <p v-if="form.errors.image" class="mt-1 text-sm text-red-600">{{ form.errors.image }}</p>
+                  <label class="block text-sm font-medium text-gray-700 mb-2">
+                    Category Image
+                  </label>
+                  <ImageUploader 
+                    v-model="images" 
+                    :maxFiles="1" 
+                    :maxSize="5" 
+                    accept="image/*"
+                  />
+                  <p v-if="images.length > 0" class="mt-2 text-xs text-green-600">
+                    ✓ {{ images.length }} image selected (will be uploaded on save)
+                  </p>
+                  <p v-if="form.errors.image" class="mt-2 text-sm text-red-600">{{ form.errors.image }}</p>
                 </div>
 
                 <!-- Sort Order -->

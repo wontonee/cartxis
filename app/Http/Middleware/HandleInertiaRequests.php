@@ -5,6 +5,7 @@ namespace App\Http\Middleware;
 use Illuminate\Foundation\Inspiring;
 use Illuminate\Http\Request;
 use Inertia\Middleware;
+use Vortex\Core\Services\MenuService;
 
 class HandleInertiaRequests extends Middleware
 {
@@ -38,11 +39,17 @@ class HandleInertiaRequests extends Middleware
     {
         [$message, $author] = str(Inspiring::quotes()->random())->explode('-');
 
+        $menuService = app(MenuService::class);
+
         return array_merge(parent::share($request), [
             'name' => config('app.name'),
             'quote' => ['message' => trim($message), 'author' => trim($author)],
             'auth' => [
                 'user' => $request->user(),
+            ],
+            'menu' => [
+                'admin' => $menuService->buildTree('admin'),
+                'shop' => $menuService->buildTree('shop'),
             ],
             'flash' => \Inertia\Inertia::always(function () use ($request) {
                 return [

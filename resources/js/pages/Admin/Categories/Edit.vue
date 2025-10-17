@@ -1,7 +1,10 @@
 <script setup lang="ts">
-import { Head, Link, useForm } from '@inertiajs/vue3';
+import { Head, Link, useForm, usePage } from '@inertiajs/vue3';
 import AdminLayout from '@/Layouts/AdminLayout.vue';
-import { ref, watch } from 'vue';
+import ImageUploader from '@/Components/Admin/ImageUploader.vue';
+import { ref } from 'vue';
+import axios from 'axios';
+import { router } from '@inertiajs/vue3';
 import * as categoryRoutes from '@/routes/admin/catalog/categories';
 
 interface Category {
@@ -10,7 +13,8 @@ interface Category {
   slug: string;
   description?: string;
   image?: string;
-  status: boolean;
+  image_url?: string;
+  status: 'enabled' | 'disabled';
   show_in_menu: boolean;
   sort_order: number;
   parent_id?: number;
@@ -31,18 +35,21 @@ interface Props {
 
 const props = defineProps<Props>();
 
+const page = usePage();
 const activeTab = ref<'general' | 'seo'>('general');
 const showDeleteModal = ref(false);
+
+// Image upload handling (separate from form data)
+const images = ref<File[]>([]);
 
 const form = useForm({
   name: props.category.name,
   slug: props.category.slug,
   description: props.category.description || '',
   parent_id: props.category.parent_id || null,
-  status: props.category.status,
+  status: props.category.status === 'enabled', // Convert enum to boolean
   show_in_menu: props.category.show_in_menu,
   sort_order: props.category.sort_order,
-  image: props.category.image || '',
   meta_title: props.category.meta_title || '',
   meta_description: props.category.meta_description || '',
   meta_keywords: props.category.meta_keywords || '',
@@ -50,26 +57,81 @@ const form = useForm({
 
 const originalSlug = props.category.slug;
 
-// Auto-generate slug from name (only if slug was auto-generated before)
-watch(() => form.name, (newName) => {
-  if (newName && form.slug === originalSlug) {
-    form.slug = newName
-      .toLowerCase()
-      .replace(/[^a-z0-9]+/g, '-')
-      .replace(/^-+|-+$/g, '');
-  }
-});
+// Auto-generate slug from name
+const generateSlug = () => {
+  form.slug = form.name
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '');
+};
 
 const submit = () => {
-  form.put(categoryRoutes.update(props.category.id).url, {
-    preserveScroll: true,
-    onSuccess: () => {
-      // Success toast will be shown via flash message from backend
-    },
-    onError: (errors) => {
-      console.error('Validation errors:', errors);
-    },
-  });
+  // If there's an image to upload, use FormData with axios
+  if (images.value.length > 0) {
+    const formData = new FormData();
+    
+    // Add all form fields
+    formData.append('name', form.name);
+    formData.append('slug', form.slug);
+    formData.append('description', form.description);
+    if (form.parent_id) {
+      formData.append('parent_id', form.parent_id.toString());
+    }
+    // Convert boolean to enum
+    formData.append('status', form.status ? 'enabled' : 'disabled');
+    formData.append('show_in_menu', form.show_in_menu ? '1' : '0');
+    formData.append('sort_order', form.sort_order.toString());
+    formData.append('meta_title', form.meta_title);
+    formData.append('meta_description', form.meta_description);
+    formData.append('meta_keywords', form.meta_keywords);
+    formData.append('image', images.value[0]);
+    formData.append('_method', 'PUT');
+    
+    // Use axios for file upload
+    form.processing = true;
+    form.clearErrors();
+    
+    axios.post(categoryRoutes.update(props.category.id).url, formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    })
+    .then((response) => {
+      form.processing = false;
+      images.value = [];
+      
+      // Manually trigger toast by updating page props
+      page.props.flash = { success: 'Category updated successfully.' };
+      
+      // Then reload to get updated category data with new image
+      router.reload({
+        preserveScroll: true,
+      });
+    })
+    .catch(error => {
+      form.processing = false;
+      if (error.response?.data?.errors) {
+        form.setError(error.response.data.errors);
+        console.error('Validation errors:', error.response.data.errors);
+      } else {
+        console.error('Error response:', error.response?.data);
+      }
+    });
+  } else {
+    // No image, use regular Inertia put
+    form.transform((data) => ({
+      ...data,
+      status: data.status ? 'enabled' : 'disabled', // Convert boolean to enum
+    })).put(categoryRoutes.update(props.category.id).url, {
+      preserveScroll: true,
+      onSuccess: () => {
+        // Success toast will be shown via flash message from backend
+      },
+      onError: (errors) => {
+        console.error('Validation errors:', errors);
+      },
+    });
+  }
 };
 
 const deleteCategory = () => {
@@ -169,6 +231,7 @@ const deleteCategory = () => {
                     id="name"
                     v-model="form.name"
                     type="text"
+                    @input="generateSlug"
                     class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                     :class="{ 'border-red-500': form.errors.name }"
                     placeholder="e.g., Electronics, Clothing, Books"
@@ -230,29 +293,41 @@ const deleteCategory = () => {
                   <p v-if="form.errors.parent_id" class="mt-1 text-sm text-red-600">{{ form.errors.parent_id }}</p>
                 </div>
 
-                <!-- Image Upload Placeholder -->
+                <!-- Image Upload -->
                 <div>
-                  <label class="block text-sm font-medium text-gray-700">Category Image</label>
-                  <div v-if="category.image" class="mt-2 mb-4">
-                    <img :src="category.image" alt="Category" class="h-32 w-32 object-cover rounded-md" />
-                  </div>
-                  <div class="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-md">
-                    <div class="space-y-1 text-center">
-                      <svg class="mx-auto h-12 w-12 text-gray-400" stroke="currentColor" fill="none" viewBox="0 0 48 48">
-                        <path d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
-                      </svg>
-                      <div class="flex text-sm text-gray-600">
-                        <label class="relative cursor-pointer bg-white rounded-md font-medium text-blue-600 hover:text-blue-500 focus-within:outline-none focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-blue-500">
-                          <span>Upload a file</span>
-                          <input type="file" class="sr-only" accept="image/*" disabled />
-                        </label>
-                        <p class="pl-1">or drag and drop</p>
-                      </div>
-                      <p class="text-xs text-gray-500">PNG, JPG, GIF up to 2MB</p>
-                      <p class="text-xs text-gray-500 italic">(Image upload coming soon)</p>
+                  <label class="block text-sm font-medium text-gray-700 mb-2">
+                    Category Image
+                  </label>
+                  
+                  <!-- Current Image -->
+                  <div v-if="category.image" class="mb-4">
+                    <p class="text-xs font-medium text-gray-500 mb-2">Current Image:</p>
+                    <div class="relative inline-block">
+                      <img 
+                        :src="category.image_url" 
+                        alt="Category" 
+                        class="h-32 w-32 object-cover rounded-lg border-2 border-gray-200 shadow-sm" 
+                      />
                     </div>
                   </div>
-                  <p v-if="form.errors.image" class="mt-1 text-sm text-red-600">{{ form.errors.image }}</p>
+                  
+                  <!-- Upload New Image -->
+                  <div>
+                    <p class="text-sm font-medium text-gray-700 mb-2">
+                      {{ category.image ? 'Replace Image' : 'Upload Image' }}
+                    </p>
+                    <ImageUploader 
+                      v-model="images" 
+                      :maxFiles="1" 
+                      :maxSize="5" 
+                      accept="image/*"
+                    />
+                    <p v-if="images.length > 0" class="mt-2 text-xs text-green-600">
+                      ✓ {{ images.length }} image selected (will be uploaded on save)
+                    </p>
+                  </div>
+                  
+                  <p v-if="form.errors.image" class="mt-2 text-sm text-red-600">{{ form.errors.image }}</p>
                 </div>
 
                 <!-- Sort Order -->
@@ -407,43 +482,53 @@ const deleteCategory = () => {
     </div>
 
     <!-- Delete Confirmation Modal -->
-    <div v-if="showDeleteModal" class="fixed inset-0 z-50 overflow-y-auto">
-      <div class="flex min-h-screen items-end justify-center px-4 pt-4 pb-20 text-center sm:block sm:p-0">
-        <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" @click="showDeleteModal = false"></div>
-
-        <div class="inline-block align-bottom bg-white rounded-lg px-4 pt-5 pb-4 text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full sm:p-6">
-          <div class="sm:flex sm:items-start">
-            <div class="mx-auto flex-shrink-0 flex items-center justify-center h-12 w-12 rounded-full bg-red-100 sm:mx-0 sm:h-10 sm:w-10">
-              <svg class="h-6 w-6 text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-              </svg>
-            </div>
-            <div class="mt-3 text-center sm:mt-0 sm:ml-4 sm:text-left">
-              <h3 class="text-lg leading-6 font-medium text-gray-900">Delete Category</h3>
-              <div class="mt-2">
-                <p class="text-sm text-gray-500">
-                  Are you sure you want to delete "{{ category.name }}"? This action cannot be undone.
-                </p>
-                <p v-if="form.errors.error" class="mt-2 text-sm text-red-600">{{ form.errors.error }}</p>
+    <div
+      v-if="showDeleteModal"
+      class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity z-50"
+      @click="showDeleteModal = false"
+    >
+      <div class="fixed inset-0 z-50 overflow-y-auto">
+        <div class="flex min-h-full items-end justify-center p-4 text-center sm:items-center sm:p-0">
+          <div
+            class="relative transform overflow-hidden rounded-lg bg-white text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-lg"
+            @click.stop
+          >
+            <div class="bg-white px-4 pb-4 pt-5 sm:p-6 sm:pb-4">
+              <div class="sm:flex sm:items-start">
+                <div class="mx-auto flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-full bg-red-100 sm:mx-0 sm:h-10 sm:w-10">
+                  <svg class="h-6 w-6 text-red-600" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z" />
+                  </svg>
+                </div>
+                <div class="mt-3 text-center sm:ml-4 sm:mt-0 sm:text-left">
+                  <h3 class="text-base font-semibold leading-6 text-gray-900">Delete Category</h3>
+                  <div class="mt-2">
+                    <p class="text-sm text-gray-500">
+                      Are you sure you want to delete "{{ category.name }}"? This action cannot be undone.
+                    </p>
+                    <p v-if="form.errors.error" class="mt-2 text-sm text-red-600">{{ form.errors.error }}</p>
+                  </div>
+                </div>
               </div>
             </div>
-          </div>
-          <div class="mt-5 sm:mt-4 sm:flex sm:flex-row-reverse">
-            <button
-              type="button"
-              @click="deleteCategory"
-              :disabled="form.processing"
-              class="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-red-600 text-base font-medium text-white hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 sm:ml-3 sm:w-auto sm:text-sm disabled:opacity-50"
-            >
-              {{ form.processing ? 'Deleting...' : 'Delete' }}
-            </button>
-            <button
-              type="button"
-              @click="showDeleteModal = false"
-              class="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 sm:mt-0 sm:w-auto sm:text-sm"
-            >
-              Cancel
-            </button>
+            <div class="bg-gray-50 px-4 py-3 sm:flex sm:flex-row-reverse sm:px-6">
+              <button
+                @click="deleteCategory"
+                :disabled="form.processing"
+                type="button"
+                class="cursor-pointer inline-flex w-full justify-center rounded-md bg-red-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-red-500 sm:ml-3 sm:w-auto disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                <span v-if="form.processing">Deleting...</span>
+                <span v-else>Delete</span>
+              </button>
+              <button
+                @click="showDeleteModal = false"
+                type="button"
+                class="cursor-pointer mt-3 inline-flex w-full justify-center rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50 sm:mt-0 sm:w-auto"
+              >
+                Cancel
+              </button>
+            </div>
           </div>
         </div>
       </div>

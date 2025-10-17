@@ -1,10 +1,9 @@
 <script setup lang="ts">
-import { ref, computed } from 'vue';
+import { ref, computed, onMounted } from 'vue';
 import { router, Link, Head } from '@inertiajs/vue3';
 import AdminLayout from '@/Layouts/AdminLayout.vue';
 import TiptapEditor from '@/Components/Admin/TiptapEditor.vue';
 import ImageUploader from '@/Components/Admin/ImageUploader.vue';
-import ProductVariantEditor from '@/Components/Admin/ProductVariantEditor.vue';
 import InventoryTracker from '@/Components/Admin/InventoryTracker.vue';
 import * as productRoutes from '@/routes/admin/catalog/products';
 import axios from '@/lib/axios';
@@ -14,6 +13,31 @@ interface Category {
   name: string;
   parent_id: number | null;
   children?: Category[];
+}
+
+interface Brand {
+  id: number;
+  name: string;
+}
+
+interface AttributeOption {
+  id: number;
+  attribute_id: number;
+  label: string;
+  value: string;
+  swatch_value?: string;
+  sort_order: number;
+}
+
+interface Attribute {
+  id: number;
+  name: string;
+  code: string;
+  type: 'text' | 'textarea' | 'select' | 'multiselect' | 'boolean' | 'date' | 'price';
+  is_required: boolean;
+  is_filterable: boolean;
+  is_configurable: boolean;
+  options?: AttributeOption[];
 }
 
 interface Product {
@@ -37,6 +61,7 @@ interface Product {
   stock_status: string;
   manage_stock: boolean;
   type: string;
+  brand_id: number | null;
   meta_title: string | null;
   meta_description: string | null;
   meta_keywords: string | null;
@@ -49,11 +74,24 @@ interface Product {
     alt_text: string | null;
     position: number;
   }>;
+  attribute_values?: Array<{
+    id: number;
+    attribute_id: number;
+    value: any;
+    attribute?: {
+      id: number;
+      code: string;
+      name: string;
+      type: string;
+    };
+  }>;
 }
 
 interface Props {
   product: Product;
   categories: Category[];
+  brands: Brand[];
+  attributes: Attribute[];
   adjustmentHistory?: Array<{
     id: number;
     type: 'addition' | 'subtraction' | 'correction';
@@ -70,11 +108,51 @@ interface Props {
 const props = defineProps<Props>();
 
 // Active tab
-const activeTab = ref<'general' | 'images' | 'variants' | 'inventory' | 'seo'>('general');
+const activeTab = ref<'general' | 'images' | 'attributes' | 'inventory' | 'seo'>('general');
 
 // Images for upload
 const images = ref<File[]>([]);
 const isUploading = ref(false);
+
+// Attribute values - Initialize multiselect attributes as arrays
+const attributeValues = ref<Record<string, any>>({});
+
+// Selected attributes to display
+const selectedAttributeIds = ref<number[]>([]);
+
+// Initialize multiselect attributes when they are selected
+const addAttribute = (attributeId: number) => {
+  if (!selectedAttributeIds.value.includes(attributeId)) {
+    selectedAttributeIds.value.push(attributeId);
+    
+    // Initialize multiselect as array
+    const attribute = props.attributes.find(attr => attr.id === attributeId);
+    if (attribute && attribute.type === 'multiselect') {
+      attributeValues.value[attribute.code] = [];
+    }
+  }
+};
+
+const removeAttribute = (attributeId: number) => {
+  const index = selectedAttributeIds.value.indexOf(attributeId);
+  if (index > -1) {
+    selectedAttributeIds.value.splice(index, 1);
+    
+    // Remove value
+    const attribute = props.attributes.find(attr => attr.id === attributeId);
+    if (attribute) {
+      delete attributeValues.value[attribute.code];
+    }
+  }
+};
+
+const getSelectedAttributes = computed(() => {
+  return props.attributes.filter(attr => selectedAttributeIds.value.includes(attr.id));
+});
+
+const getAvailableAttributes = computed(() => {
+  return props.attributes.filter(attr => !selectedAttributeIds.value.includes(attr.id));
+});
 
 // Delete image modal
 const showDeleteImageModal = ref(false);
@@ -195,6 +273,7 @@ const form = ref({
   stock_status: props.product.stock_status,
   manage_stock: props.product.manage_stock,
   type: props.product.type,
+  brand_id: props.product.brand_id || null,
   category_ids: props.product.categories.map(cat => cat.id),
   meta_title: props.product.meta_title || '',
   meta_description: props.product.meta_description || '',
@@ -233,9 +312,50 @@ const toggleCategory = (categoryId: number) => {
   }
 };
 
-// Submit form
+// Initialize existing attribute values on component mount
+onMounted(() => {
+  // Load existing attribute values from the product
+  if (props.product.attribute_values && props.product.attribute_values.length > 0) {
+    props.product.attribute_values.forEach((attrValue: any) => {
+      const attribute = props.attributes.find(attr => attr.id === attrValue.attribute_id);
+      if (attribute) {
+        // Add attribute to selected list
+        if (!selectedAttributeIds.value.includes(attribute.id)) {
+          selectedAttributeIds.value.push(attribute.id);
+        }
+        
+        // Set the value based on attribute type
+        if (attribute.type === 'multiselect') {
+          // For multiselect, parse JSON array or split comma-separated values
+          try {
+            attributeValues.value[attribute.code] = Array.isArray(attrValue.value) 
+              ? attrValue.value 
+              : JSON.parse(attrValue.value);
+          } catch (e) {
+            // If not JSON, try splitting by comma
+            attributeValues.value[attribute.code] = attrValue.value.includes(',') 
+              ? attrValue.value.split(',').map((v: string) => v.trim())
+              : [attrValue.value];
+          }
+        } else if (attribute.type === 'boolean') {
+          // Convert to boolean
+          attributeValues.value[attribute.code] = attrValue.value === '1' || attrValue.value === 'true' || attrValue.value === true;
+        } else {
+          // For all other types, use the value directly
+          attributeValues.value[attribute.code] = attrValue.value;
+        }
+      }
+    });
+  }
+});
+
 const submitForm = () => {
-  router.put(productRoutes.update({ product: props.product.id }), form.value);
+  const formData = {
+    ...form.value,
+    attribute_values: attributeValues.value
+  };
+  
+  router.put(productRoutes.update({ product: props.product.id }), formData);
 };
 
 // Handle stock adjustment (save immediately)
@@ -326,15 +446,15 @@ const deleteProduct = () => {
                 Images
               </button>
               <button
-                @click="activeTab = 'variants'"
+                @click="activeTab = 'attributes'"
                 :class="[
-                  activeTab === 'variants'
+                  activeTab === 'attributes'
                     ? 'border-blue-500 text-blue-600'
                     : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300',
                   'whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm'
                 ]"
               >
-                Variants
+                Attributes
               </button>
               <button
                 @click="activeTab = 'inventory'"
@@ -412,6 +532,22 @@ const deleteProduct = () => {
                     placeholder="Enter SKU"
                   />
                   <p v-if="errors?.sku" class="mt-1 text-sm text-red-600">{{ errors.sku }}</p>
+                </div>
+
+                <!-- Brand -->
+                <div>
+                  <label for="brand" class="block text-sm font-medium text-gray-700 mb-1">Brand</label>
+                  <select
+                    id="brand"
+                    v-model="form.brand_id"
+                    class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  >
+                    <option :value="null">Select Brand</option>
+                    <option v-for="brand in brands" :key="brand.id" :value="brand.id">
+                      {{ brand.name }}
+                    </option>
+                  </select>
+                  <p class="mt-1 text-xs text-gray-500">Associate this product with a brand</p>
                 </div>
 
                 <!-- Short Description -->
@@ -501,17 +637,6 @@ const deleteProduct = () => {
                     {{ isUploading ? 'Uploading...' : `Upload ${images.length} Image${images.length > 1 ? 's' : ''}` }}
                   </button>
                 </div>
-              </div>
-
-              <!-- Variants Tab -->
-              <div v-show="activeTab === 'variants'">
-                <ProductVariantEditor
-                  :product-id="product.id"
-                  :base-price="product.price"
-                  :base-sku="product.sku"
-                  :configurable_attributes="[]"
-                  :existing_variants="[]"
-                />
               </div>
 
               <!-- Inventory Tab -->
@@ -674,6 +799,177 @@ const deleteProduct = () => {
                     placeholder="keyword1, keyword2, keyword3"
                   />
                   <p class="mt-1 text-xs text-gray-500">Separate keywords with commas</p>
+                </div>
+              </div>
+
+              <!-- Attributes Tab -->
+              <div v-show="activeTab === 'attributes'" class="space-y-6">
+                <div class="mb-6">
+                  <h3 class="text-lg font-semibold text-gray-900">Product Attributes</h3>
+                  <p class="text-sm text-gray-600 mt-1">Add and specify product characteristics and specifications</p>
+                </div>
+                
+                <!-- Attribute Selector -->
+                <div class="mb-6">
+                  <label class="block text-sm font-medium text-gray-700 mb-2">
+                    Add Attribute
+                  </label>
+                  <select 
+                    @change="(e) => { addAttribute(Number(e.target.value)); e.target.value = ''; }"
+                    class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  >
+                    <option value="">Select an attribute to add...</option>
+                    <option 
+                      v-for="attribute in getAvailableAttributes" 
+                      :key="attribute.id" 
+                      :value="attribute.id"
+                    >
+                      {{ attribute.name }}
+                      <template v-if="attribute.is_required"> (Required)</template>
+                    </option>
+                  </select>
+                  <p class="mt-1 text-xs text-gray-500">Choose attributes that apply to this product</p>
+                </div>
+
+                <!-- No Attributes Selected State -->
+                <div v-if="selectedAttributeIds.length === 0" class="text-center py-12 bg-gray-50 rounded-lg border-2 border-dashed border-gray-300">
+                  <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                  </svg>
+                  <p class="mt-2 text-sm font-medium text-gray-900">No attributes added yet</p>
+                  <p class="text-xs text-gray-500">Select attributes from the dropdown above to add product specifications</p>
+                </div>
+
+                <!-- Selected Attributes -->
+                <div v-else class="space-y-4">
+                  <div 
+                    v-for="attribute in getSelectedAttributes" 
+                    :key="attribute.id" 
+                    class="border border-gray-200 rounded-lg p-4 hover:border-blue-300 transition-colors bg-white"
+                  >
+                    <!-- Attribute Header -->
+                    <div class="flex items-start justify-between mb-3">
+                      <div>
+                        <label class="block text-sm font-medium text-gray-900">
+                          {{ attribute.name }}
+                          <span v-if="attribute.is_required" class="text-red-500 ml-1">*</span>
+                        </label>
+                        <div class="flex items-center gap-2 mt-1">
+                          <span v-if="attribute.is_configurable" class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-purple-100 text-purple-800">
+                            Configurable
+                          </span>
+                          <span v-if="attribute.is_filterable" class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-blue-100 text-blue-800">
+                            Filterable
+                          </span>
+                          <span class="text-xs text-gray-500">{{ attribute.type }}</span>
+                        </div>
+                      </div>
+                      <button
+                        v-if="!attribute.is_required"
+                        type="button"
+                        @click="removeAttribute(attribute.id)"
+                        class="text-gray-400 hover:text-red-600 transition-colors"
+                        title="Remove attribute"
+                      >
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                      </button>
+                    </div>
+
+                    <!-- Attribute Input Fields -->
+                    <div class="mt-3">
+                      <!-- Text Input -->
+                      <input
+                        v-if="attribute.type === 'text'"
+                        v-model="attributeValues[attribute.code]"
+                        type="text"
+                        class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                        :placeholder="`Enter ${attribute.name.toLowerCase()}`"
+                      />
+
+                      <!-- Textarea -->
+                      <textarea
+                        v-if="attribute.type === 'textarea'"
+                        v-model="attributeValues[attribute.code]"
+                        rows="3"
+                        class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                        :placeholder="`Enter ${attribute.name.toLowerCase()}`"
+                      />
+
+                      <!-- Select -->
+                      <select
+                        v-if="attribute.type === 'select'"
+                        v-model="attributeValues[attribute.code]"
+                        class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                      >
+                        <option value="">Select {{ attribute.name }}</option>
+                        <option v-for="option in attribute.options" :key="option.id" :value="option.value">
+                          {{ option.label }}
+                        </option>
+                      </select>
+
+                      <!-- Multiselect with better UI -->
+                      <div v-if="attribute.type === 'multiselect'" class="grid grid-cols-2 md:grid-cols-3 gap-3">
+                        <label 
+                          v-for="option in attribute.options" 
+                          :key="option.id" 
+                          class="flex items-center p-3 border border-gray-200 rounded-md hover:bg-blue-50 cursor-pointer transition-colors"
+                          :class="{ 'bg-blue-50 border-blue-300': attributeValues[attribute.code]?.includes(option.value) }"
+                        >
+                          <input
+                            :id="`${attribute.code}-${option.id}`"
+                            type="checkbox"
+                            :value="option.value"
+                            v-model="attributeValues[attribute.code]"
+                            class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                          />
+                          <span class="ml-3 text-sm text-gray-700 flex items-center">
+                            <span 
+                              v-if="option.swatch_value" 
+                              class="w-5 h-5 rounded-full mr-2 border border-gray-300" 
+                              :style="{ backgroundColor: option.swatch_value }"
+                            ></span>
+                            {{ option.label }}
+                          </span>
+                        </label>
+                      </div>
+
+                      <!-- Boolean -->
+                      <div v-if="attribute.type === 'boolean'" class="flex items-center p-3 bg-gray-50 rounded-md">
+                        <input
+                          :id="attribute.code"
+                          type="checkbox"
+                          v-model="attributeValues[attribute.code]"
+                          class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                        />
+                        <label :for="attribute.code" class="ml-3 text-sm text-gray-700">
+                          Enable {{ attribute.name }}
+                        </label>
+                      </div>
+
+                      <!-- Date -->
+                      <input
+                        v-if="attribute.type === 'date'"
+                        v-model="attributeValues[attribute.code]"
+                        type="date"
+                        class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                      />
+
+                      <!-- Price -->
+                      <div v-if="attribute.type === 'price'" class="relative">
+                        <span class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500">$</span>
+                        <input
+                          v-model="attributeValues[attribute.code]"
+                          type="number"
+                          step="0.01"
+                          min="0"
+                          class="w-full pl-8 pr-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                          :placeholder="`Enter ${attribute.name.toLowerCase()}`"
+                        />
+                      </div>
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>

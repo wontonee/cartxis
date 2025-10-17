@@ -33,7 +33,8 @@
             "Database\\Seeders\\": "database/seeders/",
             "Vortex\\Core\\": "packages/Core/",
             "Vortex\\Admin\\": "packages/Admin/",
-            "Vortex\\Product\\": "packages/Product/"
+            "Vortex\\Product\\": "packages/Product/",
+            "Packages\\Core\\": "packages/Core/"
         }
     },
     "autoload-dev": {

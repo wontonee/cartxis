@@ -3,6 +3,7 @@ import { Head, router, Link } from '@inertiajs/vue3';
 import AdminLayout from '@/Layouts/AdminLayout.vue';
 import { ref, computed } from 'vue';
 import { debounce } from 'lodash';
+import * as categoryRoutes from '@/routes/admin/catalog/categories';
 
 interface Category {
   id: number;
@@ -48,8 +49,6 @@ const selectedCategories = ref<number[]>([]);
 const showDeleteModal = ref(false);
 const deleteCategoryId = ref<number | null>(null);
 const showBulkDeleteModal = ref(false);
-const showBulkStatusModal = ref(false);
-const bulkStatus = ref<'enabled' | 'disabled'>('enabled');
 
 // Local filter state
 const search = ref(props.filters.search || '');
@@ -84,7 +83,7 @@ function toggleSelectAll() {
 }
 
 function applyFilters() {
-  router.get('/admin/catalog/categories', {
+  router.get(categoryRoutes.index().url, {
     search: search.value || undefined,
     status: statusFilter.value || undefined,
     parent_id: parentFilter.value || undefined,
@@ -122,7 +121,7 @@ function confirmDelete(categoryId: number) {
 
 function deleteCategory() {
   if (deleteCategoryId.value) {
-    router.delete(`/admin/catalog/categories/${deleteCategoryId.value}`, {
+    router.delete(categoryRoutes.destroy(deleteCategoryId.value).url, {
       onSuccess: () => {
         showDeleteModal.value = false;
         deleteCategoryId.value = null;
@@ -138,7 +137,7 @@ function confirmBulkDelete() {
 }
 
 function bulkDelete() {
-  router.post('/admin/catalog/categories/bulk-destroy', {
+  router.post(categoryRoutes.bulkDestroy().url, {
     ids: selectedCategories.value,
   }, {
     onSuccess: () => {
@@ -148,27 +147,21 @@ function bulkDelete() {
   });
 }
 
-function confirmBulkStatus(status: 'enabled' | 'disabled') {
+function bulkUpdateStatus(status: 'enabled' | 'disabled') {
   if (selectedCategories.value.length > 0) {
-    bulkStatus.value = status;
-    showBulkStatusModal.value = true;
+    router.post(categoryRoutes.bulkStatus().url, {
+      ids: selectedCategories.value,
+      status: status,
+    }, {
+      onSuccess: () => {
+        selectedCategories.value = [];
+      },
+    });
   }
 }
 
-function bulkUpdateStatus() {
-  router.post('/admin/catalog/categories/bulk-status', {
-    ids: selectedCategories.value,
-    status: bulkStatus.value === 'enabled',
-  }, {
-    onSuccess: () => {
-      showBulkStatusModal.value = false;
-      selectedCategories.value = [];
-    },
-  });
-}
-
 function changePage(page: number) {
-  router.get('/admin/catalog/categories', {
+  router.get(categoryRoutes.index().url, {
     ...props.filters,
     page,
   }, {
@@ -190,7 +183,7 @@ function changePage(page: number) {
           <p class="mt-1 text-sm text-gray-600">Manage your product categories</p>
         </div>
         <Link
-          :href="`/admin/catalog/categories/create`"
+          :href="categoryRoutes.create().url"
           class="flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition-colors"
         >
           <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -266,13 +259,13 @@ function changePage(page: number) {
           </span>
           <div class="flex gap-2">
             <button
-              @click="confirmBulkStatus('enabled')"
+              @click="bulkUpdateStatus('enabled')"
               class="inline-flex items-center px-3 py-1.5 border border-transparent text-xs font-medium rounded text-white bg-green-600 hover:bg-green-700"
             >
               Enable
             </button>
             <button
-              @click="confirmBulkStatus('disabled')"
+              @click="bulkUpdateStatus('disabled')"
               class="inline-flex items-center px-3 py-1.5 border border-transparent text-xs font-medium rounded text-white bg-gray-600 hover:bg-gray-700"
             >
               Disable
@@ -395,7 +388,7 @@ function changePage(page: number) {
                   <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                     <div class="flex items-center justify-end gap-2">
                       <Link
-                        :href="`/admin/catalog/categories/${category.id}/edit`"
+                        :href="categoryRoutes.edit(category.id).url"
                         class="text-blue-600 hover:text-blue-900"
                         title="Edit"
                       >
@@ -505,126 +498,93 @@ function changePage(page: number) {
       </div>
 
     <!-- Delete Confirmation Modal -->
-    <div v-if="showDeleteModal" class="fixed inset-0 z-50 overflow-y-auto">
-      <div class="flex min-h-screen items-end justify-center px-4 pt-4 pb-20 text-center sm:block sm:p-0">
-        <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" @click="showDeleteModal = false"></div>
-        <div class="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full">
-          <div class="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
-            <div class="sm:flex sm:items-start">
-              <div class="mx-auto flex-shrink-0 flex items-center justify-center h-12 w-12 rounded-full bg-red-100 sm:mx-0 sm:h-10 sm:w-10">
-                <svg class="h-6 w-6 text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-                </svg>
-              </div>
-              <div class="mt-3 text-center sm:mt-0 sm:ml-4 sm:text-left">
-                <h3 class="text-lg leading-6 font-medium text-gray-900">Delete Category</h3>
-                <div class="mt-2">
-                  <p class="text-sm text-gray-500">
-                    Are you sure you want to delete this category? This action cannot be undone.
-                  </p>
+    <div
+      v-if="showDeleteModal"
+      class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity z-50"
+      @click="showDeleteModal = false"
+    >
+      <div class="fixed inset-0 z-50 overflow-y-auto">
+        <div class="flex min-h-full items-end justify-center p-4 text-center sm:items-center sm:p-0">
+          <div
+            class="relative transform overflow-hidden rounded-lg bg-white text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-lg"
+            @click.stop
+          >
+            <div class="bg-white px-4 pb-4 pt-5 sm:p-6 sm:pb-4">
+              <div class="sm:flex sm:items-start">
+                <div class="mx-auto flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-full bg-red-100 sm:mx-0 sm:h-10 sm:w-10">
+                  <svg class="h-6 w-6 text-red-600" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z" />
+                  </svg>
+                </div>
+                <div class="mt-3 text-center sm:ml-4 sm:mt-0 sm:text-left">
+                  <h3 class="text-base font-semibold leading-6 text-gray-900">Delete Category</h3>
+                  <div class="mt-2">
+                    <p class="text-sm text-gray-500">
+                      Are you sure you want to delete this category? This action cannot be undone.
+                    </p>
+                  </div>
                 </div>
               </div>
             </div>
-          </div>
-          <div class="bg-gray-50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
-            <button
-              @click="deleteCategory"
-              type="button"
-              class="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-red-600 text-base font-medium text-white hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 sm:ml-3 sm:w-auto sm:text-sm"
-            >
-              Delete
-            </button>
-            <button
-              @click="showDeleteModal = false"
-              type="button"
-              class="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm"
-            >
-              Cancel
-            </button>
+            <div class="bg-gray-50 px-4 py-3 sm:flex sm:flex-row-reverse sm:px-6">
+              <button
+                @click="deleteCategory"
+                type="button"
+                class="cursor-pointer inline-flex w-full justify-center rounded-md bg-red-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-red-500 sm:ml-3 sm:w-auto"
+              >
+                Delete
+              </button>
+              <button
+                @click="showDeleteModal = false"
+                type="button"
+                class="cursor-pointer mt-3 inline-flex w-full justify-center rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50 sm:mt-0 sm:w-auto"
+              >
+                Cancel
+              </button>
+            </div>
           </div>
         </div>
       </div>
     </div>
 
     <!-- Bulk Delete Modal -->
-    <div v-if="showBulkDeleteModal" class="fixed inset-0 z-50 overflow-y-auto">
-      <div class="flex min-h-screen items-end justify-center px-4 pt-4 pb-20 text-center sm:block sm:p-0">
-        <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" @click="showBulkDeleteModal = false"></div>
-        <div class="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full">
-          <div class="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
-            <div class="sm:flex sm:items-start">
-              <div class="mx-auto flex-shrink-0 flex items-center justify-center h-12 w-12 rounded-full bg-red-100 sm:mx-0 sm:h-10 sm:w-10">
-                <svg class="h-6 w-6 text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-                </svg>
-              </div>
-              <div class="mt-3 text-center sm:mt-0 sm:ml-4 sm:text-left">
-                <h3 class="text-lg leading-6 font-medium text-gray-900">Bulk Delete Categories</h3>
-                <div class="mt-2">
-                  <p class="text-sm text-gray-500">
-                    Are you sure you want to delete {{ selectedCategories.length }} {{ selectedCategories.length === 1 ? 'category' : 'categories' }}? This action cannot be undone.
-                  </p>
+    <div v-if="showBulkDeleteModal" class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity z-50" @click="showBulkDeleteModal = false">
+      <div class="fixed inset-0 z-50 overflow-y-auto">
+        <div class="flex min-h-full items-center justify-center p-4 text-center sm:p-0">
+          <div class="relative transform overflow-hidden rounded-lg bg-white text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-lg" @click.stop>
+            <div class="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
+              <div class="sm:flex sm:items-start">
+                <div class="mx-auto flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-full bg-red-100 sm:mx-0 sm:h-10 sm:w-10">
+                  <svg class="h-6 w-6 text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                  </svg>
+                </div>
+                <div class="mt-3 text-center sm:mt-0 sm:ml-4 sm:text-left">
+                  <h3 class="text-lg font-medium leading-6 text-gray-900">Bulk Delete Categories</h3>
+                  <div class="mt-2">
+                    <p class="text-sm text-gray-500">
+                      Are you sure you want to delete {{ selectedCategories.length }} {{ selectedCategories.length === 1 ? 'category' : 'categories' }}? This action cannot be undone.
+                    </p>
+                  </div>
                 </div>
               </div>
             </div>
-          </div>
-          <div class="bg-gray-50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
-            <button
-              @click="bulkDelete"
-              type="button"
-              class="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-red-600 text-base font-medium text-white hover:bg-red-700 sm:ml-3 sm:w-auto sm:text-sm"
-            >
-              Delete
-            </button>
-            <button
-              @click="showBulkDeleteModal = false"
-              type="button"
-              class="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm"
-            >
-              Cancel
-            </button>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Bulk Status Modal -->
-    <div v-if="showBulkStatusModal" class="fixed inset-0 z-50 overflow-y-auto">
-      <div class="flex min-h-screen items-end justify-center px-4 pt-4 pb-20 text-center sm:block sm:p-0">
-        <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" @click="showBulkStatusModal = false"></div>
-        <div class="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full">
-          <div class="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
-            <div class="sm:flex sm:items-start">
-              <div class="mx-auto flex-shrink-0 flex items-center justify-center h-12 w-12 rounded-full bg-blue-100 sm:mx-0 sm:h-10 sm:w-10">
-                <svg class="h-6 w-6 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                </svg>
-              </div>
-              <div class="mt-3 text-center sm:mt-0 sm:ml-4 sm:text-left">
-                <h3 class="text-lg leading-6 font-medium text-gray-900">Update Category Status</h3>
-                <div class="mt-2">
-                  <p class="text-sm text-gray-500">
-                    Are you sure you want to {{ bulkStatus === 'enabled' ? 'enable' : 'disable' }} {{ selectedCategories.length }} {{ selectedCategories.length === 1 ? 'category' : 'categories' }}?
-                  </p>
-                </div>
-              </div>
+            <div class="bg-gray-50 px-4 py-3 sm:flex sm:flex-row-reverse sm:px-6">
+              <button
+                @click="bulkDelete"
+                type="button"
+                class="inline-flex w-full justify-center rounded-md border border-transparent bg-red-600 px-4 py-2 text-base font-medium text-white shadow-sm hover:bg-red-700 cursor-pointer sm:ml-3 sm:w-auto sm:text-sm"
+              >
+                Delete
+              </button>
+              <button
+                @click="showBulkDeleteModal = false"
+                type="button"
+                class="mt-3 inline-flex w-full justify-center rounded-md border border-gray-300 bg-white px-4 py-2 text-base font-medium text-gray-700 shadow-sm hover:bg-gray-50 cursor-pointer sm:mt-0 sm:w-auto sm:text-sm"
+              >
+                Cancel
+              </button>
             </div>
-          </div>
-          <div class="bg-gray-50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
-            <button
-              @click="bulkUpdateStatus"
-              type="button"
-              class="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-blue-600 text-base font-medium text-white hover:bg-blue-700 sm:ml-3 sm:w-auto sm:text-sm"
-            >
-              Update
-            </button>
-            <button
-              @click="showBulkStatusModal = false"
-              type="button"
-              class="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm"
-            >
-              Cancel
-            </button>
           </div>
         </div>
       </div>

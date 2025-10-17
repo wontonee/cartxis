@@ -39,20 +39,28 @@ class Category extends Model
         'depth' => 'integer',
     ];
 
-    /**
-     * Get the status attribute as boolean for forms
-     */
-    public function getStatusAttribute($value): bool
-    {
-        return $value === 'enabled';
-    }
+    protected $appends = [
+        'image_url',
+    ];
 
     /**
-     * Set the status attribute from boolean to enum
+     * Get the image URL (appends to JSON)
      */
-    public function setStatusAttribute($value): void
+    public function getImageUrlAttribute(): ?string
     {
-        $this->attributes['status'] = $value ? 'enabled' : 'disabled';
+        if (empty($this->attributes['image'])) {
+            return null;
+        }
+        
+        $image = $this->attributes['image'];
+        
+        // If it's already a full URL, return as is
+        if (filter_var($image, FILTER_VALIDATE_URL)) {
+            return $image;
+        }
+        
+        // Otherwise, convert storage path to public URL
+        return asset('storage/' . $image);
     }
 
     /**

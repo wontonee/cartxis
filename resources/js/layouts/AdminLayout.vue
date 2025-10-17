@@ -1,45 +1,20 @@
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref, computed } from 'vue'
 import { Link, usePage } from '@inertiajs/vue3'
 import admin from '@/routes/admin'
 import Toast from '@/Components/Toast.vue'
+import { useMenuIcons } from '@/composables/useMenuIcons'
 import {
   Menu,
   ChevronDown,
-  LayoutDashboard,
-  ShoppingBag,
-  ShoppingCart,
-  Users,
-  TrendingUp,
-  FileText,
-  BarChart3,
-  Settings,
-  Server,
-  Shield,
-  Wrench,
   LogOut,
   Search,
   Bell,
-  Tag,
-  Package,
-  FolderTree,
-  ListChecks,
-  Star,
-  Receipt,
-  Truck,
-  CreditCard,
-  Megaphone,
-  Ticket,
-  Mail,
-  Globe,
-  BookOpen,
-  Image,
-  Newspaper,
-  Zap,
   ChevronLeft,
   ChevronRight,
   User,
-  UserCircle
+  UserCircle,
+  Settings
 } from 'lucide-vue-next'
 
 defineProps<{
@@ -47,23 +22,77 @@ defineProps<{
 }>()
 
 const page = usePage()
+const { getIcon } = useMenuIcons()
 const sidebarOpen = ref(false)
 const sidebarCollapsed = ref(false)
 const userMenuOpen = ref(false)
-const catalogOpen = ref(true) // Open by default if on catalog page
-const salesOpen = ref(false)
-const customersOpen = ref(false)
-const marketingOpen = ref(false)
-const contentOpen = ref(false)
-const reportsOpen = ref(false)
-const settingsOpen = ref(false)
-const systemOpen = ref(false)
-const usersOpen = ref(false)
-const toolsOpen = ref(false)
 
-// Helper function to check if route is active
-const isActive = (path: string) => {
-  return page.url.startsWith(path)
+// Track which parent menus are open
+const openMenus = ref<Set<number>>(new Set())
+
+// Get menu items from shared data
+const menuItems = computed(() => {
+  return page.props.menu?.admin || []
+})
+
+// Helper function to check if menu item is active
+const isActive = (item: any) => {
+  if (!item || !item.full_url) return false
+  
+  try {
+    const currentUrl = page.url
+    const menuUrl = item.full_url
+    
+    // Remove trailing slashes for comparison
+    const cleanCurrentUrl = currentUrl.replace(/\/$/, '')
+    const cleanMenuUrl = menuUrl.replace(/\/$/, '')
+    
+    // Exact match (most common case)
+    if (cleanCurrentUrl === cleanMenuUrl) return true
+    
+    // Check if current URL starts with menu URL (for child routes)
+    // Only match if followed by a slash to prevent partial matches
+    if (cleanCurrentUrl.startsWith(cleanMenuUrl + '/')) return true
+    
+    return false
+  } catch (error) {
+    console.error('Error in isActive:', error)
+    return false
+  }
+}
+
+// Check if any child is active
+const hasActiveChild = (item: any): boolean => {
+  if (item.children && item.children.length > 0) {
+    return item.children.some((child: any) => 
+      isActive(child) || hasActiveChild(child)
+    )
+  }
+  return false
+}
+
+// Initialize open menus based on active routes
+const initializeOpenMenus = () => {
+  menuItems.value.forEach((item: any) => {
+    if (hasActiveChild(item)) {
+      openMenus.value.add(item.id)
+    }
+  })
+}
+
+// Call on mount
+initializeOpenMenus()
+
+const toggleMenu = (itemId: number) => {
+  if (openMenus.value.has(itemId)) {
+    openMenus.value.delete(itemId)
+  } else {
+    openMenus.value.add(itemId)
+  }
+}
+
+const isMenuOpen = (itemId: number) => {
+  return openMenus.value.has(itemId)
 }
 
 const toggleSidebar = () => {
@@ -102,335 +131,74 @@ const toggleSidebar = () => {
 
       <!-- Navigation -->
       <nav class="flex-1 px-4 py-6 space-y-1 overflow-y-auto h-[calc(100vh-4rem)]">
-        <!-- Dashboard -->
-        <Link
-          :href="admin.dashboard.url()"
-          :class="[
-            'flex items-center px-4 py-3 text-gray-300 rounded-lg hover:bg-gray-800 hover:text-white transition-colors',
-            { 'bg-blue-600 text-white': $page.url === '/admin/dashboard' },
-            sidebarCollapsed && 'justify-center'
-          ]"
-          :title="sidebarCollapsed ? 'Dashboard' : ''"
-        >
-          <LayoutDashboard class="w-5 h-5 flex-shrink-0" :class="{ 'mr-3': !sidebarCollapsed }" />
-          <span v-if="!sidebarCollapsed">Dashboard</span>
-        </Link>
-
-        <!-- Catalog -->
-        <div>
-          <button
-            @click="catalogOpen = !catalogOpen"
+        <!-- Dynamic Menu Items -->
+        <template v-for="item in menuItems" :key="item.id">
+          <!-- Parent Menu without children (Direct Link) -->
+          <Link
+            v-if="!item.children || item.children.length === 0"
+            :href="item.full_url || '#'"
             :class="[
-              'w-full flex items-center px-4 py-3 text-gray-300 rounded-lg hover:bg-gray-800 hover:text-white transition-colors',
+              'flex items-center px-4 py-3 text-gray-300 rounded-lg hover:bg-gray-800 hover:text-white transition-colors',
+              { 'bg-blue-600 text-white': isActive(item) },
               sidebarCollapsed && 'justify-center'
             ]"
-            :title="sidebarCollapsed ? 'Catalog' : ''"
+            :title="sidebarCollapsed ? item.title : ''"
           >
-            <ShoppingBag class="w-5 h-5 flex-shrink-0" :class="{ 'mr-3': !sidebarCollapsed }" />
-            <span v-if="!sidebarCollapsed" class="flex-1 text-left">Catalog</span>
-            <ChevronDown v-if="!sidebarCollapsed" :class="['w-4 h-4 transition-transform', catalogOpen && 'rotate-180']" />
-          </button>
-          <div v-if="!sidebarCollapsed" v-show="catalogOpen" class="ml-4 mt-1 space-y-1">
-            <Link 
-              :href="admin.catalog.products.index.url()" 
+            <component 
+              :is="getIcon(item.icon)" 
+              v-if="item.icon"
+              class="w-5 h-5 flex-shrink-0" 
+              :class="{ 'mr-3': !sidebarCollapsed }" 
+            />
+            <span v-if="!sidebarCollapsed">{{ item.title }}</span>
+          </Link>
+
+          <!-- Parent Menu with children (Expandable) -->
+          <div v-else>
+            <button
+              @click="toggleMenu(item.id)"
               :class="[
-                'flex items-center px-4 py-2 rounded-lg transition-colors cursor-pointer',
-                isActive('/admin/catalog/products') 
-                  ? 'bg-blue-600 text-white' 
-                  : 'text-gray-400 hover:text-white hover:bg-gray-800'
+                'w-full flex items-center px-4 py-3 text-gray-300 rounded-lg hover:bg-gray-800 hover:text-white transition-colors',
+                sidebarCollapsed && 'justify-center'
               ]"
+              :title="sidebarCollapsed ? item.title : ''"
             >
-              <Package class="w-4 h-4 mr-3" />
-              <span class="text-sm">Products</span>
-            </Link>
-            <Link 
-              :href="admin.catalog.categories.index.url()" 
-              :class="[
-                'flex items-center px-4 py-2 rounded-lg transition-colors cursor-pointer',
-                isActive('/admin/catalog/categories') 
-                  ? 'bg-blue-600 text-white' 
-                  : 'text-gray-400 hover:text-white hover:bg-gray-800'
-              ]"
-            >
-              <FolderTree class="w-4 h-4 mr-3" />
-              <span class="text-sm">Categories</span>
-            </Link>
-            <Link 
-              :href="admin.catalog.attributes.index.url()" 
-              :class="[
-                'flex items-center px-4 py-2 rounded-lg transition-colors cursor-pointer',
-                isActive('/admin/catalog/attributes') 
-                  ? 'bg-blue-600 text-white' 
-                  : 'text-gray-400 hover:text-white hover:bg-gray-800'
-              ]"
-            >
-              <ListChecks class="w-4 h-4 mr-3" />
-              <span class="text-sm">Attributes</span>
-            </Link>
-            <a href="#" class="flex items-center px-4 py-2 text-gray-400 hover:text-white hover:bg-gray-800 rounded-lg transition-colors cursor-pointer">
-              <Tag class="w-4 h-4 mr-3" />
-              <span class="text-sm">Brands</span>
-            </a>
-            <a href="#" class="flex items-center px-4 py-2 text-gray-400 hover:text-white hover:bg-gray-800 rounded-lg transition-colors cursor-pointer">
-              <Star class="w-4 h-4 mr-3" />
-              <span class="text-sm">Reviews</span>
-            </a>
+              <component 
+                :is="getIcon(item.icon)" 
+                v-if="item.icon"
+                class="w-5 h-5 flex-shrink-0" 
+                :class="{ 'mr-3': !sidebarCollapsed }" 
+              />
+              <span v-if="!sidebarCollapsed" class="flex-1 text-left">{{ item.title }}</span>
+              <ChevronDown 
+                v-if="!sidebarCollapsed" 
+                :class="['w-4 h-4 transition-transform', isMenuOpen(item.id) && 'rotate-180']" 
+              />
+            </button>
+            
+            <!-- Child Menu Items -->
+            <div v-if="!sidebarCollapsed" v-show="isMenuOpen(item.id)" class="ml-4 mt-1 space-y-1">
+              <Link 
+                v-for="child in item.children" 
+                :key="child.id"
+                :href="child.full_url || '#'" 
+                :class="[
+                  'flex items-center px-4 py-2 rounded-lg transition-colors cursor-pointer',
+                  isActive(child)
+                    ? 'bg-blue-600 text-white' 
+                    : 'text-gray-400 hover:text-white hover:bg-gray-800'
+                ]"
+              >
+                <component 
+                  :is="getIcon(child.icon)" 
+                  v-if="child.icon"
+                  class="w-4 h-4 mr-3" 
+                />
+                <span class="text-sm">{{ child.title }}</span>
+              </Link>
+            </div>
           </div>
-        </div>
-
-        <!-- Sales -->
-        <div>
-          <button
-            @click="salesOpen = !salesOpen"
-            :class="[
-              'w-full flex items-center px-4 py-3 text-gray-300 rounded-lg hover:bg-gray-800 hover:text-white transition-colors',
-              sidebarCollapsed && 'justify-center'
-            ]"
-            :title="sidebarCollapsed ? 'Sales' : ''"
-          >
-            <ShoppingCart class="w-5 h-5 flex-shrink-0" :class="{ 'mr-3': !sidebarCollapsed }" />
-            <span v-if="!sidebarCollapsed" class="flex-1 text-left">Sales</span>
-            <ChevronDown v-if="!sidebarCollapsed" :class="['w-4 h-4 transition-transform', salesOpen && 'rotate-180']" />
-          </button>
-          <div v-if="!sidebarCollapsed" v-show="salesOpen" class="ml-4 mt-1 space-y-1">
-            <a href="#" class="flex items-center px-4 py-2 text-gray-400 hover:text-white transition-colors">
-              <ShoppingCart class="w-4 h-4 mr-3" />
-              <span class="text-sm">Orders</span>
-            </a>
-            <a href="#" class="flex items-center px-4 py-2 text-gray-400 hover:text-white transition-colors">
-              <Receipt class="w-4 h-4 mr-3" />
-              <span class="text-sm">Invoices</span>
-            </a>
-            <a href="#" class="flex items-center px-4 py-2 text-gray-400 hover:text-white transition-colors">
-              <Truck class="w-4 h-4 mr-3" />
-              <span class="text-sm">Shipments</span>
-            </a>
-            <a href="#" class="flex items-center px-4 py-2 text-gray-400 hover:text-white transition-colors">
-              <CreditCard class="w-4 h-4 mr-3" />
-              <span class="text-sm">Transactions</span>
-            </a>
-          </div>
-        </div>
-
-        <!-- Customers -->
-        <div>
-          <button
-            @click="customersOpen = !customersOpen"
-            :class="[
-              'w-full flex items-center px-4 py-3 text-gray-300 rounded-lg hover:bg-gray-800 hover:text-white transition-colors',
-              sidebarCollapsed && 'justify-center'
-            ]"
-            :title="sidebarCollapsed ? 'Customers' : ''"
-          >
-            <Users class="w-5 h-5 flex-shrink-0" :class="{ 'mr-3': !sidebarCollapsed }" />
-            <span v-if="!sidebarCollapsed" class="flex-1 text-left">Customers</span>
-            <ChevronDown v-if="!sidebarCollapsed" :class="['w-4 h-4 transition-transform', customersOpen && 'rotate-180']" />
-          </button>
-          <div v-if="!sidebarCollapsed" v-show="customersOpen" class="ml-4 mt-1 space-y-1">
-            <a href="#" class="flex items-center px-4 py-2 text-gray-400 hover:text-white transition-colors">
-              <Users class="w-4 h-4 mr-3" />
-              <span class="text-sm">All Customers</span>
-            </a>
-            <a href="#" class="flex items-center px-4 py-2 text-gray-400 hover:text-white transition-colors">
-              <Tag class="w-4 h-4 mr-3" />
-              <span class="text-sm">Customer Groups</span>
-            </a>
-          </div>
-        </div>
-
-        <!-- Marketing -->
-        <div>
-          <button
-            @click="marketingOpen = !marketingOpen"
-            :class="[
-              'w-full flex items-center px-4 py-3 text-gray-300 rounded-lg hover:bg-gray-800 hover:text-white transition-colors',
-              sidebarCollapsed && 'justify-center'
-            ]"
-            :title="sidebarCollapsed ? 'Marketing' : ''"
-          >
-            <TrendingUp class="w-5 h-5 flex-shrink-0" :class="{ 'mr-3': !sidebarCollapsed }" />
-            <span v-if="!sidebarCollapsed" class="flex-1 text-left">Marketing</span>
-            <ChevronDown v-if="!sidebarCollapsed" :class="['w-4 h-4 transition-transform', marketingOpen && 'rotate-180']" />
-          </button>
-          <div v-if="!sidebarCollapsed" v-show="marketingOpen" class="ml-4 mt-1 space-y-1">
-            <a href="#" class="flex items-center px-4 py-2 text-gray-400 hover:text-white transition-colors">
-              <Megaphone class="w-4 h-4 mr-3" />
-              <span class="text-sm">Promotions</span>
-            </a>
-            <a href="#" class="flex items-center px-4 py-2 text-gray-400 hover:text-white transition-colors">
-              <Ticket class="w-4 h-4 mr-3" />
-              <span class="text-sm">Coupons</span>
-            </a>
-            <a href="#" class="flex items-center px-4 py-2 text-gray-400 hover:text-white transition-colors">
-              <Mail class="w-4 h-4 mr-3" />
-              <span class="text-sm">Email Campaigns</span>
-            </a>
-            <a href="#" class="flex items-center px-4 py-2 text-gray-400 hover:text-white transition-colors">
-              <Globe class="w-4 h-4 mr-3" />
-              <span class="text-sm">SEO</span>
-            </a>
-          </div>
-        </div>
-
-        <!-- Content -->
-        <div>
-          <button
-            @click="contentOpen = !contentOpen"
-            :class="[
-              'w-full flex items-center px-4 py-3 text-gray-300 rounded-lg hover:bg-gray-800 hover:text-white transition-colors',
-              sidebarCollapsed && 'justify-center'
-            ]"
-            :title="sidebarCollapsed ? 'Content' : ''"
-          >
-            <FileText class="w-5 h-5 flex-shrink-0" :class="{ 'mr-3': !sidebarCollapsed }" />
-            <span v-if="!sidebarCollapsed" class="flex-1 text-left">Content</span>
-            <ChevronDown v-if="!sidebarCollapsed" :class="['w-4 h-4 transition-transform', contentOpen && 'rotate-180']" />
-          </button>
-          <div v-if="!sidebarCollapsed" v-show="contentOpen" class="ml-4 mt-1 space-y-1">
-            <a href="#" class="flex items-center px-4 py-2 text-gray-400 hover:text-white transition-colors">
-              <BookOpen class="w-4 h-4 mr-3" />
-              <span class="text-sm">Pages</span>
-            </a>
-            <a href="#" class="flex items-center px-4 py-2 text-gray-400 hover:text-white transition-colors">
-              <Newspaper class="w-4 h-4 mr-3" />
-              <span class="text-sm">Blog Posts</span>
-            </a>
-            <a href="#" class="flex items-center px-4 py-2 text-gray-400 hover:text-white transition-colors">
-              <Image class="w-4 h-4 mr-3" />
-              <span class="text-sm">Media Gallery</span>
-            </a>
-          </div>
-        </div>
-
-        <!-- Reports -->
-        <div>
-          <button
-            @click="reportsOpen = !reportsOpen"
-            :class="[
-              'w-full flex items-center px-4 py-3 text-gray-300 rounded-lg hover:bg-gray-800 hover:text-white transition-colors',
-              sidebarCollapsed && 'justify-center'
-            ]"
-            :title="sidebarCollapsed ? 'Reports' : ''"
-          >
-            <BarChart3 class="w-5 h-5 flex-shrink-0" :class="{ 'mr-3': !sidebarCollapsed }" />
-            <span v-if="!sidebarCollapsed" class="flex-1 text-left">Reports</span>
-            <ChevronDown v-if="!sidebarCollapsed" :class="['w-4 h-4 transition-transform', reportsOpen && 'rotate-180']" />
-          </button>
-          <div v-if="!sidebarCollapsed" v-show="reportsOpen" class="ml-4 mt-1 space-y-1">
-            <a href="#" class="flex items-center px-4 py-2 text-gray-400 hover:text-white transition-colors">
-              <TrendingUp class="w-4 h-4 mr-3" />
-              <span class="text-sm">Sales Reports</span>
-            </a>
-            <a href="#" class="flex items-center px-4 py-2 text-gray-400 hover:text-white transition-colors">
-              <Package class="w-4 h-4 mr-3" />
-              <span class="text-sm">Product Reports</span>
-            </a>
-          </div>
-        </div>
-
-        <!-- Settings -->
-        <div>
-          <button
-            @click="settingsOpen = !settingsOpen"
-            :class="[
-              'w-full flex items-center px-4 py-3 text-gray-300 rounded-lg hover:bg-gray-800 hover:text-white transition-colors',
-              sidebarCollapsed && 'justify-center'
-            ]"
-            :title="sidebarCollapsed ? 'Settings' : ''"
-          >
-            <Settings class="w-5 h-5 flex-shrink-0" :class="{ 'mr-3': !sidebarCollapsed }" />
-            <span v-if="!sidebarCollapsed" class="flex-1 text-left">Settings</span>
-            <ChevronDown v-if="!sidebarCollapsed" :class="['w-4 h-4 transition-transform', settingsOpen && 'rotate-180']" />
-          </button>
-          <div v-if="!sidebarCollapsed" v-show="settingsOpen" class="ml-4 mt-1 space-y-1">
-            <a href="#" class="flex items-center px-4 py-2 text-gray-400 hover:text-white transition-colors">
-              <Settings class="w-4 h-4 mr-3" />
-              <span class="text-sm">General</span>
-            </a>
-            <a href="#" class="flex items-center px-4 py-2 text-gray-400 hover:text-white transition-colors">
-              <CreditCard class="w-4 h-4 mr-3" />
-              <span class="text-sm">Payment Methods</span>
-            </a>
-          </div>
-        </div>
-
-        <!-- System -->
-        <div>
-          <button
-            @click="systemOpen = !systemOpen"
-            :class="[
-              'w-full flex items-center px-4 py-3 text-gray-300 rounded-lg hover:bg-gray-800 hover:text-white transition-colors',
-              sidebarCollapsed && 'justify-center'
-            ]"
-            :title="sidebarCollapsed ? 'System' : ''"
-          >
-            <Server class="w-5 h-5 flex-shrink-0" :class="{ 'mr-3': !sidebarCollapsed }" />
-            <span v-if="!sidebarCollapsed" class="flex-1 text-left">System</span>
-            <ChevronDown v-if="!sidebarCollapsed" :class="['w-4 h-4 transition-transform', systemOpen && 'rotate-180']" />
-          </button>
-          <div v-if="!sidebarCollapsed" v-show="systemOpen" class="ml-4 mt-1 space-y-1">
-            <a href="#" class="flex items-center px-4 py-2 text-gray-400 hover:text-white transition-colors">
-              <Zap class="w-4 h-4 mr-3" />
-              <span class="text-sm">Cache Management</span>
-            </a>
-            <a href="#" class="flex items-center px-4 py-2 text-gray-400 hover:text-white transition-colors">
-              <FileText class="w-4 h-4 mr-3" />
-              <span class="text-sm">Logs</span>
-            </a>
-          </div>
-        </div>
-
-        <!-- Users & Roles -->
-        <div>
-          <button
-            @click="usersOpen = !usersOpen"
-            :class="[
-              'w-full flex items-center px-4 py-3 text-gray-300 rounded-lg hover:bg-gray-800 hover:text-white transition-colors',
-              sidebarCollapsed && 'justify-center'
-            ]"
-            :title="sidebarCollapsed ? 'Users & Roles' : ''"
-          >
-            <Shield class="w-5 h-5 flex-shrink-0" :class="{ 'mr-3': !sidebarCollapsed }" />
-            <span v-if="!sidebarCollapsed" class="flex-1 text-left">Users & Roles</span>
-            <ChevronDown v-if="!sidebarCollapsed" :class="['w-4 h-4 transition-transform', usersOpen && 'rotate-180']" />
-          </button>
-          <div v-if="!sidebarCollapsed" v-show="usersOpen" class="ml-4 mt-1 space-y-1">
-            <a href="#" class="flex items-center px-4 py-2 text-gray-400 hover:text-white transition-colors">
-              <Users class="w-4 h-4 mr-3" />
-              <span class="text-sm">Admin Users</span>
-            </a>
-            <a href="#" class="flex items-center px-4 py-2 text-gray-400 hover:text-white transition-colors">
-              <Shield class="w-4 h-4 mr-3" />
-              <span class="text-sm">Roles & Permissions</span>
-            </a>
-          </div>
-        </div>
-
-        <!-- Tools -->
-        <div>
-          <button
-            @click="toolsOpen = !toolsOpen"
-            :class="[
-              'w-full flex items-center px-4 py-3 text-gray-300 rounded-lg hover:bg-gray-800 hover:text-white transition-colors',
-              sidebarCollapsed && 'justify-center'
-            ]"
-            :title="sidebarCollapsed ? 'Tools' : ''"
-          >
-            <Wrench class="w-5 h-5 flex-shrink-0" :class="{ 'mr-3': !sidebarCollapsed }" />
-            <span v-if="!sidebarCollapsed" class="flex-1 text-left">Tools</span>
-            <ChevronDown v-if="!sidebarCollapsed" :class="['w-4 h-4 transition-transform', toolsOpen && 'rotate-180']" />
-          </button>
-          <div v-if="!sidebarCollapsed" v-show="toolsOpen" class="ml-4 mt-1 space-y-1">
-            <a href="#" class="flex items-center px-4 py-2 text-gray-400 hover:text-white transition-colors">
-              <FileText class="w-4 h-4 mr-3" />
-              <span class="text-sm">Import/Export</span>
-            </a>
-            <a href="#" class="flex items-center px-4 py-2 text-gray-400 hover:text-white transition-colors">
-              <Zap class="w-4 h-4 mr-3" />
-              <span class="text-sm">Bulk Actions</span>
-            </a>
-          </div>
-        </div>
+        </template>
       </nav>
     </aside>
 

@@ -9,6 +9,7 @@ use Vortex\Product\Models\Category;
 use Illuminate\Http\Request;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Storage;
 
 class CategoryController extends Controller
 {
@@ -76,13 +77,18 @@ class CategoryController extends Controller
             'slug' => 'nullable|string|max:255|unique:categories,slug',
             'description' => 'nullable|string',
             'parent_id' => 'nullable|exists:categories,id',
-            'status' => 'required|boolean',
+            'status' => 'required|in:enabled,disabled',
             'sort_order' => 'nullable|integer',
             'meta_title' => 'nullable|string|max:255',
             'meta_description' => 'nullable|string',
             'meta_keywords' => 'nullable|string',
-            'image' => 'nullable|string',
+            'image' => 'nullable|file|image|max:2048',
         ]);
+
+        // Handle image upload
+        if ($request->hasFile('image')) {
+            $validated['image'] = $request->file('image')->store('categories', 'public');
+        }
 
         // Auto-generate slug if not provided
         if (empty($validated['slug'])) {
@@ -136,13 +142,22 @@ class CategoryController extends Controller
             'slug' => 'nullable|string|max:255|unique:categories,slug,' . $category->id,
             'description' => 'nullable|string',
             'parent_id' => 'nullable|exists:categories,id',
-            'status' => 'required|boolean',
+            'status' => 'required|in:enabled,disabled',
             'sort_order' => 'nullable|integer',
             'meta_title' => 'nullable|string|max:255',
             'meta_description' => 'nullable|string',
             'meta_keywords' => 'nullable|string',
-            'image' => 'nullable|string',
+            'image' => 'nullable|file|image|max:2048',
         ]);
+
+        // Handle image upload
+        if ($request->hasFile('image')) {
+            // Delete old image if exists
+            if ($category->image && Storage::disk('public')->exists($category->image)) {
+                Storage::disk('public')->delete($category->image);
+            }
+            $validated['image'] = $request->file('image')->store('categories', 'public');
+        }
 
         // Auto-generate slug if not provided
         if (empty($validated['slug'])) {
@@ -159,12 +174,8 @@ class CategoryController extends Controller
         // Flash the message to session
         session()->flash('success', 'Category updated successfully.');
 
-        // If it's an AJAX/Inertia request, return back to stay on same page
-        if ($request->wantsJson() || $request->header('X-Inertia')) {
-            return redirect()->back();
-        }
-
-        return redirect()->route('admin.catalog.categories.index');
+        // Always return back for both regular and AJAX requests
+        return redirect()->back();
     }
 
     /**
@@ -235,7 +246,7 @@ class CategoryController extends Controller
         $request->validate([
             'ids' => 'required|array',
             'ids.*' => 'exists:categories,id',
-            'status' => 'required|boolean',
+            'status' => 'required|in:enabled,disabled',
         ]);
 
         Category::whereIn('id', $request->ids)->update(['status' => $request->status]);

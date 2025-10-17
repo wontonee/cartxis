@@ -4,6 +4,8 @@ use Vortex\Product\Http\Controllers\Admin\ProductController;
 use Vortex\Product\Http\Controllers\Admin\ProductImageController;
 use Vortex\Product\Http\Controllers\Admin\CategoryController;
 use Vortex\Product\Http\Controllers\Admin\AttributeController;
+use Vortex\Product\Http\Controllers\Admin\BrandController;
+use Vortex\Product\Http\Controllers\Admin\ReviewController;
 use Illuminate\Support\Facades\Route;
 
 Route::middleware(['web', 'auth:admin'])
@@ -30,4 +32,15 @@ Route::middleware(['web', 'auth:admin'])
         // Attribute Management
         Route::resource('attributes', AttributeController::class);
         Route::post('attributes/bulk-destroy', [AttributeController::class, 'bulkDestroy'])->name('attributes.bulk-destroy');
+
+        // Brand Management
+        Route::resource('brands', BrandController::class);
+        Route::post('brands/bulk-destroy', [BrandController::class, 'bulkDestroy'])->name('brands.bulk-destroy');
+        Route::post('brands/bulk-status', [BrandController::class, 'bulkStatus'])->name('brands.bulk-status');
+
+        // Review Management
+        Route::resource('reviews', ReviewController::class)->only(['index', 'show', 'destroy']);
+        Route::post('reviews/{review}/status', [ReviewController::class, 'updateStatus'])->name('reviews.update-status');
+        Route::post('reviews/{review}/reply', [ReviewController::class, 'reply'])->name('reviews.reply');
+        Route::post('reviews/bulk-action', [ReviewController::class, 'bulkAction'])->name('reviews.bulk-action');
     });

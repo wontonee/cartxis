@@ -34,13 +34,13 @@ class AttributeController extends Controller
         }
 
         // Sort
-        $sortBy = $request->get('sort_by', 'position');
+        $sortBy = $request->get('sort_by', 'sort_order');
         $sortOrder = $request->get('sort_order', 'asc');
         $query->orderBy($sortBy, $sortOrder);
 
         $attributes = $query->paginate($request->get('per_page', 15))->withQueryString();
 
-        return Inertia::render('admin/catalog/attributes/Index', [
+        return Inertia::render('Admin/Attributes/Index', [
             'attributes' => $attributes,
             'filters' => $request->only(['search', 'type', 'sort_by', 'sort_order']),
         ]);
@@ -51,7 +51,9 @@ class AttributeController extends Controller
      */
     public function create(): Response
     {
-        return Inertia::render('admin/catalog/attributes/Create');
+        return Inertia::render('Admin/Attributes/Create', [
+            //
+        ]);
     }
 
     /**
@@ -62,24 +64,22 @@ class AttributeController extends Controller
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'code' => 'required|string|max:255|unique:attributes,code',
-            'type' => 'required|in:text,textarea,select,multiselect,boolean,date,price,number',
+            'type' => 'required|in:text,textarea,select,multiselect,boolean,date,price',
             'is_required' => 'boolean',
-            'is_unique' => 'boolean',
             'is_filterable' => 'boolean',
-            'is_comparable' => 'boolean',
-            'is_visible_on_front' => 'boolean',
-            'position' => 'nullable|integer',
-            'validation' => 'nullable|string',
+            'is_configurable' => 'boolean',
+            'sort_order' => 'nullable|integer',
             'options' => 'nullable|array',
-            'options.*.label' => 'required|string|max:255',
-            'options.*.value' => 'required|string|max:255',
-            'options.*.position' => 'nullable|integer',
+            'options.*.label' => 'required_with:options|string|max:255',
+            'options.*.value' => 'required_with:options|string|max:255',
+            'options.*.swatch_value' => 'nullable|string|max:255',
+            'options.*.sort_order' => 'nullable|integer',
         ]);
 
-        // Auto-set position if not provided
-        if (empty($validated['position'])) {
-            $maxPosition = Attribute::max('position') ?? 0;
-            $validated['position'] = $maxPosition + 1;
+        // Auto-set sort_order if not provided
+        if (!isset($validated['sort_order'])) {
+            $maxSortOrder = Attribute::max('sort_order') ?? 0;
+            $validated['sort_order'] = $maxSortOrder + 1;
         }
 
         $options = $validated['options'] ?? [];
@@ -89,12 +89,13 @@ class AttributeController extends Controller
 
         // Create options if type is select or multiselect
         if (in_array($validated['type'], ['select', 'multiselect']) && !empty($options)) {
-            foreach ($options as $index => $option) {
+            foreach ($options as $option) {
                 AttributeOption::create([
                     'attribute_id' => $attribute->id,
                     'label' => $option['label'],
                     'value' => $option['value'],
-                    'position' => $option['position'] ?? $index,
+                    'swatch_value' => $option['swatch_value'] ?? null,
+                    'sort_order' => $option['sort_order'] ?? 0,
                 ]);
             }
         }
@@ -110,7 +111,7 @@ class AttributeController extends Controller
     {
         $attribute->load('options');
 
-        return Inertia::render('admin/catalog/attributes/Show', [
+        return Inertia::render('Admin/Attributes/Show', [
             'attribute' => $attribute,
         ]);
     }
@@ -122,7 +123,7 @@ class AttributeController extends Controller
     {
         $attribute->load('options');
 
-        return Inertia::render('admin/catalog/attributes/Edit', [
+        return Inertia::render('Admin/Attributes/Edit', [
             'attribute' => $attribute,
         ]);
     }
@@ -198,14 +199,15 @@ class AttributeController extends Controller
      */
     public function destroy(Attribute $attribute): RedirectResponse
     {
-        // Delete associated options
-        $attribute->options()->delete();
-        
-        // Delete the attribute
-        $attribute->delete();
+        try {
+            // Delete associated options and attribute
+            $attribute->options()->delete();
+            $attribute->delete();
 
-        return redirect()->route('admin.catalog.attributes.index')
-            ->with('success', 'Attribute deleted successfully.');
+            return back()->with('success', 'Attribute deleted successfully.');
+        } catch (\Exception $e) {
+            return back()->withErrors(['error' => 'Failed to delete attribute: ' . $e->getMessage()]);
+        }
     }
 
     /**
@@ -218,12 +220,20 @@ class AttributeController extends Controller
             'ids.*' => 'exists:attributes,id',
         ]);
 
-        foreach ($request->ids as $id) {
-            $attribute = Attribute::find($id);
-            $attribute->options()->delete();
-            $attribute->delete();
-        }
+        try {
+            $count = 0;
+            foreach ($request->ids as $id) {
+                $attribute = Attribute::find($id);
+                if ($attribute) {
+                    $attribute->options()->delete();
+                    $attribute->delete();
+                    $count++;
+                }
+            }
 
-        return back()->with('success', count($request->ids) . ' attributes deleted successfully.');
+            return back()->with('success', $count . ' attribute(s) deleted successfully.');
+        } catch (\Exception $e) {
+            return back()->withErrors(['error' => 'Failed to delete attributes: ' . $e->getMessage()]);
+        }
     }
 }

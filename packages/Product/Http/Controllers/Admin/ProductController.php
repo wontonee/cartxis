@@ -67,6 +67,14 @@ class ProductController extends Controller
     {
         return Inertia::render('Admin/Products/Create', [
             'categories' => Category::enabled()->with('children')->whereNull('parent_id')->orderBy('name')->get(),
+            'brands' => \Vortex\Product\Models\Brand::where('status', true)->orderBy('name')->get(['id', 'name']),
+            'attributes' => \Vortex\Product\Models\Attribute::with('options')
+                ->where(function($query) {
+                    $query->where('is_filterable', true)
+                          ->orWhere('is_configurable', true);
+                })
+                ->orderBy('sort_order')
+                ->get(['id', 'name', 'code', 'type', 'is_required', 'is_filterable', 'is_configurable']),
         ]);
     }
 
@@ -100,17 +108,41 @@ class ProductController extends Controller
             'meta_title' => 'nullable|string|max:255',
             'meta_description' => 'nullable|string',
             'meta_keywords' => 'nullable|string',
+            'brand_id' => 'nullable|exists:brands,id',
             'category_ids' => 'nullable|array',
             'category_ids.*' => 'exists:categories,id',
+            'attribute_values' => 'nullable|array',
         ]);
 
         $categoryIds = $validated['category_ids'] ?? [];
-        unset($validated['category_ids']);
+        $attributeValues = $validated['attribute_values'] ?? [];
+        unset($validated['category_ids'], $validated['attribute_values']);
 
         $product = Product::create($validated);
 
         if (!empty($categoryIds)) {
             $product->categories()->attach($categoryIds);
+        }
+
+        // Save attribute values
+        if (!empty($attributeValues)) {
+            foreach ($attributeValues as $code => $value) {
+                $attribute = \Vortex\Product\Models\Attribute::where('code', $code)->first();
+                if ($attribute) {
+                    // Convert arrays to JSON for multiselect
+                    $valueToStore = is_array($value) ? json_encode($value) : $value;
+                    
+                    \Vortex\Product\Models\ProductAttributeValue::updateOrCreate(
+                        [
+                            'product_id' => $product->id,
+                            'attribute_id' => $attribute->id,
+                        ],
+                        [
+                            'value' => $valueToStore,
+                        ]
+                    );
+                }
+            }
         }
 
         // Flash the message to session
@@ -136,6 +168,14 @@ class ProductController extends Controller
         return Inertia::render('Admin/Products/Edit', [
             'product' => $product,
             'categories' => Category::enabled()->with('children')->whereNull('parent_id')->orderBy('name')->get(),
+            'brands' => \Vortex\Product\Models\Brand::where('status', true)->orderBy('name')->get(['id', 'name']),
+            'attributes' => \Vortex\Product\Models\Attribute::with('options')
+                ->where(function($query) {
+                    $query->where('is_filterable', true)
+                          ->orWhere('is_configurable', true);
+                })
+                ->orderBy('sort_order')
+                ->get(['id', 'name', 'code', 'type', 'is_required', 'is_filterable', 'is_configurable']),
             'adjustmentHistory' => $adjustmentHistory,
         ]);
     }
@@ -170,12 +210,15 @@ class ProductController extends Controller
             'meta_title' => 'nullable|string|max:255',
             'meta_description' => 'nullable|string',
             'meta_keywords' => 'nullable|string',
+            'brand_id' => 'nullable|exists:brands,id',
             'category_ids' => 'nullable|array',
             'category_ids.*' => 'exists:categories,id',
+            'attribute_values' => 'nullable|array',
         ]);
 
         $categoryIds = $validated['category_ids'] ?? [];
-        unset($validated['category_ids']);
+        $attributeValues = $validated['attribute_values'] ?? [];
+        unset($validated['category_ids'], $validated['attribute_values']);
 
         // Track inventory changes
         $oldQuantity = $product->quantity;
@@ -184,6 +227,40 @@ class ProductController extends Controller
         $product->update($validated);
 
         $product->categories()->sync($categoryIds);
+
+        // Update attribute values
+        // First, get all current attribute IDs for this product
+        $currentAttributeCodes = array_keys($attributeValues);
+        $currentAttributeIds = \Vortex\Product\Models\Attribute::whereIn('code', $currentAttributeCodes)->pluck('id')->toArray();
+        
+        // Delete attribute values that are no longer selected
+        \Vortex\Product\Models\ProductAttributeValue::where('product_id', $product->id)
+            ->whereNotIn('attribute_id', $currentAttributeIds)
+            ->delete();
+        
+        // Update or create attribute values
+        if (!empty($attributeValues)) {
+            foreach ($attributeValues as $code => $value) {
+                $attribute = \Vortex\Product\Models\Attribute::where('code', $code)->first();
+                if ($attribute) {
+                    // Convert arrays to JSON for multiselect
+                    $valueToStore = is_array($value) ? json_encode($value) : $value;
+                    
+                    \Vortex\Product\Models\ProductAttributeValue::updateOrCreate(
+                        [
+                            'product_id' => $product->id,
+                            'attribute_id' => $attribute->id,
+                        ],
+                        [
+                            'value' => $valueToStore,
+                        ]
+                    );
+                }
+            }
+        } else {
+            // If no attribute values provided, delete all existing ones
+            \Vortex\Product\Models\ProductAttributeValue::where('product_id', $product->id)->delete();
+        }
 
         // Record inventory adjustment if quantity changed
         if ($oldQuantity != $newQuantity && auth()->check()) {

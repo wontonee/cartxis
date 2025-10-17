@@ -3,6 +3,7 @@
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Auth;
 use Vortex\Admin\Http\Controllers\Auth\AdminLoginController;
+use Packages\Core\Http\Controllers\Admin\ThemeController;
 
 /*
 |--------------------------------------------------------------------------
@@ -33,6 +34,16 @@ Route::prefix('admin')->name('admin.')->middleware(['web'])->group(function () {
                 ]
             ]);
         })->name('dashboard');
+        
+        // Appearance -> Themes
+        Route::prefix('appearance/themes')->name('themes.')->group(function () {
+            Route::get('/', [ThemeController::class, 'index'])->name('index');
+            Route::post('/{slug}/activate', [ThemeController::class, 'activate'])->name('activate');
+            Route::get('/{slug}/settings', [ThemeController::class, 'settings'])->name('settings');
+            Route::put('/{slug}/settings', [ThemeController::class, 'updateSettings'])->name('settings.update');
+            Route::delete('/{slug}', [ThemeController::class, 'destroy'])->name('destroy');
+            Route::post('/upload', [ThemeController::class, 'upload'])->name('upload');
+        });
     });
 });
 
