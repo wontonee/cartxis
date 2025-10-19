@@ -316,33 +316,50 @@ const toggleCategory = (categoryId: number) => {
 onMounted(() => {
   // Load existing attribute values from the product
   if (props.product.attribute_values && props.product.attribute_values.length > 0) {
-    props.product.attribute_values.forEach((attrValue: any) => {
-      const attribute = props.attributes.find(attr => attr.id === attrValue.attribute_id);
+    // Group attribute values by attribute_id for multiselect handling
+    const groupedByAttribute = props.product.attribute_values.reduce((acc: any, attrValue: any) => {
+      if (!acc[attrValue.attribute_id]) {
+        acc[attrValue.attribute_id] = [];
+      }
+      acc[attrValue.attribute_id].push(attrValue);
+      return acc;
+    }, {});
+
+    // Process each attribute
+    Object.keys(groupedByAttribute).forEach((attributeIdStr) => {
+      const attributeId = Number(attributeIdStr);
+      const attribute = props.attributes.find(attr => attr.id === attributeId);
+      
       if (attribute) {
         // Add attribute to selected list
         if (!selectedAttributeIds.value.includes(attribute.id)) {
           selectedAttributeIds.value.push(attribute.id);
         }
-        
+
+        const attrValues = groupedByAttribute[attributeId];
+
         // Set the value based on attribute type
-        if (attribute.type === 'multiselect') {
-          // For multiselect, parse JSON array or split comma-separated values
-          try {
-            attributeValues.value[attribute.code] = Array.isArray(attrValue.value) 
-              ? attrValue.value 
-              : JSON.parse(attrValue.value);
-          } catch (e) {
-            // If not JSON, try splitting by comma
-            attributeValues.value[attribute.code] = attrValue.value.includes(',') 
-              ? attrValue.value.split(',').map((v: string) => v.trim())
-              : [attrValue.value];
+        if (attribute.type === 'multiselect' || attribute.type === 'select') {
+          // For multiselect/select, collect all option values
+          const optionValues = attrValues
+            .filter((av: any) => av.attribute_option_id)
+            .map((av: any) => av.option?.value || String(av.attribute_option_id));
+          
+          if (attribute.type === 'multiselect') {
+            attributeValues.value[attribute.code] = optionValues;
+          } else {
+            attributeValues.value[attribute.code] = optionValues[0] || '';
           }
         } else if (attribute.type === 'boolean') {
           // Convert to boolean
-          attributeValues.value[attribute.code] = attrValue.value === '1' || attrValue.value === 'true' || attrValue.value === true;
+          const boolValue = attrValues[0]?.boolean_value;
+          attributeValues.value[attribute.code] = boolValue === 1 || boolValue === '1' || boolValue === true;
+        } else if (attribute.type === 'date') {
+          // Date value
+          attributeValues.value[attribute.code] = attrValues[0]?.date_value || '';
         } else {
-          // For all other types, use the value directly
-          attributeValues.value[attribute.code] = attrValue.value;
+          // For text/textarea types, use text_value
+          attributeValues.value[attribute.code] = attrValues[0]?.text_value || '';
         }
       }
     });

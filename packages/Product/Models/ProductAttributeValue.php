@@ -49,6 +49,14 @@ class ProductAttributeValue extends Model
     }
 
     /**
+     * Alias for option() - for backward compatibility
+     */
+    public function attributeOption(): BelongsTo
+    {
+        return $this->option();
+    }
+
+    /**
      * Get the value based on attribute type
      */
     public function getValue()

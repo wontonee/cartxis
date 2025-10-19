@@ -32,6 +32,7 @@ export default defineConfig({
     resolve: {
         alias: {
             '@admin': '/resources/admin',
+            '@themes': '/themes',
         },
     },
 });

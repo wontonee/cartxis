@@ -34,6 +34,7 @@
             "Vortex\\Core\\": "packages/Core/",
             "Vortex\\Admin\\": "packages/Admin/",
             "Vortex\\Product\\": "packages/Product/",
+            "Vortex\\Cart\\": "packages/Cart/",
             "Packages\\Core\\": "packages/Core/"
         }
     },

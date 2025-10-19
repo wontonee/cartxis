@@ -241,20 +241,76 @@ class ProductController extends Controller
         // Update or create attribute values
         if (!empty($attributeValues)) {
             foreach ($attributeValues as $code => $value) {
-                $attribute = \Vortex\Product\Models\Attribute::where('code', $code)->first();
+                $attribute = \Vortex\Product\Models\Attribute::with('options')->where('code', $code)->first();
                 if ($attribute) {
-                    // Convert arrays to JSON for multiselect
-                    $valueToStore = is_array($value) ? json_encode($value) : $value;
-                    
-                    \Vortex\Product\Models\ProductAttributeValue::updateOrCreate(
-                        [
-                            'product_id' => $product->id,
-                            'attribute_id' => $attribute->id,
-                        ],
-                        [
-                            'value' => $valueToStore,
-                        ]
-                    );
+                    // Handle different attribute types
+                    if ($attribute->type === 'multiselect') {
+                        // For multiselect, delete existing values first
+                        \Vortex\Product\Models\ProductAttributeValue::where('product_id', $product->id)
+                            ->where('attribute_id', $attribute->id)
+                            ->delete();
+                        
+                        // Create a new row for each selected option
+                        $values = is_array($value) ? $value : [$value];
+                        foreach ($values as $optionValue) {
+                            if (!empty($optionValue)) {
+                                // Find the option by value
+                                $option = $attribute->options->firstWhere('value', $optionValue);
+                                if ($option) {
+                                    \Vortex\Product\Models\ProductAttributeValue::create([
+                                        'product_id' => $product->id,
+                                        'attribute_id' => $attribute->id,
+                                        'attribute_option_id' => $option->id,
+                                    ]);
+                                }
+                            }
+                        }
+                    } elseif ($attribute->type === 'select') {
+                        // For single select
+                        $option = $attribute->options->firstWhere('value', $value);
+                        \Vortex\Product\Models\ProductAttributeValue::updateOrCreate(
+                            [
+                                'product_id' => $product->id,
+                                'attribute_id' => $attribute->id,
+                            ],
+                            [
+                                'attribute_option_id' => $option ? $option->id : null,
+                            ]
+                        );
+                    } elseif ($attribute->type === 'boolean') {
+                        // For boolean
+                        \Vortex\Product\Models\ProductAttributeValue::updateOrCreate(
+                            [
+                                'product_id' => $product->id,
+                                'attribute_id' => $attribute->id,
+                            ],
+                            [
+                                'boolean_value' => $value ? 1 : 0,
+                            ]
+                        );
+                    } elseif ($attribute->type === 'date') {
+                        // For date
+                        \Vortex\Product\Models\ProductAttributeValue::updateOrCreate(
+                            [
+                                'product_id' => $product->id,
+                                'attribute_id' => $attribute->id,
+                            ],
+                            [
+                                'date_value' => $value,
+                            ]
+                        );
+                    } else {
+                        // For text/textarea
+                        \Vortex\Product\Models\ProductAttributeValue::updateOrCreate(
+                            [
+                                'product_id' => $product->id,
+                                'attribute_id' => $attribute->id,
+                            ],
+                            [
+                                'text_value' => $value,
+                            ]
+                        );
+                    }
                 }
             }
         } else {

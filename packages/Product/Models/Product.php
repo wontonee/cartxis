@@ -67,6 +67,14 @@ class Product extends Model
         'sales_count' => 'integer',
     ];
 
+    protected $appends = [
+        'in_stock',
+        'image',
+        'rating',
+        'reviews_count',
+        'has_configurable_attributes',
+    ];
+
     /**
      * Boot the model
      */
@@ -153,6 +161,55 @@ class Product extends Model
         }
 
         return $this->quantity > 0 && $this->stock_status === 'in_stock';
+    }
+
+    /**
+     * Get in_stock attribute
+     */
+    public function getInStockAttribute(): bool
+    {
+        return $this->isInStock();
+    }
+
+    /**
+     * Get image attribute (main image URL)
+     */
+    public function getImageAttribute(): ?string
+    {
+        if ($this->mainImage) {
+            return $this->mainImage->url ?? $this->mainImage->path ?? null;
+        }
+        
+        $firstImage = $this->images()->first();
+        return $firstImage ? ($firstImage->url ?? $firstImage->path ?? null) : null;
+    }
+
+    /**
+     * Get rating attribute
+     */
+    public function getRatingAttribute(): float
+    {
+        return round($this->approvedReviews()->avg('rating') ?? 0, 1);
+    }
+
+    /**
+     * Get reviews_count attribute
+     */
+    public function getReviewsCountAttribute(): int
+    {
+        return $this->approvedReviews()->count();
+    }
+
+    /**
+     * Check if product has configurable attributes (color, size, etc.)
+     */
+    public function getHasConfigurableAttributesAttribute(): bool
+    {
+        return $this->attributeValues()
+            ->whereHas('attribute', function ($query) {
+                $query->where('is_configurable', true);
+            })
+            ->exists();
     }
 
     /**
