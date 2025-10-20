@@ -132,6 +132,19 @@ class Product extends Model
     {
         return $this->hasMany(ProductAttributeValue::class);
     }
+    
+    /**
+     * Get attribute options (for product variations like size, color)
+     */
+    public function attributeOptions(): BelongsToMany
+    {
+        return $this->belongsToMany(
+            AttributeOption::class, 
+            'product_attribute_values', 
+            'product_id', 
+            'attribute_option_id'
+        )->withTimestamps();
+    }
 
     /**
      * Get variants (for configurable products)

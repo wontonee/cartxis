@@ -1,0 +1,356 @@
+<?php
+
+namespace Vortex\Shop\Services;
+
+use Vortex\Shop\Contracts\OrderRepositoryInterface;
+use Vortex\Cart\Services\CartService;
+use Vortex\Shop\Models\Order;
+use Vortex\Shop\Models\OrderItem;
+use Vortex\Shop\Models\Address;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
+use Exception;
+
+class CheckoutService extends ShopService
+{
+    /**
+     * @var OrderRepositoryInterface
+     */
+    protected $orderRepository;
+
+    /**
+     * @var CartService
+     */
+    protected $cartService;
+
+    /**
+     * Create a new CheckoutService instance.
+     *
+     * @param  OrderRepositoryInterface  $orderRepository
+     * @param  CartService  $cartService
+     * @return void
+     */
+    public function __construct(
+        OrderRepositoryInterface $orderRepository,
+        CartService $cartService
+    ) {
+        $this->orderRepository = $orderRepository;
+        $this->cartService = $cartService;
+    }
+
+    /**
+     * Create an order from cart data.
+     *
+     * @param  array  $data
+     * @return array
+     */
+    public function createOrder(array $data): array
+    {
+        try {
+            DB::beginTransaction();
+
+            // Get cart items
+            $cartItems = $this->cartService->getCartItems();
+            
+            if ($cartItems->isEmpty()) {
+                throw new Exception('Cart is empty');
+            }
+
+            // Calculate totals
+            $totals = $this->calculateTotals($cartItems, $data);
+
+            // Generate unique order number
+            $orderNumber = Order::generateOrderNumber();
+
+            // Create order
+            $order = $this->orderRepository->create([
+                'user_id' => $data['user_id'] ?? auth()->id(),
+                'order_number' => $orderNumber,
+                'status' => Order::STATUS_PENDING,
+                'payment_status' => Order::PAYMENT_PENDING,
+                'subtotal' => $totals['subtotal'],
+                'tax' => $totals['tax'],
+                'shipping_cost' => $totals['shipping_cost'],
+                'discount' => $totals['discount'],
+                'total' => $totals['total'],
+                'payment_method' => $data['payment_method'] ?? null,
+                'shipping_method' => $data['shipping_method'] ?? null,
+                'customer_email' => $data['customer_email'] ?? auth()->user()?->email,
+                'customer_phone' => $data['customer_phone'] ?? null,
+                'notes' => $data['notes'] ?? null,
+                'ip_address' => request()->ip(),
+                'user_agent' => request()->userAgent(),
+            ]);
+
+            // Create order items
+            foreach ($cartItems as $cartItem) {
+                OrderItem::create([
+                    'order_id' => $order->id,
+                    'product_id' => $cartItem->product_id,
+                    'product_sku' => $cartItem->product->sku ?? null,
+                    'product_name' => $cartItem->product->name,
+                    'product_image' => $cartItem->product->mainImage?->url ?? null,
+                    'quantity' => $cartItem->quantity,
+                    'price' => $cartItem->price,
+                    'total' => $cartItem->quantity * $cartItem->price,
+                    'tax_amount' => 0, // TODO: Calculate tax per item
+                    'discount_amount' => 0, // TODO: Calculate discount per item
+                    'options' => $cartItem->options ?? null,
+                ]);
+            }
+
+            // Create shipping address
+            if (isset($data['shipping_address'])) {
+                $this->createAddress($order, $data['shipping_address'], Address::TYPE_SHIPPING);
+            }
+
+            // Create billing address
+            if (isset($data['billing_address'])) {
+                $this->createAddress($order, $data['billing_address'], Address::TYPE_BILLING);
+            } elseif (isset($data['shipping_address']) && ($data['same_as_shipping'] ?? false)) {
+                // Use shipping address as billing if specified
+                $this->createAddress($order, $data['shipping_address'], Address::TYPE_BILLING);
+            }
+
+            // Clear cart after successful order creation
+            $this->cartService->clearCart();
+
+            DB::commit();
+
+            return $this->formatResponse([
+                'order' => $order->load(['items', 'addresses']),
+                'order_number' => $orderNumber,
+            ], 'Order created successfully');
+
+        } catch (Exception $e) {
+            DB::rollBack();
+            Log::error('Order creation failed: ' . $e->getMessage());
+            return $this->handleException($e, 'Failed to create order');
+        }
+    }
+
+    /**
+     * Calculate order totals.
+     *
+     * @param  \Illuminate\Support\Collection  $cartItems
+     * @param  array  $data
+     * @return array
+     */
+    protected function calculateTotals($cartItems, array $data): array
+    {
+        $subtotal = $cartItems->sum(function ($item) {
+            return $item->quantity * $item->price;
+        });
+
+        $taxRate = config('shop.checkout.tax_rate', 0); // e.g., 0.08 for 8%
+        $tax = $subtotal * $taxRate;
+
+        $shippingCost = $this->calculateShipping($data['shipping_method'] ?? null, $subtotal);
+
+        $discount = $this->calculateDiscount($data['discount_code'] ?? null, $subtotal);
+
+        $total = $subtotal + $tax + $shippingCost - $discount;
+
+        return [
+            'subtotal' => round($subtotal, 2),
+            'tax' => round($tax, 2),
+            'shipping_cost' => round($shippingCost, 2),
+            'discount' => round($discount, 2),
+            'total' => round($total, 2),
+        ];
+    }
+
+    /**
+     * Calculate shipping cost.
+     *
+     * @param  string|null  $shippingMethod
+     * @param  float  $subtotal
+     * @return float
+     */
+    protected function calculateShipping(?string $shippingMethod, float $subtotal): float
+    {
+        // Free shipping threshold
+        $freeShippingThreshold = config('shop.checkout.free_shipping_threshold', 100);
+        
+        if ($subtotal >= $freeShippingThreshold) {
+            return 0;
+        }
+
+        // Shipping rates
+        $rates = config('shop.checkout.shipping_rates', [
+            'standard' => 5.00,
+            'express' => 15.00,
+            'overnight' => 25.00,
+        ]);
+
+        return $rates[$shippingMethod] ?? $rates['standard'];
+    }
+
+    /**
+     * Calculate discount amount.
+     *
+     * @param  string|null  $discountCode
+     * @param  float  $subtotal
+     * @return float
+     */
+    protected function calculateDiscount(?string $discountCode, float $subtotal): float
+    {
+        if (!$discountCode) {
+            return 0;
+        }
+
+        // TODO: Implement discount code validation and calculation
+        // This would typically query a discounts/coupons table
+
+        return 0;
+    }
+
+    /**
+     * Create an address for an order.
+     *
+     * @param  Order  $order
+     * @param  array  $addressData
+     * @param  string  $type
+     * @return Address
+     */
+    protected function createAddress(Order $order, array $addressData, string $type): Address
+    {
+        return Address::create([
+            'addressable_type' => Order::class,
+            'addressable_id' => $order->id,
+            'type' => $type,
+            'first_name' => $addressData['first_name'],
+            'last_name' => $addressData['last_name'],
+            'company' => $addressData['company'] ?? null,
+            'address_line1' => $addressData['address_line1'],
+            'address_line2' => $addressData['address_line2'] ?? null,
+            'city' => $addressData['city'],
+            'state' => $addressData['state'],
+            'postal_code' => $addressData['postal_code'],
+            'country' => $addressData['country'],
+            'phone' => $addressData['phone'] ?? null,
+            'email' => $addressData['email'] ?? null,
+        ]);
+    }
+
+    /**
+     * Validate checkout data.
+     *
+     * @param  array  $data
+     * @return array
+     */
+    public function validateCheckout(array $data): array
+    {
+        try {
+            $errors = [];
+
+            // Validate cart
+            $cartItems = $this->cartService->getCartItems();
+            if ($cartItems->isEmpty()) {
+                $errors[] = 'Cart is empty';
+            }
+
+            // Validate stock availability
+            foreach ($cartItems as $item) {
+                if (!$item->product || $item->product->quantity < $item->quantity) {
+                    $errors[] = "Product '{$item->product->name}' is out of stock";
+                }
+            }
+
+            // Validate shipping address
+            if (empty($data['shipping_address'])) {
+                $errors[] = 'Shipping address is required';
+            }
+
+            // Validate payment method
+            if (empty($data['payment_method'])) {
+                $errors[] = 'Payment method is required';
+            }
+
+            if (!empty($errors)) {
+                return $this->formatResponse(null, 'Validation failed', false, $errors);
+            }
+
+            return $this->formatResponse(null, 'Validation successful');
+
+        } catch (Exception $e) {
+            return $this->handleException($e, 'Validation failed');
+        }
+    }
+
+    /**
+     * Get order by order number.
+     *
+     * @param  string  $orderNumber
+     * @return array
+     */
+    public function getOrderByNumber(string $orderNumber): array
+    {
+        try {
+            $order = $this->orderRepository->findByOrderNumber($orderNumber);
+
+            if (!$order) {
+                return $this->formatResponse(null, 'Order not found', false);
+            }
+
+            $order->load(['items.product', 'addresses', 'user']);
+
+            return $this->formatResponse($order, 'Order retrieved successfully');
+
+        } catch (Exception $e) {
+            return $this->handleException($e, 'Failed to retrieve order');
+        }
+    }
+
+    /**
+     * Get user orders.
+     *
+     * @param  int  $userId
+     * @param  int  $perPage
+     * @return array
+     */
+    public function getUserOrders(int $userId, int $perPage = 10): array
+    {
+        try {
+            $orders = $this->orderRepository->getByUser($userId, $perPage);
+
+            return $this->formatResponse($orders, 'Orders retrieved successfully');
+
+        } catch (Exception $e) {
+            return $this->handleException($e, 'Failed to retrieve orders');
+        }
+    }
+
+    /**
+     * Cancel an order.
+     *
+     * @param  int  $orderId
+     * @param  int  $userId
+     * @return array
+     */
+    public function cancelOrder(int $orderId, int $userId): array
+    {
+        try {
+            $order = $this->orderRepository->find($orderId);
+
+            if (!$order) {
+                return $this->formatResponse(null, 'Order not found', false);
+            }
+
+            if ($order->user_id !== $userId) {
+                return $this->formatResponse(null, 'Unauthorized', false);
+            }
+
+            if (!$order->canBeCancelled()) {
+                return $this->formatResponse(null, 'Order cannot be cancelled', false);
+            }
+
+            $this->orderRepository->cancel($orderId);
+
+            return $this->formatResponse(null, 'Order cancelled successfully');
+
+        } catch (Exception $e) {
+            return $this->handleException($e, 'Failed to cancel order');
+        }
+    }
+}

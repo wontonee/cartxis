@@ -16,6 +16,7 @@ class CartController extends Controller
     public function index()
     {
         $items = $this->getCartItems();
+        $items = $this->refreshCartItemImages($items);
 
         return response()->json([
             'items' => $items,
@@ -35,7 +36,7 @@ class CartController extends Controller
             'attributes' => 'array',
         ]);
 
-        $product = Product::findOrFail($validated['product_id']);
+        $product = Product::with(['images', 'mainImage'])->findOrFail($validated['product_id']);
         $quantity = $validated['quantity'] ?? 1;
         $productAttributes = $validated['attributes'] ?? [];
 
@@ -109,6 +110,8 @@ class CartController extends Controller
 
         $items[$key]['quantity'] = $request->quantity;
         $this->saveCartItems($items);
+        
+        $items = $this->refreshCartItemImages($items);
 
         return response()->json([
             'message' => 'Cart updated successfully',
@@ -132,6 +135,8 @@ class CartController extends Controller
 
         array_splice($items, $key, 1);
         $this->saveCartItems($items);
+        
+        $items = $this->refreshCartItemImages($items);
 
         return response()->json([
             'message' => 'Item removed from cart',
@@ -239,5 +244,20 @@ class CartController extends Controller
         }
 
         return $readable;
+    }
+
+    /**
+     * Refresh product images in cart items
+     * This ensures cart items always have the latest product images
+     */
+    private function refreshCartItemImages(array $items): array
+    {
+        return array_map(function ($item) {
+            $product = Product::with(['images', 'mainImage'])->find($item['product_id']);
+            if ($product) {
+                $item['product_image'] = $product->image;
+            }
+            return $item;
+        }, $items);
     }
 }

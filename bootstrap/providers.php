@@ -8,4 +8,5 @@ return [
     Vortex\Admin\Providers\AdminServiceProvider::class,
     Vortex\Product\Providers\ProductServiceProvider::class,
     Vortex\Cart\Providers\CartServiceProvider::class,
+    Vortex\Shop\Providers\ShopServiceProvider::class,
 ];

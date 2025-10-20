@@ -1,20 +1,18 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
-use Vortex\Product\Http\Controllers\FrontEnd\ProductController;
 
 /*
 |--------------------------------------------------------------------------
-| Product Frontend Routes
+| Product Package Routes
 |--------------------------------------------------------------------------
 |
-| These routes handle public-facing product pages including
-| product listing, filtering, sorting, and product detail pages.
+| Product package should NOT have frontend routes.
+| All frontend product routes are in Shop package.
+| This file can be deleted or kept empty for future admin API routes.
 |
 */
 
-Route::middleware('web')->prefix('products')->name('products.')->group(function () {
-    Route::get('/', [ProductController::class, 'index'])->name('index');
-    Route::get('/{slug}/quick-view', [ProductController::class, 'quickView'])->name('quick-view');
-    Route::get('/{slug}', [ProductController::class, 'show'])->name('show');
-});
+// No routes - Product package is data layer only
+// Frontend routes: packages/Shop/Routes/web.php
+// Admin routes: packages/Admin/Routes/admin.php

@@ -148,25 +148,59 @@
 
                                     <!-- Configurable Attributes -->
                                     <div v-if="configurableAttributes.length > 0" class="space-y-4 py-4 border-t border-gray-200">
-                                        <div v-for="attribute in configurableAttributes" :key="attribute.id" class="space-y-2">
+                                        <div v-for="attribute in configurableAttributes" :key="attribute.id" class="space-y-3">
                                             <label class="block text-sm font-semibold text-gray-700">
                                                 {{ attribute.name }} <span class="text-red-500">*</span>
                                             </label>
 
-                                            <!-- Color Swatches (for color attributes) -->
-                                            <div v-if="attribute.name.toLowerCase() === 'color' && attribute.options.some(opt => opt.color_code)" class="flex gap-2 flex-wrap">
-                                                <button
-                                                    v-for="option in attribute.options"
-                                                    :key="option.id"
-                                                    @click="selectedAttributes[attribute.id] = option.id; attributeError = null"
-                                                    class="w-10 h-10 rounded-full border-2 transition-all hover:scale-110"
-                                                    :class="{
-                                                        'ring-2 ring-indigo-600 ring-offset-2': selectedAttributes[attribute.id] === option.id,
-                                                        'border-gray-300': selectedAttributes[attribute.id] !== option.id
-                                                    }"
-                                                    :style="{ backgroundColor: option.color_code || '#cccccc' }"
-                                                    :title="option.value"
-                                                ></button>
+                                            <!-- Color Swatches -->
+                                            <div v-if="attribute.type === 'color' || attribute.name.toLowerCase() === 'color'" class="space-y-3">
+                                                <div class="flex gap-3 flex-wrap">
+                                                    <button
+                                                        v-for="option in attribute.options"
+                                                        :key="option.id"
+                                                        @click="selectedAttributes[attribute.id] = option.id; attributeError = null"
+                                                        class="group relative cursor-pointer"
+                                                        :title="option.value"
+                                                    >
+                                                        <!-- Color Swatch Circle -->
+                                                        <div
+                                                            class="w-12 h-12 rounded-full border-2 transition-all flex items-center justify-center overflow-hidden cursor-pointer"
+                                                            :class="selectedAttributes[attribute.id] === option.id
+                                                                ? 'border-indigo-600 ring-2 ring-indigo-200 ring-offset-2' 
+                                                                : 'border-gray-300 hover:border-gray-400'"
+                                                            :style="option.color_code ? { backgroundColor: option.color_code } : { backgroundColor: '#f3f4f6' }"
+                                                        >
+                                                            <!-- Show text if no color code -->
+                                                            <span v-if="!option.color_code" class="text-xs font-semibold text-gray-700 uppercase">
+                                                                {{ option.value.substring(0, 3) }}
+                                                            </span>
+                                                        </div>
+                                                        
+                                                        <!-- Selected Checkmark -->
+                                                        <svg
+                                                            v-if="selectedAttributes[attribute.id] === option.id"
+                                                            class="absolute -top-1 -right-1 w-5 h-5 text-white bg-indigo-600 rounded-full p-0.5"
+                                                            fill="none"
+                                                            stroke="currentColor"
+                                                            viewBox="0 0 24 24"
+                                                        >
+                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7" />
+                                                        </svg>
+                                                        
+                                                        <!-- Color Name Label -->
+                                                        <span class="absolute -bottom-6 left-1/2 -translate-x-1/2 text-xs font-medium text-gray-700 opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">
+                                                            {{ option.value }}
+                                                        </span>
+                                                    </button>
+                                                </div>
+                                                
+                                                <!-- Selected Color Display -->
+                                                <div v-if="selectedAttributes[attribute.id]" class="text-sm text-gray-600">
+                                                    Selected: <span class="font-semibold text-gray-900">
+                                                        {{ attribute.options.find(opt => opt.id === selectedAttributes[attribute.id])?.value }}
+                                                    </span>
+                                                </div>
                                             </div>
 
                                             <!-- Buttons (for size and other attributes) -->
@@ -175,10 +209,10 @@
                                                     v-for="option in attribute.options"
                                                     :key="option.id"
                                                     @click="selectedAttributes[attribute.id] = option.id; attributeError = null"
-                                                    class="px-4 py-2 border-2 rounded-lg font-medium transition-all hover:border-indigo-600"
+                                                    class="px-4 py-2 border-2 rounded-lg font-medium transition-all cursor-pointer"
                                                     :class="{
                                                         'border-indigo-600 bg-indigo-50 text-indigo-700': selectedAttributes[attribute.id] === option.id,
-                                                        'border-gray-300 text-gray-700 hover:bg-gray-50': selectedAttributes[attribute.id] !== option.id
+                                                        'border-gray-300 text-gray-700 hover:bg-gray-50 hover:border-indigo-600': selectedAttributes[attribute.id] !== option.id
                                                     }"
                                                 >
                                                     {{ option.value }}

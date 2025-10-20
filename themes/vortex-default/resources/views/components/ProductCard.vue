@@ -95,7 +95,7 @@ const renderStars = (rating: number) => {
 <template>
     <div class="group relative bg-white rounded-2xl overflow-hidden shadow-md hover:shadow-2xl transition-all duration-300">
         <!-- Product Image -->
-        <Link :href="`/products/${product.slug}`" class="block">
+        <Link :href="`/product/${product.slug}`" class="block">
             <div class="relative aspect-square bg-gradient-to-br from-gray-100 to-gray-200 overflow-hidden">
                 <img
                     v-if="product.image"
@@ -126,7 +126,7 @@ const renderStars = (rating: number) => {
                 <div class="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
                     <button
                         @click.prevent="emit('quickView', product.slug)"
-                        class="px-6 py-3 bg-white text-gray-900 rounded-lg font-semibold hover:bg-gray-100 transition-all transform hover:scale-105"
+                        class="px-6 py-3 bg-white text-gray-900 rounded-lg font-semibold hover:bg-gray-100 transition-all transform hover:scale-105 cursor-pointer"
                     >
                         Quick View
                     </button>
@@ -147,7 +147,7 @@ const renderStars = (rating: number) => {
             </div>
 
             <!-- Product Name -->
-            <Link :href="`/products/${product.slug}`">
+            <Link :href="`/product/${product.slug}`">
                 <h3 class="font-semibold text-gray-900 mb-2 group-hover:text-indigo-600 transition-colors line-clamp-2 min-h-[3rem]">
                     {{ product.name }}
                 </h3>
@@ -177,7 +177,7 @@ const renderStars = (rating: number) => {
             <button
                 @click="handleAddToCart"
                 :disabled="!product.in_stock || addingToCart"
-                class="w-full py-3 px-4 rounded-lg font-semibold transition-all disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                class="w-full py-3 px-4 rounded-lg font-semibold transition-all disabled:cursor-not-allowed flex items-center justify-center gap-2 cursor-pointer"
                 :class="{
                     'bg-indigo-600 hover:bg-indigo-700 text-white hover:shadow-lg': product.in_stock,
                     'bg-gray-300 text-gray-500': !product.in_stock,

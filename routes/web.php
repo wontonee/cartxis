@@ -1,6 +1,5 @@
 <?php
 
-use App\Http\Controllers\HomeController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
@@ -10,12 +9,13 @@ use Inertia\Inertia;
 |--------------------------------------------------------------------------
 |
 | Package-specific routes are loaded by their respective service providers:
+| - Shop routes: packages/Shop/Routes/web.php (loaded by ShopServiceProvider)
 | - Product routes: packages/Product/Routes/web.php (loaded by ProductServiceProvider)
 | - Cart API routes: packages/Cart/Routes/api.php (loaded by CartServiceProvider)
 |
+| Note: Homepage (/) is now handled by Shop package's HomeController
+|
 */
-
-Route::get('/', [HomeController::class, 'index'])->name('home');
 
 Route::get('dashboard', function () {
     return Inertia::render('Dashboard');
