@@ -4,6 +4,7 @@ use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Auth;
 use Vortex\Admin\Http\Controllers\Auth\AdminLoginController;
 use Packages\Core\Http\Controllers\Admin\ThemeController;
+use Vortex\Core\Http\Controllers\Admin\Settings\GeneralSettingsController;
 
 /*
 |--------------------------------------------------------------------------
@@ -28,7 +29,7 @@ Route::prefix('admin')->name('admin.')->middleware(['web'])->group(function () {
         
         // Dashboard
         Route::get('/dashboard', function () {
-            return inertia('Admin/Dashboard', [
+            return inertia('Admin/Dashboard/Index', [
                 'auth' => [
                     'user' => Auth::guard('admin')->user()
                 ]
@@ -43,6 +44,23 @@ Route::prefix('admin')->name('admin.')->middleware(['web'])->group(function () {
             Route::put('/{slug}/settings', [ThemeController::class, 'updateSettings'])->name('settings.update');
             Route::delete('/{slug}', [ThemeController::class, 'destroy'])->name('destroy');
             Route::post('/upload', [ThemeController::class, 'upload'])->name('upload');
+        });
+
+        // Settings Routes
+        Route::prefix('settings')->name('settings.')->group(function () {
+            // General Settings
+            Route::prefix('general')->name('general.')->group(function () {
+                Route::get('/', function () {
+                    return inertia('Admin/Settings/General/Index', [
+                        'settings' => [],
+                        'cacheStatus' => [
+                            'config_cached' => app()->configurationIsCached(),
+                            'routes_cached' => app()->routesAreCached(),
+                            'events_cached' => app()->eventsAreCached(),
+                        ]
+                    ]);
+                })->name('index');
+            });
         });
     });
 });

@@ -2,7 +2,6 @@
 import { useEditor, EditorContent } from '@tiptap/vue-3'
 import StarterKit from '@tiptap/starter-kit'
 import Image from '@tiptap/extension-image'
-import Link from '@tiptap/extension-link'
 import { watch } from 'vue'
 
 interface Props {
@@ -22,11 +21,12 @@ const emit = defineEmits<{
 
 const editor = useEditor({
   extensions: [
-    StarterKit,
-    Image,
-    Link.configure({
-      openOnClick: false,
+    StarterKit.configure({
+      Link: {
+        openOnClick: false,
+      },
     }),
+    Image,
   ],
   content: props.modelValue,
   editorProps: {

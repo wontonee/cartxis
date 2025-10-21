@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { Head } from '@inertiajs/vue3';
 import { computed, ref } from 'vue';
-import ThemeLayout from '../layouts/ThemeLayout.vue';
+import ThemeLayout from '../../layouts/ThemeLayout.vue';
 
 interface Category {
     id: number;

@@ -55,7 +55,7 @@ class HomeController extends Controller
         ];
         
         // Use ThemeViewResolver to get correct view path
-        return Inertia::render($this->themeResolver->resolve('Home'), [
+        return Inertia::render($this->themeResolver->resolve('Home/Index'), [
             'theme' => [
                 'name' => $theme?->name ?? 'Default',
                 'slug' => $theme?->slug ?? 'default',

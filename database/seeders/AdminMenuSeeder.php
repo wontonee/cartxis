@@ -97,14 +97,26 @@ class AdminMenuSeeder extends Seeder
                 'active' => true,
             ],
 
-            // System Parent
+            // Settings Parent (Separate from System)
             [
-                'key' => 'system',
-                'title' => 'System',
+                'key' => 'settings',
+                'title' => 'Settings',
                 'icon' => 'settings',
                 'route' => null,
                 'parent_id' => null,
                 'order' => 80,
+                'location' => 'admin',
+                'active' => true,
+            ],
+
+            // System Parent (For maintenance tools)
+            [
+                'key' => 'system',
+                'title' => 'System',
+                'icon' => 'server',
+                'route' => null,
+                'parent_id' => null,
+                'order' => 90,
                 'location' => 'admin',
                 'active' => true,
             ],
@@ -128,6 +140,7 @@ class AdminMenuSeeder extends Seeder
         $marketingId = DB::table('menu_items')->where('key', 'marketing')->value('id');
         $contentId = DB::table('menu_items')->where('key', 'content')->value('id');
         $reportsId = DB::table('menu_items')->where('key', 'reports')->value('id');
+        $settingsId = DB::table('menu_items')->where('key', 'settings')->value('id');
         $systemId = DB::table('menu_items')->where('key', 'system')->value('id');
 
         // Child menu items
@@ -354,11 +367,93 @@ class AdminMenuSeeder extends Seeder
                 'active' => false,
             ],
 
-            // System Children
+            // Settings Children (8 sub-modules as per documentation)
             [
-                'key' => 'system-settings',
-                'title' => 'Settings',
-                'icon' => 'settings',
+                'key' => 'settings-general',
+                'title' => 'General Settings',
+                'icon' => 'wrench',
+                'route' => 'admin.settings.general.index',
+                'parent_id' => $settingsId,
+                'order' => 1,
+                'location' => 'admin',
+                'active' => true,
+            ],
+            [
+                'key' => 'settings-store',
+                'title' => 'Store Configuration',
+                'icon' => 'shop',
+                'route' => 'admin.settings.store.index',
+                'parent_id' => $settingsId,
+                'order' => 2,
+                'location' => 'admin',
+                'active' => true,
+            ],
+            [
+                'key' => 'settings-locales',
+                'title' => 'Locales',
+                'icon' => 'flag',
+                'route' => 'admin.settings.locales.index',
+                'parent_id' => $settingsId,
+                'order' => 3,
+                'location' => 'admin',
+                'active' => true,
+            ],
+            [
+                'key' => 'settings-channels',
+                'title' => 'Channels',
+                'icon' => 'devices',
+                'route' => null,
+                'parent_id' => $settingsId,
+                'order' => 4,
+                'location' => 'admin',
+                'active' => false,
+            ],
+            [
+                'key' => 'settings-payment',
+                'title' => 'Payment Methods',
+                'icon' => 'credit-card',
+                'route' => null,
+                'parent_id' => $settingsId,
+                'order' => 5,
+                'location' => 'admin',
+                'active' => false,
+            ],
+            [
+                'key' => 'settings-shipping',
+                'title' => 'Shipping Methods',
+                'icon' => 'truck',
+                'route' => null,
+                'parent_id' => $settingsId,
+                'order' => 6,
+                'location' => 'admin',
+                'active' => false,
+            ],
+            [
+                'key' => 'settings-tax',
+                'title' => 'Tax Rules',
+                'icon' => 'percent',
+                'route' => null,
+                'parent_id' => $settingsId,
+                'order' => 7,
+                'location' => 'admin',
+                'active' => false,
+            ],
+            [
+                'key' => 'settings-email',
+                'title' => 'Email Templates',
+                'icon' => 'mail',
+                'route' => null,
+                'parent_id' => $settingsId,
+                'order' => 8,
+                'location' => 'admin',
+                'active' => false,
+            ],
+
+            // System Children (Maintenance tools)
+            [
+                'key' => 'system-cache',
+                'title' => 'Cache Management',
+                'icon' => 'clock',
                 'route' => null,
                 'parent_id' => $systemId,
                 'order' => 1,

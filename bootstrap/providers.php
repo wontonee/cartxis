@@ -9,4 +9,5 @@ return [
     Vortex\Product\Providers\ProductServiceProvider::class,
     Vortex\Cart\Providers\CartServiceProvider::class,
     Vortex\Shop\Providers\ShopServiceProvider::class,
+    Vortex\Settings\Providers\SettingsServiceProvider::class,
 ];
