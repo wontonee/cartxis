@@ -2,7 +2,7 @@
     "$schema": "https://getcomposer.org/schema.json",
     "name": "laravel/vue-starter-kit",
     "type": "project",
-    "description": "The skeleton application for the Laravel framework.",
+    "description": "Vortex Ecommerce Open Source For Laravel Inertia JS VUE.",
     "keywords": [
         "laravel",
         "framework"
@@ -32,18 +32,18 @@
             "App\\": "app/",
             "Database\\Factories\\": "database/factories/",
             "Database\\Seeders\\": "database/seeders/",
-            "Vortex\\Core\\": "packages/Core/",
-            "Vortex\\Core\\Database\\Seeders\\": "packages/Core/Database/Seeders/",
-            "Vortex\\Admin\\": "packages/Admin/",
-            "Vortex\\Admin\\Database\\Seeders\\": "packages/Admin/Database/Seeders/",
-            "Vortex\\Product\\": "packages/Product/",
-            "Vortex\\Product\\Database\\Seeders\\": "packages/Product/Database/Seeders/",
-            "Vortex\\Cart\\": "packages/Cart/",
-            "Vortex\\Shop\\": "packages/Shop/",
-            "Vortex\\Shop\\Database\\Seeders\\": "packages/Shop/Database/Seeders/",
-            "Vortex\\Settings\\": "packages/Settings/",
-            "Vortex\\Settings\\Database\\Seeders\\": "packages/Settings/Database/Seeders/",
-            "Vortex\\Stripe\\": "packages/Stripe/src/"
+            "Vortex\\Core\\": "packages/Vortex/Core/",
+            "Vortex\\Core\\Database\\Seeders\\": "packages/Vortex/Core/Database/Seeders/",
+            "Vortex\\Admin\\": "packages/Vortex/Admin/",
+            "Vortex\\Admin\\Database\\Seeders\\": "packages/Vortex/Admin/Database/Seeders/",
+            "Vortex\\Product\\": "packages/Vortex/Product/",
+            "Vortex\\Product\\Database\\Seeders\\": "packages/Vortex/Product/Database/Seeders/",
+            "Vortex\\Cart\\": "packages/Vortex/Cart/",
+            "Vortex\\Shop\\": "packages/Vortex/Shop/",
+            "Vortex\\Shop\\Database\\Seeders\\": "packages/Vortex/Shop/Database/Seeders/",
+            "Vortex\\Settings\\": "packages/Vortex/Settings/",
+            "Vortex\\Settings\\Database\\Seeders\\": "packages/Vortex/Settings/Database/Seeders/",
+            "Vortex\\Stripe\\": "packages/Vortex/Stripe/src/"
         }
     },
     "autoload-dev": {
