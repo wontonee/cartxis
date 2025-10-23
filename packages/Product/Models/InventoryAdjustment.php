@@ -1,10 +1,10 @@
 <?php
 
-namespace App\Models;
+namespace Vortex\Product\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Vortex\Product\Models\Product;
+use App\Models\User;
 
 class InventoryAdjustment extends Model
 {

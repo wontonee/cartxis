@@ -1,10 +1,10 @@
 <?php
 
-namespace Database\Seeders;
+namespace Vortex\Shop\Database\Seeders;
 
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
-use Packages\Core\Models\Theme;
+use Vortex\Core\Models\Theme;
 
 class ThemeSeeder extends Seeder
 {

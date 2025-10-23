@@ -1,10 +1,10 @@
 <?php
 
-namespace Packages\Core\Http\Controllers\Admin;
+namespace Vortex\Core\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
-use Packages\Core\Services\ThemeService;
-use Packages\Core\Models\Theme;
+use Vortex\Core\Services\ThemeService;
+use Vortex\Core\Models\Theme;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Illuminate\Support\Facades\Validator;

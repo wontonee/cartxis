@@ -4,7 +4,7 @@ namespace Vortex\Shop\Http\Controllers;
 
 use Vortex\Shop\Services\HomeService;
 use Vortex\Core\Services\ThemeViewResolver;
-use Packages\Core\Models\Theme;
+use Vortex\Core\Models\Theme;
 use Inertia\Inertia;
 
 class HomeController extends Controller

@@ -34,7 +34,7 @@ class DashboardController extends Controller
     private function getTotalProducts(): int
     {
         try {
-            return \Packages\Product\Models\Product::count();
+            return \Vortex\Product\Models\Product::count();
         } catch (\Exception $e) {
             return 0;
         }

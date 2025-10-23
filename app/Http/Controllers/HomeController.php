@@ -5,7 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Inertia\Response;
-use Packages\Core\Models\Theme;
+use Vortex\Core\Models\Theme;
 
 class HomeController extends Controller
 {

@@ -1,6 +1,6 @@
 <?php
 
-namespace Database\Seeders;
+namespace Vortex\Admin\Database\Seeders;
 
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
@@ -402,41 +402,41 @@ class AdminMenuSeeder extends Seeder
                 'key' => 'settings-channels',
                 'title' => 'Channels',
                 'icon' => 'devices',
-                'route' => null,
+                'route' => 'admin.settings.channels.index',
                 'parent_id' => $settingsId,
                 'order' => 4,
                 'location' => 'admin',
-                'active' => false,
+                'active' => true,
             ],
             [
                 'key' => 'settings-payment',
                 'title' => 'Payment Methods',
                 'icon' => 'credit-card',
-                'route' => null,
+                'route' => 'admin.settings.payment-methods.index',
                 'parent_id' => $settingsId,
                 'order' => 5,
                 'location' => 'admin',
-                'active' => false,
+                'active' => true,
             ],
             [
                 'key' => 'settings-shipping',
                 'title' => 'Shipping Methods',
                 'icon' => 'truck',
-                'route' => null,
+                'route' => 'admin.settings.shipping-methods.index',
                 'parent_id' => $settingsId,
                 'order' => 6,
                 'location' => 'admin',
-                'active' => false,
+                'active' => true,
             ],
             [
                 'key' => 'settings-tax',
                 'title' => 'Tax Rules',
                 'icon' => 'percent',
-                'route' => null,
+                'route' => 'admin.settings.tax-rules.index',
                 'parent_id' => $settingsId,
                 'order' => 7,
                 'location' => 'admin',
-                'active' => false,
+                'active' => true,
             ],
             [
                 'key' => 'settings-email',

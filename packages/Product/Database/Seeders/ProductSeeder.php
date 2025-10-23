@@ -1,6 +1,6 @@
 <?php
 
-namespace Database\Seeders;
+namespace Vortex\Product\Database\Seeders;
 
 use Illuminate\Database\Seeder;
 use Vortex\Product\Models\Product;

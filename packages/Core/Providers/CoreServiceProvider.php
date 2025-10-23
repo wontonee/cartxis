@@ -8,7 +8,7 @@ use Vortex\Core\Services\MenuService;
 use Vortex\Core\Services\ExtensionService;
 use Vortex\Core\Services\SettingService;
 use Vortex\Core\Services\ThemeViewResolver;
-use Packages\Core\Services\ThemeService;
+use Vortex\Core\Services\ThemeService;
 
 class CoreServiceProvider extends ServiceProvider
 {

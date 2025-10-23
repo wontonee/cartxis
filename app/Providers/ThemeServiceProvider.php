@@ -5,7 +5,7 @@ namespace App\Providers;
 use Illuminate\Support\Facades\View;
 use Illuminate\Support\ServiceProvider;
 use Inertia\Inertia;
-use Packages\Core\Models\Theme;
+use Vortex\Core\Models\Theme;
 
 class ThemeServiceProvider extends ServiceProvider
 {

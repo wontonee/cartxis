@@ -5,7 +5,7 @@ namespace Vortex\Product\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use Vortex\Product\Models\Product;
 use Vortex\Product\Models\Category;
-use App\Models\InventoryAdjustment;
+use Vortex\Product\Models\InventoryAdjustment;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Inertia\Response;

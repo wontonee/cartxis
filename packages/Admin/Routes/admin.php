@@ -3,8 +3,10 @@
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Auth;
 use Vortex\Admin\Http\Controllers\Auth\AdminLoginController;
-use Packages\Core\Http\Controllers\Admin\ThemeController;
+use Vortex\Core\Http\Controllers\Admin\ThemeController;
 use Vortex\Core\Http\Controllers\Admin\Settings\GeneralSettingsController;
+use Vortex\Settings\Http\Controllers\Admin\ShippingMethodsController;
+use Vortex\Settings\Http\Controllers\Admin\ChannelsController;
 
 /*
 |--------------------------------------------------------------------------
@@ -61,6 +63,22 @@ Route::prefix('admin')->name('admin.')->middleware(['web'])->group(function () {
                     ]);
                 })->name('index');
             });
+
+            // Channels Routes
+            Route::resource('channels', ChannelsController::class);
+            Route::post('channels/{channel}/update-theme', [ChannelsController::class, 'updateTheme'])->name('channels.updateTheme');
+            Route::post('channels/{channel}/set-default', [ChannelsController::class, 'setDefault'])->name('channels.setDefault');
+            Route::post('channels/{channel}/toggle-status', [ChannelsController::class, 'toggleStatus'])->name('channels.toggleStatus');
+
+            // Shipping Methods Routes
+            Route::resource('shipping-methods', ShippingMethodsController::class);
+            Route::post('shipping-methods/{shippingMethod}/set-default', [ShippingMethodsController::class, 'setDefault'])->name('shipping-methods.setDefault');
+            Route::post('shipping-methods/{shippingMethod}/toggle-status', [ShippingMethodsController::class, 'toggleStatus'])->name('shipping-methods.toggleStatus');
+            Route::post('shipping-methods/{shippingMethod}/add-rate', [ShippingMethodsController::class, 'addRate'])->name('shipping-methods.addRate');
+            Route::put('shipping-rates/{shippingRate}', [ShippingMethodsController::class, 'updateRate'])->name('shipping-rates.update');
+            Route::delete('shipping-rates/{shippingRate}', [ShippingMethodsController::class, 'deleteRate'])->name('shipping-rates.delete');
+            Route::post('shipping-rates/{shippingRate}/toggle-status', [ShippingMethodsController::class, 'toggleRateStatus'])->name('shipping-rates.toggleStatus');
+            Route::post('shipping-methods/{shippingMethod}/calculate-cost', [ShippingMethodsController::class, 'calculateCost'])->name('shipping-methods.calculateCost');
         });
     });
 });

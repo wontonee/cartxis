@@ -14,7 +14,8 @@
         "laravel/fortify": "^1.30",
         "laravel/framework": "^12.0",
         "laravel/tinker": "^2.10.1",
-        "laravel/wayfinder": "^0.1.9"
+        "laravel/wayfinder": "^0.1.9",
+        "stripe/stripe-php": "^18.0"
     },
     "require-dev": {
         "fakerphp/faker": "^1.23",
@@ -32,12 +33,17 @@
             "Database\\Factories\\": "database/factories/",
             "Database\\Seeders\\": "database/seeders/",
             "Vortex\\Core\\": "packages/Core/",
+            "Vortex\\Core\\Database\\Seeders\\": "packages/Core/Database/Seeders/",
             "Vortex\\Admin\\": "packages/Admin/",
+            "Vortex\\Admin\\Database\\Seeders\\": "packages/Admin/Database/Seeders/",
             "Vortex\\Product\\": "packages/Product/",
+            "Vortex\\Product\\Database\\Seeders\\": "packages/Product/Database/Seeders/",
             "Vortex\\Cart\\": "packages/Cart/",
             "Vortex\\Shop\\": "packages/Shop/",
+            "Vortex\\Shop\\Database\\Seeders\\": "packages/Shop/Database/Seeders/",
             "Vortex\\Settings\\": "packages/Settings/",
-            "Packages\\Core\\": "packages/Core/"
+            "Vortex\\Settings\\Database\\Seeders\\": "packages/Settings/Database/Seeders/",
+            "Vortex\\Stripe\\": "packages/Stripe/src/"
         }
     },
     "autoload-dev": {

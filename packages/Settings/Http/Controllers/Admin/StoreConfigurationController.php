@@ -26,6 +26,7 @@ class StoreConfigurationController
                 'store_description' => (string) $this->settingService->get('store_description', ''),
                 'business_registration' => (string) $this->settingService->get('business_registration', ''),
                 'vat_number' => (string) $this->settingService->get('vat_number', ''),
+                'store_license' => (string) $this->settingService->get('store_license', ''),
                 
                 // Contact Information
                 'store_email' => (string) $this->settingService->get('store_email', ''),
@@ -71,6 +72,7 @@ class StoreConfigurationController
             'store_description' => 'nullable|string',
             'business_registration' => 'nullable|string|max:255',
             'vat_number' => 'nullable|string|max:255',
+            'store_license' => 'nullable|string|max:255',
             
             // Contact Information
             'store_email' => 'required|email|max:255',

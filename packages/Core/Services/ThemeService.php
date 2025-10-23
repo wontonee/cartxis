@@ -1,8 +1,8 @@
 <?php
 
-namespace Packages\Core\Services;
+namespace Vortex\Core\Services;
 
-use Packages\Core\Models\Theme;
+use Vortex\Core\Models\Theme;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Cache;
 

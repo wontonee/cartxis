@@ -5,7 +5,7 @@ namespace App\Http\Middleware;
 use Illuminate\Foundation\Inspiring;
 use Illuminate\Http\Request;
 use Inertia\Middleware;
-use Packages\Core\Models\Theme;
+use Vortex\Core\Models\Theme;
 use Vortex\Core\Services\MenuService;
 
 class HandleInertiaRequests extends Middleware

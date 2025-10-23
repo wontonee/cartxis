@@ -10,6 +10,7 @@ interface Props {
     store_description: string
     business_registration: string
     vat_number: string
+    store_license: string
     store_email: string
     support_email: string
     store_phone: string
@@ -42,6 +43,7 @@ const props = withDefaults(defineProps<Props>(), {
     store_description: '',
     business_registration: '',
     vat_number: '',
+    store_license: '',
     store_email: '',
     support_email: '',
     store_phone: '',
@@ -75,6 +77,7 @@ const form = useForm({
   store_description: props.settings.store_description || '',
   business_registration: props.settings.business_registration || '',
   vat_number: props.settings.vat_number || '',
+  store_license: props.settings.store_license || '',
   store_email: props.settings.store_email || '',
   support_email: props.settings.support_email || '',
   store_phone: props.settings.store_phone || '',
@@ -111,10 +114,10 @@ const save = () => {
   <AdminLayout title="Store Configuration">
     <Head title="Store Configuration" />
 
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <div class="p-6">
       <div class="mb-6">
-        <h1 class="text-2xl font-semibold text-gray-900">Store Configuration</h1>
-        <p class="mt-1 text-sm text-gray-600">
+        <h1 class="text-2xl font-bold text-gray-900">Store Configuration</h1>
+        <p class="mt-1 text-sm text-gray-500">
           Manage store details, contact information, social media links, and policies
         </p>
       </div>
@@ -219,6 +222,19 @@ const save = () => {
                     class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                   />
                   <p v-if="form.errors.vat_number" class="mt-1 text-sm text-red-600">{{ form.errors.vat_number }}</p>
+                </div>
+
+                <div>
+                  <label for="store_license" class="block text-sm font-medium text-gray-700">
+                    License Number
+                  </label>
+                  <input
+                    id="store_license"
+                    v-model="form.store_license"
+                    type="text"
+                    class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  />
+                  <p v-if="form.errors.store_license" class="mt-1 text-sm text-red-600">{{ form.errors.store_license }}</p>
                 </div>
 
                 <div>

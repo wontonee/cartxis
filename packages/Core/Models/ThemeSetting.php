@@ -1,6 +1,6 @@
 <?php
 
-namespace Packages\Core\Models;
+namespace Vortex\Core\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;

@@ -1,6 +1,6 @@
 <?php
 
-namespace Database\Seeders;
+namespace Vortex\Admin\Database\Seeders;
 
 use App\Models\User;
 use Illuminate\Database\Seeder;
@@ -30,4 +30,3 @@ class AdminUserSeeder extends Seeder
         $this->command->info('Password: password');
     }
 }
-

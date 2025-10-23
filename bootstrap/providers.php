@@ -10,4 +10,5 @@ return [
     Vortex\Cart\Providers\CartServiceProvider::class,
     Vortex\Shop\Providers\ShopServiceProvider::class,
     Vortex\Settings\Providers\SettingsServiceProvider::class,
+    Vortex\Stripe\Providers\StripeServiceProvider::class,
 ];
