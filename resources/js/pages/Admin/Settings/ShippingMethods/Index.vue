@@ -1,6 +1,7 @@
 <template>
   <AdminLayout title="Shipping Methods">
     <template #default>
+      <Head title="Shipping Methods" />
       <!-- Header -->
       <div class="mb-8 flex items-center justify-between">
         <div>
@@ -184,7 +185,7 @@
 
 <script setup lang="ts">
 import { ref, computed } from 'vue'
-import { Link, usePage } from '@inertiajs/vue3'
+import { Link, usePage, Head } from '@inertiajs/vue3'
 import AdminLayout from '@/layouts/AdminLayout.vue'
 import { Plus, Star, Truck } from 'lucide-vue-next'
 import axios from 'axios'

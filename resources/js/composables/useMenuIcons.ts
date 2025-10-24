@@ -28,6 +28,8 @@ import {
   Wrench,
   Store,
   Flag,
+  Smartphone,
+  Percent,
 } from 'lucide-vue-next'
 
 export interface IconMap {
@@ -65,6 +67,8 @@ export function useMenuIcons() {
     'shop': Store,
     'store': Store,
     'flag': Flag,
+    'devices': Smartphone,
+    'percent': Percent,
   }
 
   const getIcon = (iconName: string): Component | null => {

@@ -440,13 +440,13 @@ class AdminMenuSeeder extends Seeder
             ],
             [
                 'key' => 'settings-email',
-                'title' => 'Email Templates',
+                'title' => 'Email Settings',
                 'icon' => 'mail',
-                'route' => null,
+                'route' => 'admin.settings.email.index',
                 'parent_id' => $settingsId,
                 'order' => 8,
                 'location' => 'admin',
-                'active' => false,
+                'active' => true,
             ],
 
             // System Children (Maintenance tools)
