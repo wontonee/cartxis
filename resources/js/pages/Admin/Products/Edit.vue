@@ -20,6 +20,12 @@ interface Brand {
   name: string;
 }
 
+interface TaxClass {
+  id: number;
+  name: string;
+  code: string;
+}
+
 interface AttributeOption {
   id: number;
   attribute_id: number;
@@ -91,6 +97,7 @@ interface Props {
   product: Product;
   categories: Category[];
   brands: Brand[];
+  taxClasses: TaxClass[];
   attributes: Attribute[];
   adjustmentHistory?: Array<{
     id: number;
@@ -260,6 +267,7 @@ const form = ref({
   description: props.product.description || '',
   short_description: props.product.short_description || '',
   price: props.product.price,
+  tax_class_id: props.product.tax_class_id || null,
   special_price: props.product.special_price || '',
   special_price_from: props.product.special_price_from || '',
   special_price_to: props.product.special_price_to || '',
@@ -706,6 +714,23 @@ const deleteProduct = () => {
                           class="w-full pl-7 pr-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                         />
                       </div>
+                    </div>
+
+                    <div>
+                      <label for="tax_class_id" class="block text-sm font-medium text-gray-700 mb-1">
+                        Tax Class
+                      </label>
+                      <select
+                        id="tax_class_id"
+                        v-model="form.tax_class_id"
+                        class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                      >
+                        <option :value="null">No Tax</option>
+                        <option v-for="taxClass in props.taxClasses" :key="taxClass.id" :value="taxClass.id">
+                          {{ taxClass.name }}
+                        </option>
+                      </select>
+                      <p class="mt-1 text-xs text-gray-500">Select applicable tax class for this product</p>
                     </div>
                   </div>
 

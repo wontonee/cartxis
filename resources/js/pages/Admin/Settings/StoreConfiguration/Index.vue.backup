@@ -34,8 +34,6 @@ interface Props {
     policy_terms: string
     policy_return: string
     policy_shipping: string
-    checkout_allow_guest: boolean
-    checkout_require_account: boolean
   }
 }
 
@@ -69,8 +67,6 @@ const props = withDefaults(defineProps<Props>(), {
     policy_terms: '',
     policy_return: '',
     policy_shipping: '',
-    checkout_allow_guest: true,
-    checkout_require_account: false,
   }),
 })
 
@@ -105,8 +101,6 @@ const form = useForm({
   policy_terms: props.settings.policy_terms || '',
   policy_return: props.settings.policy_return || '',
   policy_shipping: props.settings.policy_shipping || '',
-  checkout_allow_guest: props.settings.checkout_allow_guest ?? true,
-  checkout_require_account: props.settings.checkout_require_account ?? false,
 })
 
 const save = () => {
@@ -168,18 +162,6 @@ const save = () => {
                 ]"
               >
                 Social Media
-              </button>
-              <button
-                type="button"
-                @click="activeTab = 'checkout'"
-                :class="[
-                  activeTab === 'checkout'
-                    ? 'border-blue-500 text-blue-600'
-                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300',
-                  'whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm'
-                ]"
-              >
-                Checkout
               </button>
               <button
                 type="button"
@@ -760,74 +742,6 @@ const save = () => {
                   placeholder="https://pinterest.com/yourstore"
                 />
                 <p v-if="form.errors.social_pinterest" class="mt-1 text-sm text-red-600">{{ form.errors.social_pinterest }}</p>
-              </div>
-            </div>
-          </div>
-
-
-          <!-- Checkout Tab -->
-          <div v-show="activeTab === 'checkout'" class="p-6">
-            <div class="space-y-6">
-              <div>
-                <h3 class="text-lg font-medium text-gray-900 mb-4">Checkout Options</h3>
-                <p class="text-sm text-gray-600 mb-6">Configure checkout flow and account requirements for your store</p>
-              </div>
-
-              <!-- Allow Guest Checkout -->
-              <div class="flex items-start">
-                <div class="flex items-center h-5">
-                  <input
-                    id="checkout_allow_guest"
-                    v-model="form.checkout_allow_guest"
-                    type="checkbox"
-                    class="focus:ring-blue-500 h-4 w-4 text-blue-600 border-gray-300 rounded"
-                  />
-                </div>
-                <div class="ml-3">
-                  <label for="checkout_allow_guest" class="font-medium text-gray-700">
-                    Allow Guest Checkout
-                  </label>
-                  <p class="text-sm text-gray-500">
-                    Allow customers to complete checkout without creating an account. They can optionally create one during checkout.
-                  </p>
-                </div>
-              </div>
-
-              <!-- Require Account Creation -->
-              <div class="flex items-start">
-                <div class="flex items-center h-5">
-                  <input
-                    id="checkout_require_account"
-                    v-model="form.checkout_require_account"
-                    type="checkbox"
-                    :disabled="!form.checkout_allow_guest"
-                    class="focus:ring-blue-500 h-4 w-4 text-blue-600 border-gray-300 rounded disabled:opacity-50 disabled:cursor-not-allowed"
-                  />
-                </div>
-                <div class="ml-3">
-                  <label for="checkout_require_account" class="font-medium text-gray-700" :class="{ 'text-gray-400': !form.checkout_allow_guest }">
-                    Require Account Creation
-                  </label>
-                  <p class="text-sm text-gray-500">
-                    When enabled, guests must create an account during checkout (cannot proceed without registration).
-                  </p>
-                </div>
-              </div>
-
-              <!-- Info Box -->
-              <div class="bg-blue-50 border-l-4 border-blue-400 p-4 mt-6">
-                <div class="flex">
-                  <div class="ml-3">
-                    <h3 class="text-sm font-medium text-blue-800">Configuration Options</h3>
-                    <div class="mt-2 text-sm text-blue-700">
-                      <ul class="list-disc list-inside space-y-1">
-                        <li><strong>Both disabled:</strong> Customers must log in or register before checkout (no guest option)</li>
-                        <li><strong>Guest allowed only:</strong> Customers can checkout as guests or create an account (optional)</li>
-                        <li><strong>Both enabled:</strong> Customers can start as guest but must create account during checkout</li>
-                      </ul>
-                    </div>
-                  </div>
-                </div>
               </div>
             </div>
           </div>

@@ -64,8 +64,8 @@ class EmailController
             'drivers' => [
                 'smtp' => 'SMTP',
                 'ses' => 'Amazon SES',
-                'postmark' => 'Postmark',
-                'sendmail' => 'Sendmail',
+                // 'postmark' => 'Postmark',  // Will be enabled in later versions
+                // 'sendmail' => 'Sendmail',  // Will be enabled in later versions
                 'log' => 'Log (Testing)',
             ],
             'categories' => [
@@ -78,6 +78,16 @@ class EmailController
 
     public function saveConfiguration(Request $request)
     {
+        // Check if credentials are masked (not changed by user)
+        $sesKeyMasked = str_contains($request->ses_key ?? '', '•');
+        $sesSecretMasked = str_contains($request->ses_secret ?? '', '•');
+        $postmarkTokenMasked = str_contains($request->postmark_token ?? '', '•');
+        
+        // Check if config already exists to allow switching drivers without re-entering credentials
+        $existingConfig = EmailConfiguration::first();
+        $hasExistingSesCredentials = $existingConfig && $existingConfig->ses_key && $existingConfig->ses_secret;
+        $hasExistingPostmarkToken = $existingConfig && $existingConfig->postmark_token;
+        
         $validated = $request->validate([
             'mail_driver' => 'required|in:smtp,ses,postmark,sendmail,log',
             'mail_from_address' => 'required|email',
@@ -87,22 +97,53 @@ class EmailController
             
             // SMTP fields
             'smtp_host' => 'required_if:mail_driver,smtp|nullable|string',
-            'smtp_port' => 'required_if:mail_driver,smtp|nullable|integer',
+            'smtp_port' => 'required_if:mail_driver,smtp|nullable|integer|between:1,65535',
             'smtp_username' => 'nullable|string',
             'smtp_password' => 'nullable|string',
             'smtp_encryption' => 'nullable|in:tls,ssl,none',
             
-            // SES fields
-            'ses_key' => 'required_if:mail_driver,ses|nullable|string',
-            'ses_secret' => 'required_if:mail_driver,ses|nullable|string',
-            'ses_region' => 'required_if:mail_driver,ses|nullable|string',
+            // SES fields - if masked and existing credentials, make nullable; otherwise require for ses driver
+            'ses_key' => ($sesKeyMasked && $hasExistingSesCredentials) 
+                ? 'nullable|string' 
+                : 'required_if:mail_driver,ses|nullable|string|min:16',
+            'ses_secret' => ($sesSecretMasked && $hasExistingSesCredentials) 
+                ? 'nullable|string' 
+                : 'required_if:mail_driver,ses|nullable|string|min:20',
+            'ses_region' => 'required_if:mail_driver,ses|nullable|string|regex:/^[a-z]{2}-[a-z\-]+-\d{1}$/',
             
             // Postmark fields
-            'postmark_token' => 'required_if:mail_driver,postmark|nullable|string',
+            'postmark_token' => ($postmarkTokenMasked && $hasExistingPostmarkToken) 
+                ? 'nullable|string' 
+                : 'required_if:mail_driver,postmark|nullable|string|min:32',
             
             // Sendmail fields
             'sendmail_path' => 'nullable|string',
+        ], [
+            'ses_key.min' => 'AWS Access Key appears invalid (too short)',
+            'ses_secret.min' => 'AWS Secret Key appears invalid (too short)',
+            'ses_region.regex' => 'AWS Region format is invalid. Use format like us-east-1',
+            'smtp_port.between' => 'SMTP Port must be between 1 and 65535',
+            'postmark_token.min' => 'Postmark token format is invalid (too short)',
         ]);
+
+        // Validate credentials format before saving
+        if ($request->mail_driver === 'smtp') {
+            if (strpos($request->smtp_password ?? '', '••••') === 0) {
+                // User didn't change password, keep existing
+                unset($validated['smtp_password']);
+            }
+        } elseif ($request->mail_driver === 'ses') {
+            if (strpos($request->ses_key ?? '', '••••') === 0) {
+                unset($validated['ses_key']);
+            }
+            if (strpos($request->ses_secret ?? '', '••••') === 0) {
+                unset($validated['ses_secret']);
+            }
+        } elseif ($request->mail_driver === 'postmark') {
+            if (strpos($request->postmark_token ?? '', '••••') === 0) {
+                unset($validated['postmark_token']);
+            }
+        }
 
         $config = EmailConfiguration::first() ?? new EmailConfiguration();
         

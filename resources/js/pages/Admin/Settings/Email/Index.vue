@@ -454,12 +454,12 @@ const form = reactive({
   smtp_host: props.configuration.smtp_host,
   smtp_port: props.configuration.smtp_port,
   smtp_username: props.configuration.smtp_username,
-  smtp_password: '',
+  smtp_password: props.configuration.smtp_password_masked || '',
   smtp_encryption: props.configuration.smtp_encryption,
-  ses_key: '',
-  ses_secret: '',
+  ses_key: props.configuration.ses_key_masked || '',
+  ses_secret: props.configuration.ses_secret_masked || '',
   ses_region: props.configuration.ses_region,
-  postmark_token: '',
+  postmark_token: props.configuration.postmark_token_masked || '',
   processing: false,
 })
 

@@ -20,6 +20,7 @@ class Product extends Model
         'short_description',
         'description',
         'price',
+        'tax_class_id',
         'cost',
         'special_price',
         'special_price_from',
@@ -123,6 +124,14 @@ class Product extends Model
     public function brand()
     {
         return $this->belongsTo(Brand::class);
+    }
+
+    /**
+     * Get the tax class
+     */
+    public function taxClass()
+    {
+        return $this->belongsTo(\Vortex\Core\Models\TaxClass::class);
     }
 
     /**

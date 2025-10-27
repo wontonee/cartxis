@@ -59,6 +59,8 @@ class CartController extends Controller
             'price' => $product->special_price ?? $product->price,
             'quantity' => $quantity,
             'attributes' => $readableAttributes,
+            'tax_class_id' => $product->tax_class_id,
+            'weight' => $product->weight,
         ];
 
         $items = $this->getCartItems();

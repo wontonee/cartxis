@@ -68,6 +68,7 @@ class ProductController extends Controller
         return Inertia::render('Admin/Products/Create', [
             'categories' => Category::enabled()->with('children')->whereNull('parent_id')->orderBy('name')->get(),
             'brands' => \Vortex\Product\Models\Brand::where('status', true)->orderBy('name')->get(['id', 'name']),
+            'taxClasses' => \Vortex\Core\Models\TaxClass::orderBy('name')->get(['id', 'name', 'code']),
             'attributes' => \Vortex\Product\Models\Attribute::with('options')
                 ->where(function($query) {
                     $query->where('is_filterable', true)
@@ -90,6 +91,7 @@ class ProductController extends Controller
             'short_description' => 'nullable|string',
             'description' => 'nullable|string',
             'price' => 'required|numeric|min:0',
+            'tax_class_id' => 'nullable|exists:tax_classes,id',
             'cost' => 'nullable|numeric|min:0',
             'special_price' => 'nullable|numeric|min:0',
             'special_price_from' => 'nullable|date',
@@ -169,6 +171,7 @@ class ProductController extends Controller
             'product' => $product,
             'categories' => Category::enabled()->with('children')->whereNull('parent_id')->orderBy('name')->get(),
             'brands' => \Vortex\Product\Models\Brand::where('status', true)->orderBy('name')->get(['id', 'name']),
+            'taxClasses' => \Vortex\Core\Models\TaxClass::orderBy('name')->get(['id', 'name', 'code']),
             'attributes' => \Vortex\Product\Models\Attribute::with('options')
                 ->where(function($query) {
                     $query->where('is_filterable', true)
@@ -192,6 +195,7 @@ class ProductController extends Controller
             'short_description' => 'nullable|string',
             'description' => 'nullable|string',
             'price' => 'required|numeric|min:0',
+            'tax_class_id' => 'nullable|exists:tax_classes,id',
             'cost' => 'nullable|numeric|min:0',
             'special_price' => 'nullable|numeric|min:0',
             'special_price_from' => 'nullable|date',

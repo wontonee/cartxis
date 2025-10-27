@@ -5,17 +5,55 @@ import ThemeLayout from '@/../../themes/vortex-default/resources/views/layouts/T
 import CartItemSkeleton from '@/../../themes/vortex-default/resources/views/components/CartItemSkeleton.vue';
 import { useCart } from '@/composables/useCart';
 
-const { items, loading, itemCount, subtotal, updateQuantity, removeItem, fetchCart } = useCart();
+// Define props
+interface CartSummary {
+    subtotal: number;
+    taxes: {
+        breakdown: Array<{
+            tax_class: string;
+            tax_class_id: number;
+            rate: number;
+            rate_id: number;
+            amount: number;
+            label: string;
+        }>;
+        total: number;
+    };
+    shipping: {
+        options: Array<{
+            id: number;
+            code: string | null;
+            name: string;
+            description: string | null;
+            cost: number;
+            estimated_days: number | null;
+            sort_order: number | null;
+        }>;
+        selected: any;
+        cost: number;
+    };
+    total: number;
+}
+
+defineProps<{
+    cartSummary: CartSummary;
+}>();
+
+const { 
+    items, 
+    loading, 
+    itemCount, 
+    updateQuantity, 
+    removeItem, 
+    fetchCart 
+} = useCart();
 
 // Computed values
 const isEmpty = computed(() => items.value.length === 0);
-const tax = computed(() => subtotal.value * 0.1); // 10% tax
-const shipping = computed(() => subtotal.value > 0 ? 10 : 0); // $10 flat shipping
-const total = computed(() => subtotal.value + tax.value + shipping.value);
 
 // Load cart on mount
-onMounted(() => {
-    fetchCart();
+onMounted(async () => {
+    await fetchCart();
 });
 
 // Local loading states for individual items
@@ -43,6 +81,9 @@ const handleQuantityChange = async (itemId: string, newQuantity: number) => {
 
     if (!result.success) {
         alert('Failed to update quantity');
+    } else {
+        // Reload page to refresh cart summary with new calculations
+        window.location.reload();
     }
 };
 
@@ -58,6 +99,9 @@ const handleRemove = async (itemId: string) => {
 
     if (!result.success) {
         alert('Failed to remove item');
+    } else {
+        // Reload page to refresh cart summary
+        window.location.reload();
     }
 };
 
@@ -241,20 +285,29 @@ const formatPrice = (price: number) => {
                         <div class="space-y-3 mb-4">
                             <div class="flex justify-between text-gray-700">
                                 <span>Subtotal</span>
-                                <span>{{ formatPrice(subtotal) }}</span>
+                                <span>{{ formatPrice(cartSummary.subtotal) }}</span>
                             </div>
                             <div class="flex justify-between text-gray-700">
                                 <span>Shipping</span>
-                                <span>{{ formatPrice(shipping) }}</span>
+                                <span>{{ formatPrice(cartSummary.shipping.cost) }}</span>
                             </div>
-                            <div class="flex justify-between text-gray-700">
-                                <span>Tax (10%)</span>
-                                <span>{{ formatPrice(tax) }}</span>
+                            
+                            <!-- Tax Breakdown -->
+                            <div v-if="cartSummary.taxes.breakdown && cartSummary.taxes.breakdown.length > 0">
+                                <div v-for="taxItem in cartSummary.taxes.breakdown" :key="taxItem.tax_class_id" class="flex justify-between text-gray-700">
+                                    <span>{{ taxItem.label }}</span>
+                                    <span>{{ formatPrice(taxItem.amount) }}</span>
+                                </div>
                             </div>
+                            <div v-else class="flex justify-between text-gray-700">
+                                <span>Tax</span>
+                                <span>{{ formatPrice(cartSummary.taxes.total) }}</span>
+                            </div>
+                            
                             <div class="border-t border-gray-200 pt-3">
                                 <div class="flex justify-between text-lg font-bold text-gray-900">
                                     <span>Total</span>
-                                    <span>{{ formatPrice(total) }}</span>
+                                    <span>{{ formatPrice(cartSummary.total) }}</span>
                                 </div>
                             </div>
                         </div>
