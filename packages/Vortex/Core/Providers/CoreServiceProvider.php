@@ -9,6 +9,7 @@ use Vortex\Core\Services\ExtensionService;
 use Vortex\Core\Services\SettingService;
 use Vortex\Core\Services\ThemeViewResolver;
 use Vortex\Core\Services\ThemeService;
+use Vortex\Core\Services\PaymentGatewayManager;
 
 class CoreServiceProvider extends ServiceProvider
 {
@@ -58,6 +59,16 @@ class CoreServiceProvider extends ServiceProvider
         // Bind ThemeViewResolver class to service container
         $this->app->bind(ThemeViewResolver::class, function ($app) {
             return $app->make('vortex.theme.resolver');
+        });
+
+        // Register PaymentGatewayManager as singleton
+        $this->app->singleton('vortex.payment.gateway', function ($app) {
+            return new PaymentGatewayManager();
+        });
+        
+        // Bind PaymentGatewayManager class to service container
+        $this->app->bind(PaymentGatewayManager::class, function ($app) {
+            return $app->make('vortex.payment.gateway');
         });
     }
 

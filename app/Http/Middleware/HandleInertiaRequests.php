@@ -6,6 +6,7 @@ use Illuminate\Foundation\Inspiring;
 use Illuminate\Http\Request;
 use Inertia\Middleware;
 use Vortex\Core\Models\Theme;
+use Vortex\Core\Models\Currency;
 use Vortex\Core\Services\MenuService;
 
 class HandleInertiaRequests extends Middleware
@@ -59,6 +60,7 @@ class HandleInertiaRequests extends Middleware
         // Load active theme for frontend routes
         $theme = null;
         $siteConfig = null;
+        $currency = Currency::getDefault();
         
         if (!$request->is('admin/*') && !$request->is('admin')) {
             $theme = Theme::where('is_active', true)->first();
@@ -85,6 +87,7 @@ class HandleInertiaRequests extends Middleware
                     'error' => $request->session()->get('error'),
                     'warning' => $request->session()->get('warning'),
                     'info' => $request->session()->get('info'),
+                    'redirect_url' => $request->session()->get('redirect_url'),
                 ];
             }),
             'sidebarOpen' => ! $request->hasCookie('sidebar_state') || $request->cookie('sidebar_state') === 'true',
@@ -95,6 +98,13 @@ class HandleInertiaRequests extends Middleware
             // Theme and site config for frontend
             'theme' => $theme,
             'siteConfig' => $siteConfig,
+            // Currency configuration
+            'currency' => $currency ? [
+                'code' => $currency->code,
+                'symbol' => $currency->symbol,
+                'symbolPosition' => $currency->symbol_position,
+                'decimalPlaces' => $currency->decimal_places,
+            ] : null,
         ]);
     }
 }

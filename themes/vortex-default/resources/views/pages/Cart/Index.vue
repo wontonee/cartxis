@@ -4,6 +4,7 @@ import { Head, Link } from '@inertiajs/vue3';
 import ThemeLayout from '@/../../themes/vortex-default/resources/views/layouts/ThemeLayout.vue';
 import CartItemSkeleton from '@/../../themes/vortex-default/resources/views/components/CartItemSkeleton.vue';
 import { useCart } from '@/composables/useCart';
+import { useCurrency } from '@/composables/useCurrency';
 
 // Define props
 interface CartSummary {
@@ -47,6 +48,9 @@ const {
     removeItem, 
     fetchCart 
 } = useCart();
+
+// Currency formatting
+const { formatPrice } = useCurrency();
 
 // Computed values
 const isEmpty = computed(() => items.value.length === 0);
@@ -103,14 +107,6 @@ const handleRemove = async (itemId: string) => {
         // Reload page to refresh cart summary
         window.location.reload();
     }
-};
-
-// Format price
-const formatPrice = (price: number) => {
-    return new Intl.NumberFormat('en-US', {
-        style: 'currency',
-        currency: 'USD',
-    }).format(price);
 };
 </script>
 
@@ -312,11 +308,12 @@ const formatPrice = (price: number) => {
                             </div>
                         </div>
 
-                        <button
-                            class="w-full bg-blue-600 text-white py-3 px-4 rounded-md font-semibold hover:bg-blue-700 transition-colors cursor-pointer"
+                        <Link
+                            href="/checkout"
+                            class="w-full block text-center bg-blue-600 text-white py-3 px-4 rounded-md font-semibold hover:bg-blue-700 transition-colors cursor-pointer"
                         >
                             Proceed to Checkout
-                        </button>
+                        </Link>
 
                         <Link
                             href="/products"

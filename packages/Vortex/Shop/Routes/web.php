@@ -58,9 +58,9 @@ Route::group([
         'middleware' => ['auth'],
         'as' => 'shop.account.'
     ], function () {
-        // Route::get('/', [Vortex\Shop\Http\Controllers\Account\DashboardController::class, 'index'])->name('dashboard');
-        // Route::get('/orders', [Vortex\Shop\Http\Controllers\Account\OrderController::class, 'index'])->name('orders.index');
-        // Route::get('/orders/{id}', [Vortex\Shop\Http\Controllers\Account\OrderController::class, 'show'])->name('orders.show');
+        Route::get('/', [Vortex\Shop\Http\Controllers\Account\DashboardController::class, 'index'])->name('dashboard');
+        Route::get('/orders', [Vortex\Shop\Http\Controllers\Account\OrderController::class, 'index'])->name('orders.index');
+        Route::get('/orders/{id}', [Vortex\Shop\Http\Controllers\Account\OrderController::class, 'show'])->name('orders.show');
         // Route::get('/profile', [Vortex\Shop\Http\Controllers\Account\ProfileController::class, 'edit'])->name('profile.edit');
         // Route::put('/profile', [Vortex\Shop\Http\Controllers\Account\ProfileController::class, 'update'])->name('profile.update');
         // Route::get('/addresses', [Vortex\Shop\Http\Controllers\Account\AddressController::class, 'index'])->name('addresses.index');
@@ -77,11 +77,9 @@ Route::group([
         'prefix' => 'checkout',
         'as' => 'shop.checkout.'
     ], function () {
-        // Route::get('/', [Vortex\Shop\Http\Controllers\Checkout\CheckoutController::class, 'index'])->name('index');
-        // Route::post('/address', [Vortex\Shop\Http\Controllers\Checkout\CheckoutController::class, 'saveAddress'])->name('address.save');
-        // Route::post('/shipping', [Vortex\Shop\Http\Controllers\Checkout\CheckoutController::class, 'saveShipping'])->name('shipping.save');
-        // Route::post('/payment', [Vortex\Shop\Http\Controllers\Checkout\CheckoutController::class, 'savePayment'])->name('payment.save');
-        // Route::post('/complete', [Vortex\Shop\Http\Controllers\Checkout\CheckoutController::class, 'complete'])->name('complete');
-        // Route::get('/success', [Vortex\Shop\Http\Controllers\Checkout\CheckoutController::class, 'success'])->name('success');
+        Route::get('/', [Vortex\Shop\Http\Controllers\Checkout\CheckoutController::class, 'index'])->name('index');
+        Route::post('/', [Vortex\Shop\Http\Controllers\Checkout\CheckoutController::class, 'store'])->name('store');
+        Route::post('/shipping', [Vortex\Shop\Http\Controllers\Checkout\CheckoutController::class, 'updateShipping'])->name('shipping.update');
+        Route::get('/success/{order}', [Vortex\Shop\Http\Controllers\Checkout\CheckoutController::class, 'success'])->name('success');
     });
 });

@@ -6,6 +6,8 @@ use Illuminate\Support\ServiceProvider;
 use Stripe\Stripe;
 use Vortex\Core\Facades\Menu;
 use Vortex\Core\Models\PaymentMethod;
+use Vortex\Core\Services\PaymentGatewayManager;
+use Vortex\Stripe\Services\StripeGateway;
 
 class StripeServiceProvider extends ServiceProvider
 {
@@ -20,8 +22,8 @@ class StripeServiceProvider extends ServiceProvider
             'stripe'
         );
 
-        // Register Stripe API key
-        $this->registerStripeApi();
+        // Note: API key is set per-request from database configuration
+        // in StripeGateway service, not globally here
     }
 
     /**
@@ -31,6 +33,10 @@ class StripeServiceProvider extends ServiceProvider
     {
         // Load routes
         $this->loadRoutesFrom(__DIR__ . '/../Routes/admin.php');
+        $this->loadRoutesFrom(__DIR__ . '/../Routes/web.php');
+
+        // Register Stripe gateway with the payment gateway manager
+        $this->registerGateway();
 
         // Register menu items (TODO: Only register if payment-methods menu exists)
         // $this->registerMenu();
@@ -45,11 +51,12 @@ class StripeServiceProvider extends ServiceProvider
     }
 
     /**
-     * Register Stripe API.
+     * Register Stripe gateway with the payment gateway manager.
      */
-    protected function registerStripeApi(): void
+    protected function registerGateway(): void
     {
-        Stripe::setApiKey(config('stripe.stripe.secret_key'));
+        $manager = $this->app->make(PaymentGatewayManager::class);
+        $manager->register(new StripeGateway());
     }
 
     /**

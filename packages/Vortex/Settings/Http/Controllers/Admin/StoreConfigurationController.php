@@ -60,6 +60,10 @@ class StoreConfigurationController
                 'policy_terms' => (string) $this->settingService->get('policy_terms', ''),
                 'policy_return' => (string) $this->settingService->get('policy_return', ''),
                 'policy_shipping' => (string) $this->settingService->get('policy_shipping', ''),
+                
+                // Checkout Options
+                'checkout_allow_guest' => (bool) $this->settingService->get('checkout_allow_guest', true),
+                'checkout_require_account' => (bool) $this->settingService->get('checkout_require_account', false),
             ],
         ]);
     }
@@ -106,6 +110,10 @@ class StoreConfigurationController
             'policy_terms' => 'nullable|string',
             'policy_return' => 'nullable|string',
             'policy_shipping' => 'nullable|string',
+            
+            // Checkout Options
+            'checkout_allow_guest' => 'nullable|boolean',
+            'checkout_require_account' => 'nullable|boolean',
         ]);
 
         foreach ($validated as $key => $value) {

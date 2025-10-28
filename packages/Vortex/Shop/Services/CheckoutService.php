@@ -3,12 +3,13 @@
 namespace Vortex\Shop\Services;
 
 use Vortex\Shop\Contracts\OrderRepositoryInterface;
-use Vortex\Cart\Services\CartService;
 use Vortex\Shop\Models\Order;
 use Vortex\Shop\Models\OrderItem;
 use Vortex\Shop\Models\Address;
+use Vortex\Product\Models\Product;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Session;
 use Exception;
 
 class CheckoutService extends ShopService
@@ -19,23 +20,15 @@ class CheckoutService extends ShopService
     protected $orderRepository;
 
     /**
-     * @var CartService
-     */
-    protected $cartService;
-
-    /**
      * Create a new CheckoutService instance.
      *
      * @param  OrderRepositoryInterface  $orderRepository
-     * @param  CartService  $cartService
      * @return void
      */
     public function __construct(
-        OrderRepositoryInterface $orderRepository,
-        CartService $cartService
+        OrderRepositoryInterface $orderRepository
     ) {
         $this->orderRepository = $orderRepository;
-        $this->cartService = $cartService;
     }
 
     /**
@@ -49,22 +42,34 @@ class CheckoutService extends ShopService
         try {
             DB::beginTransaction();
 
-            // Get cart items
-            $cartItems = $this->cartService->getCartItems();
+            // Get cart items from session
+            $cartItems = Session::get('cart', []);
             
-            if ($cartItems->isEmpty()) {
+            if (empty($cartItems)) {
                 throw new Exception('Cart is empty');
             }
 
-            // Calculate totals
-            $totals = $this->calculateTotals($cartItems, $data);
+            // Use provided totals (already calculated in controller with dynamic tax/shipping)
+            // or calculate them (fallback for backwards compatibility)
+            if (isset($data['subtotal']) && isset($data['tax']) && isset($data['shipping_cost']) && isset($data['total'])) {
+                $totals = [
+                    'subtotal' => $data['subtotal'],
+                    'tax' => $data['tax'],
+                    'shipping_cost' => $data['shipping_cost'],
+                    'discount' => $data['discount'] ?? 0,
+                    'total' => $data['total'],
+                ];
+            } else {
+                // Fallback: calculate totals (legacy behavior)
+                $totals = $this->calculateTotals(collect($cartItems), $data);
+            }
 
             // Generate unique order number
             $orderNumber = Order::generateOrderNumber();
 
             // Create order
             $order = $this->orderRepository->create([
-                'user_id' => $data['user_id'] ?? auth()->id(),
+                'user_id' => $data['user_id'] ?? null,
                 'order_number' => $orderNumber,
                 'status' => Order::STATUS_PENDING,
                 'payment_status' => Order::PAYMENT_PENDING,
@@ -75,7 +80,7 @@ class CheckoutService extends ShopService
                 'total' => $totals['total'],
                 'payment_method' => $data['payment_method'] ?? null,
                 'shipping_method' => $data['shipping_method'] ?? null,
-                'customer_email' => $data['customer_email'] ?? auth()->user()?->email,
+                'customer_email' => $data['customer_email'] ?? null,
                 'customer_phone' => $data['customer_phone'] ?? null,
                 'notes' => $data['notes'] ?? null,
                 'ip_address' => request()->ip(),
@@ -84,19 +89,38 @@ class CheckoutService extends ShopService
 
             // Create order items
             foreach ($cartItems as $cartItem) {
-                OrderItem::create([
-                    'order_id' => $order->id,
-                    'product_id' => $cartItem->product_id,
-                    'product_sku' => $cartItem->product->sku ?? null,
-                    'product_name' => $cartItem->product->name,
-                    'product_image' => $cartItem->product->mainImage?->url ?? null,
-                    'quantity' => $cartItem->quantity,
-                    'price' => $cartItem->price,
-                    'total' => $cartItem->quantity * $cartItem->price,
-                    'tax_amount' => 0, // TODO: Calculate tax per item
-                    'discount_amount' => 0, // TODO: Calculate discount per item
-                    'options' => $cartItem->options ?? null,
-                ]);
+                // Handle both array and object cart items
+                if (is_array($cartItem)) {
+                    $product = Product::find($cartItem['product_id']);
+                    OrderItem::create([
+                        'order_id' => $order->id,
+                        'product_id' => $cartItem['product_id'],
+                        'product_sku' => $product->sku ?? null,
+                        'product_name' => $product->name ?? 'Product',
+                        'product_image' => $product->mainImage?->url ?? null,
+                        'quantity' => $cartItem['quantity'],
+                        'price' => $cartItem['price'],
+                        'total' => $cartItem['quantity'] * $cartItem['price'],
+                        'tax_amount' => 0, // TODO: Calculate tax per item
+                        'discount_amount' => 0, // TODO: Calculate discount per item
+                        'options' => $cartItem['options'] ?? null,
+                    ]);
+                } else {
+                    // Legacy object-based cart items
+                    OrderItem::create([
+                        'order_id' => $order->id,
+                        'product_id' => $cartItem->product_id,
+                        'product_sku' => $cartItem->product->sku ?? null,
+                        'product_name' => $cartItem->product->name,
+                        'product_image' => $cartItem->product->mainImage?->url ?? null,
+                        'quantity' => $cartItem->quantity,
+                        'price' => $cartItem->price,
+                        'total' => $cartItem->quantity * $cartItem->price,
+                        'tax_amount' => 0, // TODO: Calculate tax per item
+                        'discount_amount' => 0, // TODO: Calculate discount per item
+                        'options' => $cartItem->options ?? null,
+                    ]);
+                }
             }
 
             // Create shipping address
@@ -112,8 +136,8 @@ class CheckoutService extends ShopService
                 $this->createAddress($order, $data['shipping_address'], Address::TYPE_BILLING);
             }
 
-            // Clear cart after successful order creation
-            $this->cartService->clearCart();
+            // Clear cart after successful order creation (handled in controller)
+            // Session::forget('cart');
 
             DB::commit();
 
@@ -245,15 +269,19 @@ class CheckoutService extends ShopService
             $errors = [];
 
             // Validate cart
-            $cartItems = $this->cartService->getCartItems();
-            if ($cartItems->isEmpty()) {
+            $cartItems = Session::get('cart', []);
+            if (empty($cartItems)) {
                 $errors[] = 'Cart is empty';
             }
 
             // Validate stock availability
             foreach ($cartItems as $item) {
-                if (!$item->product || $item->product->quantity < $item->quantity) {
-                    $errors[] = "Product '{$item->product->name}' is out of stock";
+                $productId = is_array($item) ? $item['product_id'] : $item->product_id;
+                $quantity = is_array($item) ? $item['quantity'] : $item->quantity;
+                $product = Product::find($productId);
+                
+                if (!$product || $product->quantity < $quantity) {
+                    $errors[] = "Product '{$product->name}' is out of stock";
                 }
             }
 

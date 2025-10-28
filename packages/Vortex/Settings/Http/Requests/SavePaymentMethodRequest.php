@@ -21,15 +21,32 @@ class SavePaymentMethodRequest extends FormRequest
     {
         $type = $this->route('type');
 
+        // Only validate core payment methods (COD and Bank Transfer)
         if ($type === 'cod') {
             return $this->codRules();
         } elseif ($type === 'bank_transfer') {
             return $this->bankTransferRules();
-        } elseif ($type === 'stripe') {
-            return $this->stripeRules();
         }
 
-        return [];
+        // For all extension payment gateways (Stripe, PayPal, Razorpay, etc.)
+        // Use flexible validation - extensions handle their own validation
+        return $this->flexibleGatewayRules();
+    }
+
+    /**
+     * Flexible validation rules for any payment gateway extension
+     * Allows any configuration structure without restrictions
+     * Extensions should validate their specific requirements in their own code
+     */
+    private function flexibleGatewayRules(): array
+    {
+        return [
+            'name' => ['required', 'string', 'max:255'],
+            'description' => ['nullable', 'string', 'max:1000'],
+            'instructions' => ['nullable', 'string', 'max:2000'],
+            'configuration' => ['nullable', 'array'],
+            // Allow any configuration keys - extensions define their own structure
+        ];
     }
 
     /**
@@ -85,32 +102,6 @@ class SavePaymentMethodRequest extends FormRequest
     }
 
     /**
-     * Validation rules for Stripe payment method
-     */
-    private function stripeRules(): array
-    {
-        return [
-            'name' => ['required', 'string', 'max:255'],
-            'description' => ['nullable', 'string', 'max:1000'],
-            'instructions' => ['nullable', 'string', 'max:2000'],
-            'configuration.public_key' => ['required', 'string', 'max:255'],
-            'configuration.enable_3d_secure' => ['boolean'],
-            'configuration.save_payment_method' => ['boolean'],
-            'configuration.payment_methods' => ['array'],
-            'configuration.payment_methods.card' => ['boolean'],
-            'configuration.payment_methods.apple_pay' => ['boolean'],
-            'configuration.payment_methods.google_pay' => ['boolean'],
-            'configuration.payment_methods.ideal' => ['boolean'],
-            'configuration.payment_methods.bancontact' => ['boolean'],
-            'configuration.payment_methods.eps' => ['boolean'],
-            'configuration.payment_methods.giropay' => ['boolean'],
-            'configuration.payment_methods.klarna' => ['boolean'],
-            'configuration.payment_methods.p24' => ['boolean'],
-            'configuration.payment_methods.alipay' => ['boolean'],
-        ];
-    }
-
-    /**
      * Get custom messages for validation errors
      */
     public function messages(): array
@@ -129,7 +120,6 @@ class SavePaymentMethodRequest extends FormRequest
             'verification_days.max' => 'Verification days cannot exceed 90',
             'iban.string' => 'IBAN must be a valid string',
             'swift_code.string' => 'SWIFT code must be a valid string',
-            'configuration.public_key.required' => 'Stripe Publishable Key is required',
         ];
     }
 }

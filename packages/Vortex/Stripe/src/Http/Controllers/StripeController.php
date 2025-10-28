@@ -6,11 +6,98 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Stripe\PaymentIntent;
 use Stripe\Webhook;
+use Vortex\Shop\Models\Order;
+use Vortex\Core\Models\EmailTemplate;
+use Vortex\Core\Services\PaymentGatewayManager;
+use Illuminate\Support\Facades\Log;
 
 class StripeController extends Controller
 {
+    protected PaymentGatewayManager $gatewayManager;
+
+    public function __construct(PaymentGatewayManager $gatewayManager)
+    {
+        $this->gatewayManager = $gatewayManager;
+    }
+
     /**
-     * Create Stripe payment intent (for checkout - future).
+     * Payment success callback.
+     */
+    public function paymentSuccess(Request $request, $orderId)
+    {
+        $order = Order::findOrFail($orderId);
+
+        // Verify payment with Stripe gateway
+        $gateway = $this->gatewayManager->get('stripe');
+        
+        if (!$gateway) {
+            return redirect()->route('shop.cart.index')
+                ->with('error', 'Payment gateway not found');
+        }
+
+        $result = $gateway->handleCallback([
+            'session_id' => $request->get('session_id'),
+        ]);
+
+        if (!$result['success']) {
+            return redirect()->route('shop.cart.index')
+                ->with('error', 'Payment verification failed: ' . $result['message']);
+        }
+
+        // Update order payment status
+        $order->update([
+            'payment_status' => Order::PAYMENT_PAID,
+            'status' => Order::STATUS_PROCESSING,
+        ]);
+
+        // Send order confirmation email
+        try {
+            $template = EmailTemplate::findByCode('order_placed');
+            
+            if ($template) {
+                $shippingAddress = $order->shippingAddress();
+                $customerName = $shippingAddress->first_name . ' ' . $shippingAddress->last_name;
+                
+                $template->send($order->customer_email, [
+                    'customer_name' => $customerName,
+                    'order_number' => $order->order_number,
+                    'order_date' => $order->created_at->format('F j, Y'),
+                    'order_total' => '₹' . number_format($order->total, 2),
+                    'store_name' => config('app.name', 'Vortex'),
+                    'store_url' => url('/'),
+                ]);
+            }
+        } catch (\Exception $e) {
+            Log::error('Order confirmation email failed after Stripe payment', [
+                'order_id' => $order->id,
+                'error' => $e->getMessage()
+            ]);
+        }
+
+        // Redirect to order success page
+        return redirect()->route('shop.checkout.success', ['order' => $order->id])
+            ->with('success', 'Payment successful! Your order has been confirmed.');
+    }
+
+    /**
+     * Payment cancel callback.
+     */
+    public function paymentCancel($orderId)
+    {
+        $order = Order::findOrFail($orderId);
+
+        // Update order status to payment failed
+        $order->update([
+            'payment_status' => Order::PAYMENT_FAILED,
+        ]);
+
+        // Redirect back to cart with error
+        return redirect()->route('shop.cart.index')
+            ->with('error', 'Payment was cancelled. Your order has been saved and you can try again later.');
+    }
+
+    /**
+     * Create Stripe payment intent (Legacy - keeping for compatibility).
      */
     public function createPaymentIntent(Request $request)
     {

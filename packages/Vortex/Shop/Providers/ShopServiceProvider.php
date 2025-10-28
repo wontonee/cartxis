@@ -113,8 +113,7 @@ class ShopServiceProvider extends ServiceProvider
             \Vortex\Shop\Services\CheckoutService::class,
             function ($app) {
                 return new \Vortex\Shop\Services\CheckoutService(
-                    $app->make(\Vortex\Shop\Contracts\OrderRepositoryInterface::class),
-                    $app->make(\Vortex\Cart\Services\CartService::class)
+                    $app->make(\Vortex\Shop\Contracts\OrderRepositoryInterface::class)
                 );
             }
         );

@@ -38,6 +38,7 @@ class Order extends Model
         'discount',
         'total',
         'payment_method',
+        'payment_data',
         'payment_status',
         'shipping_method',
         'tracking_number',
