@@ -156,13 +156,37 @@ class Order extends Model
     }
 
     /**
-     * Get the billing address.
+     * Get billing address for the order.
      *
      * @return \Vortex\Shop\Models\Address|null
      */
     public function billingAddress()
     {
         return $this->addresses()->where('type', Address::TYPE_BILLING)->first();
+    }
+
+    /**
+     * Get order histories (admin actions/status changes).
+     */
+    public function histories(): HasMany
+    {
+        return $this->hasMany(\Vortex\Sales\Models\OrderHistory::class);
+    }
+
+    /**
+     * Get order invoices.
+     */
+    public function invoices(): HasMany
+    {
+        return $this->hasMany(\Vortex\Sales\Models\Invoice::class);
+    }
+
+    /**
+     * Get order shipments.
+     */
+    public function shipments(): HasMany
+    {
+        return $this->hasMany(\Vortex\Sales\Models\Shipment::class);
     }
 
     /**
@@ -226,6 +250,90 @@ class Order extends Model
     }
 
     /**
+     * Check if order can be shipped.
+     *
+     * @return bool
+     */
+    public function canBeShipped(): bool
+    {
+        return $this->isPaid() && 
+               !$this->isCancelled() && 
+               !$this->isFullyShipped();
+    }
+
+    /**
+     * Check if order is fully shipped.
+     *
+     * @return bool
+     */
+    public function isFullyShipped(): bool
+    {
+        // Get total quantity ordered
+        $orderedQuantity = $this->items->sum('quantity');
+        
+        // Get total quantity shipped
+        $shippedQuantity = 0;
+        foreach ($this->shipments as $shipment) {
+            if (!in_array($shipment->status, ['cancelled', 'failed'])) {
+                $shippedQuantity += $shipment->shipmentItems->sum('quantity');
+            }
+        }
+        
+        return $orderedQuantity > 0 && $shippedQuantity >= $orderedQuantity;
+    }
+
+    /**
+     * Check if order is partially shipped.
+     *
+     * @return bool
+     */
+    public function isPartiallyShipped(): bool
+    {
+        if ($this->shipments->isEmpty()) {
+            return false;
+        }
+        
+        // Has at least one valid shipment but not fully shipped
+        $hasValidShipment = $this->shipments()
+            ->whereNotIn('status', ['cancelled', 'failed'])
+            ->exists();
+            
+        return $hasValidShipment && !$this->isFullyShipped();
+    }
+
+    /**
+     * Get remaining quantity to ship for an order item.
+     *
+     * @param int $orderItemId
+     * @return int
+     */
+    public function getRemainingQuantityToShip(int $orderItemId): int
+    {
+        $orderItem = $this->items->find($orderItemId);
+        if (!$orderItem) {
+            return 0;
+        }
+        
+        $orderedQuantity = $orderItem->quantity;
+        
+        // Calculate shipped quantity from all valid shipments
+        $shippedQuantity = 0;
+        foreach ($this->shipments as $shipment) {
+            if (!in_array($shipment->status, ['cancelled', 'failed'])) {
+                $shipmentItem = $shipment->shipmentItems
+                    ->where('order_item_id', $orderItemId)
+                    ->first();
+                    
+                if ($shipmentItem) {
+                    $shippedQuantity += $shipmentItem->quantity;
+                }
+            }
+        }
+        
+        return max(0, $orderedQuantity - $shippedQuantity);
+    }
+
+    /**
      * Generate a unique order number.
      *
      * @return string
@@ -281,7 +389,8 @@ class Order extends Model
      */
     public function getFormattedTotalAttribute(): string
     {
-        return '$' . number_format($this->total, 2);
+        $currency = \Vortex\Core\Models\Currency::getDefault();
+        return $currency ? $currency->format($this->total) : '$' . number_format($this->total, 2);
     }
 
     /**
@@ -291,7 +400,8 @@ class Order extends Model
      */
     public function getFormattedSubtotalAttribute(): string
     {
-        return '$' . number_format($this->subtotal, 2);
+        $currency = \Vortex\Core\Models\Currency::getDefault();
+        return $currency ? $currency->format($this->subtotal) : '$' . number_format($this->subtotal, 2);
     }
 
     /**

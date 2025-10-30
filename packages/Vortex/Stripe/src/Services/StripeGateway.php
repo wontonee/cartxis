@@ -106,6 +106,29 @@ class StripeGateway implements PaymentGatewayInterface
                 'metadata' => [
                     'order_id' => $order->id,
                     'order_number' => $order->order_number,
+                    'customer_name' => $order->customer_name,
+                    'customer_phone' => $order->customer_phone,
+                ],
+                // Pre-fill customer shipping information
+                'shipping_address_collection' => [
+                    'allowed_countries' => ['US', 'CA', 'GB', 'IN'], // Add countries as needed
+                ],
+                'shipping_options' => [
+                    [
+                        'shipping_rate_data' => [
+                            'type' => 'fixed_amount',
+                            'fixed_amount' => [
+                                'amount' => 0, // Already included in line items
+                                'currency' => 'inr',
+                            ],
+                            'display_name' => $order->shipping_method ?? 'Standard Shipping',
+                        ],
+                    ],
+                ],
+                // Pre-fill billing details if available
+                'billing_address_collection' => 'required',
+                'phone_number_collection' => [
+                    'enabled' => true,
                 ],
             ]);
             

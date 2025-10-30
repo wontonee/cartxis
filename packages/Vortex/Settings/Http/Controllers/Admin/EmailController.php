@@ -72,6 +72,7 @@ class EmailController
                 'order' => 'Order Emails',
                 'account' => 'Account Emails',
                 'payment' => 'Payment Emails',
+                'invoice' => 'Invoice Emails',
             ],
         ]);
     }

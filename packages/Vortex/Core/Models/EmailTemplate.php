@@ -129,8 +129,16 @@ class EmailTemplate extends Model
     private function replaceVariables(string $content, array $data): string
     {
         foreach ($data as $key => $value) {
+            // Skip array values - they should be handled separately in the template
+            if (is_array($value)) {
+                continue;
+            }
+            
+            // Convert value to string
+            $stringValue = is_bool($value) ? ($value ? 'true' : 'false') : (string) $value;
+            
             // Support both {variable} and {{variable}} syntax
-            $content = str_replace(['{' . $key . '}', '{{' . $key . '}}'], $value, $content);
+            $content = str_replace(['{' . $key . '}', '{{' . $key . '}}'], $stringValue, $content);
         }
         return $content;
     }

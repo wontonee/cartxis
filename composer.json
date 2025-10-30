@@ -45,7 +45,8 @@
             "Vortex\\Shop\\Database\\Seeders\\": "packages/Vortex/Shop/Database/Seeders/",
             "Vortex\\Settings\\": "packages/Vortex/Settings/",
             "Vortex\\Settings\\Database\\Seeders\\": "packages/Vortex/Settings/Database/Seeders/",
-            "Vortex\\Stripe\\": "packages/Vortex/Stripe/src/"
+            "Vortex\\Stripe\\": "packages/Vortex/Stripe/src/",
+            "Vortex\\Sales\\": "packages/Vortex/Sales/src/"
         }
     },
     "autoload-dev": {

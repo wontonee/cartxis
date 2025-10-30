@@ -81,7 +81,8 @@ class OrderItem extends Model
      */
     public function getFormattedPriceAttribute(): string
     {
-        return '$' . number_format($this->price, 2);
+        $currency = \Vortex\Core\Models\Currency::getDefault();
+        return $currency ? $currency->format($this->price) : '$' . number_format($this->price, 2);
     }
 
     /**
@@ -91,7 +92,8 @@ class OrderItem extends Model
      */
     public function getFormattedTotalAttribute(): string
     {
-        return '$' . number_format($this->total, 2);
+        $currency = \Vortex\Core\Models\Currency::getDefault();
+        return $currency ? $currency->format($this->total) : '$' . number_format($this->total, 2);
     }
 
     /**
