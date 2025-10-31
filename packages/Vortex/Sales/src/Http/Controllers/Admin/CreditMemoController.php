@@ -68,9 +68,9 @@ class CreditMemoController extends Controller
     /**
      * Display credit memo details
      */
-    public function show(int $id): Response
+    public function show(string|int $id): Response
     {
-        $creditMemo = $this->repository->find($id);
+        $creditMemo = $this->repository->find((int) $id);
 
         if (!$creditMemo) {
             abort(404, 'Credit memo not found');
@@ -84,9 +84,9 @@ class CreditMemoController extends Controller
     /**
      * Show create credit memo form
      */
-    public function create(Request $request, int $orderId): Response|\Illuminate\Http\RedirectResponse
+    public function create(Request $request, string|int $orderId): Response|\Illuminate\Http\RedirectResponse
     {
-        $order = Order::with(['user', 'items.product'])->findOrFail($orderId);
+        $order = Order::with(['user', 'items.product'])->findOrFail((int) $orderId);
 
         if (!$order->isPaid()) {
             return back()->with('error', 'Cannot create credit memo for unpaid order');
@@ -157,9 +157,9 @@ class CreditMemoController extends Controller
     /**
      * Show edit credit memo form
      */
-    public function edit(int $id): Response
+    public function edit(string|int $id): Response|\Illuminate\Http\RedirectResponse
     {
-        $creditMemo = $this->repository->find($id);
+        $creditMemo = $this->repository->find((int) $id);
 
         if (!$creditMemo) {
             abort(404, 'Credit memo not found');
@@ -177,7 +177,7 @@ class CreditMemoController extends Controller
     /**
      * Update credit memo
      */
-    public function update(Request $request, int $id)
+    public function update(Request $request, string|int $id)
     {
         $validated = $request->validate([
             'adjustment_positive' => 'nullable|numeric|min:0',
@@ -202,10 +202,10 @@ class CreditMemoController extends Controller
     /**
      * Delete credit memo
      */
-    public function destroy(int $id)
+    public function destroy(string|int $id)
     {
         try {
-            $this->service->delete($id);
+            $this->service->delete((int) $id);
 
             return redirect()
                 ->route('admin.sales.credit-memos.index')
@@ -219,10 +219,10 @@ class CreditMemoController extends Controller
     /**
      * Process refund for credit memo
      */
-    public function processRefund(int $id)
+    public function processRefund(string|int $id)
     {
         try {
-            $creditMemo = $this->repository->find($id);
+            $creditMemo = $this->repository->find((int) $id);
             
             if (!$creditMemo) {
                 return back()->with('error', 'Credit memo not found');
@@ -240,7 +240,7 @@ class CreditMemoController extends Controller
     /**
      * Cancel credit memo
      */
-    public function cancel(Request $request, int $id)
+    public function cancel(Request $request, string|int $id)
     {
         $validated = $request->validate([
             'reason' => 'nullable|string|max:500',
@@ -259,10 +259,10 @@ class CreditMemoController extends Controller
     /**
      * Send credit memo email
      */
-    public function sendEmail(int $id)
+    public function sendEmail(string|int $id)
     {
         try {
-            $creditMemo = $this->repository->find($id);
+            $creditMemo = $this->repository->find((int) $id);
             
             if (!$creditMemo) {
                 return back()->with('error', 'Credit memo not found');
@@ -281,10 +281,10 @@ class CreditMemoController extends Controller
     /**
      * Download credit memo as PDF
      */
-    public function downloadPdf(int $id)
+    public function downloadPdf(string|int $id)
     {
         try {
-            $creditMemo = $this->repository->find($id);
+            $creditMemo = $this->repository->find((int) $id);
             
             if (!$creditMemo) {
                 return back()->with('error', 'Credit memo not found');

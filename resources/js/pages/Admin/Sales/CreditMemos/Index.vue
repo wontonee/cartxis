@@ -59,7 +59,7 @@ const viewCreditMemo = (id: number) => {
 };
 
 const createCreditMemo = () => {
-  router.visit('/admin/sales/credit-memos/create');
+  router.visit('/admin/sales/orders');
 };
 
 const toggleSelectAll = () => {

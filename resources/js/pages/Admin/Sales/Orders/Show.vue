@@ -106,6 +106,10 @@ const paymentComment = ref('');
 const cancelReason = ref('');
 const restoreStock = ref(true);
 
+function createCreditMemo() {
+  router.visit(`/admin/sales/credit-memos/create/${props.order.id}`);
+}
+
 function updateStatus() {
   if (!newStatus.value) return;
 
@@ -194,6 +198,13 @@ const billingAddress = props.order.addresses.find(a => a.type === 'billing');
           <p class="mt-1 text-sm text-gray-600">{{ formatDate(order.created_at) }}</p>
         </div>
         <div class="flex gap-2">
+          <button
+            @click="createCreditMemo"
+            v-if="order.payment_status === 'paid'"
+            class="px-4 py-2 text-sm font-medium text-white bg-purple-600 rounded-lg hover:bg-purple-700"
+          >
+            Create Credit Memo
+          </button>
           <button
             @click="showStatusModal = true"
             class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50"
