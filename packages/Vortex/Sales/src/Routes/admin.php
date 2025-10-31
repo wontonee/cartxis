@@ -4,6 +4,7 @@ use Illuminate\Support\Facades\Route;
 use Vortex\Sales\Http\Controllers\Admin\OrderController;
 use Vortex\Sales\Http\Controllers\Admin\InvoiceController;
 use Vortex\Sales\Http\Controllers\Admin\ShipmentController;
+use Vortex\Sales\Http\Controllers\Admin\CreditMemoController;
 
 /*
 |--------------------------------------------------------------------------
@@ -119,6 +120,45 @@ Route::middleware(['web', 'auth:admin'])->prefix('admin/sales')->name('admin.sal
         
         // Print shipping label
         Route::get('/{id}/print-label', [ShipmentController::class, 'printLabel'])->name('print-label');
+    });
+
+    // Credit Memos
+    Route::prefix('credit-memos')->name('credit-memos.')->group(function () {
+        // List credit memos
+        Route::get('/', [CreditMemoController::class, 'index'])->name('index');
+        
+        // Create credit memo form
+        Route::get('/create/{orderId}', [CreditMemoController::class, 'create'])->name('create');
+        
+        // Store new credit memo
+        Route::post('/', [CreditMemoController::class, 'store'])->name('store');
+        
+        // View credit memo details
+        Route::get('/{id}', [CreditMemoController::class, 'show'])->name('show');
+        
+        // Edit credit memo form
+        Route::get('/{id}/edit', [CreditMemoController::class, 'edit'])->name('edit');
+        
+        // Update credit memo
+        Route::put('/{id}', [CreditMemoController::class, 'update'])->name('update');
+        
+        // Delete credit memo
+        Route::delete('/{id}', [CreditMemoController::class, 'destroy'])->name('destroy');
+        
+        // Process refund
+        Route::post('/{id}/process-refund', [CreditMemoController::class, 'processRefund'])->name('process-refund');
+        
+        // Cancel credit memo
+        Route::post('/{id}/cancel', [CreditMemoController::class, 'cancel'])->name('cancel');
+        
+        // Send email
+        Route::post('/{id}/send-email', [CreditMemoController::class, 'sendEmail'])->name('send-email');
+        
+        // Download PDF
+        Route::get('/{id}/download-pdf', [CreditMemoController::class, 'downloadPdf'])->name('download-pdf');
+        
+        // Bulk delete
+        Route::post('/bulk-delete', [CreditMemoController::class, 'bulkDelete'])->name('bulk-delete');
     });
 
 });

@@ -4,13 +4,11 @@ namespace Vortex\Sales\Services;
 
 use Vortex\Sales\Models\Shipment;
 use Vortex\Sales\Models\ShipmentItem;
-use Vortex\Sales\Mail\ShipmentShippedMail;
-use Vortex\Sales\Mail\ShipmentDeliveredMail;
 use Vortex\Shop\Models\Order;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Collection;
 use Exception;
+
 
 class ShipmentService
 {
@@ -286,8 +284,12 @@ class ShipmentService
 
             $shipment->update($updateData);
 
-            // Send delivery confirmation email
-            $this->sendShipmentDeliveredEmail($shipment);
+            // Send emails based on status change
+            if ($status === Shipment::STATUS_SHIPPED) {
+                $this->sendShipmentShippedEmail($shipment);
+            } elseif ($status === Shipment::STATUS_DELIVERED) {
+                $this->sendShipmentDeliveredEmail($shipment);
+            }
 
             DB::commit();
 
@@ -375,27 +377,13 @@ class ShipmentService
             return;
         }
 
-        $items = $shipment->shipmentItems->map(function ($item) {
-            return [
-                'name' => $item->orderItem->product->name ?? 'Product',
-                'sku' => $item->orderItem->sku ?? '',
-                'quantity' => $item->quantity,
-            ];
-        })->toArray();
-
         $data = [
-            'shipment_number' => $shipment->shipment_number,
-            'order_number' => $shipment->order->order_number,
             'customer_name' => $shipment->order->user->name ?? 'Customer',
-            'customer_email' => $shipment->order->customer_email,
-            'carrier' => $shipment->carrier ?? 'N/A',
-            'tracking_number' => $shipment->tracking_number ?? 'N/A',
-            'tracking_url' => $shipment->tracking_url ?? '#',
-            'shipped_at' => $shipment->shipped_at ? $shipment->shipped_at->format('F d, Y') : now()->format('F d, Y'),
-            'items_count' => $shipment->shipmentItems->count(),
-            'items' => json_encode($items),
+            'order_number' => $shipment->order->order_number,
+            'shipment_number' => $shipment->shipment_number,
+            'tracking_number' => $shipment->tracking_number ?? '',
+            'shipping_address' => $shipment->order->shipping_address ?? '',
             'store_name' => config('app.name'),
-            'store_url' => config('app.url'),
         ];
 
         $template->send($shipment->order->customer_email, $data);
@@ -415,24 +403,12 @@ class ShipmentService
             return;
         }
 
-        $items = $shipment->shipmentItems->map(function ($item) {
-            return [
-                'name' => $item->orderItem->product->name ?? 'Product',
-                'sku' => $item->orderItem->sku ?? '',
-                'quantity' => $item->quantity,
-            ];
-        })->toArray();
-
         $data = [
-            'shipment_number' => $shipment->shipment_number,
-            'order_number' => $shipment->order->order_number,
             'customer_name' => $shipment->order->user->name ?? 'Customer',
-            'customer_email' => $shipment->order->customer_email,
+            'order_number' => $shipment->order->order_number,
+            'shipment_number' => $shipment->shipment_number,
             'delivered_at' => $shipment->delivered_at ? $shipment->delivered_at->format('F d, Y') : now()->format('F d, Y'),
-            'items_count' => $shipment->shipmentItems->count(),
-            'items' => json_encode($items),
             'store_name' => config('app.name'),
-            'store_url' => config('app.url'),
         ];
 
         $template->send($shipment->order->customer_email, $data);

@@ -89,6 +89,20 @@ class SalesServiceProvider extends ServiceProvider
                     'permission' => null,
                 ]
             );
+
+            // Register Credit Memos sub-menu
+            \Vortex\Core\Models\MenuItem::firstOrCreate(
+                ['key' => 'sales-credit-memos', 'location' => 'admin'],
+                [
+                    'title' => 'Credit Memos',
+                    'icon' => 'receipt',
+                    'route' => 'admin.sales.credit-memos.index',
+                    'order' => 40,
+                    'parent_id' => 3, // Sales parent menu ID
+                    'active' => true,
+                    'permission' => null,
+                ]
+            );
         }
     }
 }

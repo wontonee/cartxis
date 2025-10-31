@@ -259,17 +259,11 @@ class OrderService
             // Determine which template to use based on new status
             $templateCode = null;
             switch ($newStatus) {
-                case 'shipped':
-                    $templateCode = 'order_shipped';
-                    break;
-                case 'delivered':
-                    $templateCode = 'order_delivered';
-                    break;
                 case 'cancelled':
                     $templateCode = 'order_cancelled';
                     break;
                 case 'completed':
-                    $templateCode = 'order_delivered';  // Use delivered template for completed
+                    $templateCode = 'order_completed';
                     break;
             }
 

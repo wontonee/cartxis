@@ -7,9 +7,7 @@ use Vortex\Sales\Models\Invoice;
 use Vortex\Sales\Repositories\InvoiceRepository;
 use Vortex\Sales\Services\InvoiceService;
 use Vortex\Sales\Services\InvoicePdfService;
-use Vortex\Sales\Mail\InvoiceMail;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Mail;
 use Inertia\Inertia;
 use Inertia\Response;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
@@ -221,12 +219,42 @@ class InvoiceController extends Controller
                 return back()->with('error', 'Invoice not found');
             }
             
+            if (!$invoice->order->customer_email) {
+                return back()->with('error', 'No customer email found');
+            }
+            
+            // Get email template
+            $template = \Vortex\Core\Models\EmailTemplate::findByCode('invoice_sent');
+            if (!$template || !$template->is_active) {
+                return back()->with('error', 'Invoice email template not found or inactive');
+            }
+            
             // Generate PDF
             $pdfPath = $this->pdfService->generate($invoice);
             
+            // Prepare email data
+            $order = $invoice->order;
+            $data = [
+                'customer_name' => $order->customer_name ?? 'Valued Customer',
+                'invoice_number' => $invoice->invoice_number,
+                'order_number' => $order->order_number,
+                'issue_date' => $invoice->issue_date->format('F d, Y'),
+                'due_date' => $invoice->due_date->format('F d, Y'),
+                'status' => strtoupper($invoice->status),
+                'total' => '₹' . number_format($invoice->total, 2),
+                'store_name' => config('app.name'),
+                'store_url' => config('app.url'),
+                'year' => date('Y'),
+            ];
+            
             // Send email with PDF attachment
-            Mail::to($invoice->order->customer_email)
-                ->send(new InvoiceMail($invoice, $pdfPath));
+            $template->send($invoice->order->customer_email, $data, [
+                [
+                    'path' => $pdfPath,
+                    'name' => $invoice->invoice_number . '.pdf',
+                    'mime' => 'application/pdf',
+                ]
+            ]);
             
             // Mark as sent if it was pending
             if ($invoice->status === 'pending') {

@@ -70,9 +70,11 @@ class EmailController
             ],
             'categories' => [
                 'order' => 'Order Emails',
+                'shipment' => 'Shipment Emails',
                 'account' => 'Account Emails',
                 'payment' => 'Payment Emails',
                 'invoice' => 'Invoice Emails',
+                'credit_memo' => 'Credit Memo Emails',
             ],
         ]);
     }

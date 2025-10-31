@@ -12,9 +12,6 @@ class ShipmentEmailTemplatesSeeder extends Seeder
      */
     public function run(): void
     {
-        $shippedHtml = file_get_contents(base_path('packages/Vortex/Sales/src/resources/views/emails/shipment-shipped.blade.php'));
-        $deliveredHtml = file_get_contents(base_path('packages/Vortex/Sales/src/resources/views/emails/shipment-delivered.blade.php'));
-
         // Shipment Shipped Template
         EmailTemplate::updateOrCreate(
             ['code' => 'shipment_shipped'],
@@ -22,23 +19,24 @@ class ShipmentEmailTemplatesSeeder extends Seeder
                 'name' => 'Shipment Shipped',
                 'description' => 'Sent when a shipment is marked as shipped',
                 'category' => 'shipment',
-                'subject' => 'Your order has been shipped - {shipment_number}',
+                'subject' => 'Your Order #{order_number} Has Shipped!',
                 'from_name' => '{store_name}',
-                'html_content' => $shippedHtml,
-                'plain_text_content' => "Hi {customer_name},\n\nYour order {order_number} has been shipped!\n\nShipment Details:\n- Shipment Number: {shipment_number}\n- Carrier: {carrier}\n- Tracking Number: {tracking_number}\n- Tracking URL: {tracking_url}\n- Shipped Date: {shipped_at}\n\nShipped Items ({items_count} items):\n{items}\n\nYou can track your package using the tracking number above.\n\nThank you for shopping with us!\n\n{store_name}\n{store_url}",
+                'html_content' => '<h2>Your Order Has Shipped! 📦</h2>
+<p>Hi {customer_name},</p>
+<p>Great news! Your order #{order_number} is on its way!</p>
+<p><strong>Tracking Number:</strong> {tracking_number}</p>
+<p><strong>Shipping Address:</strong><br>{shipping_address}</p>
+<p>You can track your shipment using the tracking number above.</p>
+<p>Thank you for your order!</p>
+<p>{store_name}</p>',
+                'plain_text_content' => "Hi {customer_name},\n\nYour order #{order_number} has been shipped!\n\nTracking Number: {tracking_number}\nShipping Address: {shipping_address}\n\nThank you for your order!\n\n{store_name}",
                 'variables' => [
-                    'shipment_number',
-                    'order_number',
                     'customer_name',
-                    'customer_email',
-                    'carrier',
+                    'order_number',
+                    'shipment_number',
                     'tracking_number',
-                    'tracking_url',
-                    'shipped_at',
-                    'items_count',
-                    'items',
+                    'shipping_address',
                     'store_name',
-                    'store_url'
                 ],
                 'is_active' => true,
                 'is_system' => false,
@@ -53,20 +51,22 @@ class ShipmentEmailTemplatesSeeder extends Seeder
                 'name' => 'Shipment Delivered',
                 'description' => 'Sent when a shipment is marked as delivered',
                 'category' => 'shipment',
-                'subject' => 'Your order has been delivered - {shipment_number}',
+                'subject' => 'Your Order #{order_number} Has Been Delivered!',
                 'from_name' => '{store_name}',
-                'html_content' => $deliveredHtml,
-                'plain_text_content' => "Hi {customer_name},\n\nGreat news! Your order {order_number} has been delivered!\n\nDelivery Details:\n- Shipment Number: {shipment_number}\n- Delivered Date: {delivered_at}\n\nDelivered Items ({items_count} items):\n{items}\n\nWe hope you enjoy your purchase! If you have any questions or concerns, please don't hesitate to contact us.\n\nWould you like to leave a review? Your feedback helps us improve!\n\nThank you for shopping with us!\n\n{store_name}\n{store_url}",
+                'html_content' => '<h2>Your Order Has Been Delivered! ✅</h2>
+<p>Hi {customer_name},</p>
+<p>Great news! Your order #{order_number} has been delivered!</p>
+<p><strong>Delivered on:</strong> {delivered_at}</p>
+<p>We hope you enjoy your purchase! If you have any questions or concerns, please don\'t hesitate to contact us.</p>
+<p>Thank you for shopping with us!</p>
+<p>{store_name}</p>',
+                'plain_text_content' => "Hi {customer_name},\n\nGreat news! Your order #{order_number} has been delivered!\n\nDelivered on: {delivered_at}\n\nThank you for shopping with us!\n\n{store_name}",
                 'variables' => [
-                    'shipment_number',
-                    'order_number',
                     'customer_name',
-                    'customer_email',
+                    'order_number',
+                    'shipment_number',
                     'delivered_at',
-                    'items_count',
-                    'items',
                     'store_name',
-                    'store_url'
                 ],
                 'is_active' => true,
                 'is_system' => false,

@@ -56,7 +56,7 @@ class EmailTemplate extends Model
     /**
      * Send email using this template
      */
-    public function send(string $to, array $data = []): bool
+    public function send(string $to, array $data = [], array $attachments = []): bool
     {
         if (!$this->is_active) {
             Log::warning("Attempted to send inactive email template: {$this->code}");
@@ -67,7 +67,7 @@ class EmailTemplate extends Model
             $rendered = $this->render($data);
             $config = EmailConfiguration::where('is_active', true)->first();
 
-            Mail::send([], [], function ($message) use ($to, $rendered, $config) {
+            Mail::send([], [], function ($message) use ($to, $rendered, $config, $attachments) {
                 $message->to($to)
                     ->subject($rendered['subject']);
 
@@ -105,6 +105,20 @@ class EmailTemplate extends Model
                     $message->bcc($bccEmails);
                 } elseif ($config && $config->bcc_email) {
                     $message->bcc($config->bcc_email);
+                }
+                
+                // Attachments
+                foreach ($attachments as $attachment) {
+                    if (is_array($attachment)) {
+                        // Format: ['path' => $path, 'name' => $name, 'mime' => $mime]
+                        $message->attach($attachment['path'], [
+                            'as' => $attachment['name'] ?? null,
+                            'mime' => $attachment['mime'] ?? null,
+                        ]);
+                    } else {
+                        // Simple path string
+                        $message->attach($attachment);
+                    }
                 }
             });
 
