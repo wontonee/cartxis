@@ -3,6 +3,7 @@ import { ref, computed } from 'vue';
 import { router, Link, Head } from '@inertiajs/vue3';
 import AdminLayout from '@/Layouts/AdminLayout.vue';
 import * as reviewRoutes from '@/routes/admin/catalog/reviews';
+import Pagination from '@/components/Admin/Pagination.vue';
 
 interface Review {
     id: number;
@@ -439,82 +440,7 @@ function confirmBulkDelete() {
                 </div>
 
                 <!-- Pagination -->
-                <div v-if="reviews.last_page > 1" class="bg-white px-4 py-3 border-t border-gray-200 sm:px-6">
-                    <div class="flex items-center justify-between">
-                        <div class="flex-1 flex justify-between sm:hidden">
-                            <a
-                                v-if="reviews.current_page > 1"
-                                @click.prevent="changePage(reviews.current_page - 1)"
-                                href="#"
-                                class="relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50"
-                            >
-                                Previous
-                            </a>
-                            <a
-                                v-if="reviews.current_page < reviews.last_page"
-                                @click.prevent="changePage(reviews.current_page + 1)"
-                                href="#"
-                                class="ml-3 relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50"
-                            >
-                                Next
-                            </a>
-                        </div>
-                        <div class="hidden sm:flex-1 sm:flex sm:items-center sm:justify-between">
-                            <div>
-                                <p class="text-sm text-gray-700">
-                                    Showing
-                                    <span class="font-medium">{{ (reviews.current_page - 1) * reviews.per_page + 1 }}</span>
-                                    to
-                                    <span class="font-medium">{{ Math.min(reviews.current_page * reviews.per_page, reviews.total) }}</span>
-                                    of
-                                    <span class="font-medium">{{ reviews.total }}</span>
-                                    results
-                                </p>
-                            </div>
-                            <div>
-                                <nav class="relative z-0 inline-flex rounded-md shadow-sm -space-x-px">
-                                    <a
-                                        v-if="reviews.current_page > 1"
-                                        @click.prevent="changePage(reviews.current_page - 1)"
-                                        href="#"
-                                        class="relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50"
-                                    >
-                                        <svg class="h-5 w-5" fill="currentColor" viewBox="0 0 20 20">
-                                            <path fill-rule="evenodd" d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z" clip-rule="evenodd" />
-                                        </svg>
-                                    </a>
-                                    <span v-for="page in reviews.last_page" :key="page">
-                                        <a
-                                            v-if="Math.abs(page - reviews.current_page) < 3 || page === 1 || page === reviews.last_page"
-                                            @click.prevent="changePage(page)"
-                                            href="#"
-                                            class="relative inline-flex items-center px-4 py-2 border text-sm font-medium"
-                                            :class="{
-                                                'z-10 bg-blue-50 border-blue-500 text-blue-600': page === reviews.current_page,
-                                                'bg-white border-gray-300 text-gray-500 hover:bg-gray-50': page !== reviews.current_page,
-                                            }"
-                                        >
-                                            {{ page }}
-                                        </a>
-                                        <span v-else-if="page === reviews.current_page - 3 || page === reviews.current_page + 3" class="relative inline-flex items-center px-4 py-2 border border-gray-300 bg-white text-sm font-medium text-gray-700">
-                                            ...
-                                        </span>
-                                    </span>
-                                    <a
-                                        v-if="reviews.current_page < reviews.last_page"
-                                        @click.prevent="changePage(reviews.current_page + 1)"
-                                        href="#"
-                                        class="relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50"
-                                    >
-                                        <svg class="h-5 w-5" fill="currentColor" viewBox="0 0 20 20">
-                                            <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd" />
-                                        </svg>
-                                    </a>
-                                </nav>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+                <Pagination :data="reviews" resource-name="reviews" />
             </div>
 
             <!-- Bulk Delete Confirmation Modal -->

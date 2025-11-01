@@ -5,6 +5,7 @@ use Vortex\Sales\Http\Controllers\Admin\OrderController;
 use Vortex\Sales\Http\Controllers\Admin\InvoiceController;
 use Vortex\Sales\Http\Controllers\Admin\ShipmentController;
 use Vortex\Sales\Http\Controllers\Admin\CreditMemoController;
+use Vortex\Sales\Http\Controllers\Admin\TransactionController;
 
 /*
 |--------------------------------------------------------------------------
@@ -159,6 +160,27 @@ Route::middleware(['web', 'auth:admin'])->prefix('admin/sales')->name('admin.sal
         
         // Bulk delete
         Route::post('/bulk-delete', [CreditMemoController::class, 'bulkDelete'])->name('bulk-delete');
+    });
+
+    // Transactions
+    Route::prefix('transactions')->name('transactions.')->group(function () {
+        // List transactions
+        Route::get('/', [TransactionController::class, 'index'])->name('index');
+        
+        // View transaction details
+        Route::get('/{id}', [TransactionController::class, 'show'])->name('show');
+        
+        // Process refund for a transaction
+        Route::post('/{id}/refund', [TransactionController::class, 'refund'])->name('refund');
+        
+        // Retry a failed transaction
+        Route::post('/{id}/retry', [TransactionController::class, 'retry'])->name('retry');
+        
+        // Cancel a pending transaction
+        Route::post('/{id}/cancel', [TransactionController::class, 'cancel'])->name('cancel');
+        
+        // Export transactions
+        Route::get('/export/csv', [TransactionController::class, 'export'])->name('export');
     });
 
 });

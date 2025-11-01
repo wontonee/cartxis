@@ -105,10 +105,6 @@ const formatDate = (date: string): string => {
 const viewShipment = (id: number) => {
   router.visit(`/admin/sales/shipments/${id}`);
 };
-
-const createShipment = () => {
-  router.visit('/admin/sales/shipments/create');
-};
 </script>
 
 <template>
@@ -117,20 +113,9 @@ const createShipment = () => {
   <AdminLayout>
     <div class="space-y-6">
       <!-- Header -->
-      <div class="flex justify-between items-center">
-        <div>
-          <h1 class="text-2xl font-bold text-gray-900">Shipments</h1>
-          <p class="text-gray-600 mt-1">Manage order shipments and tracking</p>
-        </div>
-        <button
-          @click="createShipment"
-          class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 flex items-center space-x-2"
-        >
-          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
-          </svg>
-          <span>Create Shipment</span>
-        </button>
+      <div>
+        <h1 class="text-2xl font-bold text-gray-900">Shipments</h1>
+        <p class="text-gray-600 mt-1">Manage order shipments and tracking</p>
       </div>
 
       <!-- Statistics Cards -->

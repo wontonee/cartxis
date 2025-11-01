@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import { ref, computed } from 'vue'
-import { Link, usePage } from '@inertiajs/vue3'
+import { ref, computed, watch, onMounted, nextTick } from 'vue'
+import { Link, usePage, router } from '@inertiajs/vue3'
 import admin from '@/routes/admin'
 import Toast from '@/Components/Toast.vue'
 import { useMenuIcons } from '@/composables/useMenuIcons'
@@ -30,6 +30,33 @@ const userMenuOpen = ref(false)
 // Track which parent menus are open
 const openMenus = ref<Set<number>>(new Set())
 
+// LocalStorage key for persisting menu state
+const MENU_STATE_KEY = 'admin_menu_state'
+
+// Load menu state from localStorage
+const loadMenuState = (): Set<number> => {
+  try {
+    const saved = localStorage.getItem(MENU_STATE_KEY)
+    if (saved) {
+      const parsed = JSON.parse(saved)
+      return new Set(parsed)
+    }
+  } catch (error) {
+    console.error('Error loading menu state:', error)
+  }
+  return new Set()
+}
+
+// Save menu state to localStorage
+const saveMenuState = () => {
+  try {
+    const state = Array.from(openMenus.value)
+    localStorage.setItem(MENU_STATE_KEY, JSON.stringify(state))
+  } catch (error) {
+    console.error('Error saving menu state:', error)
+  }
+}
+
 // Get menu items from shared data
 const menuItems = computed(() => {
   return page.props.menu?.admin || []
@@ -43,16 +70,20 @@ const isActive = (item: any) => {
     const currentUrl = page.url
     const menuUrl = item.full_url
     
+    // Strip query strings for comparison (to handle pagination, filters, etc.)
+    const currentPath = currentUrl.split('?')[0]
+    const menuPath = menuUrl.split('?')[0]
+    
     // Remove trailing slashes for comparison
-    const cleanCurrentUrl = currentUrl.replace(/\/$/, '')
-    const cleanMenuUrl = menuUrl.replace(/\/$/, '')
+    const cleanCurrentPath = currentPath.replace(/\/$/, '')
+    const cleanMenuPath = menuPath.replace(/\/$/, '')
     
     // Exact match (most common case)
-    if (cleanCurrentUrl === cleanMenuUrl) return true
+    if (cleanCurrentPath === cleanMenuPath) return true
     
     // Check if current URL starts with menu URL (for child routes)
     // Only match if followed by a slash to prevent partial matches
-    if (cleanCurrentUrl.startsWith(cleanMenuUrl + '/')) return true
+    if (cleanCurrentPath.startsWith(cleanMenuPath + '/')) return true
     
     return false
   } catch (error) {
@@ -71,17 +102,56 @@ const hasActiveChild = (item: any): boolean => {
   return false
 }
 
-// Initialize open menus based on active routes
+// Initialize open menus based on active routes and localStorage
 const initializeOpenMenus = () => {
+  // First, load saved state from localStorage
+  const savedState = loadMenuState()
+  
+  // Clear current state
+  openMenus.value.clear()
+  
+  // Merge saved state with active routes
   menuItems.value.forEach((item: any) => {
+    // Always open menus with active children
     if (hasActiveChild(item)) {
+      openMenus.value.add(item.id)
+    } 
+    // Also restore previously opened menus from localStorage
+    else if (savedState.has(item.id)) {
       openMenus.value.add(item.id)
     }
   })
+  
+  // Save the merged state
+  saveMenuState()
 }
 
 // Call on mount
-initializeOpenMenus()
+onMounted(() => {
+  initializeOpenMenus()
+  
+  // Listen for Inertia navigation events - use 'before' event
+  router.on('before', () => {
+    // Will re-initialize after nextTick when page data updates
+    nextTick(() => {
+      initializeOpenMenus()
+    })
+  })
+  
+  // Also listen for 'finish' as backup
+  router.on('finish', () => {
+    nextTick(() => {
+      initializeOpenMenus()
+    })
+  })
+})
+
+// Also watch URL changes as backup
+watch(() => page.url, () => {
+  nextTick(() => {
+    initializeOpenMenus()
+  })
+}, { immediate: false })
 
 const toggleMenu = (itemId: number) => {
   if (openMenus.value.has(itemId)) {
@@ -89,6 +159,8 @@ const toggleMenu = (itemId: number) => {
   } else {
     openMenus.value.add(itemId)
   }
+  // Persist menu state to localStorage after toggle
+  saveMenuState()
 }
 
 const isMenuOpen = (itemId: number) => {

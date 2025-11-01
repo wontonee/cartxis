@@ -50,21 +50,26 @@ class ShipmentController extends Controller
 
     /**
      * Show create shipment form
+     * Note: Shipments can only be created from orders
      */
     public function create(Request $request): Response|RedirectResponse
     {
         $orderId = $request->input('order_id');
-        $order = null;
+        
+        // Require order_id - shipments must be linked to orders
+        if (!$orderId) {
+            return redirect()
+                ->route('admin.sales.orders.index')
+                ->with('error', 'Please select an order first. Shipments must be created from an order.');
+        }
 
-        if ($orderId) {
-            $order = Order::with(['items.product', 'user', 'shipments.shipmentItems'])
-                ->findOrFail($orderId);
+        $order = Order::with(['items.product', 'user', 'shipments.shipmentItems'])
+            ->findOrFail($orderId);
 
-            if (!$order->canBeShipped()) {
-                return redirect()
-                    ->route('admin.sales.orders.show', $orderId)
-                    ->with('error', 'This order cannot be shipped');
-            }
+        if (!$order->canBeShipped()) {
+            return redirect()
+                ->route('admin.sales.orders.show', $orderId)
+                ->with('error', 'This order cannot be shipped');
         }
 
         return Inertia::render('Admin/Sales/Shipments/Create', [

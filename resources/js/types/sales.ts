@@ -228,6 +228,11 @@ export interface PaginatedResponse<T> {
   total: number;
   from: number;
   to: number;
+  links: Array<{
+    url: string | null;
+    label: string;
+    active: boolean;
+  }>;
 }
 
 // Statistics
@@ -271,6 +276,56 @@ export interface CreditMemoStatistics {
   total_amount: number;
   pending_amount: number;
   refunded_amount: number;
+}
+
+// Transaction Types
+export interface Transaction {
+  id: number;
+  order_id: number;
+  invoice_id?: number;
+  credit_memo_id?: number;
+  transaction_number: string;
+  type: 'payment' | 'refund' | 'authorization' | 'capture';
+  payment_method: string;
+  gateway: string;
+  gateway_transaction_id?: string;
+  amount: number;
+  status: 'pending' | 'completed' | 'failed' | 'cancelled';
+  response_data?: Record<string, any>;
+  notes?: string;
+  processed_at?: string;
+  created_at: string;
+  updated_at: string;
+  order?: Order;
+  invoice?: Invoice;
+  credit_memo?: CreditMemo;
+}
+
+export interface TransactionFilters {
+  search?: string;
+  type?: string;
+  status?: string;
+  gateway?: string;
+  payment_method?: string;
+  date_from?: string;
+  date_to?: string;
+  amount_min?: number;
+  amount_max?: number;
+  order_id?: number;
+  sort_by?: string;
+  sort_order?: 'asc' | 'desc';
+}
+
+export interface TransactionStatistics {
+  total: number;
+  completed: number;
+  pending: number;
+  failed: number;
+  total_amount: number;
+  payment_count: number;
+  refund_count: number;
+  payment_amount: number;
+  refund_amount: number;
 }
 
 // Status Options

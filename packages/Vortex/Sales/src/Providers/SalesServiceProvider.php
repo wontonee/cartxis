@@ -11,10 +11,12 @@ class SalesServiceProvider extends ServiceProvider
         // Register repositories
         $this->app->singleton(\Vortex\Sales\Repositories\OrderRepository::class);
         $this->app->singleton(\Vortex\Sales\Repositories\InvoiceRepository::class);
+        $this->app->singleton(\Vortex\Sales\Repositories\TransactionRepository::class);
         
         // Register services
         $this->app->singleton(\Vortex\Sales\Services\OrderService::class);
         $this->app->singleton(\Vortex\Sales\Services\InvoiceService::class);
+        $this->app->singleton(\Vortex\Sales\Services\TransactionService::class);
     }
 
     public function boot(): void
@@ -98,6 +100,20 @@ class SalesServiceProvider extends ServiceProvider
                     'icon' => 'receipt',
                     'route' => 'admin.sales.credit-memos.index',
                     'order' => 40,
+                    'parent_id' => 3, // Sales parent menu ID
+                    'active' => true,
+                    'permission' => null,
+                ]
+            );
+
+            // Register Transactions sub-menu
+            \Vortex\Core\Models\MenuItem::firstOrCreate(
+                ['key' => 'sales-transactions', 'location' => 'admin'],
+                [
+                    'title' => 'Transactions',
+                    'icon' => 'credit-card',
+                    'route' => 'admin.sales.transactions.index',
+                    'order' => 50,
                     'parent_id' => 3, // Sales parent menu ID
                     'active' => true,
                     'permission' => null,

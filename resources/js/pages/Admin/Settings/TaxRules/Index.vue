@@ -110,26 +110,7 @@
             </table>
 
             <!-- Pagination -->
-            <div v-if="taxRules.data.length > 0" class="mt-4 flex justify-between items-center">
-              <div class="text-sm text-gray-600">
-                Showing {{ taxRules.from }} to {{ taxRules.to }} of {{ taxRules.total }} results
-              </div>
-              <div class="flex space-x-2">
-                <a
-                  v-for="link in taxRules.links"
-                  :key="link.label"
-                  :href="link.url || '#'"
-                  :class="[
-                    'px-3 py-1 border rounded',
-                    link.active
-                      ? 'bg-blue-600 text-white border-blue-600'
-                      : 'bg-white text-gray-600 border-gray-300 hover:bg-gray-50',
-                    !link.url && 'opacity-50 cursor-not-allowed'
-                  ]"
-                  v-html="link.label"
-                />
-              </div>
-            </div>
+            <Pagination :data="taxRules" resource-name="tax rules" />
           </div>
 
           <!-- Tax Classes Tab -->
@@ -637,6 +618,7 @@
 import { ref, reactive } from 'vue'
 import { router, Link, Head } from '@inertiajs/vue3'
 import AdminLayout from '@/layouts/AdminLayout.vue'
+import Pagination from '@/components/Admin/Pagination.vue'
 
 interface TaxClass {
   id: number

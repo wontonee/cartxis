@@ -1,0 +1,28 @@
+{
+    "name": "vortex/customer",
+    "description": "Customer Management Module for Vortex Admin",
+    "type": "library",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Vortex Team"
+        }
+    ],
+    "require": {
+        "php": "^8.2",
+        "illuminate/support": "^11.0"
+    },
+    "autoload": {
+        "psr-4": {
+            "Vortex\\Customer\\": "src/"
+        }
+    },
+    "extra": {
+        "laravel": {
+            "providers": [
+                "Vortex\\Customer\\Providers\\CustomerServiceProvider"
+            ]
+        }
+    },
+    "minimum-stability": "stable"
+}

@@ -237,7 +237,7 @@ const cancelCreditMemo = (id: number) => {
           <!-- Reset -->
           <button
             @click="resetFilters"
-            class="px-4 py-2 text-gray-600 hover:text-gray-900"
+            class="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 text-gray-700"
           >
             Reset
           </button>
