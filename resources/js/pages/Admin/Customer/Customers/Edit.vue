@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import { ref } from 'vue';
 import { Head, useForm, router } from '@inertiajs/vue3';
 import AdminLayout from '@/layouts/AdminLayout.vue';
 import * as customerRoutes from '@/routes/admin/customers';
@@ -35,27 +34,29 @@ interface Props {
 const props = defineProps<Props>();
 
 const form = useForm({
-    first_name: props.customer.first_name,
-    last_name: props.customer.last_name,
-    email: props.customer.email,
-    phone: props.customer.phone || '',
-    date_of_birth: props.customer.date_of_birth || '',
-    gender: props.customer.gender || '',
-    customer_group_id: props.customer.customer_group_id,
-    company_name: props.customer.company_name || '',
-    tax_id: props.customer.tax_id || '',
-    is_active: props.customer.is_active,
-    is_verified: props.customer.is_verified,
-    newsletter_subscribed: props.customer.newsletter_subscribed,
-    notes: props.customer.notes || '',
+    first_name: props.customer?.first_name || '',
+    last_name: props.customer?.last_name || '',
+    email: props.customer?.email || '',
+    phone: props.customer?.phone || '',
+    date_of_birth: props.customer?.date_of_birth || '',
+    gender: props.customer?.gender || '',
+    customer_group_id: props.customer?.customer_group_id || 0,
+    company_name: props.customer?.company_name || '',
+    tax_id: props.customer?.tax_id || '',
+    is_active: props.customer?.is_active ?? true,
+    is_verified: props.customer?.is_verified ?? false,
+    newsletter_subscribed: props.customer?.newsletter_subscribed ?? false,
+    notes: props.customer?.notes || '',
 });
 
 const submit = () => {
+    if (!props.customer?.id) {
+        console.error('Cannot submit: customer ID is undefined');
+        return;
+    }
+    
     form.put(customerRoutes.update({ customer: props.customer.id }).url, {
         preserveScroll: true,
-        onSuccess: () => {
-            // Redirect handled by controller
-        },
     });
 };
 </script>
@@ -63,245 +64,219 @@ const submit = () => {
 <template>
     <Head title="Edit Customer" />
 
-    <AdminLayout>
-        <div class="container-fixed">
-            <div class="flex flex-wrap items-center lg:items-end justify-between gap-5 pb-7.5">
-                <div class="flex flex-col justify-center gap-2">
-                    <h1 class="text-xl font-semibold leading-none text-gray-900">
-                        Edit Customer
-                    </h1>
-                    <div class="flex items-center gap-2 text-sm font-medium text-gray-600">
-                        Update customer information
-                    </div>
-                </div>
+    <AdminLayout title="Edit Customer">
+        <div v-if="!props.customer" class="p-6">
+            <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+                <p class="text-yellow-800">Loading customer data...</p>
             </div>
         </div>
 
-        <div class="container-fixed">
-            <div class="grid gap-5 lg:gap-7.5">
-                <form @submit.prevent="submit">
-                    <div class="card">
-                        <div class="card-header">
-                            <h3 class="card-title">Customer Information</h3>
-                        </div>
-                        <div class="card-body grid gap-5">
+        <div v-else class="p-6">
+            <!-- Back Button -->
+            <div class="mb-4">
+                <button
+                    type="button"
+                    @click="router.visit('/admin/customers')"
+                    class="inline-flex items-center px-3 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50"
+                >
+                    <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+                    </svg>
+                    Back to Customers
+                </button>
+            </div>
+
+            <div class="bg-white rounded-lg shadow-sm p-6">
+                <form @submit.prevent="submit" class="space-y-6">
+                    <!-- Customer Information -->
+                    <div>
+                        <h2 class="text-lg font-medium text-gray-900 mb-4">Customer Information</h2>
+                        <div class="space-y-4">
                             <!-- Basic Information -->
-                            <div class="grid grid-cols-1 lg:grid-cols-2 gap-5">
-                                <div class="flex flex-col gap-1">
-                                    <label class="form-label text-gray-900">
-                                        First Name
-                                        <span class="text-danger">*</span>
-                                    </label>
+                            <div class="grid grid-cols-2 gap-4">
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">First Name *</label>
                                     <input
                                         v-model="form.first_name"
                                         type="text"
-                                        class="input"
-                                        :class="{ 'border-danger': form.errors.first_name }"
+                                        required
+                                        class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                                        :class="{ 'border-red-500': form.errors.first_name }"
                                         placeholder="Enter first name"
                                     />
-                                    <span v-if="form.errors.first_name" class="text-danger text-xs">
-                                        {{ form.errors.first_name }}
-                                    </span>
+                                    <div v-if="form.errors.first_name" class="text-red-600 text-sm mt-1">{{ form.errors.first_name }}</div>
                                 </div>
-
-                                <div class="flex flex-col gap-1">
-                                    <label class="form-label text-gray-900">
-                                        Last Name
-                                        <span class="text-danger">*</span>
-                                    </label>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">Last Name *</label>
                                     <input
                                         v-model="form.last_name"
                                         type="text"
-                                        class="input"
-                                        :class="{ 'border-danger': form.errors.last_name }"
+                                        required
+                                        class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                                        :class="{ 'border-red-500': form.errors.last_name }"
                                         placeholder="Enter last name"
                                     />
-                                    <span v-if="form.errors.last_name" class="text-danger text-xs">
-                                        {{ form.errors.last_name }}
-                                    </span>
+                                    <div v-if="form.errors.last_name" class="text-red-600 text-sm mt-1">{{ form.errors.last_name }}</div>
                                 </div>
                             </div>
 
                             <!-- Contact Information -->
-                            <div class="grid grid-cols-1 lg:grid-cols-2 gap-5">
-                                <div class="flex flex-col gap-1">
-                                    <label class="form-label text-gray-900">
-                                        Email
-                                        <span class="text-danger">*</span>
-                                    </label>
+                            <div class="grid grid-cols-2 gap-4">
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">Email *</label>
                                     <input
                                         v-model="form.email"
                                         type="email"
-                                        class="input"
-                                        :class="{ 'border-danger': form.errors.email }"
+                                        required
+                                        class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                                        :class="{ 'border-red-500': form.errors.email }"
                                         placeholder="customer@example.com"
                                     />
-                                    <span v-if="form.errors.email" class="text-danger text-xs">
-                                        {{ form.errors.email }}
-                                    </span>
+                                    <div v-if="form.errors.email" class="text-red-600 text-sm mt-1">{{ form.errors.email }}</div>
                                 </div>
-
-                                <div class="flex flex-col gap-1">
-                                    <label class="form-label text-gray-900">Phone</label>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">Phone</label>
                                     <input
                                         v-model="form.phone"
                                         type="text"
-                                        class="input"
-                                        :class="{ 'border-danger': form.errors.phone }"
+                                        class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                                        :class="{ 'border-red-500': form.errors.phone }"
                                         placeholder="+1 (555) 000-0000"
                                     />
-                                    <span v-if="form.errors.phone" class="text-danger text-xs">
-                                        {{ form.errors.phone }}
-                                    </span>
+                                    <div v-if="form.errors.phone" class="text-red-600 text-sm mt-1">{{ form.errors.phone }}</div>
                                 </div>
                             </div>
 
                             <!-- Personal Information -->
-                            <div class="grid grid-cols-1 lg:grid-cols-3 gap-5">
-                                <div class="flex flex-col gap-1">
-                                    <label class="form-label text-gray-900">Date of Birth</label>
+                            <div class="grid grid-cols-3 gap-4">
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">Date of Birth</label>
                                     <input
                                         v-model="form.date_of_birth"
                                         type="date"
-                                        class="input"
-                                        :class="{ 'border-danger': form.errors.date_of_birth }"
+                                        class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                                        :class="{ 'border-red-500': form.errors.date_of_birth }"
                                     />
-                                    <span v-if="form.errors.date_of_birth" class="text-danger text-xs">
-                                        {{ form.errors.date_of_birth }}
-                                    </span>
+                                    <div v-if="form.errors.date_of_birth" class="text-red-600 text-sm mt-1">{{ form.errors.date_of_birth }}</div>
                                 </div>
-
-                                <div class="flex flex-col gap-1">
-                                    <label class="form-label text-gray-900">Gender</label>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">Gender</label>
                                     <select
                                         v-model="form.gender"
-                                        class="select"
-                                        :class="{ 'border-danger': form.errors.gender }"
+                                        class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                                        :class="{ 'border-red-500': form.errors.gender }"
                                     >
                                         <option value="">Select Gender</option>
                                         <option value="male">Male</option>
                                         <option value="female">Female</option>
                                         <option value="other">Other</option>
                                     </select>
-                                    <span v-if="form.errors.gender" class="text-danger text-xs">
-                                        {{ form.errors.gender }}
-                                    </span>
+                                    <div v-if="form.errors.gender" class="text-red-600 text-sm mt-1">{{ form.errors.gender }}</div>
                                 </div>
-
-                                <div class="flex flex-col gap-1">
-                                    <label class="form-label text-gray-900">
-                                        Customer Group
-                                        <span class="text-danger">*</span>
-                                    </label>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">Customer Group *</label>
                                     <select
                                         v-model="form.customer_group_id"
-                                        class="select"
-                                        :class="{ 'border-danger': form.errors.customer_group_id }"
+                                        required
+                                        class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                                        :class="{ 'border-red-500': form.errors.customer_group_id }"
                                     >
-                                        <option
-                                            v-for="group in customerGroups"
-                                            :key="group.id"
-                                            :value="group.id"
-                                        >
-                                            {{ group.name }}
-                                        </option>
+                                        <option value="">Select Group</option>
+                                        <option v-for="group in customerGroups" :key="group.id" :value="group.id">{{ group.name }}</option>
                                     </select>
-                                    <span v-if="form.errors.customer_group_id" class="text-danger text-xs">
-                                        {{ form.errors.customer_group_id }}
-                                    </span>
+                                    <div v-if="form.errors.customer_group_id" class="text-red-600 text-sm mt-1">{{ form.errors.customer_group_id }}</div>
                                 </div>
                             </div>
 
                             <!-- Company Information -->
-                            <div class="grid grid-cols-1 lg:grid-cols-2 gap-5">
-                                <div class="flex flex-col gap-1">
-                                    <label class="form-label text-gray-900">Company Name</label>
+                            <div class="grid grid-cols-2 gap-4">
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">Company Name</label>
                                     <input
                                         v-model="form.company_name"
                                         type="text"
-                                        class="input"
-                                        :class="{ 'border-danger': form.errors.company_name }"
+                                        class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                                        :class="{ 'border-red-500': form.errors.company_name }"
                                         placeholder="Enter company name"
                                     />
-                                    <span v-if="form.errors.company_name" class="text-danger text-xs">
-                                        {{ form.errors.company_name }}
-                                    </span>
+                                    <div v-if="form.errors.company_name" class="text-red-600 text-sm mt-1">{{ form.errors.company_name }}</div>
                                 </div>
-
-                                <div class="flex flex-col gap-1">
-                                    <label class="form-label text-gray-900">Tax ID</label>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">Tax ID</label>
                                     <input
                                         v-model="form.tax_id"
                                         type="text"
-                                        class="input"
-                                        :class="{ 'border-danger': form.errors.tax_id }"
+                                        class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                                        :class="{ 'border-red-500': form.errors.tax_id }"
                                         placeholder="Enter tax ID"
                                     />
-                                    <span v-if="form.errors.tax_id" class="text-danger text-xs">
-                                        {{ form.errors.tax_id }}
-                                    </span>
+                                    <div v-if="form.errors.tax_id" class="text-red-600 text-sm mt-1">{{ form.errors.tax_id }}</div>
                                 </div>
                             </div>
 
                             <!-- Status Toggles -->
-                            <div class="grid grid-cols-1 lg:grid-cols-3 gap-5">
-                                <label class="switch">
+                            <div class="grid grid-cols-3 gap-4">
+                                <div class="flex items-center">
                                     <input
                                         v-model="form.is_active"
                                         type="checkbox"
+                                        id="is_active"
+                                        class="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
                                     />
-                                    <span class="switch-label">Active</span>
-                                </label>
-
-                                <label class="switch">
+                                    <label for="is_active" class="ml-2 text-sm font-medium text-gray-700">Active</label>
+                                </div>
+                                <div class="flex items-center">
                                     <input
                                         v-model="form.is_verified"
                                         type="checkbox"
+                                        id="is_verified"
+                                        class="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
                                     />
-                                    <span class="switch-label">Verified</span>
-                                </label>
-
-                                <label class="switch">
+                                    <label for="is_verified" class="ml-2 text-sm font-medium text-gray-700">Verified</label>
+                                </div>
+                                <div class="flex items-center">
                                     <input
                                         v-model="form.newsletter_subscribed"
                                         type="checkbox"
+                                        id="newsletter"
+                                        class="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
                                     />
-                                    <span class="switch-label">Newsletter Subscription</span>
-                                </label>
+                                    <label for="newsletter" class="ml-2 text-sm font-medium text-gray-700">Newsletter</label>
+                                </div>
                             </div>
 
                             <!-- Notes -->
-                            <div class="flex flex-col gap-1">
-                                <label class="form-label text-gray-900">Notes</label>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Notes</label>
                                 <textarea
                                     v-model="form.notes"
-                                    class="textarea"
-                                    :class="{ 'border-danger': form.errors.notes }"
+                                    class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                                    :class="{ 'border-red-500': form.errors.notes }"
                                     rows="4"
-                                    placeholder="Add any additional notes about this customer"
+                                    placeholder="Add any additional notes"
                                 ></textarea>
-                                <span v-if="form.errors.notes" class="text-danger text-xs">
-                                    {{ form.errors.notes }}
-                                </span>
+                                <div v-if="form.errors.notes" class="text-red-600 text-sm mt-1">{{ form.errors.notes }}</div>
                             </div>
                         </div>
+                    </div>
 
-                        <div class="card-footer justify-between">
-                            <a
-                                :href="customerRoutes.show({ customer: customer.id }).url"
-                                class="btn btn-light"
-                            >
-                                Cancel
-                            </a>
-                            <button
-                                type="submit"
-                                class="btn btn-primary"
-                                :disabled="form.processing"
-                            >
-                                <span v-if="form.processing">Updating...</span>
-                                <span v-else>Update Customer</span>
-                            </button>
-                        </div>
+                    <!-- Form Actions -->
+                    <div class="flex items-center justify-end gap-3 pt-6 border-t border-gray-200">
+                        <button
+                            type="button"
+                            @click="router.visit('/admin/customers')"
+                            class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50"
+                        >
+                            Cancel
+                        </button>
+                        <button
+                            type="submit"
+                            :disabled="form.processing"
+                            class="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 disabled:opacity-50"
+                        >
+                            <span v-if="form.processing">Saving...</span>
+                            <span v-else>Save Changes</span>
+                        </button>
                     </div>
                 </form>
             </div>

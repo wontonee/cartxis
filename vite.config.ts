@@ -29,6 +29,12 @@ export default defineConfig({
             },
         }),
     ],
+    server: {
+        host: '0.0.0.0',
+        hmr: {
+            host: 'vortex.test',
+        },
+    },
     resolve: {
         alias: {
             '@admin': '/resources/admin',

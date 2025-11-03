@@ -25,18 +25,25 @@ class CustomerResource extends JsonResource
             'gender' => $this->gender,
             'customer_group_id' => $this->customer_group_id,
             'customer_group' => $this->whenLoaded('customerGroup', function () {
-                return [
+                return $this->customerGroup ? [
                     'id' => $this->customerGroup->id,
                     'name' => $this->customerGroup->name,
                     'code' => $this->customerGroup->code,
                     'color' => $this->customerGroup->color,
                     'discount_percentage' => $this->customerGroup->discount_percentage,
+                ] : [
+                    'id' => null,
+                    'name' => 'No Group',
+                    'code' => 'no-group',
+                    'color' => '#6B7280',
+                    'discount_percentage' => 0,
                 ];
             }),
             'company_name' => $this->company_name,
             'tax_id' => $this->tax_id,
             'is_active' => $this->is_active,
             'is_verified' => $this->is_verified,
+            'is_guest' => $this->is_guest,
             'newsletter_subscribed' => $this->newsletter_subscribed,
             'total_orders' => $this->total_orders,
             'total_spent' => (float) $this->total_spent,

@@ -23,14 +23,19 @@ class CustomerCollection extends ResourceCollection
                     'full_name' => $customer->full_name,
                     'email' => $customer->email,
                     'phone' => $customer->phone,
-                    'customer_group' => [
+                    'customer_group' => $customer->customerGroup ? [
                         'id' => $customer->customerGroup->id,
                         'name' => $customer->customerGroup->name,
                         'color' => $customer->customerGroup->color,
+                    ] : [
+                        'id' => null,
+                        'name' => 'No Group',
+                        'color' => '#6B7280', // gray-500
                     ],
                     'company_name' => $customer->company_name,
                     'is_active' => $customer->is_active,
                     'is_verified' => $customer->is_verified,
+                    'is_guest' => $customer->is_guest,
                     'newsletter_subscribed' => $customer->newsletter_subscribed,
                     'total_orders' => $customer->total_orders,
                     'total_spent' => (float) $customer->total_spent,

@@ -52,6 +52,16 @@ class CustomerController extends Controller
             }
         }
 
+        // Filter by customer type (registered/guest)
+        if ($request->filled('customer_type')) {
+            $customerType = $request->input('customer_type');
+            if ($customerType === 'registered') {
+                $query->where('is_guest', false);
+            } elseif ($customerType === 'guest') {
+                $query->where('is_guest', true);
+            }
+        }
+
         // Filter by verified status
         if ($request->filled('is_verified')) {
             $query->where('is_verified', $request->boolean('is_verified'));
@@ -83,12 +93,14 @@ class CustomerController extends Controller
             'active_customers' => Customer::where('is_active', true)->count(),
             'verified_customers' => Customer::where('is_verified', true)->count(),
             'newsletter_subscribers' => Customer::where('newsletter_subscribed', true)->count(),
+            'guest_customers' => Customer::where('is_guest', true)->count(),
+            'registered_customers' => Customer::where('is_guest', false)->count(),
         ];
 
         return Inertia::render('Admin/Customer/Customers/Index', [
             'customers' => new CustomerCollection($customers),
             'customerGroups' => CustomerGroup::active()->orderBy('order')->get(),
-            'filters' => $request->only(['search', 'customer_group_id', 'status', 'is_verified', 'newsletter_subscribed', 'date_from', 'date_to']),
+            'filters' => $request->only(['search', 'customer_group_id', 'status', 'customer_type', 'is_verified', 'newsletter_subscribed', 'date_from', 'date_to']),
             'statistics' => $statistics,
         ]);
     }
@@ -132,7 +144,7 @@ class CustomerController extends Controller
         ]);
 
         return Inertia::render('Admin/Customer/Customers/Show', [
-            'customer' => new CustomerResource($customer),
+            'customer' => (new CustomerResource($customer))->resolve(),
         ]);
     }
 
@@ -144,7 +156,7 @@ class CustomerController extends Controller
         $customer->load('customerGroup');
 
         return Inertia::render('Admin/Customer/Customers/Edit', [
-            'customer' => new CustomerResource($customer),
+            'customer' => (new CustomerResource($customer))->resolve(),
             'customerGroups' => CustomerGroup::active()->orderBy('order')->get(),
         ]);
     }

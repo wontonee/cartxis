@@ -7,6 +7,7 @@ use Vortex\Shop\Models\Order;
 use Vortex\Shop\Models\OrderItem;
 use Vortex\Shop\Models\Address;
 use Vortex\Product\Models\Product;
+use Vortex\Customer\Models\Customer;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Session;
@@ -67,9 +68,20 @@ class CheckoutService extends ShopService
             // Generate unique order number
             $orderNumber = Order::generateOrderNumber();
 
+            // Handle guest customer creation
+            $userId = $data['user_id'] ?? null;
+            $customerId = null;
+            
+            // If no user_id (guest checkout) and we have email, create/get guest customer
+            if (!$userId && isset($data['customer_email'])) {
+                $guestCustomer = $this->getOrCreateGuestCustomer($data);
+                $customerId = $guestCustomer->id;
+            }
+
             // Create order
             $order = $this->orderRepository->create([
-                'user_id' => $data['user_id'] ?? null,
+                'user_id' => $userId,
+                'customer_id' => $customerId,
                 'order_number' => $orderNumber,
                 'status' => Order::STATUS_PENDING,
                 'payment_status' => Order::PAYMENT_PENDING,
@@ -380,5 +392,46 @@ class CheckoutService extends ShopService
         } catch (Exception $e) {
             return $this->handleException($e, 'Failed to cancel order');
         }
+    }
+
+    /**
+     * Get or create a guest customer record.
+     *
+     * @param  array  $data
+     * @return Customer
+     */
+    protected function getOrCreateGuestCustomer(array $data): Customer
+    {
+        $email = $data['customer_email'];
+        $firstName = $data['shipping_address']['first_name'] ?? 'Guest';
+        $lastName = $data['shipping_address']['last_name'] ?? 'Customer';
+        $phone = $data['customer_phone'] ?? $data['shipping_address']['phone'] ?? null;
+
+        // Try to find existing guest customer with this email
+        $customer = Customer::where('email', $email)
+            ->where('is_guest', true)
+            ->first();
+
+        if ($customer) {
+            // Update total orders and total spent
+            $customer->increment('total_orders');
+            $customer->increment('total_spent', $data['total'] ?? 0);
+            return $customer;
+        }
+
+        // Create new guest customer
+        return Customer::create([
+            'first_name' => $firstName,
+            'last_name' => $lastName,
+            'email' => $email,
+            'phone' => $phone,
+            'is_guest' => true,
+            'is_active' => true,
+            'is_verified' => false,
+            'customer_group_id' => null,
+            'newsletter_subscribed' => false,
+            'total_orders' => 1,
+            'total_spent' => $data['total'] ?? 0,
+        ]);
     }
 }

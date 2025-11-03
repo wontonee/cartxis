@@ -9,6 +9,7 @@ use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use App\Models\User;
+use Vortex\Customer\Models\Customer;
 use Vortex\Shop\Models\OrderItem;
 use Vortex\Shop\Models\Address;
 
@@ -30,6 +31,7 @@ class Order extends Model
      */
     protected $fillable = [
         'user_id',
+        'customer_id',
         'order_number',
         'status',
         'subtotal',
@@ -123,6 +125,16 @@ class Order extends Model
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
+    }
+
+    /**
+     * Get the customer that owns the order.
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
+     */
+    public function customer(): BelongsTo
+    {
+        return $this->belongsTo(Customer::class);
     }
 
     /**

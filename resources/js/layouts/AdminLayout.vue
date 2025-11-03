@@ -81,9 +81,15 @@ const isActive = (item: any) => {
     // Exact match (most common case)
     if (cleanCurrentPath === cleanMenuPath) return true
     
-    // Check if current URL starts with menu URL (for child routes)
-    // Only match if followed by a slash to prevent partial matches
-    if (cleanCurrentPath.startsWith(cleanMenuPath + '/')) return true
+    // For resource routes, check if current URL starts with menu URL AND
+    // has a valid resource pattern (ID or action like /create, /edit)
+    // This prevents /admin/customers from matching /admin/customers/groups
+    if (cleanCurrentPath.startsWith(cleanMenuPath + '/')) {
+      const remainder = cleanCurrentPath.substring(cleanMenuPath.length + 1)
+      // Only match if remainder is a number (resource ID) or standard actions
+      // Don't match other text segments like "groups", "reports", etc.
+      return /^(\d+|create|edit|show)/.test(remainder)
+    }
     
     return false
   } catch (error) {
