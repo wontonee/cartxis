@@ -33,6 +33,21 @@ Route::middleware(['web', 'auth:admin'])->prefix('admin')->name('admin.')->group
     // Customer export (must be before resource routes)
     Route::get('customers/export/csv', [CustomerController::class, 'export'])
         ->name('customers.export');
+
+    // Customer addresses (child resource under a customer)
+    Route::prefix('customers/{customer}/addresses')->name('customers.addresses.')->group(function () {
+        Route::get('/', [\Vortex\Customer\Http\Controllers\CustomerAddressController::class, 'index'])->name('index');
+        Route::get('/create', [\Vortex\Customer\Http\Controllers\CustomerAddressController::class, 'create'])->name('create');
+        Route::post('/', [\Vortex\Customer\Http\Controllers\CustomerAddressController::class, 'store'])->name('store');
+        Route::get('/{address}/edit', [\Vortex\Customer\Http\Controllers\CustomerAddressController::class, 'edit'])->name('edit');
+        Route::put('/{address}', [\Vortex\Customer\Http\Controllers\CustomerAddressController::class, 'update'])->name('update');
+        Route::delete('/{address}', [\Vortex\Customer\Http\Controllers\CustomerAddressController::class, 'destroy'])->name('destroy');
+
+        Route::post('/{address}/set-default-shipping', [\Vortex\Customer\Http\Controllers\CustomerAddressController::class, 'setDefaultShipping'])
+            ->name('set-default-shipping');
+        Route::post('/{address}/set-default-billing', [\Vortex\Customer\Http\Controllers\CustomerAddressController::class, 'setDefaultBilling'])
+            ->name('set-default-billing');
+    });
     
     // Customers resource (should be LAST to avoid catching specific routes)
     Route::resource('customers', CustomerController::class);

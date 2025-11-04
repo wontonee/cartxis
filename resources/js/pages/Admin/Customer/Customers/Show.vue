@@ -1,7 +1,8 @@
 <script setup lang="ts">
 import { ref } from 'vue';
-import { Head, router } from '@inertiajs/vue3';
+import { Head, Link, router } from '@inertiajs/vue3';
 import AdminLayout from '@/layouts/AdminLayout.vue';
+import { useCurrency } from '@/composables/useCurrency';
 
 interface CustomerGroup {
     id: number;
@@ -11,18 +12,19 @@ interface CustomerGroup {
 
 interface CustomerAddress {
     id: number;
-    address_type: string;
+    type: string;
     first_name: string;
     last_name: string;
     company: string | null;
-    street_address_1: string;
-    street_address_2: string | null;
+    address_line_1: string;
+    address_line_2: string | null;
     city: string;
     state: string;
     postal_code: string;
     country: string;
     phone: string | null;
-    is_default: boolean;
+    is_default_shipping: boolean;
+    is_default_billing: boolean;
     formatted_address: string;
 }
 
@@ -70,6 +72,8 @@ const props = defineProps<Props>();
 const activeTab = ref('info');
 const showDeleteModal = ref(false);
 
+const { formatPrice } = useCurrency();
+
 const deleteCustomer = () => {
     router.delete(`/admin/customers/${props.customer.id}`, {
         onSuccess: () => {
@@ -79,10 +83,7 @@ const deleteCustomer = () => {
 };
 
 const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat('en-US', {
-        style: 'currency',
-        currency: 'USD',
-    }).format(amount);
+    return formatPrice(amount);
 };
 
 const formatDate = (dateString: string) => {
@@ -303,6 +304,26 @@ const formatDateTime = (dateString: string) => {
 
                     <!-- Addresses Tab -->
                     <div v-if="activeTab === 'addresses'">
+                        <div class="mb-4 flex justify-between items-center">
+                            <Link
+                                :href="`/admin/customers/${customer.id}/addresses`"
+                                class="inline-flex items-center px-4 py-2 border border-gray-300 text-gray-700 text-sm font-medium rounded-lg hover:bg-gray-50"
+                            >
+                                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 10h16M4 14h16M4 18h16" />
+                                </svg>
+                                Manage All Addresses
+                            </Link>
+                            <Link
+                                :href="`/admin/customers/${customer.id}/addresses/create`"
+                                class="inline-flex items-center px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700"
+                            >
+                                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+                                </svg>
+                                Add Address
+                            </Link>
+                        </div>
                         <div v-if="customer.addresses && customer.addresses.length > 0" class="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <div
                                 v-for="address in customer.addresses"
@@ -310,19 +331,27 @@ const formatDateTime = (dateString: string) => {
                                 class="border border-gray-200 rounded-lg p-4"
                             >
                                 <div class="flex items-center justify-between mb-3">
-                                    <span class="text-sm font-medium text-gray-900 capitalize">{{ address.address_type }}</span>
-                                    <span
-                                        v-if="address.is_default"
-                                        class="px-2 py-1 text-xs font-medium bg-blue-100 text-blue-800 rounded"
-                                    >
-                                        Default
-                                    </span>
+                                    <span class="text-sm font-medium text-gray-900 capitalize">{{ address.type }}</span>
+                                    <div class="flex gap-2">
+                                        <span
+                                            v-if="address.is_default_shipping"
+                                            class="px-2 py-1 text-xs font-medium bg-blue-100 text-blue-800 rounded"
+                                        >
+                                            Default Shipping
+                                        </span>
+                                        <span
+                                            v-if="address.is_default_billing"
+                                            class="px-2 py-1 text-xs font-medium bg-green-100 text-green-800 rounded"
+                                        >
+                                            Default Billing
+                                        </span>
+                                    </div>
                                 </div>
                                 <div class="text-sm text-gray-700 space-y-1">
                                     <p class="font-medium">{{ address.first_name }} {{ address.last_name }}</p>
                                     <p v-if="address.company">{{ address.company }}</p>
-                                    <p>{{ address.street_address_1 }}</p>
-                                    <p v-if="address.street_address_2">{{ address.street_address_2 }}</p>
+                                    <p>{{ address.address_line_1 }}</p>
+                                    <p v-if="address.address_line_2">{{ address.address_line_2 }}</p>
                                     <p>{{ address.city }}, {{ address.state }} {{ address.postal_code }}</p>
                                     <p>{{ address.country }}</p>
                                     <p v-if="address.phone" class="pt-2">{{ address.phone }}</p>

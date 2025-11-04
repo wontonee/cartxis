@@ -13,7 +13,7 @@ class CustomerMenuSeeder extends Seeder
     public function run(): void
     {
         // Create parent Customers menu item
-        $customerMenu = MenuItem::firstOrCreate(
+        $customerMenu = MenuItem::updateOrCreate(
             [
                 'key' => 'customers',
                 'location' => 'admin',
@@ -24,7 +24,7 @@ class CustomerMenuSeeder extends Seeder
                 'route' => null,
                 'url' => null,
                 'parent_id' => null,
-                'order' => 30, // After Dashboard and Catalog
+                'order' => 40,
                 'permission' => null,
                 'active' => true,
                 'extension_code' => 'vortex_customer',
@@ -34,25 +34,27 @@ class CustomerMenuSeeder extends Seeder
         // Create child menu items
         $childItems = [
             [
-                'key' => 'customers.all',
+                'key' => 'customers-all',
                 'title' => 'All Customers',
                 'icon' => 'user',
                 'route' => 'admin.customers.index',
                 'url' => null,
-                'order' => 1,
+                'order' => 10,
+                'permission' => null,
             ],
             [
-                'key' => 'customers.groups',
+                'key' => 'customers-groups',
                 'title' => 'Customer Groups',
                 'icon' => 'users',
-                'route' => 'admin.customer-groups.index',
+                'route' => 'admin.customers.groups.index',
                 'url' => null,
-                'order' => 2,
+                'order' => 20,
+                'permission' => null,
             ],
         ];
 
         foreach ($childItems as $item) {
-            MenuItem::firstOrCreate(
+            MenuItem::updateOrCreate(
                 [
                     'key' => $item['key'],
                     'location' => 'admin',
@@ -64,11 +66,13 @@ class CustomerMenuSeeder extends Seeder
                     'url' => $item['url'],
                     'parent_id' => $customerMenu->id,
                     'order' => $item['order'],
-                    'permission' => null,
+                    'permission' => $item['permission'],
                     'active' => true,
                     'extension_code' => 'vortex_customer',
                 ]
             );
         }
+
+        $this->command->info('✓ Customer menu items seeded successfully!');
     }
 }

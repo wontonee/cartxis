@@ -50,9 +50,12 @@ class Setting extends Model
      */
     public function setValueAttribute($value): void
     {
-        $this->attributes['value'] = match ($this->type) {
+        // Get type from attributes if it exists, otherwise treat as string
+        $type = $this->attributes['type'] ?? 'string';
+        
+        $this->attributes['value'] = match ($type) {
             'boolean' => (int) $value,
-            'json', 'array' => json_encode($value),
+            'json', 'array' => is_string($value) ? $value : json_encode($value),
             default => $value,
         };
     }

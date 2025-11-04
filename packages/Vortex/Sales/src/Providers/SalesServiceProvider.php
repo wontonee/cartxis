@@ -38,7 +38,7 @@ class SalesServiceProvider extends ServiceProvider
     {
         if (class_exists(\Vortex\Core\Models\MenuItem::class)) {
             // Register Sales parent menu
-            \Vortex\Core\Models\MenuItem::firstOrCreate(
+            $salesMenu = \Vortex\Core\Models\MenuItem::firstOrCreate(
                 ['key' => 'sales', 'location' => 'admin'],
                 [
                     'title' => 'Sales',
@@ -58,7 +58,7 @@ class SalesServiceProvider extends ServiceProvider
                     'icon' => 'ki-outline ki-package',
                     'route' => 'admin.sales.orders.index',
                     'order' => 10,
-                    'parent_id' => 3, // Sales parent menu ID
+                    'parent_id' => $salesMenu->id,
                     'active' => true,
                     'permission' => 'admin.orders.view',
                 ]
@@ -72,7 +72,7 @@ class SalesServiceProvider extends ServiceProvider
                     'icon' => 'ki-outline ki-file-sheet',
                     'route' => 'admin.sales.invoices.index',
                     'order' => 20,
-                    'parent_id' => 3, // Sales parent menu ID
+                    'parent_id' => $salesMenu->id,
                     'active' => true,
                     'permission' => 'admin.invoices.view',
                 ]
@@ -86,7 +86,7 @@ class SalesServiceProvider extends ServiceProvider
                     'icon' => 'package',
                     'route' => 'admin.sales.shipments.index',
                     'order' => 30,
-                    'parent_id' => 3, // Sales parent menu ID
+                    'parent_id' => $salesMenu->id,
                     'active' => true,
                     'permission' => null,
                 ]
@@ -100,7 +100,7 @@ class SalesServiceProvider extends ServiceProvider
                     'icon' => 'receipt',
                     'route' => 'admin.sales.credit-memos.index',
                     'order' => 40,
-                    'parent_id' => 3, // Sales parent menu ID
+                    'parent_id' => $salesMenu->id,
                     'active' => true,
                     'permission' => null,
                 ]
@@ -114,7 +114,7 @@ class SalesServiceProvider extends ServiceProvider
                     'icon' => 'credit-card',
                     'route' => 'admin.sales.transactions.index',
                     'order' => 50,
-                    'parent_id' => 3, // Sales parent menu ID
+                    'parent_id' => $salesMenu->id,
                     'active' => true,
                     'permission' => null,
                 ]

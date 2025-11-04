@@ -31,29 +31,13 @@ class CustomerServiceProvider extends ServiceProvider
         $this->registerAdminMenuItems();
     }
 
-    /**
-     * Register admin menu items.
+        /**
+     * Register admin menu items
+     * Note: Menu items are seeded via CustomerMenuSeeder during database seeding
      */
     protected function registerAdminMenuItems(): void
     {
-        if (config('admin.menu_items')) {
-            config(['admin.menu_items' => array_merge(config('admin.menu_items', []), [
-                [
-                    'label' => 'Customers',
-                    'icon' => 'Users',
-                    'route' => null,
-                    'children' => [
-                        [
-                            'label' => 'All Customers',
-                            'route' => 'admin.customers.index',
-                        ],
-                        [
-                            'label' => 'Customer Groups',
-                            'route' => 'admin.customer-groups.index',
-                        ],
-                    ],
-                ],
-            ])]);
-        }
+        // Menu items are managed via database seeding (CustomerMenuSeeder)
+        // This method is kept for potential dynamic menu registration in the future
     }
 }

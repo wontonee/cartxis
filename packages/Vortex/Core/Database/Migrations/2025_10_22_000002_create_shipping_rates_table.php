@@ -32,7 +32,7 @@ return new class extends Migration
                 $table->index('state');
                 $table->index(['country', 'state']);
                 $table->index('status');
-                $table->unique(['shipping_method_id', 'country', 'state', 'min_weight', 'max_weight']);
+                $table->unique(['shipping_method_id', 'country', 'state', 'min_weight', 'max_weight'], 'shipping_rates_unique');
             });
         }
     }

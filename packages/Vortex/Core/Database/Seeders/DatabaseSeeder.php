@@ -1,6 +1,8 @@
 <?php
 
-namespace Database\Seeders;
+declare(strict_types=1);
+
+namespace Vortex\Core\Database\Seeders;
 
 use Illuminate\Database\Seeder;
 use Vortex\Admin\Database\Seeders\AdminUserSeeder;
@@ -15,6 +17,7 @@ use Vortex\Shop\Database\Seeders\ThemeSeeder;
 use Vortex\Core\Database\Seeders\PaymentMethodsTableSeeder;
 use Vortex\Core\Database\Seeders\ChannelSeeder;
 use Vortex\Core\Database\Seeders\ShippingMethodSeeder;
+use Vortex\Customer\Database\Seeders\CustomerMenuSeeder;
 
 class DatabaseSeeder extends Seeder
 {
@@ -47,6 +50,9 @@ class DatabaseSeeder extends Seeder
 
             // Shipping Methods Seeder
             ShippingMethodSeeder::class,
+
+            // Customer Package Seeders
+            CustomerMenuSeeder::class,
         ]);
     }
 }

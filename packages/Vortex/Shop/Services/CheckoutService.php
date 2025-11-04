@@ -8,6 +8,7 @@ use Vortex\Shop\Models\OrderItem;
 use Vortex\Shop\Models\Address;
 use Vortex\Product\Models\Product;
 use Vortex\Customer\Models\Customer;
+use Vortex\Customer\Models\CustomerAddress;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Session;
@@ -138,11 +139,21 @@ class CheckoutService extends ShopService
             // Create shipping address
             if (isset($data['shipping_address'])) {
                 $this->createAddress($order, $data['shipping_address'], Address::TYPE_SHIPPING);
+                
+                // Save to customer address book if this is their first order
+                if ($customerId) {
+                    $this->saveToCustomerAddressBook($customerId, $data['shipping_address'], 'shipping');
+                }
             }
 
             // Create billing address
             if (isset($data['billing_address'])) {
                 $this->createAddress($order, $data['billing_address'], Address::TYPE_BILLING);
+                
+                // Save to customer address book if this is their first order
+                if ($customerId) {
+                    $this->saveToCustomerAddressBook($customerId, $data['billing_address'], 'billing');
+                }
             } elseif (isset($data['shipping_address']) && ($data['same_as_shipping'] ?? false)) {
                 // Use shipping address as billing if specified
                 $this->createAddress($order, $data['shipping_address'], Address::TYPE_BILLING);
@@ -266,6 +277,44 @@ class CheckoutService extends ShopService
             'country' => $addressData['country'],
             'phone' => $addressData['phone'] ?? null,
             'email' => $addressData['email'] ?? null,
+        ]);
+    }
+
+    /**
+     * Save address to customer's address book.
+     * Only saves if customer has no saved addresses yet (first order).
+     *
+     * @param  int  $customerId
+     * @param  array  $addressData
+     * @param  string  $type
+     * @return void
+     */
+    protected function saveToCustomerAddressBook(int $customerId, array $addressData, string $type): void
+    {
+        // Check if customer already has saved addresses
+        $hasAddresses = CustomerAddress::where('customer_id', $customerId)->exists();
+        
+        if ($hasAddresses) {
+            // Customer already has saved addresses, don't auto-save
+            return;
+        }
+
+        // This is customer's first order, save the address for future use
+        CustomerAddress::create([
+            'customer_id' => $customerId,
+            'type' => $type,
+            'first_name' => $addressData['first_name'],
+            'last_name' => $addressData['last_name'],
+            'company' => $addressData['company'] ?? null,
+            'address_line_1' => $addressData['address_line1'],
+            'address_line_2' => $addressData['address_line2'] ?? null,
+            'city' => $addressData['city'],
+            'state' => $addressData['state'],
+            'postal_code' => $addressData['postal_code'],
+            'country' => $addressData['country'],
+            'phone' => $addressData['phone'] ?? null,
+            'is_default_shipping' => $type === 'shipping',
+            'is_default_billing' => $type === 'billing',
         ]);
     }
 

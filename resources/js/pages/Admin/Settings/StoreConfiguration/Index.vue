@@ -112,6 +112,19 @@ const form = useForm({
 const save = () => {
   form.post('/admin/settings/store', {
     preserveScroll: true,
+    onSuccess: () => {
+      // Toast notification will be shown automatically via flash message
+      console.log('Store configuration saved successfully');
+    },
+    onError: (errors) => {
+      console.error('Validation errors:', errors);
+      // Show first error in toast
+      const firstError = Object.values(errors)[0];
+      if (firstError) {
+        // The error will be shown via Inertia's error handling
+        console.error('First error:', firstError);
+      }
+    },
   })
 }
 </script>

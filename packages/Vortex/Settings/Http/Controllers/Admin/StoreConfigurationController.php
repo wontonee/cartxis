@@ -4,6 +4,7 @@ namespace Vortex\Settings\Http\Controllers\Admin;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Redirect;
+use Illuminate\Support\Facades\Log;
 use Inertia\Inertia;
 use Inertia\Response;
 use Vortex\Core\Services\SettingService;
@@ -70,56 +71,73 @@ class StoreConfigurationController
 
     public function save(Request $request)
     {
-        $validated = $request->validate([
-            // Store Details
-            'store_name' => 'required|string|max:255',
-            'store_description' => 'nullable|string',
-            'business_registration' => 'nullable|string|max:255',
-            'vat_number' => 'nullable|string|max:255',
-            'store_license' => 'nullable|string|max:255',
-            
-            // Contact Information
-            'store_email' => 'required|email|max:255',
-            'support_email' => 'nullable|email|max:255',
-            'store_phone' => 'required|string|max:50',
-            'store_phone_alt' => 'nullable|string|max:50',
-            'store_whatsapp' => 'nullable|string|max:50',
-            
-            // Address Information
-            'store_address_1' => 'required|string|max:255',
-            'store_address_2' => 'nullable|string|max:255',
-            'store_city' => 'required|string|max:100',
-            'store_state' => 'required|string|max:100',
-            'store_postal_code' => 'required|string|max:20',
-            'store_country' => 'required|string|max:100',
-            
-            // Store Timezone
-            'store_timezone' => 'required|string|max:50',
-            
-            // Social Media
-            'social_facebook' => 'nullable|url|max:255',
-            'social_instagram' => 'nullable|url|max:255',
-            'social_twitter' => 'nullable|url|max:255',
-            'social_linkedin' => 'nullable|url|max:255',
-            'social_youtube' => 'nullable|url|max:255',
-            'social_tiktok' => 'nullable|url|max:255',
-            'social_pinterest' => 'nullable|url|max:255',
-            
-            // Policies
-            'policy_privacy' => 'nullable|string',
-            'policy_terms' => 'nullable|string',
-            'policy_return' => 'nullable|string',
-            'policy_shipping' => 'nullable|string',
-            
-            // Checkout Options
-            'checkout_allow_guest' => 'nullable|boolean',
-            'checkout_require_account' => 'nullable|boolean',
-        ]);
+        try {
+            $validated = $request->validate([
+                // Store Details
+                'store_name' => 'required|string|max:255',
+                'store_description' => 'nullable|string',
+                'business_registration' => 'nullable|string|max:255',
+                'vat_number' => 'nullable|string|max:255',
+                'store_license' => 'nullable|string|max:255',
+                
+                // Contact Information
+                'store_email' => 'required|email|max:255',
+                'support_email' => 'nullable|email|max:255',
+                'store_phone' => 'required|string|max:50',
+                'store_phone_alt' => 'nullable|string|max:50',
+                'store_whatsapp' => 'nullable|string|max:50',
+                
+                // Address Information
+                'store_address_1' => 'required|string|max:255',
+                'store_address_2' => 'nullable|string|max:255',
+                'store_city' => 'required|string|max:100',
+                'store_state' => 'required|string|max:100',
+                'store_postal_code' => 'required|string|max:20',
+                'store_country' => 'required|string|max:100',
+                
+                // Store Timezone
+                'store_timezone' => 'required|string|max:50',
+                
+                // Social Media
+                'social_facebook' => 'nullable|url|max:255',
+                'social_instagram' => 'nullable|url|max:255',
+                'social_twitter' => 'nullable|url|max:255',
+                'social_linkedin' => 'nullable|url|max:255',
+                'social_youtube' => 'nullable|url|max:255',
+                'social_tiktok' => 'nullable|url|max:255',
+                'social_pinterest' => 'nullable|url|max:255',
+                
+                // Policies
+                'policy_privacy' => 'nullable|string',
+                'policy_terms' => 'nullable|string',
+                'policy_return' => 'nullable|string',
+                'policy_shipping' => 'nullable|string',
+                
+                // Checkout Options
+                'checkout_allow_guest' => 'nullable|boolean',
+                'checkout_require_account' => 'nullable|boolean',
+            ]);
 
-        foreach ($validated as $key => $value) {
-            $this->settingService->set($key, $value, 'string', 'store');
+            foreach ($validated as $key => $value) {
+                // Determine the appropriate type for each setting
+                $type = match(true) {
+                    in_array($key, ['checkout_allow_guest', 'checkout_require_account']) => 'boolean',
+                    is_bool($value) => 'boolean',
+                    is_int($value) => 'integer',
+                    is_float($value) => 'float',
+                    is_array($value) => 'json',
+                    default => 'string',
+                };
+                
+                $this->settingService->set($key, $value, $type, 'store');
+            }
+
+            return redirect()->route('admin.settings.store.index')->with('success', 'Store configuration saved successfully.');
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            return redirect()->back()->withErrors($e->errors())->withInput();
+        } catch (\Exception $e) {
+            Log::error('Store configuration save error: ' . $e->getMessage());
+            return redirect()->back()->with('error', 'Failed to save store configuration. Please try again.');
         }
-
-        return back()->with('success', 'Store configuration saved successfully.');
     }
 }

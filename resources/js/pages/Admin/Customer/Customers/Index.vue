@@ -4,6 +4,7 @@ import AdminLayout from '@/layouts/AdminLayout.vue';
 import Pagination from '@/components/Admin/Pagination.vue';
 import { ref, computed } from 'vue';
 import { debounce } from 'lodash';
+import { useCurrency } from '@/composables/useCurrency';
 
 interface CustomerGroup {
   id: number;
@@ -189,11 +190,10 @@ function exportCustomers() {
   window.location.href = `/admin/customers/export/csv?${params.toString()}`;
 }
 
+const { formatPrice } = useCurrency();
+
 function formatCurrency(amount: number): string {
-  return new Intl.NumberFormat('en-US', {
-    style: 'currency',
-    currency: 'USD',
-  }).format(amount);
+  return formatPrice(amount);
 }
 
 function formatDate(dateString: string): string {
@@ -441,6 +441,29 @@ function formatDate(dateString: string): string {
           </tr>
         </thead>
         <tbody class="bg-white divide-y divide-gray-200">
+          <!-- Empty State -->
+          <tr v-if="customers.data.length === 0">
+            <td colspan="9" class="px-6 py-12 text-center">
+              <div class="flex flex-col items-center justify-center">
+                <svg class="w-16 h-16 text-gray-400 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                </svg>
+                <h3 class="text-lg font-medium text-gray-900 mb-1">No customers found</h3>
+                <p class="text-gray-500 mb-4">Get started by creating your first customer.</p>
+                <Link
+                  href="/admin/customers/create"
+                  class="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                >
+                  <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                  </svg>
+                  Add Customer
+                </Link>
+              </div>
+            </td>
+          </tr>
+          
+          <!-- Customer Rows -->
           <tr v-for="customer in customers.data" :key="customer.id" class="hover:bg-gray-50">
             <td class="px-6 py-4">
               <input

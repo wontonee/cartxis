@@ -12,7 +12,7 @@ class PaymentMethodsTableSeeder extends Seeder
      */
     public function run(): void
     {
-        DB::table('payment_methods')->insert([
+        $paymentMethods = [
             // Cash on Delivery
             [
                 'code' => 'cod',
@@ -89,6 +89,13 @@ class PaymentMethodsTableSeeder extends Seeder
                 'created_at' => now(),
                 'updated_at' => now(),
             ],
-        ]);
+        ];
+
+        foreach ($paymentMethods as $method) {
+            DB::table('payment_methods')->updateOrInsert(
+                ['code' => $method['code']],
+                $method
+            );
+        }
     }
 }

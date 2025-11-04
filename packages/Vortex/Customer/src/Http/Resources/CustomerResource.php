@@ -51,7 +51,29 @@ class CustomerResource extends JsonResource
             'last_order_date' => $this->last_order_date?->format('Y-m-d H:i:s'),
             'notes' => $this->notes,
             'addresses' => $this->whenLoaded('addresses', function () {
-                return CustomerAddressResource::collection($this->addresses);
+                return $this->addresses->map(function ($address) {
+                    return [
+                        'id' => $address->id,
+                        'customer_id' => $address->customer_id,
+                        'type' => $address->type,
+                        'first_name' => $address->first_name,
+                        'last_name' => $address->last_name,
+                        'full_name' => $address->full_name,
+                        'company' => $address->company,
+                        'address_line_1' => $address->address_line_1,
+                        'address_line_2' => $address->address_line_2,
+                        'city' => $address->city,
+                        'state' => $address->state,
+                        'postal_code' => $address->postal_code,
+                        'country' => $address->country,
+                        'phone' => $address->phone,
+                        'is_default_shipping' => $address->is_default_shipping,
+                        'is_default_billing' => $address->is_default_billing,
+                        'formatted_address' => $address->formatted_address,
+                        'created_at' => $address->created_at->format('Y-m-d H:i:s'),
+                        'updated_at' => $address->updated_at->format('Y-m-d H:i:s'),
+                    ];
+                });
             }),
             'customer_notes' => $this->whenLoaded('notes', function () {
                 return $this->notes->map(function ($note) {

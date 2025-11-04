@@ -177,11 +177,12 @@ class CustomerGroupController extends Controller
      */
     public function destroy(CustomerGroup $group): RedirectResponse
     {
-        // Prevent deletion if group has customers
-        if ($group->customers()->count() > 0) {
+        // Prevent deletion if group has customers (including soft-deleted)
+        $customersCount = $group->customers()->withTrashed()->count();
+        if ($customersCount > 0) {
             return redirect()
                 ->back()
-                ->with('error', "Cannot delete '{$group->name}' because it has {$group->customers()->count()} customer(s). Please reassign or delete the customers first.");
+                ->with('error', "Cannot delete '{$group->name}' because it has {$customersCount} customer(s) (including soft-deleted). Please reassign or permanently delete the customers first.");
         }
         
         // Prevent deletion of default group
@@ -307,8 +308,8 @@ class CustomerGroupController extends Controller
             $errors = [];
             
             foreach ($groups as $group) {
-                // Check if group has customers
-                if ($group->customers()->count() > 0) {
+                // Check if group has customers including soft-deleted
+                if ($group->customers()->withTrashed()->count() > 0) {
                     $errors[] = "'{$group->name}' has customers";
                     continue;
                 }
