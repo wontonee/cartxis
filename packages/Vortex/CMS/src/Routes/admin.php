@@ -6,23 +6,10 @@ use Illuminate\Support\Facades\Route;
 use Vortex\CMS\Http\Controllers\Admin\PagesController;
 use Vortex\CMS\Http\Controllers\Admin\MediaController;
 use Vortex\CMS\Http\Controllers\Admin\FolderController;
-use Vortex\CMS\Http\Controllers\Admin\AdminMenuController;
+use Vortex\CMS\Http\Controllers\Admin\StorefrontMenuController;
 
 // CMS Admin Routes
 Route::middleware(['web', 'auth:admin'])->prefix('admin')->name('admin.')->group(function () {
-    // System Management
-    Route::prefix('system')->name('system.')->group(function () {
-        // Admin Menu Management
-        Route::prefix('menus')->name('menus.')->group(function () {
-            Route::get('/', [AdminMenuController::class, 'index'])->name('index');
-            Route::post('/', [AdminMenuController::class, 'store'])->name('store');
-            Route::put('/{adminMenu}', [AdminMenuController::class, 'update'])->name('update');
-            Route::delete('/{adminMenu}', [AdminMenuController::class, 'destroy'])->name('destroy');
-            Route::post('/reorder', [AdminMenuController::class, 'reorder'])->name('reorder');
-            Route::post('/{adminMenu}/toggle', [AdminMenuController::class, 'toggleActive'])->name('toggle');
-        });
-    });
-
     Route::prefix('content')->name('content.')->group(function () {
         // Pages Management
         Route::prefix('pages')->name('pages.')->group(function () {
@@ -53,6 +40,16 @@ Route::middleware(['web', 'auth:admin'])->prefix('admin')->name('admin.')->group
             Route::post('/', [FolderController::class, 'store'])->name('store');
             Route::put('/{folder}', [FolderController::class, 'update'])->name('update');
             Route::delete('/{folder}', [FolderController::class, 'destroy'])->name('destroy');
+        });
+
+        // Storefront Menus
+        Route::prefix('storefront-menus')->name('storefront-menus.')->group(function () {
+            Route::get('/', [StorefrontMenuController::class, 'index'])->name('index');
+            Route::post('/', [StorefrontMenuController::class, 'store'])->name('store');
+            Route::put('/{menuItem}', [StorefrontMenuController::class, 'update'])->name('update');
+            Route::delete('/{menuItem}', [StorefrontMenuController::class, 'destroy'])->name('destroy');
+            Route::post('/reorder', [StorefrontMenuController::class, 'reorder'])->name('reorder');
+            Route::post('/{menuItem}/toggle', [StorefrontMenuController::class, 'toggle'])->name('toggle');
         });
     });
 });

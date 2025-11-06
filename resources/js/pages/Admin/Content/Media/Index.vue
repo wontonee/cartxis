@@ -290,7 +290,7 @@ const handleUploadError = (message: string) => {
 <template>
     <Head title="Media Library" />
 
-    <AdminLayout>
+    <AdminLayout title="Media Library">
         <div class="flex gap-6">
             <!-- Sidebar - Folder Tree -->
             <div class="w-64 flex-shrink-0 space-y-4">

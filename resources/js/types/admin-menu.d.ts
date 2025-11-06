@@ -1,31 +1,51 @@
-export interface AdminMenuItem {
+/**
+ * MenuItem interface matching Vortex\Core\Models\MenuItem
+ * Used for admin menu management
+ */
+export interface MenuItem {
     id: number;
-    name: string;
+    key: string | null;
+    title: string;
     icon: string | null;
     route: string | null;
     url: string | null;
     parent_id: number | null;
-    sort_order: number;
-    is_active: boolean;
+    order: number;
+    permission: string | null;
+    location: 'admin' | 'storefront';
+    active: boolean;
+    meta: Record<string, any> | null;
+    extension_code: string | null;
     created_at: string;
     updated_at: string;
-    deleted_at: string | null;
-    parent?: AdminMenuItem;
-    children?: AdminMenuItem[];
+    full_url?: string;
+    parent?: MenuItem;
+    children?: MenuItem[];
 }
 
-export interface AdminMenuFormData {
-    name: string;
+/**
+ * Form data for creating/updating menu items
+ */
+export interface MenuFormData {
+    key?: string;
+    title: string;
     icon: string | null;
     route: string | null;
     url: string | null;
     parent_id: number | null;
-    sort_order: number;
-    is_active: boolean;
+    order: number;
+    permission: string | null;
+    location: 'admin' | 'storefront';
+    active: boolean;
+    meta?: Record<string, any>;
+    extension_code?: string;
 }
 
-export interface AdminMenuReorderItem {
+/**
+ * Reorder item structure for drag-drop
+ */
+export interface MenuReorderItem {
     id: number;
-    sort_order: number;
+    order: number;
     parent_id: number | null;
 }

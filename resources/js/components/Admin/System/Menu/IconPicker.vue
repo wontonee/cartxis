@@ -1,9 +1,11 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue';
 import {
-    LayoutDashboard, Package, ShoppingCart, Users, TrendingUp,
-    FileText, BarChart3, Settings, Server, FolderOpen, Image,
-    Menu, X, Search, Check
+    LayoutDashboard, Package, ShoppingCart, ShoppingBag, Users, TrendingUp,
+    FileText, BarChart3, Settings, Server, FolderOpen, FolderTree, Image,
+    Menu, X, Search, Check, ListChecks, Tag, Star, Truck, Receipt,
+    CreditCard, Megaphone, Ticket, Mail, Globe, BookOpen, Newspaper,
+    Wrench, Store, Flag, Laptop, Percent, Clock, Shield
 } from 'lucide-vue-next';
 
 interface Props {
@@ -24,6 +26,7 @@ const searchQuery = ref('');
 const availableIcons = [
     { name: 'layout-dashboard', label: 'Dashboard', component: LayoutDashboard },
     { name: 'package', label: 'Package', component: Package },
+    { name: 'shopping-bag', label: 'Shopping Bag', component: ShoppingBag },
     { name: 'shopping-cart', label: 'Shopping Cart', component: ShoppingCart },
     { name: 'users', label: 'Users', component: Users },
     { name: 'trending-up', label: 'Trending Up', component: TrendingUp },
@@ -32,7 +35,27 @@ const availableIcons = [
     { name: 'settings', label: 'Settings', component: Settings },
     { name: 'server', label: 'Server', component: Server },
     { name: 'folder-open', label: 'Folder', component: FolderOpen },
+    { name: 'folder-tree', label: 'Folder Tree', component: FolderTree },
+    { name: 'list-checks', label: 'List Checks', component: ListChecks },
+    { name: 'tag', label: 'Tag', component: Tag },
+    { name: 'star', label: 'Star', component: Star },
+    { name: 'truck', label: 'Truck', component: Truck },
+    { name: 'receipt', label: 'Receipt', component: Receipt },
+    { name: 'credit-card', label: 'Credit Card', component: CreditCard },
+    { name: 'megaphone', label: 'Megaphone', component: Megaphone },
+    { name: 'ticket', label: 'Ticket', component: Ticket },
+    { name: 'mail', label: 'Mail', component: Mail },
+    { name: 'globe', label: 'Globe', component: Globe },
+    { name: 'book-open', label: 'Book Open', component: BookOpen },
+    { name: 'newspaper', label: 'Newspaper', component: Newspaper },
     { name: 'image', label: 'Image', component: Image },
+    { name: 'wrench', label: 'Wrench', component: Wrench },
+    { name: 'shop', label: 'Shop', component: Store },
+    { name: 'flag', label: 'Flag', component: Flag },
+    { name: 'devices', label: 'Devices', component: Laptop },
+    { name: 'percent', label: 'Percent', component: Percent },
+    { name: 'clock', label: 'Clock', component: Clock },
+    { name: 'shield', label: 'Shield', component: Shield },
     { name: 'menu', label: 'Menu', component: Menu },
 ];
 

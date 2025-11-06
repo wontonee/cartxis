@@ -31,6 +31,9 @@ import {
   Flag,
   Smartphone,
   Percent,
+  List,
+  Clock,
+  Menu,
 } from 'lucide-vue-next'
 
 export interface IconMap {
@@ -71,6 +74,9 @@ export function useMenuIcons() {
     'flag': Flag,
     'devices': Smartphone,
     'percent': Percent,
+    'list': List,
+    'clock': Clock,
+    'menu': Menu,
   }
 
   const getIcon = (iconName: string): Component | null => {

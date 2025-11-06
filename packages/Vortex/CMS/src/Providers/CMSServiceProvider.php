@@ -79,6 +79,22 @@ class CMSServiceProvider extends ServiceProvider
                 ]);
             }
 
+            // Create Storefront Menu item if it doesn't exist
+            $storefrontMenuItem = MenuItem::where('key', 'content.storefront-menus')->first();
+            
+            if (!$storefrontMenuItem) {
+                MenuItem::create([
+                    'parent_id' => $contentMenu->id,
+                    'key' => 'content.storefront-menus',
+                    'title' => 'Storefront Menu',
+                    'icon' => 'menu',
+                    'route' => 'admin.content.storefront-menus.index',
+                    'location' => 'admin',
+                    'order' => 20,
+                    'active' => true,
+                ]);
+            }
+
             // Pages menu is now managed by AdminMenuSeeder
             // No need to auto-create it here
 
