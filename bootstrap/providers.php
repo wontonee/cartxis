@@ -14,4 +14,5 @@ return [
     Vortex\Stripe\Providers\StripeServiceProvider::class,
     Vortex\Sales\Providers\SalesServiceProvider::class,
     Vortex\Customer\Providers\CustomerServiceProvider::class,
+    Vortex\CMS\Providers\CMSServiceProvider::class,
 ];

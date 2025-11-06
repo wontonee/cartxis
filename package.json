@@ -31,10 +31,15 @@
     },
     "dependencies": {
         "@inertiajs/vue3": "^2.1.0",
-        "@tiptap/extension-image": "^3.6.6",
-        "@tiptap/extension-link": "^3.6.6",
-        "@tiptap/starter-kit": "^3.6.6",
-        "@tiptap/vue-3": "^3.6.6",
+        "@tiptap/extension-character-count": "^3.10.1",
+        "@tiptap/extension-color": "^3.10.1",
+        "@tiptap/extension-highlight": "^3.10.1",
+        "@tiptap/extension-image": "^3.10.1",
+        "@tiptap/extension-link": "^3.10.1",
+        "@tiptap/extension-text-align": "^3.10.1",
+        "@tiptap/extension-underline": "^3.10.1",
+        "@tiptap/starter-kit": "^3.10.1",
+        "@tiptap/vue-3": "^3.10.1",
         "@vueuse/core": "^12.8.2",
         "class-variance-authority": "^0.7.1",
         "clsx": "^2.1.1",
@@ -45,7 +50,8 @@
         "tailwind-merge": "^3.2.0",
         "tailwindcss": "^4.1.1",
         "tw-animate-css": "^1.2.5",
-        "vue": "^3.5.13"
+        "vue": "^3.5.13",
+        "vuedraggable": "^4.1.0"
     },
     "optionalDependencies": {
         "@rollup/rollup-linux-x64-gnu": "4.9.5",
