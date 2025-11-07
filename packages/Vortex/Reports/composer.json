@@ -1,0 +1,22 @@
+{
+    "name": "vortex/reports",
+    "description": "Reports and Analytics Module for Vortex E-commerce Platform",
+    "type": "library",
+    "license": "MIT",
+    "autoload": {
+        "psr-4": {
+            "Vortex\\Reports\\": "src/"
+        }
+    },
+    "require": {
+        "php": "^8.2",
+        "laravel/framework": "^11.0"
+    },
+    "extra": {
+        "laravel": {
+            "providers": [
+                "Vortex\\Reports\\ReportsServiceProvider"
+            ]
+        }
+    }
+}

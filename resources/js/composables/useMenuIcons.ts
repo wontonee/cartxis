@@ -34,6 +34,7 @@ import {
   List,
   Clock,
   Menu,
+  Box,
 } from 'lucide-vue-next'
 
 export interface IconMap {
@@ -77,6 +78,7 @@ export function useMenuIcons() {
     'list': List,
     'clock': Clock,
     'menu': Menu,
+    'box': Box,
   }
 
   const getIcon = (iconName: string): Component | null => {

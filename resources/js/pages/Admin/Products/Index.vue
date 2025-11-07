@@ -2,6 +2,7 @@
 import { Head, router, Link } from '@inertiajs/vue3';
 import AdminLayout from '@/Layouts/AdminLayout.vue';
 import Pagination from '@/components/Admin/Pagination.vue';
+import ConfirmDeleteModal from '@/components/Admin/ConfirmDeleteModal.vue';
 import ProductQuickView from '@/Components/Admin/ProductQuickView.vue';
 import { ref, computed } from 'vue';
 import { debounce } from 'lodash';
@@ -55,6 +56,7 @@ const props = defineProps<Props>();
 const selectedProducts = ref<number[]>([]);
 const showDeleteModal = ref(false);
 const deleteProductId = ref<number | null>(null);
+const deletingProduct = ref<{ id: number; name: string } | null>(null);
 const showBulkDeleteModal = ref(false);
 
 // Quick View
@@ -129,16 +131,19 @@ function sortTable(column: string) {
 }
 
 function confirmDelete(productId: number) {
-  deleteProductId.value = productId;
-  showDeleteModal.value = true;
+  const product = props.products.data.find((p) => p.id === productId);
+  if (product) {
+    deletingProduct.value = { id: product.id, name: product.name };
+    showDeleteModal.value = true;
+  }
 }
 
 function deleteProduct() {
-  if (deleteProductId.value) {
-    router.delete(productRoutes.destroy({ product: deleteProductId.value }).url, {
+  if (deletingProduct.value) {
+    router.delete(productRoutes.destroy({ product: deletingProduct.value.id }).url, {
       onSuccess: () => {
         showDeleteModal.value = false;
-        deleteProductId.value = null;
+        deletingProduct.value = null;
       },
     });
   }
@@ -521,52 +526,20 @@ function formatDate(date: string): string {
       </div>
 
       <!-- Delete Confirmation Modal -->
-      <div v-if="showDeleteModal" class="fixed inset-0 bg-gray-500 bg-opacity-75 flex items-center justify-center z-50">
-        <div class="bg-white rounded-lg p-6 max-w-sm w-full mx-4">
-          <h3 class="text-lg font-medium text-gray-900 mb-4">Delete Product</h3>
-          <p class="text-sm text-gray-500 mb-6">
-            Are you sure you want to delete this product? This action cannot be undone.
-          </p>
-          <div class="flex gap-3 justify-end">
-            <button
-              @click="showDeleteModal = false"
-              class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50"
-            >
-              Cancel
-            </button>
-            <button
-              @click="deleteProduct"
-              class="px-4 py-2 text-sm font-medium text-white bg-red-600 rounded-md hover:bg-red-700"
-            >
-              Delete
-            </button>
-          </div>
-        </div>
-      </div>
+      <ConfirmDeleteModal
+        v-model:show="showDeleteModal"
+        :title="deletingProduct?.name ?? ''"
+        :message="`Are you sure you want to delete '${deletingProduct?.name}'? This action cannot be undone.`"
+        @confirm="deleteProduct"
+      />
 
       <!-- Bulk Delete Confirmation Modal -->
-      <div v-if="showBulkDeleteModal" class="fixed inset-0 bg-gray-500 bg-opacity-75 flex items-center justify-center z-50">
-        <div class="bg-white rounded-lg p-6 max-w-sm w-full mx-4">
-          <h3 class="text-lg font-medium text-gray-900 mb-4">Delete Products</h3>
-          <p class="text-sm text-gray-500 mb-6">
-            Are you sure you want to delete {{ selectedProducts.length }} product{{ selectedProducts.length > 1 ? 's' : '' }}? This action cannot be undone.
-          </p>
-          <div class="flex gap-3 justify-end">
-            <button
-              @click="showBulkDeleteModal = false"
-              class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50"
-            >
-              Cancel
-            </button>
-            <button
-              @click="bulkDelete"
-              class="px-4 py-2 text-sm font-medium text-white bg-red-600 rounded-md hover:bg-red-700"
-            >
-              Delete All
-            </button>
-          </div>
-        </div>
-      </div>
+      <ConfirmDeleteModal
+        v-model:show="showBulkDeleteModal"
+        title="Delete Multiple Products"
+        :message="`Are you sure you want to delete ${selectedProducts.length} product${selectedProducts.length > 1 ? 's' : ''}? This action cannot be undone.`"
+        @confirm="bulkDelete"
+      />
 
       <!-- Product Quick View Modal -->
       <ProductQuickView

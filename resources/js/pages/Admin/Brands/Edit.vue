@@ -2,6 +2,7 @@
 import { Head, Link, useForm, usePage } from '@inertiajs/vue3';
 import AdminLayout from '@/Layouts/AdminLayout.vue';
 import ImageUploader from '@/Components/Admin/ImageUploader.vue';
+import ConfirmDeleteModal from '@/components/Admin/ConfirmDeleteModal.vue';
 import { ref } from 'vue';
 import axios from 'axios';
 import { router } from '@inertiajs/vue3';
@@ -101,15 +102,11 @@ const submit = () => {
 
 // Delete brand
 const deleteBrand = () => {
-  isDeleting.value = true;
   router.delete(brandRoutes.destroy({ brand: props.brand.id }).url, {
     onSuccess: () => {
+      showDeleteModal.value = false;
       router.visit(brandRoutes.index().url);
     },
-    onFinish: () => {
-      isDeleting.value = false;
-      showDeleteModal.value = false;
-    }
   });
 };
 </script>
@@ -410,46 +407,12 @@ const deleteBrand = () => {
       </form>
 
       <!-- Delete Confirmation Modal -->
-      <Teleport to="body">
-        <div
-          v-if="showDeleteModal"
-          class="fixed inset-0 bg-gray-500 bg-opacity-75 flex items-center justify-center z-50"
-          @click.self="showDeleteModal = false"
-        >
-          <div class="bg-white rounded-lg shadow-xl max-w-md w-full mx-4 p-6">
-            <div class="flex items-start">
-              <div class="flex-shrink-0">
-                <svg class="h-6 w-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-                </svg>
-              </div>
-              <div class="ml-3 flex-1">
-                <h3 class="text-lg font-medium text-gray-900">Delete Brand</h3>
-                <p class="mt-2 text-sm text-gray-500">
-                  Are you sure you want to delete this brand? This action cannot be undone.
-                </p>
-              </div>
-            </div>
-            <div class="mt-5 flex justify-end space-x-3">
-              <button
-                type="button"
-                @click="showDeleteModal = false"
-                class="px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
-              >
-                Cancel
-              </button>
-              <button
-                type="button"
-                @click="deleteBrand"
-                :disabled="isDeleting"
-                class="px-4 py-2 bg-red-600 border border-transparent rounded-md text-sm font-medium text-white hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 disabled:opacity-50"
-              >
-                {{ isDeleting ? 'Deleting...' : 'Delete' }}
-              </button>
-            </div>
-          </div>
-        </div>
-      </Teleport>
+      <ConfirmDeleteModal
+        v-model:show="showDeleteModal"
+        :title="props.brand.name"
+        :message="`Are you sure you want to delete '${props.brand.name}'? This action cannot be undone.`"
+        @confirm="deleteBrand"
+      />
     </div>
   </AdminLayout>
 </template>

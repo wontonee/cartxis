@@ -6,7 +6,10 @@ namespace Vortex\CMS\Providers;
 
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Blade;
 use Vortex\Core\Models\MenuItem;
+use Vortex\CMS\Repositories\BlockRepository;
+use Vortex\CMS\Services\BlockService;
 
 class CMSServiceProvider extends ServiceProvider
 {
@@ -24,6 +27,8 @@ class CMSServiceProvider extends ServiceProvider
         // Register services
         $this->app->singleton(\Vortex\CMS\Services\PageService::class);
         $this->app->singleton(\Vortex\CMS\Repositories\PageRepository::class);
+        $this->app->singleton(\Vortex\CMS\Services\BlockService::class);
+        $this->app->singleton(\Vortex\CMS\Repositories\BlockRepository::class);
     }
 
     /**
@@ -43,8 +48,21 @@ class CMSServiceProvider extends ServiceProvider
             __DIR__ . '/../../config/cms.php' => config_path('cms.php'),
         ], 'cms-config');
 
+        // Register @block Blade directive
+        $this->registerBlockDirective();
+
         // Register admin menu items
         $this->registerAdminMenuItems();
+    }
+
+    /**
+     * Register @block Blade directive for rendering blocks.
+     */
+    protected function registerBlockDirective(): void
+    {
+        Blade::directive('block', function ($expression) {
+            return "<?php echo app(\Vortex\CMS\Services\BlockService::class)->renderBlock(app(\Vortex\CMS\Repositories\BlockRepository::class)->findByIdentifier({$expression})); ?>";
+        });
     }
 
     /**

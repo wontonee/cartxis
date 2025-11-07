@@ -2,6 +2,7 @@
 import { ref, computed, watch } from 'vue';
 import { Head, router, usePage } from '@inertiajs/vue3';
 import AdminLayout from '@/layouts/AdminLayout.vue';
+import ConfirmDeleteModal from '@/components/Admin/ConfirmDeleteModal.vue';
 import FolderTreeItem from '@/components/Admin/Media/FolderTreeItem.vue';
 import UploadDropzone from '@/components/Admin/Media/UploadDropzone.vue';
 import * as mediaRoutes from '@/routes/admin/content/media/index';
@@ -74,6 +75,21 @@ const showDeleteModal = ref(false);
 const deleteTarget = ref<{ type: 'single' | 'bulk'; file?: MediaFile; count?: number } | null>(null);
 const newFolderName = ref('');
 const newFolderParentId = ref<number | null>(null);
+
+// Computed properties for delete modal
+const deleteModalTitle = computed(() => {
+    if (deleteTarget.value?.type === 'bulk') {
+        return 'Delete Multiple Files';
+    }
+    return deleteTarget.value?.file?.original_filename ?? '';
+});
+
+const deleteModalMessage = computed(() => {
+    if (deleteTarget.value?.type === 'bulk') {
+        return `Are you sure you want to delete ${deleteTarget.value.count} file(s)? This action cannot be undone.`;
+    }
+    return `Are you sure you want to delete '${deleteTarget.value?.file?.original_filename}'? This action cannot be undone.`;
+});
 
 // Toggle folder expansion
 const toggleFolder = (folderId: number) => {
@@ -260,10 +276,12 @@ const confirmDelete = () => {
     }
 };
 
-const cancelDelete = () => {
-    showDeleteModal.value = false;
-    deleteTarget.value = null;
-};
+// Watch for modal close to reset deleteTarget
+watch(showDeleteModal, (newValue) => {
+    if (!newValue) {
+        deleteTarget.value = null;
+    }
+});
 
 // Delete single file
 const deleteFile = (file: MediaFile) => {
@@ -740,65 +758,12 @@ const handleUploadError = (message: string) => {
         </div>
 
         <!-- Delete Confirmation Modal -->
-        <div
-            v-if="showDeleteModal"
-            class="fixed inset-0 z-50 overflow-y-auto"
-        >
-            <div class="flex items-center justify-center min-h-screen px-4 pt-4 pb-20 text-center sm:block sm:p-0">
-                <!-- Background overlay -->
-                <div
-                    class="fixed inset-0 transition-opacity bg-gray-500 bg-opacity-75 dark:bg-gray-900 dark:bg-opacity-75"
-                    @click="cancelDelete"
-                ></div>
-
-                <!-- Modal panel -->
-                <div class="relative inline-block align-bottom bg-white dark:bg-gray-800 rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-md sm:w-full z-10">
-                    <!-- Header -->
-                    <div class="px-6 py-4">
-                        <div class="flex items-start">
-                            <div class="flex-shrink-0 flex items-center justify-center h-12 w-12 rounded-full bg-red-100 dark:bg-red-900/20">
-                                <svg class="h-6 w-6 text-red-600 dark:text-red-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-                                </svg>
-                            </div>
-                            <div class="ml-4 flex-1">
-                                <h3 class="text-lg font-medium text-gray-900 dark:text-white">
-                                    {{ deleteTarget?.type === 'bulk' ? 'Delete Files' : 'Delete File' }}
-                                </h3>
-                                <div class="mt-2">
-                                    <p class="text-sm text-gray-500 dark:text-gray-400">
-                                        <template v-if="deleteTarget?.type === 'bulk'">
-                                            Are you sure you want to delete {{ deleteTarget.count }} file(s)? This action cannot be undone.
-                                        </template>
-                                        <template v-else>
-                                            Are you sure you want to delete "{{ deleteTarget?.file?.original_filename }}"? This action cannot be undone.
-                                        </template>
-                                    </p>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Footer -->
-                    <div class="px-6 py-4 bg-gray-50 dark:bg-gray-700/50 flex items-center justify-end gap-3">
-                        <button
-                            @click="cancelDelete"
-                            type="button"
-                            class="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-600 rounded-lg transition-colors"
-                        >
-                            Cancel
-                        </button>
-                        <button
-                            @click="confirmDelete"
-                            type="button"
-                            class="px-4 py-2 text-sm font-medium text-white bg-red-600 hover:bg-red-700 rounded-lg transition-colors"
-                        >
-                            Delete
-                        </button>
-                    </div>
-                </div>
-            </div>
-        </div>
+        <ConfirmDeleteModal
+            v-model:show="showDeleteModal"
+            :title="deleteModalTitle"
+            :message="deleteModalMessage"
+            @confirm="confirmDelete"
+        />
 
         <!-- New Folder Modal -->
         <div

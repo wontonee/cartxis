@@ -7,6 +7,7 @@ use Vortex\CMS\Http\Controllers\Admin\PagesController;
 use Vortex\CMS\Http\Controllers\Admin\MediaController;
 use Vortex\CMS\Http\Controllers\Admin\FolderController;
 use Vortex\CMS\Http\Controllers\Admin\StorefrontMenuController;
+use Vortex\CMS\Http\Controllers\Admin\BlocksController;
 
 // CMS Admin Routes
 Route::middleware(['web', 'auth:admin'])->prefix('admin')->name('admin.')->group(function () {
@@ -40,6 +41,19 @@ Route::middleware(['web', 'auth:admin'])->prefix('admin')->name('admin.')->group
             Route::post('/', [FolderController::class, 'store'])->name('store');
             Route::put('/{folder}', [FolderController::class, 'update'])->name('update');
             Route::delete('/{folder}', [FolderController::class, 'destroy'])->name('destroy');
+        });
+
+        // Blocks Management
+        Route::prefix('blocks')->name('blocks.')->group(function () {
+            Route::get('/', [BlocksController::class, 'index'])->name('index');
+            Route::get('/create', [BlocksController::class, 'create'])->name('create');
+            Route::post('/', [BlocksController::class, 'store'])->name('store');
+            Route::get('/{block}/edit', [BlocksController::class, 'edit'])->name('edit');
+            Route::put('/{block}', [BlocksController::class, 'update'])->name('update');
+            Route::delete('/{block}', [BlocksController::class, 'destroy'])->name('destroy');
+            Route::post('/bulk-action', [BlocksController::class, 'bulkAction'])->name('bulk-action');
+            Route::post('/check-identifier', [BlocksController::class, 'checkIdentifier'])->name('check-identifier');
+            Route::post('/generate-identifier', [BlocksController::class, 'generateIdentifier'])->name('generate-identifier');
         });
 
         // Storefront Menus

@@ -16,4 +16,5 @@ return [
     Vortex\Customer\Providers\CustomerServiceProvider::class,
     Vortex\CMS\Providers\CMSServiceProvider::class,
     Vortex\System\Providers\SystemServiceProvider::class,
+    Vortex\Reports\ReportsServiceProvider::class,
 ];

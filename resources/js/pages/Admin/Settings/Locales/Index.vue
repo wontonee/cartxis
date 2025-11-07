@@ -2,6 +2,7 @@
 import { ref, computed } from 'vue';
 import { Head, router, usePage } from '@inertiajs/vue3';
 import AdminLayout from '@/layouts/AdminLayout.vue';
+import ConfirmDeleteModal from '@/components/Admin/ConfirmDeleteModal.vue';
 
 interface Locale {
     id: number;
@@ -68,6 +69,10 @@ const currencyForm = ref<Partial<Currency>>({
     sort_order: 0,
 });
 
+// Delete Modal State
+const showDeleteModal = ref(false);
+const deleteTarget = ref<{ type: 'locale' | 'currency'; item: Locale | Currency } | null>(null);
+
 // Locale Functions
 const openAddLocaleModal = () => {
     localeMode.value = 'add';
@@ -114,11 +119,8 @@ const saveLocale = () => {
 };
 
 const deleteLocale = (locale: Locale) => {
-    if (confirm(`Are you sure you want to delete "${locale.name}"?`)) {
-        router.delete(`/admin/settings/locales/locale/${locale.id}`, {
-            preserveScroll: true,
-        });
-    }
+    deleteTarget.value = { type: 'locale', item: locale };
+    showDeleteModal.value = true;
 };
 
 // Currency Functions
@@ -169,11 +171,25 @@ const saveCurrency = () => {
 };
 
 const deleteCurrency = (currency: Currency) => {
-    if (confirm(`Are you sure you want to delete "${currency.name}"?`)) {
-        router.delete(`/admin/settings/locales/currency/${currency.id}`, {
-            preserveScroll: true,
-        });
-    }
+    deleteTarget.value = { type: 'currency', item: currency };
+    showDeleteModal.value = true;
+};
+
+const confirmDelete = () => {
+    if (!deleteTarget.value) return;
+    
+    const { type, item } = deleteTarget.value;
+    const url = type === 'locale' 
+        ? `/admin/settings/locales/locale/${item.id}`
+        : `/admin/settings/locales/currency/${item.id}`;
+    
+    router.delete(url, {
+        preserveScroll: true,
+        onSuccess: () => {
+            showDeleteModal.value = false;
+            deleteTarget.value = null;
+        },
+    });
 };
 </script>
 
@@ -491,5 +507,13 @@ const deleteCurrency = (currency: Currency) => {
                 </div>
             </div>
         </div>
+
+        <!-- Delete Confirmation Modal -->
+        <ConfirmDeleteModal
+            v-model:show="showDeleteModal"
+            :title="deleteTarget?.item?.name ?? ''"
+            :message="`Are you sure you want to delete '${deleteTarget?.item?.name}'? This action cannot be undone.`"
+            @confirm="confirmDelete"
+        />
     </AdminLayout>
 </template>
