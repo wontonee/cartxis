@@ -2,7 +2,8 @@
 import { ref, computed } from 'vue';
 import { router } from '@inertiajs/vue3';
 import AdminLayout from '@/layouts/AdminLayout.vue';
-import { Bar, Doughnut, Line } from 'vue-chartjs';
+import { useCurrency } from '@/composables/useCurrency';
+import { Bar, Doughnut } from 'vue-chartjs';
 import {
     Chart as ChartJS,
     CategoryScale,
@@ -157,9 +158,10 @@ const doughnutChartOptions = {
         tooltip: {
             callbacks: {
                 label: (context: any) => {
+                    const { formatPrice } = useCurrency();
                     const label = context.label || '';
                     const value = context.parsed || 0;
-                    return `${label}: $${value.toFixed(2)}`;
+                    return `${label}: ${formatPrice(value)}`;
                 }
             }
         }
@@ -195,12 +197,7 @@ const lineChartOptions = {
 };
 
 // Format currency
-const formatCurrency = (amount: number): string => {
-    return new Intl.NumberFormat('en-US', {
-        style: 'currency',
-        currency: 'USD',
-    }).format(amount);
-};
+const { formatPrice: formatCurrency } = useCurrency();
 
 // Format number
 const formatNumber = (num: number): string => {

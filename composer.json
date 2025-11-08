@@ -52,7 +52,8 @@
             "Vortex\\Customer\\": "packages/Vortex/Customer/src/",
             "Vortex\\CMS\\": "packages/Vortex/CMS/src/",
             "Vortex\\System\\": "packages/Vortex/System/src/",
-            "Vortex\\Reports\\": "packages/Vortex/Reports/src/"
+            "Vortex\\Reports\\": "packages/Vortex/Reports/src/",
+            "Vortex\\Marketing\\": "packages/Vortex/Marketing/src/"
         }
     },
     "autoload-dev": {

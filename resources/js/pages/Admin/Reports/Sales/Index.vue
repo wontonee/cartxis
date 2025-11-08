@@ -2,6 +2,7 @@
 import { ref, computed } from 'vue';
 import { router } from '@inertiajs/vue3';
 import AdminLayout from '@/layouts/AdminLayout.vue';
+import { useCurrency } from '@/composables/useCurrency';
 import { Line, Bar, Doughnut } from 'vue-chartjs';
 import {
     Chart as ChartJS,
@@ -114,7 +115,8 @@ const lineChartOptions = {
             beginAtZero: true,
             ticks: {
                 callback: function(value: any) {
-                    return '$' + value.toLocaleString();
+                    const { formatPrice } = useCurrency();
+                    return formatPrice(value);
                 }
             }
         }
@@ -142,12 +144,7 @@ const doughnutChartOptions = {
 };
 
 // Format currency
-const formatCurrency = (value: number) => {
-    return new Intl.NumberFormat('en-US', {
-        style: 'currency',
-        currency: 'USD',
-    }).format(value);
-};
+const { formatPrice: formatCurrency } = useCurrency();
 
 // Status badge classes
 const getStatusClass = (status: string) => {

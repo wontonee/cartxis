@@ -2,6 +2,7 @@
 import { ref, computed } from 'vue';
 import { router } from '@inertiajs/vue3';
 import AdminLayout from '@/layouts/AdminLayout.vue';
+import { useCurrency } from '@/composables/useCurrency';
 import { Line, Bar, Doughnut } from 'vue-chartjs';
 import {
     Chart as ChartJS,
@@ -183,12 +184,7 @@ const doughnutChartOptions = {
 };
 
 // Utility functions
-const formatCurrency = (value: number) => {
-    return new Intl.NumberFormat('en-US', {
-        style: 'currency',
-        currency: 'USD',
-    }).format(value);
-};
+const { formatPrice: formatCurrency } = useCurrency();
 
 const formatNumber = (value: number) => {
     return new Intl.NumberFormat('en-US').format(value);

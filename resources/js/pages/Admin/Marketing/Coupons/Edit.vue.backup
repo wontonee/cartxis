@@ -1,0 +1,491 @@
+<script setup lang="ts">
+import { ref, computed } from 'vue';
+import { router, useForm } from '@inertiajs/vue3';
+import AdminLayout from '@/layouts/AdminLayout.vue';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Badge } from '@/components/ui/badge';
+import { Checkbox } from '@/components/ui/checkbox';
+import { ArrowLeft, Save, TrendingUp, Users, DollarSign, Calendar } from 'lucide-vue-next';
+
+interface Coupon {
+  id: number;
+  code: string;
+  name: string;
+  description: string | null;
+  type: string;
+  value: number;
+  max_discount: number | null;
+  min_order_amount: number | null;
+  is_active: boolean;
+  is_public: boolean;
+  stackable: boolean;
+  auto_apply: boolean;
+  first_order_only: boolean;
+  usage_limit_total: number | null;
+  usage_limit_per_customer: number | null;
+  usage_count: number;
+  start_date: string;
+  end_date: string | null;
+  days_of_week: string[] | null;
+  time_restrictions: { start: string; end: string } | null;
+  customer_groups: number[] | null;
+  min_account_age_days: number | null;
+  applicable_products: number[] | null;
+  excluded_products: number[] | null;
+  applicable_categories: number[] | null;
+  excluded_categories: number[] | null;
+  buy_quantity: number | null;
+  get_quantity: number | null;
+  priority: number;
+  created_at: string;
+  updated_at: string;
+}
+
+interface Analytics {
+  total_uses: number;
+  total_discount: number;
+  total_revenue: number;
+  unique_customers: number;
+  avg_order_value: number;
+  recent_uses: Array<{
+    id: number;
+    customer_name: string;
+    order_id: number;
+    discount_amount: number;
+    order_total: number;
+    used_at: string;
+  }>;
+}
+
+interface Props {
+  coupon: Coupon;
+  analytics: Analytics;
+}
+
+const props = defineProps<Props>();
+
+const form = useForm({
+  code: props.coupon.code,
+  name: props.coupon.name,
+  description: props.coupon.description || '',
+  type: props.coupon.type,
+  value: props.coupon.value,
+  max_discount: props.coupon.max_discount,
+  min_order_amount: props.coupon.min_order_amount,
+  is_active: props.coupon.is_active,
+  is_public: props.coupon.is_public,
+  stackable: props.coupon.stackable,
+  auto_apply: props.coupon.auto_apply,
+  first_order_only: props.coupon.first_order_only,
+  usage_limit_total: props.coupon.usage_limit_total,
+  usage_limit_per_customer: props.coupon.usage_limit_per_customer,
+  start_date: props.coupon.start_date,
+  end_date: props.coupon.end_date || '',
+  days_of_week: props.coupon.days_of_week || [],
+  time_restrictions: props.coupon.time_restrictions || { start: '', end: '' },
+  customer_groups: props.coupon.customer_groups || [],
+  min_account_age_days: props.coupon.min_account_age_days,
+  applicable_products: props.coupon.applicable_products || [],
+  excluded_products: props.coupon.excluded_products || [],
+  applicable_categories: props.coupon.applicable_categories || [],
+  excluded_categories: props.coupon.excluded_categories || [],
+  buy_quantity: props.coupon.buy_quantity,
+  get_quantity: props.coupon.get_quantity,
+  priority: props.coupon.priority,
+});
+
+const daysOfWeek = [
+  { value: 'monday', label: 'Monday' },
+  { value: 'tuesday', label: 'Tuesday' },
+  { value: 'wednesday', label: 'Wednesday' },
+  { value: 'thursday', label: 'Thursday' },
+  { value: 'friday', label: 'Friday' },
+  { value: 'saturday', label: 'Saturday' },
+  { value: 'sunday', label: 'Sunday' },
+];
+
+const showBuyXGetY = computed(() => form.type === 'buy_x_get_y');
+const showMaxDiscount = computed(() => form.type === 'percentage');
+const showValue = computed(() => form.type !== 'free_shipping');
+
+const toggleDay = (day: string) => {
+  const index = form.days_of_week.indexOf(day);
+  if (index > -1) {
+    form.days_of_week.splice(index, 1);
+  } else {
+    form.days_of_week.push(day);
+  }
+};
+
+const submit = () => {
+  form.put(`/admin/marketing/coupons/${props.coupon.id}`, {
+    onSuccess: () => {
+      router.visit('/admin/marketing/coupons');
+    },
+  });
+};
+
+const cancel = () => {
+  router.visit('/admin/marketing/coupons');
+};
+
+const formatCurrency = (amount: number) => {
+  return `$${amount.toFixed(2)}`;
+};
+
+const formatDate = (date: string) => {
+  return new Date(date).toLocaleDateString();
+};
+
+const getTypeLabel = (type: string) => {
+  const types: Record<string, string> = {
+    percentage: 'Percentage',
+    fixed_amount: 'Fixed Amount',
+    free_shipping: 'Free Shipping',
+    buy_x_get_y: 'Buy X Get Y',
+    fixed_price: 'Fixed Price',
+  };
+  return types[type] || type;
+};
+</script>
+
+<template>
+  <AdminLayout>
+    <div class="space-y-6">
+      <!-- Header -->
+      <div class="flex items-center justify-between">
+        <div class="flex items-center space-x-4">
+          <Button variant="ghost" size="icon" @click="cancel">
+            <ArrowLeft class="h-4 w-4" />
+          </Button>
+          <div>
+            <h1 class="text-3xl font-bold tracking-tight">Edit Coupon</h1>
+            <div class="flex items-center space-x-2 mt-1">
+              <code class="text-sm font-mono">{{ coupon.code }}</code>
+              <Badge v-if="coupon.is_active" variant="success" class="bg-green-100 text-green-800">Active</Badge>
+              <Badge v-else variant="secondary">Inactive</Badge>
+            </div>
+          </div>
+        </div>
+        <div class="flex space-x-2">
+          <Button variant="outline" @click="cancel">Cancel</Button>
+          <Button @click="submit" :disabled="form.processing">
+            <Save class="mr-2 h-4 w-4" />
+            Save Changes
+          </Button>
+        </div>
+      </div>
+
+      <!-- Analytics Cards -->
+      <div class="grid gap-4 md:grid-cols-4">
+        <Card>
+          <CardHeader class="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle class="text-sm font-medium">Total Uses</CardTitle>
+            <TrendingUp class="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div class="text-2xl font-bold">{{ analytics.total_uses }}</div>
+            <p class="text-xs text-muted-foreground">
+              <span v-if="coupon.usage_limit_total">
+                / {{ coupon.usage_limit_total }} limit
+              </span>
+              <span v-else>Unlimited</span>
+            </p>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader class="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle class="text-sm font-medium">Total Discount</CardTitle>
+            <DollarSign class="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div class="text-2xl font-bold">{{ formatCurrency(analytics.total_discount) }}</div>
+            <p class="text-xs text-muted-foreground">
+              Revenue: {{ formatCurrency(analytics.total_revenue) }}
+            </p>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader class="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle class="text-sm font-medium">Unique Customers</CardTitle>
+            <Users class="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div class="text-2xl font-bold">{{ analytics.unique_customers }}</div>
+            <p class="text-xs text-muted-foreground">
+              <span v-if="coupon.usage_limit_per_customer">
+                / {{ coupon.usage_limit_per_customer }} per customer
+              </span>
+            </p>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader class="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle class="text-sm font-medium">Avg Order Value</CardTitle>
+            <Calendar class="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div class="text-2xl font-bold">{{ formatCurrency(analytics.avg_order_value) }}</div>
+            <p class="text-xs text-muted-foreground">With this coupon</p>
+          </CardContent>
+        </Card>
+      </div>
+
+      <div class="grid gap-6 lg:grid-cols-3">
+        <!-- Edit Form -->
+        <div class="lg:col-span-2 space-y-6">
+          <Card>
+            <CardHeader>
+              <CardTitle>Basic Information</CardTitle>
+            </CardHeader>
+            <CardContent class="space-y-4">
+              <div class="grid grid-cols-2 gap-4">
+                <div class="space-y-2">
+                  <Label for="code">Coupon Code *</Label>
+                  <Input
+                    id="code"
+                    v-model="form.code"
+                    class="uppercase"
+                    :class="{ 'border-red-500': form.errors.code }"
+                  />
+                  <p v-if="form.errors.code" class="text-sm text-red-500">{{ form.errors.code }}</p>
+                </div>
+
+                <div class="space-y-2">
+                  <Label for="name">Display Name *</Label>
+                  <Input
+                    id="name"
+                    v-model="form.name"
+                    :class="{ 'border-red-500': form.errors.name }"
+                  />
+                  <p v-if="form.errors.name" class="text-sm text-red-500">{{ form.errors.name }}</p>
+                </div>
+              </div>
+
+              <div class="space-y-2">
+                <Label for="description">Description</Label>
+                <textarea
+                  id="description"
+                  v-model="form.description"
+                  class="flex min-h-[80px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                  rows="3"
+                ></textarea>
+              </div>
+
+              <div class="grid grid-cols-3 gap-4">
+                <div class="space-y-2">
+                  <Label>Discount Type</Label>
+                  <div class="px-3 py-2 border rounded-md bg-muted">
+                    {{ getTypeLabel(form.type) }}
+                  </div>
+                </div>
+
+                <div v-if="showValue" class="space-y-2">
+                  <Label for="value">
+                    {{ form.type === 'percentage' ? 'Percentage (%)' : 'Amount ($)' }} *
+                  </Label>
+                  <Input
+                    id="value"
+                    v-model.number="form.value"
+                    type="number"
+                    step="0.01"
+                    min="0"
+                  />
+                </div>
+
+                <div v-if="showMaxDiscount" class="space-y-2">
+                  <Label for="max_discount">Max Discount ($)</Label>
+                  <Input
+                    id="max_discount"
+                    v-model.number="form.max_discount"
+                    type="number"
+                    step="0.01"
+                    min="0"
+                  />
+                </div>
+              </div>
+
+              <div v-if="showBuyXGetY" class="grid grid-cols-2 gap-4">
+                <div class="space-y-2">
+                  <Label for="buy_quantity">Buy Quantity *</Label>
+                  <Input
+                    id="buy_quantity"
+                    v-model.number="form.buy_quantity"
+                    type="number"
+                    min="1"
+                  />
+                </div>
+                <div class="space-y-2">
+                  <Label for="get_quantity">Get Quantity *</Label>
+                  <Input
+                    id="get_quantity"
+                    v-model.number="form.get_quantity"
+                    type="number"
+                    min="1"
+                  />
+                </div>
+              </div>
+
+              <div class="grid grid-cols-2 gap-4">
+                <div class="space-y-2">
+                  <Label for="start_date">Start Date *</Label>
+                  <Input
+                    id="start_date"
+                    v-model="form.start_date"
+                    type="datetime-local"
+                  />
+                </div>
+                <div class="space-y-2">
+                  <Label for="end_date">End Date</Label>
+                  <Input
+                    id="end_date"
+                    v-model="form.end_date"
+                    type="datetime-local"
+                  />
+                </div>
+              </div>
+
+              <div class="space-y-2">
+                <Label for="min_order_amount">Minimum Order Amount ($)</Label>
+                <Input
+                  id="min_order_amount"
+                  v-model.number="form.min_order_amount"
+                  type="number"
+                  step="0.01"
+                  min="0"
+                />
+              </div>
+
+              <div class="grid grid-cols-2 gap-4">
+                <div class="space-y-2">
+                  <Label for="usage_limit_total">Total Usage Limit</Label>
+                  <Input
+                    id="usage_limit_total"
+                    v-model.number="form.usage_limit_total"
+                    type="number"
+                    min="1"
+                    placeholder="Unlimited"
+                  />
+                </div>
+                <div class="space-y-2">
+                  <Label for="usage_limit_per_customer">Per Customer Limit</Label>
+                  <Input
+                    id="usage_limit_per_customer"
+                    v-model.number="form.usage_limit_per_customer"
+                    type="number"
+                    min="1"
+                    placeholder="Unlimited"
+                  />
+                </div>
+              </div>
+
+              <div class="space-y-3">
+                <div class="flex items-center space-x-2">
+                  <Checkbox id="is_active" :checked="form.is_active" @update:checked="(val) => form.is_active = val as boolean" />
+                  <Label for="is_active">Active</Label>
+                </div>
+                <div class="flex items-center space-x-2">
+                  <Checkbox id="is_public" :checked="form.is_public" @update:checked="(val) => form.is_public = val as boolean" />
+                  <Label for="is_public">Public (visible to customers)</Label>
+                </div>
+                <div class="flex items-center space-x-2">
+                  <Checkbox id="auto_apply" :checked="form.auto_apply" @update:checked="(val) => form.auto_apply = val as boolean" />
+                  <Label for="auto_apply">Auto Apply</Label>
+                </div>
+                <div class="flex items-center space-x-2">
+                  <Checkbox id="stackable" :checked="form.stackable" @update:checked="(val) => form.stackable = val as boolean" />
+                  <Label for="stackable">Can Stack with Other Coupons</Label>
+                </div>
+                <div class="flex items-center space-x-2">
+                  <Checkbox id="first_order_only" :checked="form.first_order_only" @update:checked="(val) => form.first_order_only = val as boolean" />
+                  <Label for="first_order_only">First Order Only</Label>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader>
+              <CardTitle>Time Restrictions</CardTitle>
+            </CardHeader>
+            <CardContent class="space-y-4">
+              <div>
+                <Label class="mb-2">Days of Week (leave empty for all days)</Label>
+                <div class="grid grid-cols-4 gap-2">
+                  <div
+                    v-for="day in daysOfWeek"
+                    :key="day.value"
+                    class="flex items-center space-x-2"
+                  >
+                    <Checkbox
+                      :id="day.value"
+                      :checked="form.days_of_week.includes(day.value)"
+                      @update:checked="() => toggleDay(day.value)"
+                    />
+                    <Label :for="day.value" class="font-normal">{{ day.label }}</Label>
+                  </div>
+                </div>
+              </div>
+
+              <div class="grid grid-cols-2 gap-4">
+                <div class="space-y-2">
+                  <Label for="time_start">Start Time</Label>
+                  <Input
+                    id="time_start"
+                    v-model="form.time_restrictions.start"
+                    type="time"
+                  />
+                </div>
+                <div class="space-y-2">
+                  <Label for="time_end">End Time</Label>
+                  <Input
+                    id="time_end"
+                    v-model="form.time_restrictions.end"
+                    type="time"
+                  />
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+
+        <!-- Recent Usage -->
+        <div>
+          <Card>
+            <CardHeader>
+              <CardTitle>Recent Usage</CardTitle>
+              <CardDescription>Last 10 uses of this coupon</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div v-if="analytics.recent_uses.length === 0" class="text-center py-8 text-muted-foreground">
+                No usage yet
+              </div>
+              <div v-else class="space-y-4">
+                <div
+                  v-for="use in analytics.recent_uses"
+                  :key="use.id"
+                  class="flex flex-col space-y-1 pb-4 border-b last:border-0"
+                >
+                  <div class="flex items-center justify-between">
+                    <span class="font-medium text-sm">{{ use.customer_name }}</span>
+                    <span class="text-xs text-muted-foreground">{{ formatDate(use.used_at) }}</span>
+                  </div>
+                  <div class="flex items-center justify-between text-sm">
+                    <span class="text-muted-foreground">Order #{{ use.order_id }}</span>
+                    <span class="font-medium text-green-600">-{{ formatCurrency(use.discount_amount) }}</span>
+                  </div>
+                  <div class="text-xs text-muted-foreground">
+                    Order Total: {{ formatCurrency(use.order_total) }}
+                  </div>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      </div>
+    </div>
+  </AdminLayout>
+</template>

@@ -1,0 +1,478 @@
+<script setup lang="ts">
+import { ref, computed } from 'vue';
+import { router, useForm, Link } from '@inertiajs/vue3';
+import AdminLayout from '@/layouts/AdminLayout.vue';
+
+const form = useForm({
+  code: '',
+  name: '',
+  description: '',
+  type: 'percentage',
+  value: 0,
+  max_discount: null as number | null,
+  min_order_amount: null as number | null,
+  is_active: true,
+  is_public: true,
+  stackable: false,
+  auto_apply: false,
+  first_order_only: false,
+  usage_limit_total: null as number | null,
+  usage_limit_per_customer: null as number | null,
+  start_date: '',
+  end_date: '',
+  days_of_week: [] as string[],
+  time_restrictions: {
+    start: '',
+    end: '',
+  },
+  customer_groups: [] as number[],
+  min_account_age_days: null as number | null,
+  applicable_products: [] as number[],
+  excluded_products: [] as number[],
+  applicable_categories: [] as number[],
+  excluded_categories: [] as number[],
+  buy_quantity: null as number | null,
+  get_quantity: null as number | null,
+  priority: 0,
+});
+
+const daysOfWeek = [
+  { value: 'monday', label: 'Monday' },
+  { value: 'tuesday', label: 'Tuesday' },
+  { value: 'wednesday', label: 'Wednesday' },
+  { value: 'thursday', label: 'Thursday' },
+  { value: 'friday', label: 'Friday' },
+  { value: 'saturday', label: 'Saturday' },
+  { value: 'sunday', label: 'Sunday' },
+];
+
+const showBuyXGetY = computed(() => form.type === 'buy_x_get_y');
+const showMaxDiscount = computed(() => form.type === 'percentage');
+const showValue = computed(() => form.type !== 'free_shipping');
+
+const toggleDay = (day: string) => {
+  const index = form.days_of_week.indexOf(day);
+  if (index > -1) {
+    form.days_of_week.splice(index, 1);
+  } else {
+    form.days_of_week.push(day);
+  }
+};
+
+const activeTab = ref('general');
+
+const submit = () => {
+  form.post('/admin/marketing/coupons', {
+    onSuccess: () => {
+      router.visit('/admin/marketing/coupons');
+    },
+  });
+};
+
+const cancel = () => {
+  router.visit('/admin/marketing/coupons');
+};
+</script>
+
+<template>
+  <AdminLayout>
+    <div class="p-6 space-y-6">
+      <!-- Header -->
+      <div class="flex items-center justify-between">
+        <div>
+          <h1 class="text-2xl font-bold text-gray-900">Create Coupon</h1>
+          <p class="mt-1 text-sm text-gray-600">Create a new discount coupon</p>
+        </div>
+        <div class="flex gap-3">
+          <Link
+            href="/admin/marketing/coupons"
+            class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50"
+          >
+            Cancel
+          </Link>
+          <button
+            @click="submit"
+            :disabled="form.processing"
+            class="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 disabled:opacity-50"
+          >
+            Save Coupon
+          </button>
+        </div>
+      </div>
+
+      <!-- Tabs -->
+      <div class="bg-white rounded-lg shadow-sm">
+        <div class="border-b border-gray-200">
+          <nav class="flex -mb-px">
+            <button
+              @click="activeTab = 'general'"
+              :class="[
+                'px-6 py-4 text-sm font-medium border-b-2 transition-colors',
+                activeTab === 'general'
+                  ? 'border-blue-600 text-blue-600'
+                  : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+              ]"
+            >
+              General
+            </button>
+            <button
+              @click="activeTab = 'conditions'"
+              :class="[
+                'px-6 py-4 text-sm font-medium border-b-2 transition-colors',
+                activeTab === 'conditions'
+                  ? 'border-blue-600 text-blue-600'
+                  : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+              ]"
+            >
+              Conditions
+            </button>
+            <button
+              @click="activeTab = 'limits'"
+              :class="[
+                'px-6 py-4 text-sm font-medium border-b-2 transition-colors',
+                activeTab === 'limits'
+                  ? 'border-blue-600 text-blue-600'
+                  : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+              ]"
+            >
+              Usage Limits
+            </button>
+            <button
+              @click="activeTab = 'restrictions'"
+              :class="[
+                'px-6 py-4 text-sm font-medium border-b-2 transition-colors',
+                activeTab === 'restrictions'
+                  ? 'border-blue-600 text-blue-600'
+                  : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+              ]"
+            >
+              Restrictions
+            </button>
+          </nav>
+        </div>
+
+        <form @submit.prevent="submit" class="p-6">
+          <!-- General Tab -->
+          <div v-show="activeTab === 'general'" class="space-y-6">
+                <div class="grid grid-cols-2 gap-4">
+                  <div class="space-y-2">
+                    <Label for="code">Coupon Code *</Label>
+                    <Input
+                      id="code"
+                      v-model="form.code"
+                      placeholder="SAVE20"
+                      class="uppercase"
+                      :class="{ 'border-red-500': form.errors.code }"
+                    />
+                    <p v-if="form.errors.code" class="text-sm text-red-500">{{ form.errors.code }}</p>
+                  </div>
+
+                  <div class="space-y-2">
+                    <Label for="name">Display Name *</Label>
+                    <Input
+                      id="name"
+                      v-model="form.name"
+                      placeholder="20% Off All Orders"
+                      :class="{ 'border-red-500': form.errors.name }"
+                    />
+                    <p v-if="form.errors.name" class="text-sm text-red-500">{{ form.errors.name }}</p>
+                  </div>
+                </div>
+
+                <div class="space-y-2">
+                  <Label for="description">Description</Label>
+                  <Textarea
+                    id="description"
+                    v-model="form.description"
+                    placeholder="Brief description of the coupon"
+                    rows="3"
+                  />
+                </div>
+
+                <div class="grid grid-cols-3 gap-4">
+                  <div class="space-y-2">
+                    <Label for="type">Discount Type *</Label>
+                    <Select v-model="form.type">
+                      <SelectTrigger :class="{ 'border-red-500': form.errors.type }">
+                        <SelectValue placeholder="Select type" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="percentage">Percentage Discount</SelectItem>
+                        <SelectItem value="fixed_amount">Fixed Amount</SelectItem>
+                        <SelectItem value="free_shipping">Free Shipping</SelectItem>
+                        <SelectItem value="buy_x_get_y">Buy X Get Y</SelectItem>
+                        <SelectItem value="fixed_price">Fixed Price</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    <p v-if="form.errors.type" class="text-sm text-red-500">{{ form.errors.type }}</p>
+                  </div>
+
+                  <div v-if="showValue" class="space-y-2">
+                    <Label for="value">
+                      {{ form.type === 'percentage' ? 'Percentage (%)' : 'Amount ($)' }} *
+                    </Label>
+                    <Input
+                      id="value"
+                      v-model.number="form.value"
+                      type="number"
+                      step="0.01"
+                      min="0"
+                      :class="{ 'border-red-500': form.errors.value }"
+                    />
+                    <p v-if="form.errors.value" class="text-sm text-red-500">{{ form.errors.value }}</p>
+                  </div>
+
+                  <div v-if="showMaxDiscount" class="space-y-2">
+                    <Label for="max_discount">Max Discount ($)</Label>
+                    <Input
+                      id="max_discount"
+                      v-model.number="form.max_discount"
+                      type="number"
+                      step="0.01"
+                      min="0"
+                      placeholder="Optional"
+                    />
+                  </div>
+                </div>
+
+                <!-- Buy X Get Y Fields -->
+                <div v-if="showBuyXGetY" class="grid grid-cols-2 gap-4">
+                  <div class="space-y-2">
+                    <Label for="buy_quantity">Buy Quantity *</Label>
+                    <Input
+                      id="buy_quantity"
+                      v-model.number="form.buy_quantity"
+                      type="number"
+                      min="1"
+                      placeholder="2"
+                    />
+                  </div>
+                  <div class="space-y-2">
+                    <Label for="get_quantity">Get Quantity *</Label>
+                    <Input
+                      id="get_quantity"
+                      v-model.number="form.get_quantity"
+                      type="number"
+                      min="1"
+                      placeholder="1"
+                    />
+                  </div>
+                </div>
+
+                <div class="grid grid-cols-2 gap-4">
+                  <div class="space-y-2">
+                    <Label for="start_date">Start Date *</Label>
+                    <Input
+                      id="start_date"
+                      v-model="form.start_date"
+                      type="datetime-local"
+                      :class="{ 'border-red-500': form.errors.start_date }"
+                    />
+                    <p v-if="form.errors.start_date" class="text-sm text-red-500">{{ form.errors.start_date }}</p>
+                  </div>
+                  <div class="space-y-2">
+                    <Label for="end_date">End Date</Label>
+                    <Input
+                      id="end_date"
+                      v-model="form.end_date"
+                      type="datetime-local"
+                      placeholder="Optional - no expiry"
+                    />
+                  </div>
+                </div>
+
+                <div class="flex items-center space-x-8">
+                  <div class="flex items-center space-x-2">
+                    <Switch id="is_active" v-model:checked="form.is_active" />
+                    <Label for="is_active">Active</Label>
+                  </div>
+                  <div class="flex items-center space-x-2">
+                    <Switch id="is_public" v-model:checked="form.is_public" />
+                    <Label for="is_public">Public (visible to customers)</Label>
+                  </div>
+                  <div class="flex items-center space-x-2">
+                    <Switch id="auto_apply" v-model:checked="form.auto_apply" />
+                    <Label for="auto_apply">Auto Apply</Label>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          <!-- Conditions Tab -->
+          <TabsContent value="conditions" class="space-y-4">
+            <Card>
+              <CardHeader>
+                <CardTitle>Order Conditions</CardTitle>
+                <CardDescription>Set conditions for when this coupon can be used</CardDescription>
+              </CardHeader>
+              <CardContent class="space-y-4">
+                <div class="grid grid-cols-2 gap-4">
+                  <div class="space-y-2">
+                    <Label for="min_order_amount">Minimum Order Amount ($)</Label>
+                    <Input
+                      id="min_order_amount"
+                      v-model.number="form.min_order_amount"
+                      type="number"
+                      step="0.01"
+                      min="0"
+                      placeholder="Optional"
+                    />
+                  </div>
+                  <div class="space-y-2">
+                    <Label for="priority">Priority</Label>
+                    <Input
+                      id="priority"
+                      v-model.number="form.priority"
+                      type="number"
+                      min="0"
+                      placeholder="0 = highest"
+                    />
+                  </div>
+                </div>
+
+                <div class="flex items-center space-x-8">
+                  <div class="flex items-center space-x-2">
+                    <Switch id="first_order_only" v-model:checked="form.first_order_only" />
+                    <Label for="first_order_only">First Order Only</Label>
+                  </div>
+                  <div class="flex items-center space-x-2">
+                    <Switch id="stackable" v-model:checked="form.stackable" />
+                    <Label for="stackable">Can Stack with Other Coupons</Label>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          <!-- Usage Limits Tab -->
+          <TabsContent value="limits" class="space-y-4">
+            <Card>
+              <CardHeader>
+                <CardTitle>Usage Limits</CardTitle>
+                <CardDescription>Control how many times this coupon can be used</CardDescription>
+              </CardHeader>
+              <CardContent class="space-y-4">
+                <div class="grid grid-cols-2 gap-4">
+                  <div class="space-y-2">
+                    <Label for="usage_limit_total">Total Usage Limit</Label>
+                    <Input
+                      id="usage_limit_total"
+                      v-model.number="form.usage_limit_total"
+                      type="number"
+                      min="1"
+                      placeholder="Unlimited"
+                    />
+                    <p class="text-xs text-muted-foreground">Leave empty for unlimited uses</p>
+                  </div>
+                  <div class="space-y-2">
+                    <Label for="usage_limit_per_customer">Usage Limit Per Customer</Label>
+                    <Input
+                      id="usage_limit_per_customer"
+                      v-model.number="form.usage_limit_per_customer"
+                      type="number"
+                      min="1"
+                      placeholder="Unlimited"
+                    />
+                    <p class="text-xs text-muted-foreground">How many times each customer can use this</p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          <!-- Restrictions Tab -->
+          <TabsContent value="restrictions" class="space-y-4">
+            <Card>
+              <CardHeader>
+                <CardTitle>Time Restrictions</CardTitle>
+                <CardDescription>Restrict when this coupon can be used</CardDescription>
+              </CardHeader>
+              <CardContent class="space-y-4">
+                <div>
+                  <Label class="mb-2">Days of Week</Label>
+                  <div class="grid grid-cols-4 gap-2">
+                    <div
+                      v-for="day in daysOfWeek"
+                      :key="day.value"
+                      class="flex items-center space-x-2"
+                    >
+                      <Checkbox
+                        :id="day.value"
+                        :checked="form.days_of_week.includes(day.value)"
+                        @update:checked="() => toggleDay(day.value)"
+                      />
+                      <Label :for="day.value" class="font-normal">{{ day.label }}</Label>
+                    </div>
+                  </div>
+                  <p class="text-xs text-muted-foreground mt-2">Leave empty to allow all days</p>
+                </div>
+
+                <div class="grid grid-cols-2 gap-4">
+                  <div class="space-y-2">
+                    <Label for="time_start">Start Time</Label>
+                    <Input
+                      id="time_start"
+                      v-model="form.time_restrictions.start"
+                      type="time"
+                      placeholder="HH:MM"
+                    />
+                  </div>
+                  <div class="space-y-2">
+                    <Label for="time_end">End Time</Label>
+                    <Input
+                      id="time_end"
+                      v-model="form.time_restrictions.end"
+                      type="time"
+                      placeholder="HH:MM"
+                    />
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader>
+                <CardTitle>Customer Restrictions</CardTitle>
+                <CardDescription>Limit which customers can use this coupon</CardDescription>
+              </CardHeader>
+              <CardContent class="space-y-4">
+                <div class="space-y-2">
+                  <Label for="min_account_age_days">Minimum Account Age (Days)</Label>
+                  <Input
+                    id="min_account_age_days"
+                    v-model.number="form.min_account_age_days"
+                    type="number"
+                    min="0"
+                    placeholder="Optional"
+                  />
+                  <p class="text-xs text-muted-foreground">
+                    Customer account must be at least this many days old
+                  </p>
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          <!-- Advanced Tab -->
+          <TabsContent value="advanced" class="space-y-4">
+            <Card>
+              <CardHeader>
+                <CardTitle>Advanced Settings</CardTitle>
+                <CardDescription>Additional configuration options</CardDescription>
+              </CardHeader>
+              <CardContent class="space-y-4">
+                <div class="rounded-md bg-muted p-4">
+                  <p class="text-sm text-muted-foreground">
+                    Product and category restrictions can be configured here in a future update.
+                    For now, all products are eligible unless otherwise specified.
+                  </p>
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+        </Tabs>
+      </form>
+    </div>
+  </AdminLayout>
+</template>
