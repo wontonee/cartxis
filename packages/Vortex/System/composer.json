@@ -1,0 +1,21 @@
+{
+    "name": "vortex/system",
+    "description": "System management module for Vortex ecommerce platform",
+    "type": "library",
+    "require": {
+        "php": "^8.2",
+        "illuminate/support": "^11.0"
+    },
+    "autoload": {
+        "psr-4": {
+            "Vortex\\System\\": "src/"
+        }
+    },
+    "extra": {
+        "laravel": {
+            "providers": [
+                "Vortex\\System\\Providers\\SystemServiceProvider"
+            ]
+        }
+    }
+}

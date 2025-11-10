@@ -15,6 +15,7 @@ export default defineConfig({
             ],
             ssr: 'resources/js/ssr.ts',
             refresh: true,
+            detectTls: 'vortex.test',
         }),
         tailwindcss(),
         wayfinder({
@@ -31,6 +32,8 @@ export default defineConfig({
     ],
     server: {
         host: '0.0.0.0',
+        port: 5173,
+        strictPort: true,
         hmr: {
             host: 'vortex.test',
         },

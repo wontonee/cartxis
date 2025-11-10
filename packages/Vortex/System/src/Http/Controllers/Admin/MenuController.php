@@ -13,8 +13,7 @@ class MenuController
      */
     public function index()
     {
-        $menuItems = MenuItem::with(['parent', 'children'])
-            ->byLocation('admin')
+        $menuItems = MenuItem::byLocation('admin')
             ->orderBy('order')
             ->get();
 
