@@ -15,6 +15,7 @@ class Customer extends Model
     use HasFactory, SoftDeletes;
 
     protected $fillable = [
+        'user_id',
         'first_name',
         'last_name',
         'email',

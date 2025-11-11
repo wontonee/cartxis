@@ -9,10 +9,13 @@ use Vortex\Shop\Models\Address;
 use Vortex\Product\Models\Product;
 use Vortex\Customer\Models\Customer;
 use Vortex\Customer\Models\CustomerAddress;
+use App\Models\User;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Session;
+use Illuminate\Support\Facades\Hash;
 use Exception;
+
 
 class CheckoutService extends ShopService
 {
@@ -69,14 +72,23 @@ class CheckoutService extends ShopService
             // Generate unique order number
             $orderNumber = Order::generateOrderNumber();
 
-            // Handle guest customer creation
+            // Handle customer and user account creation
             $userId = $data['user_id'] ?? null;
             $customerId = null;
             
-            // If no user_id (guest checkout) and we have email, create/get guest customer
+            // If no user_id (guest checkout)
             if (!$userId && isset($data['customer_email'])) {
-                $guestCustomer = $this->getOrCreateGuestCustomer($data);
-                $customerId = $guestCustomer->id;
+                // Check if user wants to create an account
+                if (!empty($data['create_account']) && !empty($data['password'])) {
+                    // Create user account and customer
+                    $result = $this->createUserAndCustomer($data);
+                    $userId = $result['user_id'];
+                    $customerId = $result['customer_id'];
+                } else {
+                    // Create guest customer only
+                    $guestCustomer = $this->getOrCreateGuestCustomer($data);
+                    $customerId = $guestCustomer->id;
+                }
             }
 
             // Create order
@@ -482,5 +494,100 @@ class CheckoutService extends ShopService
             'total_orders' => 1,
             'total_spent' => $data['total'] ?? 0,
         ]);
+    }
+
+    /**
+     * Create a user account and customer record during checkout.
+     *
+     * @param  array  $data
+     * @return array ['user_id' => int, 'customer_id' => int]
+     * @throws Exception
+     */
+    protected function createUserAndCustomer(array $data): array
+    {
+        $email = $data['customer_email'];
+        $firstName = $data['shipping_address']['first_name'] ?? 'Customer';
+        $lastName = $data['shipping_address']['last_name'] ?? 'Customer';
+        $phone = $data['customer_phone'] ?? $data['shipping_address']['phone'] ?? null;
+        $password = $data['password'];
+        $newsletterSubscribed = $data['newsletter_subscribed'] ?? false;
+
+        // Check if user already exists
+        $existingUser = User::where('email', $email)->first();
+        if ($existingUser) {
+            throw new Exception('An account with this email already exists. Please login instead.');
+        }
+
+        // Check if a non-guest customer exists with this email
+        $existingCustomer = Customer::where('email', $email)
+            ->where('is_guest', false)
+            ->first();
+        
+        if ($existingCustomer) {
+            throw new Exception('A customer account with this email already exists.');
+        }
+
+        // Create user account
+        $user = User::create([
+            'name' => trim($firstName . ' ' . $lastName),
+            'email' => $email,
+            'password' => Hash::make($password),
+            'email_verified_at' => now(), // Auto-verify on checkout
+        ]);
+
+        Log::info('User account created during checkout', [
+            'user_id' => $user->id,
+            'email' => $email,
+        ]);
+
+        // Check if guest customer exists and convert to registered customer
+        $customer = Customer::where('email', $email)
+            ->where('is_guest', true)
+            ->first();
+
+        if ($customer) {
+            // Convert guest to registered customer
+            $customer->update([
+                'user_id' => $user->id,
+                'first_name' => $firstName,
+                'last_name' => $lastName,
+                'phone' => $phone,
+                'is_guest' => false,
+                'is_active' => true,
+                'is_verified' => true,
+                'newsletter_subscribed' => $newsletterSubscribed,
+            ]);
+
+            Log::info('Guest customer converted to registered customer', [
+                'customer_id' => $customer->id,
+                'user_id' => $user->id,
+            ]);
+        } else {
+            // Create new registered customer
+            $customer = Customer::create([
+                'user_id' => $user->id,
+                'first_name' => $firstName,
+                'last_name' => $lastName,
+                'email' => $email,
+                'phone' => $phone,
+                'is_guest' => false,
+                'is_active' => true,
+                'is_verified' => true,
+                'customer_group_id' => null,
+                'newsletter_subscribed' => $newsletterSubscribed,
+                'total_orders' => 1,
+                'total_spent' => $data['total'] ?? 0,
+            ]);
+
+            Log::info('New registered customer created during checkout', [
+                'customer_id' => $customer->id,
+                'user_id' => $user->id,
+            ]);
+        }
+
+        return [
+            'user_id' => $user->id,
+            'customer_id' => $customer->id,
+        ];
     }
 }

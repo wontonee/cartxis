@@ -44,13 +44,12 @@ class MaintenanceController extends Controller
     /**
      * Enable maintenance mode
      */
-    public function enable(EnableMaintenanceRequest $request): JsonResponse
+    public function enable(EnableMaintenanceRequest $request)
     {
         $result = $this->maintenanceService->enable($request->validated());
         
-        return response()->json([
-            'success' => true,
-            'message' => 'Maintenance mode enabled successfully',
+        return back()->with([
+            'success' => 'Maintenance mode enabled successfully',
             'bypass_url' => $result['bypass_url'],
             'secret' => $result['secret'],
         ]);
@@ -59,27 +58,21 @@ class MaintenanceController extends Controller
     /**
      * Disable maintenance mode
      */
-    public function disable(): JsonResponse
+    public function disable()
     {
         $this->maintenanceService->disable();
         
-        return response()->json([
-            'success' => true,
-            'message' => 'Maintenance mode disabled successfully',
-        ]);
+        return back()->with('success', 'Maintenance mode disabled successfully');
     }
     
     /**
      * Schedule maintenance
      */
-    public function schedule(ScheduleMaintenanceRequest $request): JsonResponse
+    public function schedule(ScheduleMaintenanceRequest $request)
     {
         $this->maintenanceService->schedule($request->validated());
         
-        return response()->json([
-            'success' => true,
-            'message' => 'Maintenance scheduled successfully',
-        ]);
+        return back()->with('success', 'Maintenance scheduled successfully');
     }
     
     /**

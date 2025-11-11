@@ -226,6 +226,10 @@ class CheckoutController extends Controller
             'terms_accepted' => 'required|accepted',
             'newsletter_signup' => 'boolean',
             'order_notes' => 'nullable|string',
+            // Account creation fields
+            'create_account' => 'boolean',
+            'password' => 'required_if:create_account,true|nullable|string|min:8|confirmed',
+            'password_confirmation' => 'required_with:password|nullable|string',
         ]);
 
         // Get cart items from session
@@ -271,6 +275,10 @@ class CheckoutController extends Controller
             'shipping_cost' => $shippingCost,
             'discount' => 0,
             'total' => $grandTotal,
+            // Account creation fields
+            'create_account' => $validated['create_account'] ?? false,
+            'password' => $validated['password'] ?? null,
+            'newsletter_subscribed' => $validated['newsletter_signup'] ?? false,
         ];
 
         // Create order
