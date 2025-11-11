@@ -12,15 +12,23 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rules;
 use Inertia\Inertia;
 use Inertia\Response;
+use Vortex\Core\Services\ThemeViewResolver;
 
 class RegisteredUserController extends Controller
 {
+    protected ThemeViewResolver $themeResolver;
+
+    public function __construct(ThemeViewResolver $themeResolver)
+    {
+        $this->themeResolver = $themeResolver;
+    }
+
     /**
      * Show the registration page.
      */
     public function create(): Response
     {
-        return Inertia::render('auth/Register');
+        return Inertia::render($this->themeResolver->resolve('Auth/Register'));
     }
 
     /**
@@ -48,6 +56,6 @@ class RegisteredUserController extends Controller
 
         $request->session()->regenerate();
 
-        return to_route('dashboard');
+        return redirect()->route('shop.account.dashboard');
     }
 }

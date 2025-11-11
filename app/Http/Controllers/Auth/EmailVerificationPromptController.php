@@ -7,9 +7,17 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Inertia\Response;
+use Vortex\Core\Services\ThemeViewResolver;
 
 class EmailVerificationPromptController extends Controller
 {
+    protected ThemeViewResolver $themeResolver;
+
+    public function __construct(ThemeViewResolver $themeResolver)
+    {
+        $this->themeResolver = $themeResolver;
+    }
+
     /**
      * Show the email verification prompt page.
      */
@@ -17,6 +25,6 @@ class EmailVerificationPromptController extends Controller
     {
         return $request->user()->hasVerifiedEmail()
                     ? redirect()->intended(route('dashboard', absolute: false))
-                    : Inertia::render('auth/VerifyEmail', ['status' => $request->session()->get('status')]);
+                    : Inertia::render($this->themeResolver->resolve('Auth/VerifyEmail'), ['status' => $request->session()->get('status')]);
     }
 }

@@ -11,15 +11,23 @@ use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 use Inertia\Response;
 use Laravel\Fortify\Features;
+use Vortex\Core\Services\ThemeViewResolver;
 
 class AuthenticatedSessionController extends Controller
 {
+    protected ThemeViewResolver $themeResolver;
+
+    public function __construct(ThemeViewResolver $themeResolver)
+    {
+        $this->themeResolver = $themeResolver;
+    }
+
     /**
      * Show the login page.
      */
     public function create(Request $request): Response
     {
-        return Inertia::render('auth/Login', [
+        return Inertia::render($this->themeResolver->resolve('Auth/Login'), [
             'canResetPassword' => Route::has('password.request'),
             'status' => $request->session()->get('status'),
         ]);
@@ -45,7 +53,7 @@ class AuthenticatedSessionController extends Controller
 
         $request->session()->regenerate();
 
-        return redirect()->intended(route('dashboard', absolute: false));
+        return redirect()->intended(route('shop.account.dashboard'));
     }
 
     /**

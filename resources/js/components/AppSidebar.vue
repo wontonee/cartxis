@@ -11,18 +11,19 @@ import {
     SidebarMenuButton,
     SidebarMenuItem,
 } from '@/components/ui/sidebar';
-import { dashboard } from '@/routes';
+// import { dashboard } from '@/routes'; // Laravel Starter Kit - removed
 import { type NavItem } from '@/types';
 import { Link } from '@inertiajs/vue3';
 import { BookOpen, Folder, LayoutGrid } from 'lucide-vue-next';
 import AppLogo from './AppLogo.vue';
 
 const mainNavItems: NavItem[] = [
-    {
-        title: 'Dashboard',
-        href: dashboard(),
-        icon: LayoutGrid,
-    },
+    // Laravel Starter Kit dashboard removed
+    // {
+    //     title: 'Dashboard',
+    //     href: dashboard(),
+    //     icon: LayoutGrid,
+    // },
 ];
 
 const footerNavItems: NavItem[] = [
@@ -45,7 +46,7 @@ const footerNavItems: NavItem[] = [
             <SidebarMenu>
                 <SidebarMenuItem>
                     <SidebarMenuButton size="lg" as-child>
-                        <Link :href="dashboard()">
+                        <Link href="/">
                             <AppLogo />
                         </Link>
                     </SidebarMenuButton>

@@ -3,6 +3,7 @@
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Auth;
 use Vortex\Admin\Http\Controllers\Auth\AdminLoginController;
+use Vortex\Admin\Http\Controllers\UserController;
 use Vortex\Core\Http\Controllers\Admin\ThemeController;
 use Vortex\Core\Http\Controllers\Admin\Settings\GeneralSettingsController;
 use Vortex\Settings\Http\Controllers\Admin\ShippingMethodsController;
@@ -37,6 +38,15 @@ Route::prefix('admin')->name('admin.')->middleware(['web'])->group(function () {
                 ]
             ]);
         })->name('dashboard');
+        
+        // User Management
+        Route::prefix('users')->name('users.')->group(function () {
+            Route::get('/', [UserController::class, 'index'])->name('index');
+            Route::get('/{user}/edit', [UserController::class, 'edit'])->name('edit');
+            Route::put('/{user}', [UserController::class, 'update'])->name('update');
+            Route::put('/{user}/change-password', [UserController::class, 'changePassword'])->name('change-password');
+            Route::delete('/{user}', [UserController::class, 'destroy'])->name('destroy');
+        });
         
         // Appearance -> Themes
         Route::prefix('appearance/themes')->name('themes.')->group(function () {

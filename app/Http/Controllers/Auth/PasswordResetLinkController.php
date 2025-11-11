@@ -8,16 +8,24 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Password;
 use Inertia\Inertia;
 use Inertia\Response;
+use Vortex\Core\Services\ThemeViewResolver;
 
 class PasswordResetLinkController extends Controller
 {
+    protected ThemeViewResolver $themeResolver;
+
+    public function __construct(ThemeViewResolver $themeResolver)
+    {
+        $this->themeResolver = $themeResolver;
+    }
+
     /**
      * Show the password reset link request page.
      */
-    public function create(Request $request): Response
+    public function create(): Response
     {
-        return Inertia::render('auth/ForgotPassword', [
-            'status' => $request->session()->get('status'),
+        return Inertia::render($this->themeResolver->resolve('Auth/ForgotPassword'), [
+            'status' => session('status'),
         ]);
     }
 

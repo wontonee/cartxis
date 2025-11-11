@@ -13,16 +13,24 @@ use Illuminate\Validation\Rules;
 use Illuminate\Validation\ValidationException;
 use Inertia\Inertia;
 use Inertia\Response;
+use Vortex\Core\Services\ThemeViewResolver;
 
 class NewPasswordController extends Controller
 {
+    protected ThemeViewResolver $themeResolver;
+
+    public function __construct(ThemeViewResolver $themeResolver)
+    {
+        $this->themeResolver = $themeResolver;
+    }
+
     /**
      * Show the password reset page.
      */
     public function create(Request $request): Response
     {
-        return Inertia::render('auth/ResetPassword', [
-            'email' => $request->email,
+        return Inertia::render($this->themeResolver->resolve('Auth/ResetPassword'), [
+            'email' => $request->input('email'),
             'token' => $request->route('token'),
         ]);
     }

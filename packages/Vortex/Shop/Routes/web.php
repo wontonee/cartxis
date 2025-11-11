@@ -61,9 +61,21 @@ Route::group([
         Route::get('/', [Vortex\Shop\Http\Controllers\Account\DashboardController::class, 'index'])->name('dashboard');
         Route::get('/orders', [Vortex\Shop\Http\Controllers\Account\OrderController::class, 'index'])->name('orders.index');
         Route::get('/orders/{id}', [Vortex\Shop\Http\Controllers\Account\OrderController::class, 'show'])->name('orders.show');
-        // Route::get('/profile', [Vortex\Shop\Http\Controllers\Account\ProfileController::class, 'edit'])->name('profile.edit');
-        // Route::put('/profile', [Vortex\Shop\Http\Controllers\Account\ProfileController::class, 'update'])->name('profile.update');
-        // Route::get('/addresses', [Vortex\Shop\Http\Controllers\Account\AddressController::class, 'index'])->name('addresses.index');
+        
+        // Profile Management
+        Route::get('/profile', [Vortex\Shop\Http\Controllers\Account\ProfileController::class, 'edit'])->name('profile.edit');
+        Route::put('/profile', [Vortex\Shop\Http\Controllers\Account\ProfileController::class, 'update'])->name('profile.update');
+        Route::put('/profile/password', [Vortex\Shop\Http\Controllers\Account\ProfileController::class, 'updatePassword'])->name('profile.password');
+        Route::put('/profile/preferences', [Vortex\Shop\Http\Controllers\Account\ProfileController::class, 'updatePreferences'])->name('profile.preferences');
+        Route::delete('/profile', [Vortex\Shop\Http\Controllers\Account\ProfileController::class, 'destroy'])->name('profile.destroy');
+        
+        // Address Management
+        Route::get('/addresses', [Vortex\Shop\Http\Controllers\Account\AddressController::class, 'index'])->name('addresses.index');
+        Route::post('/addresses', [Vortex\Shop\Http\Controllers\Account\AddressController::class, 'store'])->name('addresses.store');
+        Route::put('/addresses/{address}', [Vortex\Shop\Http\Controllers\Account\AddressController::class, 'update'])->name('addresses.update');
+        Route::put('/addresses/{address}/default', [Vortex\Shop\Http\Controllers\Account\AddressController::class, 'setDefault'])->name('addresses.default');
+        Route::delete('/addresses/{address}', [Vortex\Shop\Http\Controllers\Account\AddressController::class, 'destroy'])->name('addresses.destroy');
+        
         // Route::get('/wishlist', [Vortex\Shop\Http\Controllers\Account\WishlistController::class, 'index'])->name('wishlist.index');
         // Route::get('/reviews', [Vortex\Shop\Http\Controllers\Account\ReviewController::class, 'index'])->name('reviews.index');
     });

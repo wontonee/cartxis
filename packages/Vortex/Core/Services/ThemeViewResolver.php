@@ -107,6 +107,18 @@ class ThemeViewResolver
     }
     
     /**
+     * Render Inertia view with theme resolution
+     * 
+     * @param string $view View name
+     * @param array $props Props to pass to view
+     * @return \Inertia\Response
+     */
+    public function inertia(string $view, array $props = [])
+    {
+        return \Inertia\Inertia::render($this->resolve($view), $props);
+    }
+    
+    /**
      * Get active theme name
      * 
      * @return string
