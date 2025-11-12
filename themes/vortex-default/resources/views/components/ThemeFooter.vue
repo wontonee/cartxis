@@ -60,67 +60,64 @@ const footerSections = computed(() => {
 
                 <!-- Fallback sections while loading or if no menu -->
                 <template v-else>
-                    <!-- Quick Links -->
+                    <!-- Company -->
                     <div>
-                        <h4 class="font-semibold text-white mb-4">Quick Links</h4>
+                        <h4 class="font-semibold text-white mb-4">Company</h4>
                         <ul class="space-y-2 text-sm">
                             <li>
-                                <Link href="/" class="hover:text-white transition-colors">
-                                    Shop
-                                </Link>
-                            </li>
-                            <li>
-                                <Link href="/" class="hover:text-white transition-colors">
-                                    Categories
-                                </Link>
-                            </li>
-                            <li>
-                                <Link href="/" class="hover:text-white transition-colors">
-                                    Deals
-                                </Link>
-                            </li>
-                            <li>
-                                <Link href="/" class="hover:text-white transition-colors">
+                                <Link href="/about" class="hover:text-white transition-colors">
                                     About Us
                                 </Link>
                             </li>
-                        </ul>
-                    </div>
-
-                    <!-- Customer Service -->
-                    <div>
-                        <h4 class="font-semibold text-white mb-4">Customer Service</h4>
-                        <ul class="space-y-2 text-sm">
                             <li>
-                                <Link href="/" class="hover:text-white transition-colors">
+                                <Link href="/contact" class="hover:text-white transition-colors">
                                     Contact Us
                                 </Link>
                             </li>
                             <li>
-                                <Link href="/" class="hover:text-white transition-colors">
-                                    Shipping Info
-                                </Link>
-                            </li>
-                            <li>
-                                <Link href="/" class="hover:text-white transition-colors">
-                                    Returns
-                                </Link>
-                            </li>
-                            <li>
-                                <Link href="/" class="hover:text-white transition-colors">
-                                    FAQ
+                                <Link href="/products" class="hover:text-white transition-colors">
+                                    Shop
                                 </Link>
                             </li>
                         </ul>
                     </div>
 
-                    <!-- Contact -->
+                    <!-- Help & Support -->
                     <div>
-                        <h4 class="font-semibold text-white mb-4">Contact</h4>
+                        <h4 class="font-semibold text-white mb-4">Help & Support</h4>
                         <ul class="space-y-2 text-sm">
-                            <li>Email: info@{{ siteConfig.url.replace('http://', '').replace('https://', '') }}</li>
-                            <li>Phone: (555) 123-4567</li>
-                            <li>Address: 123 Store St</li>
+                            <li>
+                                <Link href="/shipping-returns" class="hover:text-white transition-colors">
+                                    Shipping & Returns
+                                </Link>
+                            </li>
+                            <li>
+                                <Link href="/faq" class="hover:text-white transition-colors">
+                                    FAQ
+                                </Link>
+                            </li>
+                            <li>
+                                <Link href="/contact" class="hover:text-white transition-colors">
+                                    Support Center
+                                </Link>
+                            </li>
+                        </ul>
+                    </div>
+
+                    <!-- Legal -->
+                    <div>
+                        <h4 class="font-semibold text-white mb-4">Legal</h4>
+                        <ul class="space-y-2 text-sm">
+                            <li>
+                                <Link href="/privacy-policy" class="hover:text-white transition-colors">
+                                    Privacy Policy
+                                </Link>
+                            </li>
+                            <li>
+                                <Link href="/terms-of-service" class="hover:text-white transition-colors">
+                                    Terms of Service
+                                </Link>
+                            </li>
                         </ul>
                     </div>
                 </template>

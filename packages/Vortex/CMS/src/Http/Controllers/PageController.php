@@ -7,6 +7,7 @@ namespace Vortex\CMS\Http\Controllers;
 use App\Http\Controllers\Controller;
 use Vortex\CMS\Models\Page;
 use Vortex\CMS\Repositories\PageRepository;
+use Vortex\Core\Services\ThemeViewResolver;
 use Illuminate\Support\Facades\Cache;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -14,7 +15,8 @@ use Inertia\Response;
 class PageController extends Controller
 {
     public function __construct(
-        protected PageRepository $pageRepository
+        protected PageRepository $pageRepository,
+        protected ThemeViewResolver $themeResolver
     ) {}
 
     /**
@@ -31,7 +33,7 @@ class PageController extends Controller
             abort(404, 'Page not found');
         }
 
-        return Inertia::render('Page', [
+        return Inertia::render($this->themeResolver->resolve('CMS/Page'), [
             'page' => [
                 'title' => $page->title,
                 'content' => $page->content,
