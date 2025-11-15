@@ -37,6 +37,10 @@ import {
     ChevronRight,
     ChevronDown,
     Home,
+    Copy,
+    ExternalLink,
+    Eye,
+    Info,
 } from 'lucide-vue-next';
 
 interface Props {
@@ -72,9 +76,12 @@ const expandedFolders = ref<number[]>([]);
 const showNewFolderModal = ref(false);
 const showUploadModal = ref(false);
 const showDeleteModal = ref(false);
+const showFileDetailsModal = ref(false);
+const selectedFileDetails = ref<MediaFile | null>(null);
 const deleteTarget = ref<{ type: 'single' | 'bulk'; file?: MediaFile; count?: number } | null>(null);
 const newFolderName = ref('');
 const newFolderParentId = ref<number | null>(null);
+const copyUrlFeedback = ref(false);
 
 // Computed properties for delete modal
 const deleteModalTitle = computed(() => {
@@ -302,6 +309,26 @@ const handleUploadSuccess = (files: File[]) => {
 const handleUploadError = (message: string) => {
     console.error('Upload error:', message);
     // You could also show a toast notification here
+};
+
+// View file details
+const viewFileDetails = (file: MediaFile) => {
+    selectedFileDetails.value = file;
+    showFileDetailsModal.value = true;
+};
+
+// Copy URL to clipboard
+const copyUrlToClipboard = async (url: string) => {
+    try {
+        await navigator.clipboard.writeText(url);
+        copyUrlFeedback.value = true;
+        setTimeout(() => {
+            copyUrlFeedback.value = false;
+        }, 2000);
+    } catch (err) {
+        console.error('Failed to copy URL:', err);
+        alert('Failed to copy URL to clipboard');
+    }
 };
 </script>
 
@@ -556,9 +583,8 @@ const handleUploadError = (message: string) => {
                     <div
                         v-for="file in media.data"
                         :key="file.id"
-                        @click="toggleSelection(file.id)"
                         :class="[
-                            'group relative aspect-square rounded-lg border-2 cursor-pointer transition-all overflow-hidden',
+                            'group relative aspect-square rounded-lg border-2 transition-all overflow-hidden',
                             selectedFiles.includes(file.id)
                                 ? 'border-blue-500 ring-2 ring-blue-500 ring-offset-2'
                                 : 'border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600'
@@ -575,8 +601,21 @@ const handleUploadError = (message: string) => {
                             />
                         </div>
 
+                        <!-- View Details Button -->
+                        <button
+                            @click="viewFileDetails(file)"
+                            class="absolute top-2 right-2 z-10 p-1.5 bg-white dark:bg-gray-800 rounded-lg shadow-md opacity-0 group-hover:opacity-100 transition-opacity hover:bg-gray-100 dark:hover:bg-gray-700"
+                            title="View details"
+                        >
+                            <Info :size="16" class="text-gray-600 dark:text-gray-400" />
+                        </button>
+
                         <!-- Image preview -->
-                        <div v-if="file.is_image" class="w-full h-full">
+                        <div 
+                            v-if="file.is_image" 
+                            class="w-full h-full cursor-pointer"
+                            @click="viewFileDetails(file)"
+                        >
                             <img
                                 :src="file.thumbnail_url || file.url"
                                 :alt="file.alt_text || file.original_filename"
@@ -585,12 +624,16 @@ const handleUploadError = (message: string) => {
                         </div>
 
                         <!-- Non-image file icon -->
-                        <div v-else class="w-full h-full flex items-center justify-center bg-gray-50 dark:bg-gray-700">
+                        <div 
+                            v-else 
+                            class="w-full h-full flex items-center justify-center bg-gray-50 dark:bg-gray-700 cursor-pointer"
+                            @click="viewFileDetails(file)"
+                        >
                             <component :is="getFileIcon(file)" :size="48" class="text-gray-400" />
                         </div>
 
                         <!-- Overlay on hover -->
-                        <div class="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-50 transition-all flex items-center justify-center opacity-0 group-hover:opacity-100">
+                        <div class="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-50 transition-all flex items-center justify-center opacity-0 group-hover:opacity-100 pointer-events-none">
                             <p class="text-white text-xs font-medium px-2 text-center truncate w-full">
                                 {{ file.original_filename }}
                             </p>
@@ -678,12 +721,20 @@ const handleUploadError = (message: string) => {
                                     {{ formatDate(file.created_at) }}
                                 </td>
                                 <td class="px-6 py-4 text-right text-sm font-medium">
-                                    <button
-                                        @click="deleteFile(file)"
-                                        class="text-red-600 dark:text-red-400 hover:text-red-900 dark:hover:text-red-300"
-                                    >
-                                        Delete
-                                    </button>
+                                    <div class="flex items-center justify-end gap-2">
+                                        <button
+                                            @click="viewFileDetails(file)"
+                                            class="text-blue-600 dark:text-blue-400 hover:text-blue-900 dark:hover:text-blue-300"
+                                        >
+                                            View
+                                        </button>
+                                        <button
+                                            @click="deleteFile(file)"
+                                            class="text-red-600 dark:text-red-400 hover:text-red-900 dark:hover:text-red-300"
+                                        >
+                                            Delete
+                                        </button>
+                                    </div>
                                 </td>
                             </tr>
                         </tbody>
@@ -764,6 +815,223 @@ const handleUploadError = (message: string) => {
             :message="deleteModalMessage"
             @confirm="confirmDelete"
         />
+
+        <!-- File Details Modal -->
+        <Teleport to="body">
+            <Transition
+                enter-active-class="transition duration-200 ease-out"
+                enter-from-class="opacity-0"
+                enter-to-class="opacity-100"
+                leave-active-class="transition duration-200 ease-in"
+                leave-from-class="opacity-100"
+                leave-to-class="opacity-0"
+            >
+                <div
+                    v-if="showFileDetailsModal && selectedFileDetails"
+                    class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4"
+                    @click="showFileDetailsModal = false"
+                >
+                    <Transition
+                        enter-active-class="transition duration-200 ease-out"
+                        enter-from-class="scale-95 opacity-0"
+                        enter-to-class="scale-100 opacity-100"
+                        leave-active-class="transition duration-200 ease-in"
+                        leave-from-class="scale-100 opacity-100"
+                        leave-to-class="scale-95 opacity-0"
+                    >
+                        <div
+                            v-if="showFileDetailsModal && selectedFileDetails"
+                            class="relative bg-white dark:bg-gray-800 rounded-lg shadow-xl max-w-4xl w-full max-h-[90vh] overflow-y-auto"
+                            @click.stop
+                        >
+                    <!-- Header -->
+                    <div class="flex items-center justify-between px-6 py-4 border-b border-gray-200 dark:border-gray-700">
+                        <h3 class="text-lg font-medium text-gray-900 dark:text-white">
+                            File Details
+                        </h3>
+                        <button
+                            @click="showFileDetailsModal = false"
+                            type="button"
+                            class="text-gray-400 hover:text-gray-500 dark:hover:text-gray-300"
+                        >
+                            <X :size="20" />
+                        </button>
+                    </div>
+
+                    <!-- Body -->
+                    <div class="px-6 py-4">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <!-- Preview -->
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                                    Preview
+                                </label>
+                                <div class="border border-gray-200 dark:border-gray-700 rounded-lg overflow-hidden bg-gray-50 dark:bg-gray-700">
+                                    <img
+                                        v-if="selectedFileDetails.is_image"
+                                        :src="selectedFileDetails.url"
+                                        :alt="selectedFileDetails.alt_text || selectedFileDetails.original_filename"
+                                        class="w-full h-auto"
+                                    />
+                                    <div v-else class="flex items-center justify-center h-64">
+                                        <component :is="getFileIcon(selectedFileDetails)" :size="64" class="text-gray-400" />
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Details -->
+                            <div class="space-y-4">
+                                <!-- Filename -->
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                                        Filename
+                                    </label>
+                                    <p class="text-sm text-gray-900 dark:text-white">
+                                        {{ selectedFileDetails.original_filename }}
+                                    </p>
+                                </div>
+
+                                <!-- URL with Copy Button -->
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                                        File URL
+                                    </label>
+                                    <div class="flex items-center gap-2">
+                                        <input
+                                            type="text"
+                                            :value="selectedFileDetails.url"
+                                            readonly
+                                            class="flex-1 px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-white"
+                                        />
+                                        <button
+                                            @click="copyUrlToClipboard(selectedFileDetails.url)"
+                                            class="flex items-center gap-2 px-3 py-2 text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 rounded-lg transition-colors"
+                                            :class="{ 'bg-green-600 hover:bg-green-700': copyUrlFeedback }"
+                                        >
+                                            <Copy :size="16" />
+                                            {{ copyUrlFeedback ? 'Copied!' : 'Copy' }}
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <!-- Thumbnail URL (if image) -->
+                                <div v-if="selectedFileDetails.is_image && selectedFileDetails.thumbnail_url">
+                                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                                        Thumbnail URL
+                                    </label>
+                                    <div class="flex items-center gap-2">
+                                        <input
+                                            type="text"
+                                            :value="selectedFileDetails.thumbnail_url"
+                                            readonly
+                                            class="flex-1 px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-white"
+                                        />
+                                        <button
+                                            @click="copyUrlToClipboard(selectedFileDetails.thumbnail_url!)"
+                                            class="flex items-center gap-2 px-3 py-2 text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 rounded-lg transition-colors"
+                                        >
+                                            <Copy :size="16" />
+                                            Copy
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <!-- File Type -->
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                                        File Type
+                                    </label>
+                                    <p class="text-sm text-gray-900 dark:text-white">
+                                        {{ selectedFileDetails.mime_type }} ({{ selectedFileDetails.extension?.toUpperCase() }})
+                                    </p>
+                                </div>
+
+                                <!-- File Size -->
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                                        File Size
+                                    </label>
+                                    <p class="text-sm text-gray-900 dark:text-white">
+                                        {{ selectedFileDetails.formatted_size }}
+                                    </p>
+                                </div>
+
+                                <!-- Dimensions (if image) -->
+                                <div v-if="selectedFileDetails.width && selectedFileDetails.height">
+                                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                                        Dimensions
+                                    </label>
+                                    <p class="text-sm text-gray-900 dark:text-white">
+                                        {{ selectedFileDetails.width }} × {{ selectedFileDetails.height }} px
+                                    </p>
+                                </div>
+
+                                <!-- Alt Text -->
+                                <div v-if="selectedFileDetails.alt_text">
+                                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                                        Alt Text
+                                    </label>
+                                    <p class="text-sm text-gray-900 dark:text-white">
+                                        {{ selectedFileDetails.alt_text }}
+                                    </p>
+                                </div>
+
+                                <!-- Title -->
+                                <div v-if="selectedFileDetails.title">
+                                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                                        Title
+                                    </label>
+                                    <p class="text-sm text-gray-900 dark:text-white">
+                                        {{ selectedFileDetails.title }}
+                                    </p>
+                                </div>
+
+                                <!-- Description -->
+                                <div v-if="selectedFileDetails.description">
+                                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                                        Description
+                                    </label>
+                                    <p class="text-sm text-gray-900 dark:text-white">
+                                        {{ selectedFileDetails.description }}
+                                    </p>
+                                </div>
+
+                                <!-- Uploaded Date -->
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                                        Uploaded
+                                    </label>
+                                    <p class="text-sm text-gray-900 dark:text-white">
+                                        {{ formatDate(selectedFileDetails.created_at) }}
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Footer -->
+                    <div class="px-6 py-4 bg-gray-50 dark:bg-gray-700/50 flex items-center justify-between">
+                        <a
+                            :href="selectedFileDetails.url"
+                            target="_blank"
+                            class="flex items-center gap-2 px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-600 rounded-lg transition-colors"
+                        >
+                            <ExternalLink :size="16" />
+                            Open in New Tab
+                        </a>
+                        <button
+                            @click="showFileDetailsModal = false"
+                            type="button"
+                            class="px-4 py-2 text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 rounded-lg transition-colors"
+                        >
+                            Close
+                        </button>
+                    </div>
+                        </div>
+                    </Transition>
+                </div>
+            </Transition>
+        </Teleport>
 
         <!-- New Folder Modal -->
         <div

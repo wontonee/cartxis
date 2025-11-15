@@ -12,6 +12,7 @@ return [
     Vortex\Shop\Providers\ShopServiceProvider::class,
     Vortex\Settings\Providers\SettingsServiceProvider::class,
     Vortex\Stripe\Providers\StripeServiceProvider::class,
+    Vortex\Razorpay\Providers\RazorpayServiceProvider::class,
     Vortex\Sales\Providers\SalesServiceProvider::class,
     Vortex\Customer\Providers\CustomerServiceProvider::class,
     Vortex\CMS\Providers\CMSServiceProvider::class,

@@ -28,13 +28,16 @@ class PaymentMethodsController extends Controller
      */
     public function getConfigure(string $type): Response
     {
-        $method = PaymentMethod::where('type', $type)->first();
+        // Try to find by code first (for custom gateways like razorpay), then by type
+        $method = PaymentMethod::where('code', $type)
+            ->orWhere('type', $type)
+            ->first();
 
         if (!$method) {
             abort(404, 'Payment method not found');
         }
 
-        return Inertia::render("Admin/Settings/PaymentMethods/Configure{$this->getComponentName($type)}", [
+        return Inertia::render("Admin/Settings/PaymentMethods/Configure{$this->getComponentName($method->code)}", [
             'method' => $method,
         ]);
     }
@@ -44,7 +47,10 @@ class PaymentMethodsController extends Controller
      */
     public function save(SavePaymentMethodRequest $request, string $type)
     {
-        $method = PaymentMethod::where('type', $type)->firstOrFail();
+        // Try to find by code first (for custom gateways), then by type
+        $method = PaymentMethod::where('code', $type)
+            ->orWhere('type', $type)
+            ->firstOrFail();
 
         // Update method with validated data
         $method->update($request->validated());
@@ -92,12 +98,13 @@ class PaymentMethodsController extends Controller
     /**
      * Get component name from type.
      */
-    private function getComponentName(string $type): string
+    private function getComponentName(string $code): string
     {
-        return match ($type) {
+        return match ($code) {
             'cod' => 'COD',
             'bank_transfer' => 'BankTransfer',
             'stripe' => 'Stripe',
+            'razorpay' => 'Razorpay',
             default => 'Generic',
         };
     }

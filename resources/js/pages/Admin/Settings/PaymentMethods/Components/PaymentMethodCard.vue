@@ -31,6 +31,14 @@ const statusText = computed(() => {
 const defaultBadge = computed(() => {
   return props.paymentMethod.is_default ? 'Default' : null
 })
+
+const displayType = computed(() => {
+  // For custom gateways (type=other), use the code as display type
+  if (props.paymentMethod.type === 'other') {
+    return props.paymentMethod.code.toUpperCase()
+  }
+  return props.paymentMethod.type.toUpperCase()
+})
 </script>
 
 <template>
@@ -59,7 +67,7 @@ const defaultBadge = computed(() => {
       <div class="space-y-2 text-sm">
         <div class="flex justify-between">
           <span class="text-gray-600">Type:</span>
-          <span class="font-medium text-gray-900 uppercase">{{ paymentMethod.type }}</span>
+          <span class="font-medium text-gray-900 uppercase">{{ displayType }}</span>
         </div>
         <div class="flex justify-between">
           <span class="text-gray-600">Code:</span>

@@ -50,7 +50,7 @@ const handleSetDefault = (method: PaymentMethod) => {
 }
 
 const handleConfigure = (method: PaymentMethod) => {
-  router.get(`/admin/settings/payment-methods/${method.type}/configure`)
+  router.get(`/admin/settings/payment-methods/${method.code}/configure`)
 }
 </script>
 

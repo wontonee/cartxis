@@ -19,6 +19,7 @@
         "laravel/wayfinder": "^0.1.9",
         "mews/purifier": "^3.4",
         "mpdf/mpdf": "^8.2",
+        "razorpay/razorpay": "^2.9",
         "stripe/stripe-php": "^18.0"
     },
     "require-dev": {
@@ -48,6 +49,7 @@
             "Vortex\\Settings\\": "packages/Vortex/Settings/",
             "Vortex\\Settings\\Database\\Seeders\\": "packages/Vortex/Settings/Database/Seeders/",
             "Vortex\\Stripe\\": "packages/Vortex/Stripe/src/",
+            "Vortex\\Razorpay\\": "packages/Vortex/Razorpay/src/",
             "Vortex\\Sales\\": "packages/Vortex/Sales/src/",
             "Vortex\\Customer\\": "packages/Vortex/Customer/src/",
             "Vortex\\CMS\\": "packages/Vortex/CMS/src/",
