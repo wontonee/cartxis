@@ -55,20 +55,78 @@ class HandleInertiaRequests extends Middleware
     {
         [$message, $author] = str(Inspiring::quotes()->random())->explode('-');
 
+        // Skip database queries when running in console (e.g., during migrations)
+        if (app()->runningInConsole()) {
+            return array_merge(parent::share($request), [
+                'name' => config('app.name'),
+                'quote' => ['message' => trim($message), 'author' => trim($author)],
+                'auth' => [
+                    'user' => null,
+                ],
+                'menu' => [
+                    'admin' => [],
+                    'shop' => [],
+                ],
+                'flash' => \Inertia\Inertia::always(function () use ($request) {
+                    return [
+                        'success' => null,
+                        'error' => null,
+                        'warning' => null,
+                        'info' => null,
+                        'redirect_url' => null,
+                    ];
+                }),
+                'sidebarOpen' => true,
+                'ziggy' => fn () => [
+                    'location' => $request->url(),
+                ],
+                'theme' => null,
+                'siteConfig' => null,
+                'currency' => null,
+            ]);
+        }
+
         $menuService = app(MenuService::class);
 
         // Load active theme for frontend routes
         $theme = null;
         $siteConfig = null;
-        $currency = Currency::getDefault();
+        $currency = null;
+        
+        try {
+            $currency = Currency::getDefault();
+        } catch (\Exception $e) {
+            // Silently fail during migration when table doesn't exist
+        }
         
         if (!$request->is('admin/*') && !$request->is('admin')) {
-            $theme = Theme::where('is_active', true)->first();
+            try {
+                $theme = Theme::where('is_active', true)->first();
+            } catch (\Exception $e) {
+                // Silently fail during migration when table doesn't exist
+            }
+            
             $siteConfig = [
                 'name' => config('app.name'),
                 'url' => config('app.url'),
                 'description' => 'Vortex E-commerce Platform',
             ];
+        }
+
+        // Build menu trees with error handling
+        $adminMenu = [];
+        $shopMenu = [];
+        
+        try {
+            $adminMenu = $menuService->buildTree('admin');
+        } catch (\Exception $e) {
+            // Silently fail during migration when table doesn't exist
+        }
+        
+        try {
+            $shopMenu = $menuService->buildTree('shop');
+        } catch (\Exception $e) {
+            // Silently fail during migration when table doesn't exist
         }
 
         return array_merge(parent::share($request), [
@@ -78,8 +136,8 @@ class HandleInertiaRequests extends Middleware
                 'user' => $request->user(),
             ],
             'menu' => [
-                'admin' => $menuService->buildTree('admin'),
-                'shop' => $menuService->buildTree('shop'),
+                'admin' => $adminMenu,
+                'shop' => $shopMenu,
             ],
             'flash' => \Inertia\Inertia::always(function () use ($request) {
                 return [

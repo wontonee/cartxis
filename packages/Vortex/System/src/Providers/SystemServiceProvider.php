@@ -52,8 +52,25 @@ class SystemServiceProvider extends ServiceProvider
                     'title' => 'System',
                     'icon' => 'server',
                     'url' => null,
+                    'route' => null,
+                    'location' => 'admin',
                     'parent_id' => null,
                     'order' => 100,
+                    'active' => true,
+                ]
+            );
+
+            // Create Menu Management submenu
+            MenuItem::updateOrCreate(
+                ['key' => 'system.menus'],
+                [
+                    'title' => 'Menu Management',
+                    'icon' => 'menu',
+                    'route' => 'admin.system.menus.index',
+                    'url' => null,
+                    'location' => 'admin',
+                    'parent_id' => $systemMenu->id,
+                    'order' => 0,
                     'active' => true,
                 ]
             );
@@ -64,7 +81,9 @@ class SystemServiceProvider extends ServiceProvider
                 [
                     'title' => 'Cache Management',
                     'icon' => 'database',
-                    'url' => '/admin/system/cache',
+                    'route' => 'admin.system.cache.index',
+                    'url' => null,
+                    'location' => 'admin',
                     'parent_id' => $systemMenu->id,
                     'order' => 1,
                     'active' => true,
@@ -77,7 +96,9 @@ class SystemServiceProvider extends ServiceProvider
                 [
                     'title' => 'Maintenance Mode',
                     'icon' => 'wrench',
-                    'url' => '/admin/system/maintenance',
+                    'route' => 'admin.system.maintenance.index',
+                    'url' => null,
+                    'location' => 'admin',
                     'parent_id' => $systemMenu->id,
                     'order' => 2,
                     'active' => true,

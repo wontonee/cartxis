@@ -51,25 +51,30 @@ class RazorpayServiceProvider extends ServiceProvider
      */
     protected function seedPaymentMethod(): void
     {
-        // Check if payment method already exists
-        $exists = PaymentMethod::where('code', 'razorpay')->exists();
+        try {
+            // Check if payment method already exists
+            $exists = PaymentMethod::where('code', 'razorpay')->exists();
 
-        if (!$exists) {
-            PaymentMethod::create([
-                'code' => 'razorpay',
-                'name' => 'Razorpay',
-                'type' => 'other', // Using 'other' since 'razorpay' is not in enum yet
-                'description' => 'Pay securely with Razorpay - Cards, UPI, Netbanking, Wallets',
-                'is_active' => false, // Disabled by default until configured
-                'configuration' => [
-                    'key_id' => '',
-                    'key_secret' => '',
-                    'currency' => 'INR',
-                    'webhook_secret' => '',
-                    'auto_capture' => true,
-                ],
-                'sort_order' => 2,
-            ]);
+            if (!$exists) {
+                PaymentMethod::create([
+                    'code' => 'razorpay',
+                    'name' => 'Razorpay',
+                    'type' => 'other', // Using 'other' since 'razorpay' is not in enum yet
+                    'description' => 'Pay securely with Razorpay - Cards, UPI, Netbanking, Wallets',
+                    'is_active' => false, // Disabled by default until configured
+                    'configuration' => [
+                        'key_id' => '',
+                        'key_secret' => '',
+                        'currency' => 'INR',
+                        'webhook_secret' => '',
+                        'auto_capture' => true,
+                    ],
+                    'sort_order' => 2,
+                ]);
+            }
+        } catch (\Exception $e) {
+            // Silently fail during migration when table doesn't exist yet
+            // The payment method will be seeded after migrations are complete
         }
     }
 }
