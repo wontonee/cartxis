@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed, onMounted } from 'vue';
 import { Link } from '@inertiajs/vue3';
-import { useCart } from '@/Composables/useCart';
+import { useCart } from '@/composables/useCart';
 
 const { itemCount, fetchCart } = useCart();
 
