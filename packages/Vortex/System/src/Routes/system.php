@@ -4,6 +4,7 @@ use Illuminate\Support\Facades\Route;
 use Vortex\System\Http\Controllers\CacheController;
 use Vortex\System\Http\Controllers\MaintenanceController;
 use Vortex\System\Http\Controllers\Admin\MenuController;
+use Vortex\System\Http\Controllers\Admin\ExtensionsController;
 
 Route::middleware(['web', 'auth:admin'])
     ->prefix('admin/system')
@@ -38,5 +39,15 @@ Route::middleware(['web', 'auth:admin'])
             Route::delete('/{menu}', [MenuController::class, 'destroy'])->name('destroy');
             Route::post('/reorder', [MenuController::class, 'reorder'])->name('reorder');
             Route::post('/{menu}/toggle', [MenuController::class, 'toggle'])->name('toggle');
+        });
+
+        // Extensions Management Routes
+        Route::prefix('extensions')->name('extensions.')->group(function () {
+            Route::get('/', [ExtensionsController::class, 'index'])->name('index');
+            Route::post('/sync', [ExtensionsController::class, 'sync'])->name('sync');
+            Route::post('/{code}/install', [ExtensionsController::class, 'install'])->name('install');
+            Route::post('/{code}/activate', [ExtensionsController::class, 'activate'])->name('activate');
+            Route::post('/{code}/deactivate', [ExtensionsController::class, 'deactivate'])->name('deactivate');
+            Route::delete('/{code}', [ExtensionsController::class, 'uninstall'])->name('uninstall');
         });
     });

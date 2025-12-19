@@ -42,7 +42,7 @@ const confirm = () => {
         >
             <div
                 v-if="show"
-                class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4"
+                class="fixed inset-0 z-50 flex items-center justify-center bg-gray-500/75 dark:bg-gray-900/75 p-4"
                 @click="close"
             >
                 <Transition

@@ -17,7 +17,7 @@ class MenuService
             ->active()
             ->parents()
             ->ordered()
-            ->with('allChildren')
+            ->with('children')
             ->get();
 
         return $this->filterByPermission($items);

@@ -264,7 +264,7 @@ const handleDragEnd = () => {
                   class="hover:bg-gray-50 dark:hover:bg-gray-700/50"
                 >
                   <td class="px-6 py-4">
-                    <button class="cursor-move text-gray-400 hover:text-gray-600 dark:hover:text-gray-300">
+                    <button class="cursor-pointer text-gray-400 hover:text-gray-600 dark:hover:text-gray-300">
                       <GripVertical class="h-5 w-5" />
                     </button>
                   </td>
@@ -317,7 +317,7 @@ const handleDragEnd = () => {
                   class="bg-gray-50 hover:bg-gray-100 dark:bg-gray-900 dark:hover:bg-gray-800"
                 >
                   <td class="px-6 py-3">
-                    <button class="cursor-move pl-4 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300">
+                    <button class="cursor-pointer pl-4 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300">
                       <GripVertical class="h-4 w-4" />
                     </button>
                   </td>

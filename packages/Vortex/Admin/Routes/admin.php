@@ -4,6 +4,9 @@ use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Auth;
 use Vortex\Admin\Http\Controllers\Auth\AdminLoginController;
 use Vortex\Admin\Http\Controllers\UserController;
+use Vortex\Admin\Http\Controllers\ProfileController;
+use Vortex\Admin\Http\Controllers\PasswordController;
+use Vortex\Core\Http\Controllers\Admin\DashboardController;
 use Vortex\Core\Http\Controllers\Admin\ThemeController;
 use Vortex\Core\Http\Controllers\Admin\Settings\GeneralSettingsController;
 use Vortex\Settings\Http\Controllers\Admin\ShippingMethodsController;
@@ -31,13 +34,7 @@ Route::prefix('admin')->name('admin.')->middleware(['web'])->group(function () {
         Route::post('/logout', [AdminLoginController::class, 'destroy'])->name('logout');
         
         // Dashboard
-        Route::get('/dashboard', function () {
-            return inertia('Admin/Dashboard/Index', [
-                'auth' => [
-                    'user' => Auth::guard('admin')->user()
-                ]
-            ]);
-        })->name('dashboard');
+        Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
         
         // User Management
         Route::prefix('users')->name('users.')->group(function () {
@@ -46,6 +43,18 @@ Route::prefix('admin')->name('admin.')->middleware(['web'])->group(function () {
             Route::put('/{user}', [UserController::class, 'update'])->name('update');
             Route::put('/{user}/change-password', [UserController::class, 'changePassword'])->name('change-password');
             Route::delete('/{user}', [UserController::class, 'destroy'])->name('destroy');
+        });
+        
+        // Admin Profile Management
+        Route::prefix('profile')->name('profile.')->group(function () {
+            Route::get('/', [ProfileController::class, 'edit'])->name('edit');
+            Route::post('/', [ProfileController::class, 'update'])->name('update');
+        });
+        
+        // Admin Password Management
+        Route::prefix('password')->name('password.')->group(function () {
+            Route::get('/', [PasswordController::class, 'edit'])->name('edit');
+            Route::post('/', [PasswordController::class, 'update'])->name('update');
         });
         
         // Appearance -> Themes

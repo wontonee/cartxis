@@ -109,13 +109,13 @@
                                     <!-- Price -->
                                     <div class="flex items-baseline gap-3">
                                         <span class="text-4xl font-bold text-gray-900">
-                                            ${{ product.special_price || product.price }}
+                                            {{ formatPrice(product.special_price || product.price) }}
                                         </span>
                                         <span v-if="product.special_price" class="text-xl text-gray-400 line-through">
-                                            ${{ product.price }}
+                                            {{ formatPrice(product.price) }}
                                         </span>
                                         <span v-if="product.special_price" class="px-3 py-1 bg-red-100 text-red-700 text-sm font-semibold rounded-full">
-                                            Save ${{ (product.price - product.special_price).toFixed(2) }}
+                                            Save {{ formatPrice(product.price - product.special_price) }}
                                         </span>
                                     </div>
 
@@ -319,6 +319,9 @@
 import { ref, watch, computed } from 'vue';
 import axios from 'axios';
 import { useCartStore } from '@/Stores/cartStore';
+import { useCurrency } from '@/composables/useCurrency';
+
+const { formatPrice } = useCurrency();
 
 interface AttributeOption {
     id: number;

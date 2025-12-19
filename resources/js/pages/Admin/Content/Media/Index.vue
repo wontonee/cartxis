@@ -633,7 +633,7 @@ const copyUrlToClipboard = async (url: string) => {
                         </div>
 
                         <!-- Overlay on hover -->
-                        <div class="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-50 transition-all flex items-center justify-center opacity-0 group-hover:opacity-100 pointer-events-none">
+                        <div class="absolute inset-0 bg-black/0 group-hover:bg-black/50 transition-all flex items-center justify-center opacity-0 group-hover:opacity-100 pointer-events-none">
                             <p class="text-white text-xs font-medium px-2 text-center truncate w-full">
                                 {{ file.original_filename }}
                             </p>
@@ -776,7 +776,7 @@ const copyUrlToClipboard = async (url: string) => {
             <div class="flex items-center justify-center min-h-screen px-4 pt-4 pb-20 text-center sm:block sm:p-0">
                 <!-- Background overlay -->
                 <div
-                    class="fixed inset-0 transition-opacity bg-gray-500 bg-opacity-75 dark:bg-gray-900 dark:bg-opacity-75"
+                    class="fixed inset-0 transition-opacity bg-gray-500/75 dark:bg-gray-900/75"
                     @click="showUploadModal = false"
                 ></div>
 
@@ -828,7 +828,7 @@ const copyUrlToClipboard = async (url: string) => {
             >
                 <div
                     v-if="showFileDetailsModal && selectedFileDetails"
-                    class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4"
+                    class="fixed inset-0 z-50 flex items-center justify-center bg-gray-500/75 dark:bg-gray-900/75 p-4"
                     @click="showFileDetailsModal = false"
                 >
                     <Transition
@@ -1041,7 +1041,7 @@ const copyUrlToClipboard = async (url: string) => {
             <div class="flex items-center justify-center min-h-screen px-4 pt-4 pb-20 text-center sm:block sm:p-0">
                 <!-- Background overlay -->
                 <div
-                    class="fixed inset-0 transition-opacity bg-gray-500 bg-opacity-75 dark:bg-gray-900 dark:bg-opacity-75"
+                    class="fixed inset-0 transition-opacity bg-gray-500/75 dark:bg-gray-900/75"
                     @click="cancelCreateFolder"
                 ></div>
 

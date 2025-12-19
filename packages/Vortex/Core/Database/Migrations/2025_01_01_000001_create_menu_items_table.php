@@ -15,7 +15,7 @@ return new class extends Migration
             $table->id();
             $table->string('key')->unique()->comment('Unique identifier: admin.dashboard');
             $table->string('title')->comment('Display name');
-            $table->string('icon')->nullable()->comment('Icon class: ki-filled ki-element-11');
+            $table->string('icon')->nullable()->comment('Icon name: shopping-cart, users, etc.');
             $table->string('route')->nullable()->comment('Laravel route name');
             $table->string('url')->nullable()->comment('External URL if no route');
             $table->foreignId('parent_id')->nullable()

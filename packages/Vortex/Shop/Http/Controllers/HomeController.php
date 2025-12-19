@@ -66,15 +66,6 @@ class HomeController extends Controller
             'newProducts' => $data['new_products'],
             'categories' => $data['categories'], // Keep for backward compatibility
             'cmsBlocks' => $data['blocks'] ?? [],
-            'platformStatus' => [
-                'ready' => [
-                    ['name' => 'Products', 'icon' => 'package'],
-                    ['name' => 'Categories', 'icon' => 'grid'],
-                    ['name' => 'Orders', 'icon' => 'shopping-cart'],
-                    ['name' => 'Customers', 'icon' => 'users'],
-                ],
-                'coming_soon' => []
-            ],
             'siteConfig' => [
                 'name' => config('app.name', 'Vortex'),
                 'url' => config('app.url'),

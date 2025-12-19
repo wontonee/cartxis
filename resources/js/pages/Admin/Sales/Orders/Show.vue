@@ -481,7 +481,7 @@ const billingAddress = props.order.addresses.find(a => a.type === 'billing');
     <!-- Status Modal -->
     <div v-if="showStatusModal" class="fixed inset-0 z-50 overflow-y-auto">
       <div class="flex items-center justify-center min-h-screen px-4">
-        <div class="fixed inset-0 bg-gray-500 bg-opacity-75" @click="showStatusModal = false"></div>
+        <div class="fixed inset-0 bg-gray-500/75 dark:bg-gray-900/75" @click="showStatusModal = false"></div>
         <div class="relative bg-white rounded-lg max-w-lg w-full p-6">
           <h3 class="text-lg font-medium text-gray-900 mb-4">Update Order Status</h3>
           <div class="space-y-4">
@@ -512,7 +512,7 @@ const billingAddress = props.order.addresses.find(a => a.type === 'billing');
     <!-- Cancel Modal -->
     <div v-if="showCancelModal" class="fixed inset-0 z-50 overflow-y-auto">
       <div class="flex items-center justify-center min-h-screen px-4">
-        <div class="fixed inset-0 bg-gray-500 bg-opacity-75" @click="showCancelModal = false"></div>
+        <div class="fixed inset-0 bg-gray-500/75 dark:bg-gray-900/75" @click="showCancelModal = false"></div>
         <div class="relative bg-white rounded-lg max-w-lg w-full p-6">
           <h3 class="text-lg font-medium text-gray-900 mb-4">Cancel Order</h3>
           <div class="space-y-4">
@@ -536,7 +536,7 @@ const billingAddress = props.order.addresses.find(a => a.type === 'billing');
     <!-- Payment Status Update Modal -->
     <div v-if="showPaymentModal" class="fixed inset-0 z-50 overflow-y-auto">
       <div class="flex items-center justify-center min-h-screen px-4">
-        <div class="fixed inset-0 bg-gray-500 bg-opacity-75" @click="showPaymentModal = false"></div>
+        <div class="fixed inset-0 bg-gray-500/75 dark:bg-gray-900/75" @click="showPaymentModal = false"></div>
         <div class="relative bg-white rounded-lg max-w-lg w-full p-6">
           <h3 class="text-lg font-medium text-gray-900 mb-4">Update Payment Status</h3>
           <div class="space-y-4">

@@ -1,0 +1,16 @@
+{
+  "code": "acme-example-gateway",
+  "name": "Acme Example Gateway",
+  "description": "Example payment gateway extension for Vortex.",
+  "version": "1.0.0",
+  "author": "Acme Inc.",
+  "author_url": "https://acme.test",
+  "icon": "credit-card",
+  "category": "payment-gateway",
+  "requires": {
+    "php": "^8.2",
+    "vortex/core": "^1.0"
+  },
+  "provider": "Acme\\ExampleGateway\\Providers\\AcmeExampleServiceProvider",
+  "provider_file": "src/Providers/AcmeExampleServiceProvider.php"
+}

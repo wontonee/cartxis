@@ -10,12 +10,9 @@ export default defineConfig({
             input: [
                 'resources/js/app.ts',
                 'resources/admin/css/styles.css',
-                'resources/admin/vendors/keenicons/styles.bundle.css',
-                'resources/admin/css/admin-overrides.css',
             ],
             ssr: 'resources/js/ssr.ts',
             refresh: true,
-            detectTls: 'vortex.test',
         }),
         tailwindcss(),
         wayfinder({

@@ -13,6 +13,17 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Bundled Extensions Directory
+    |--------------------------------------------------------------------------
+    |
+    | This value determines the directory where bundled (first-party) extensions
+    | are stored. These are discoverable via extension.json manifests.
+    |
+    */
+    'bundled_extensions_path' => base_path('packages/Vortex'),
+
+    /*
+    |--------------------------------------------------------------------------
     | Cache Configuration
     |--------------------------------------------------------------------------
     |
@@ -48,7 +59,6 @@ return [
     |
     */
     'icon_libraries' => [
-        'keenicons' => 'Keenicons',
         'heroicons' => 'Heroicons',
         'fontawesome' => 'Font Awesome',
         'custom' => 'Custom Icons',

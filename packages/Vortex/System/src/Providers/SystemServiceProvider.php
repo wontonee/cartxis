@@ -45,8 +45,8 @@ class SystemServiceProvider extends ServiceProvider
         }
 
         try {
-            // Create or update System parent menu
-            $systemMenu = MenuItem::updateOrCreate(
+            // Create System parent menu if not exists (without overwriting user changes)
+            $systemMenu = MenuItem::firstOrCreate(
                 ['key' => 'system'],
                 [
                     'title' => 'System',
@@ -60,9 +60,9 @@ class SystemServiceProvider extends ServiceProvider
                 ]
             );
 
-            // Create Menu Management submenu
-            MenuItem::updateOrCreate(
-                ['key' => 'system.menus'],
+            // Create Menu Management submenu if not exists
+            MenuItem::firstOrCreate(
+                ['key' => 'system-menus'],
                 [
                     'title' => 'Menu Management',
                     'icon' => 'menu',
@@ -75,9 +75,9 @@ class SystemServiceProvider extends ServiceProvider
                 ]
             );
 
-            // Create Cache Management submenu
-            MenuItem::updateOrCreate(
-                ['key' => 'system.cache'],
+            // Create Cache Management submenu if not exists
+            MenuItem::firstOrCreate(
+                ['key' => 'system-cache'],
                 [
                     'title' => 'Cache Management',
                     'icon' => 'database',
@@ -90,9 +90,9 @@ class SystemServiceProvider extends ServiceProvider
                 ]
             );
 
-            // Create Maintenance Mode submenu
-            MenuItem::updateOrCreate(
-                ['key' => 'system.maintenance'],
+            // Create Maintenance Mode submenu if not exists
+            MenuItem::firstOrCreate(
+                ['key' => 'system-maintenance'],
                 [
                     'title' => 'Maintenance Mode',
                     'icon' => 'wrench',
@@ -101,6 +101,21 @@ class SystemServiceProvider extends ServiceProvider
                     'location' => 'admin',
                     'parent_id' => $systemMenu->id,
                     'order' => 2,
+                    'active' => true,
+                ]
+            );
+
+            // Create Extensions submenu if not exists
+            MenuItem::firstOrCreate(
+                ['key' => 'system-extensions'],
+                [
+                    'title' => 'Extensions',
+                    'icon' => 'server',
+                    'route' => 'admin.system.extensions.index',
+                    'url' => null,
+                    'location' => 'admin',
+                    'parent_id' => $systemMenu->id,
+                    'order' => 3,
                     'active' => true,
                 ]
             );

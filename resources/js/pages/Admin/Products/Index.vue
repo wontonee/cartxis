@@ -7,6 +7,7 @@ import ProductQuickView from '@/Components/Admin/ProductQuickView.vue';
 import { ref, computed } from 'vue';
 import { debounce } from 'lodash';
 import * as productRoutes from '@/routes/admin/catalog/products';
+import { useCurrency } from '@/composables/useCurrency';
 
 interface Product {
   id: number;
@@ -193,12 +194,7 @@ function bulkUpdateStatus(status: 'enabled' | 'disabled') {
   }
 }
 
-function formatPrice(price: number): string {
-  return new Intl.NumberFormat('en-US', {
-    style: 'currency',
-    currency: 'USD',
-  }).format(price);
-}
+const { formatPrice } = useCurrency();
 
 function formatDate(date: string): string {
   return new Date(date).toLocaleDateString('en-US', {
@@ -448,8 +444,23 @@ function formatDate(date: string): string {
                     </div>
                   </div>
                 </td>
-                <td class="px-6 py-4 text-sm text-gray-900">
-                  {{ product.sku || '-' }}
+                <td class="px-6 py-4 text-sm">
+                  <div class="flex flex-col gap-1">
+                    <span class="text-gray-900">{{ product.sku || '-' }}</span>
+                    <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium w-fit" :class="{
+                      'bg-gray-100 text-gray-800': product.type === 'simple',
+                      'bg-purple-100 text-purple-800': product.type === 'configurable',
+                      'bg-blue-100 text-blue-800': product.type === 'virtual',
+                      'bg-cyan-100 text-cyan-800': product.type === 'downloadable',
+                    }">
+                      <svg v-if="product.type === 'virtual' || product.type === 'downloadable'" class="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                        <path d="M3 12v3c0 1.657 3.134 3 7 3s7-1.343 7-3v-3c0 1.657-3.134 3-7 3s-7-1.343-7-3z" />
+                        <path d="M3 7v3c0 1.657 3.134 3 7 3s7-1.343 7-3V7c0 1.657-3.134 3-7 3S3 8.657 3 7z" />
+                        <path d="M17 5c0 1.657-3.134 3-7 3S3 6.657 3 5s3.134-3 7-3 7 1.343 7 3z" />
+                      </svg>
+                      {{ product.type.charAt(0).toUpperCase() + product.type.slice(1) }}
+                    </span>
+                  </div>
                 </td>
                 <td class="px-6 py-4 text-sm text-gray-900">
                   <div v-if="product.special_price" class="flex flex-col">

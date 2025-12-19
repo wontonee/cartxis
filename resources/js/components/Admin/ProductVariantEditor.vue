@@ -1,6 +1,9 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue';
 import axios from '@/lib/axios';
+import { useCurrency } from '@/composables/useCurrency';
+
+const { formatPrice } = useCurrency();
 
 interface Attribute {
   id: number;
@@ -335,9 +338,9 @@ const totalStock = computed(() => variants.value.reduce((sum, v) => sum + v.quan
                 </div>
               </td>
               <td class="px-4 py-3">
-                <div class="text-sm text-gray-900">${{ variant.price }}</div>
-                <div v-if="variant.special_price" class="text-xs text-red-600">
-                  Sale: ${{ variant.special_price }}
+                <div class="text-sm text-gray-900">{{ formatPrice(variant.price) }}</div>
+                <div v-if="variant.special_price" class="text-xs text-green-600">
+                  Sale: {{ formatPrice(variant.special_price) }}
                 </div>
               </td>
               <td class="px-4 py-3">
@@ -388,7 +391,7 @@ const totalStock = computed(() => variants.value.reduce((sum, v) => sum + v.quan
     <!-- Edit Variant Modal -->
     <div
       v-if="showVariantForm && editingVariant"
-      class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
+      class="fixed inset-0 bg-gray-500/75 dark:bg-gray-900/75 flex items-center justify-center z-50"
     >
       <div class="bg-white rounded-lg shadow-xl max-w-md w-full mx-4">
         <div class="p-6">

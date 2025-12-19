@@ -444,7 +444,7 @@ function confirmBulkDelete() {
             </div>
 
             <!-- Bulk Delete Confirmation Modal -->
-            <div v-if="showBulkDeleteModal" class="fixed inset-0 bg-gray-500 bg-opacity-75 flex items-center justify-center z-50">
+                        <div v-if="showBulkDeleteModal" class="fixed inset-0 bg-gray-500/75 dark:bg-gray-900/75 flex items-center justify-center z-50">
                 <div class="bg-white rounded-lg p-6 max-w-sm w-full mx-4">
                     <h3 class="text-lg font-medium text-gray-900 mb-4">Delete Reviews</h3>
                     <p class="text-sm text-gray-500 mb-6">

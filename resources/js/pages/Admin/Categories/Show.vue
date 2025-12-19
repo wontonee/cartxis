@@ -3,6 +3,9 @@ import { Head, Link } from '@inertiajs/vue3';
 import AdminLayout from '@/Layouts/AdminLayout.vue';
 import * as categoryRoutes from '@/routes/admin/catalog/categories';
 import * as productRoutes from '@/routes/admin/catalog/products';
+import { useCurrency } from '@/composables/useCurrency';
+
+const { formatPrice } = useCurrency();
 
 interface Product {
   id: number;
@@ -248,7 +251,7 @@ const props = defineProps<Props>();
                         {{ product.sku }}
                       </td>
                       <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                        ${{ product.price }}
+                        {{ formatPrice(product.price) }}
                       </td>
                       <td class="px-6 py-4 whitespace-nowrap">
                         <span :class="[

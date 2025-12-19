@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, computed } from 'vue';
+import { ref, computed, watch, onMounted, nextTick } from 'vue';
 import { router, usePage } from '@inertiajs/vue3';
 import { useCurrency } from '@/composables/useCurrency';
 import ThemeLayout from '@/../../themes/vortex-default/resources/views/layouts/ThemeLayout.vue';
@@ -169,6 +169,107 @@ const selectShipping = (shippingId: number) => {
   });
 };
 
+// Generic payment gateway handler - works with any gateway extension
+const initiatePaymentGateway = (paymentResponse: any) => {
+  console.log('Initiating payment gateway with response:', paymentResponse);
+  
+  const paymentData = paymentResponse.payment_data;
+  const gatewayType = paymentResponse.gateway_type || 'frontend_integration';
+  
+  // Gateway returned frontend integration data (modal, script, etc.)
+  if (gatewayType === 'frontend_integration' && paymentData) {
+    // Load external script if provided (e.g., Razorpay, Stripe)
+    if (paymentData.script_url) {
+      const scriptId = `payment-script-${paymentData.gateway_code || 'external'}`;
+      
+      // Check if script already loaded
+      if (!document.getElementById(scriptId)) {
+        const script = document.createElement('script');
+        script.id = scriptId;
+        script.src = paymentData.script_url;
+        script.onload = () => {
+          console.log('Payment gateway script loaded');
+          openPaymentModal(paymentData);
+        };
+        script.onerror = () => {
+          console.error('Failed to load payment gateway script');
+          processing.value = false;
+        };
+        document.body.appendChild(script);
+      } else {
+        openPaymentModal(paymentData);
+      }
+    } else {
+      // No external script needed, open modal directly
+      openPaymentModal(paymentData);
+    }
+  }
+};
+
+const openPaymentModal = (paymentData: any) => {
+  console.log('Opening payment modal for:', paymentData.gateway_code || 'unknown gateway');
+  
+  // Razorpay integration
+  if (paymentData.razorpay_order_id && (window as any).Razorpay) {
+    const options = {
+      key: paymentData.razorpay_key_id,
+      amount: paymentData.amount,
+      currency: paymentData.currency,
+      name: paymentData.name,
+      description: paymentData.description,
+      order_id: paymentData.razorpay_order_id,
+      prefill: paymentData.prefill,
+      theme: paymentData.theme,
+      handler: function (response: any) {
+        console.log('Payment successful:', response);
+        // Redirect to callback URL with payment details
+        const params = new URLSearchParams(response).toString();
+        window.location.href = paymentData.callback_url + '?' + params;
+      },
+      modal: {
+        ondismiss: function() {
+          console.log('Payment modal dismissed');
+          processing.value = false;
+          if (paymentData.cancel_url) {
+            window.location.href = paymentData.cancel_url;
+          }
+        }
+      }
+    };
+    const rzp = new (window as any).Razorpay(options);
+    rzp.open();
+  }
+  // Stripe integration
+  else if (paymentData.stripe_session_id && (window as any).Stripe) {
+    const stripe = (window as any).Stripe(paymentData.stripe_key);
+    stripe.redirectToCheckout({ sessionId: paymentData.stripe_session_id })
+      .then((result: any) => {
+        if (result.error) {
+          console.error('Stripe error:', result.error.message);
+          processing.value = false;
+        }
+      });
+  }
+  // Add more gateway integrations here as plugins are added
+  // PayPal, Square, etc.
+  else {
+    console.error('Unsupported payment gateway or missing configuration');
+    processing.value = false;
+  }
+};
+
+// Watch for payment response in flash data
+watch(() => page.props.flash, (flash: any) => {
+  console.log('Flash watcher triggered:', flash);
+  if (flash?.payment_response) {
+    console.log('Payment response detected in flash:', flash.payment_response);
+    if (flash.payment_response.success && flash.payment_response.payment_data) {
+      console.log('Initiating payment gateway integration');
+      initiatePaymentGateway(flash.payment_response);
+    }
+  }
+}, { deep: true, immediate: true });
+
 const submitOrder = () => {
   // Clear previous errors
   fieldErrors.value = {};
@@ -269,47 +370,44 @@ const submitOrder = () => {
     formData.billing_address = billingAddress.value;
   }
 
-  // Check if payment method requires external redirect (Stripe, PayPal, etc.)
-  const requiresExternalRedirect = ['stripe', 'paypal'].includes(selectedPaymentMethod.value);
-
-  console.log('Payment method:', selectedPaymentMethod.value);
-  console.log('Requires external redirect:', requiresExternalRedirect);
-
-  if (requiresExternalRedirect) {
-    console.log('Using Inertia POST with redirect URL handling for external gateway');
-    
-    // Use Inertia for all requests, but handle external redirect specially
-    router.post('/checkout', formData, {
-      preserveState: false,
-      preserveScroll: false,
-      onSuccess: () => {
-        console.log('Checkout success, checking for redirect URL');
-        // Check if there's a redirect URL in the flash data
+  // Submit checkout - let the backend determine how to handle the payment method
+  router.post('/checkout', formData, {
+    preserveState: false,
+    preserveScroll: false,
+    onSuccess: () => {
+      console.log('Checkout success, checking for gateway response');
+      
+      // Use nextTick to ensure page props are updated
+      nextTick(() => {
+        // Check if there's a redirect URL in flash data (for hosted payment pages)
         const redirectUrl = page.props.flash?.redirect_url;
         console.log('Redirect URL from flash:', redirectUrl);
         
         if (redirectUrl) {
-          console.log('Redirecting to external payment gateway:', redirectUrl);
+          console.log('Redirecting to payment gateway hosted page');
           window.location.href = redirectUrl;
+          return;
         }
-      },
-      onError: (errors) => {
-        console.log('Checkout validation errors:', errors);
-        processing.value = false;
-      },
-      onFinish: () => {
-        // processing.value will be false if there were errors
-        // For successful redirects to external gateways, page will navigate away
-      },
-    });
-  } else {
-    // Use Inertia for COD, Bank Transfer, etc. (no external redirect needed)
-    router.post('/checkout', formData, {
-      onFinish: () => {
-        processing.value = false;
-      },
-    });
-  }
+        
+        // Check if there's payment data for frontend integration (modal-based)
+        const paymentResponse = page.props.flash?.payment_response;
+        console.log('Payment response from flash:', paymentResponse);
+        
+        if (paymentResponse && paymentResponse.success && paymentResponse.payment_data) {
+          console.log('Initiating frontend payment integration');
+          initiatePaymentGateway(paymentResponse);
+        }
+      });
+    },
+    onError: (errors) => {
+      console.log('Checkout validation errors:', errors);
+      processing.value = false;
+    },
+    onFinish: () => {
+      // processing.value will be false if there were errors
+      // For successful redirects/integrations, page will navigate away or modal opens
+    },
+  });
 };
 </script>
 

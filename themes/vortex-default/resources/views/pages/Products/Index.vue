@@ -5,6 +5,9 @@ import ThemeLayout from '@/../../themes/vortex-default/resources/views/layouts/T
 import ProductCard from '@/../../themes/vortex-default/resources/views/components/ProductCard.vue';
 import ProductSkeleton from '@/../../themes/vortex-default/resources/views/components/ProductSkeleton.vue';
 import QuickViewModal from '@/../../themes/vortex-default/resources/views/components/QuickViewModal.vue';
+import { useCurrency } from '@/composables/useCurrency';
+
+const { getSymbol } = useCurrency();
 
 interface Product {
     id: number;
@@ -276,7 +279,7 @@ const activeFilterBadges = computed(() => {
     if (props.activeFilters.price_min || props.activeFilters.price_max) {
         const min = props.activeFilters.price_min || 0;
         const max = props.activeFilters.price_max || '∞';
-        badges.push({ type: 'price', label: `Price: $${min} - $${max}`, key: 'price_min' });
+        badges.push({ type: 'price', label: `Price: ${getSymbol()}${min} - ${getSymbol()}${max}`, key: 'price_min' });
     }
     
     if (props.activeFilters.rating) {

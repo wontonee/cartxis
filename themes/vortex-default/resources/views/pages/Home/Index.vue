@@ -20,11 +20,6 @@ interface Product {
     image: string | null;
 }
 
-interface PlatformStatus {
-    ready: Array<{ name: string; icon: string }>;
-    coming_soon: Array<{ name: string; icon: string }>;
-}
-
 interface CMSBlock {
     id: number;
     title: string;
@@ -53,7 +48,6 @@ interface Props {
     featuredCategories: Category[];
     featuredProducts: Product[];
     newProducts?: Product[];
-    platformStatus: PlatformStatus;
     cmsBlocks?: {
         hero?: CMSBlock;
         deal?: CMSBlock;
@@ -106,6 +100,52 @@ const formatPrice = (price: number) => {
         style: 'currency',
         currency: 'USD'
     }).format(price);
+};
+
+// Newsletter subscription
+const newsletterEmail = ref('');
+const newsletterLoading = ref(false);
+const newsletterMessage = ref('');
+const newsletterSuccess = ref(false);
+
+const subscribeNewsletter = async () => {
+    if (!newsletterEmail.value) {
+        newsletterMessage.value = 'Please enter your email address';
+        newsletterSuccess.value = false;
+        return;
+    }
+
+    newsletterLoading.value = true;
+    newsletterMessage.value = '';
+
+    try {
+        const response = await fetch('/newsletter/subscribe', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || ''
+            },
+            body: JSON.stringify({ email: newsletterEmail.value })
+        });
+
+        const data = await response.json();
+
+        newsletterMessage.value = data.message;
+        newsletterSuccess.value = data.success;
+
+        if (data.success) {
+            newsletterEmail.value = '';
+            // Auto-clear success message after 5 seconds
+            setTimeout(() => {
+                newsletterMessage.value = '';
+            }, 5000);
+        }
+    } catch (error) {
+        newsletterMessage.value = 'An error occurred. Please try again later.';
+        newsletterSuccess.value = false;
+    } finally {
+        newsletterLoading.value = false;
+    }
 };
 </script>
 
@@ -260,7 +300,7 @@ const formatPrice = (price: number) => {
                     <a 
                         v-for="product in featuredProducts.slice(0, 8)" 
                         :key="product.id"
-                        :href="`/products/${product.slug}`"
+                        :href="`/product/${product.slug}`"
                         class="group bg-white rounded-2xl overflow-hidden shadow-md hover:shadow-2xl transition-all duration-300 cursor-pointer"
                     >
                         <div class="relative aspect-square bg-gradient-to-br from-gray-100 to-gray-200 overflow-hidden">
@@ -323,47 +363,31 @@ const formatPrice = (price: number) => {
                 <div class="text-6xl mb-6">📧</div>
                 <h2 class="text-4xl font-bold mb-4">Subscribe to Our Newsletter</h2>
                 <p class="text-xl mb-8 opacity-90">Get exclusive deals, new arrivals, and special offers directly in your inbox</p>
-                <div class="flex flex-col sm:flex-row gap-4 max-w-xl mx-auto">
+                <form @submit.prevent="subscribeNewsletter" class="flex flex-col sm:flex-row gap-4 max-w-xl mx-auto">
                     <input
+                        v-model="newsletterEmail"
                         type="email"
                         placeholder="Enter your email address"
-                        class="flex-1 px-6 py-4 rounded-lg text-gray-900 focus:outline-none focus:ring-4 focus:ring-white/50"
+                        class="flex-1 px-6 py-4 rounded-lg text-gray-900 border-2 border-white/30 focus:outline-none focus:ring-4 focus:ring-white/50 focus:border-white"
+                        :disabled="newsletterLoading"
+                        required
                     />
-                    <button class="px-8 py-4 bg-white text-gray-900 rounded-lg font-bold hover:bg-gray-100 transition-all hover:scale-105 shadow-xl">
-                        Subscribe
+                    <button 
+                        type="submit"
+                        class="px-8 py-4 bg-white text-gray-900 rounded-lg font-bold hover:bg-gray-100 transition-all hover:scale-105 shadow-xl disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
+                        :disabled="newsletterLoading"
+                    >
+                        <span v-if="newsletterLoading">Subscribing...</span>
+                        <span v-else>Subscribe</span>
                     </button>
+                </form>
+                <div v-if="newsletterMessage" class="mt-4 px-4 py-3 rounded-lg" :class="newsletterSuccess ? 'bg-green-500/20 text-white' : 'bg-red-500/20 text-white'">
+                    {{ newsletterMessage }}
                 </div>
                 <p class="text-sm mt-4 opacity-75">Join 10,000+ subscribers. Unsubscribe anytime.</p>
             </div>
         </section>
 
-        <!-- Platform Status (Development Info) -->
-        <section v-if="platformStatus" class="py-16 bg-white border-t">
-            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                <div class="text-center mb-8">
-                    <h3 class="text-2xl font-bold text-gray-900 mb-2">Platform Development Status</h3>
-                    <p class="text-gray-600">Track our progress as we build amazing features</p>
-                </div>
-                <div class="grid grid-cols-2 md:grid-cols-4 gap-4 max-w-4xl mx-auto">
-                    <div 
-                        v-for="feature in platformStatus.ready" 
-                        :key="feature.name"
-                        class="flex items-center justify-between rounded-xl p-4 bg-green-50 border-2 border-green-200"
-                    >
-                        <span class="font-medium text-green-900 text-sm">{{ feature.name }}</span>
-                        <span class="text-xl">{{ feature.icon }}</span>
-                    </div>
-                    <div 
-                        v-for="feature in platformStatus.coming_soon" 
-                        :key="feature.name"
-                        class="flex items-center justify-between rounded-xl p-4 bg-yellow-50 border-2 border-yellow-200"
-                    >
-                        <span class="font-medium text-yellow-900 text-sm">{{ feature.name }}</span>
-                        <span class="text-xl">{{ feature.icon }}</span>
-                    </div>
-                </div>
-            </div>
-        </section>
     </ThemeLayout>
 </template>
 

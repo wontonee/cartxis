@@ -2,12 +2,16 @@
 import { ref, computed } from 'vue';
 import { Link, router } from '@inertiajs/vue3';
 import { useCart } from '@/Composables/useCart';
+import { useCurrency } from '@/composables/useCurrency';
+
+const { formatPrice } = useCurrency();
 
 interface Product {
     id: number;
     name: string;
     slug: string;
     sku: string;
+    type?: string;
     price: number;
     special_price: number | null;
     image: string | null;
@@ -108,10 +112,26 @@ const renderStars = (rating: number) => {
                     📦
                 </div>
                 
-                <!-- Discount Badge -->
-                <div v-if="hasDiscount" class="absolute top-4 left-4">
-                    <span class="px-3 py-1 bg-red-500 text-white text-sm font-bold rounded-full">
+                <!-- Badges Container -->
+                <div class="absolute top-4 left-4 flex flex-col gap-2">
+                    <!-- Discount Badge -->
+                    <span v-if="hasDiscount" class="px-3 py-1 bg-red-500 text-white text-sm font-bold rounded-full">
                         -{{ discountPercentage }}%
+                    </span>
+                    
+                    <!-- Product Type Badge -->
+                    <span v-if="product.type && (product.type === 'virtual' || product.type === 'downloadable')" 
+                        class="px-3 py-1 text-xs font-medium rounded-full inline-flex items-center"
+                        :class="{
+                            'bg-blue-500 text-white': product.type === 'virtual',
+                            'bg-cyan-500 text-white': product.type === 'downloadable',
+                        }">
+                        <svg class="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                            <path d="M3 12v3c0 1.657 3.134 3 7 3s7-1.343 7-3v-3c0 1.657-3.134 3-7 3s-7-1.343-7-3z" />
+                            <path d="M3 7v3c0 1.657 3.134 3 7 3s7-1.343 7-3V7c0 1.657-3.134 3-7 3S3 8.657 3 7z" />
+                            <path d="M17 5c0 1.657-3.134 3-7 3S3 6.657 3 5s3.134-3 7-3 7 1.343 7 3z" />
+                        </svg>
+                        {{ product.type === 'downloadable' ? 'Digital' : 'Virtual' }}
                     </span>
                 </div>
                 
@@ -165,10 +185,10 @@ const renderStars = (rating: number) => {
             <div class="mb-3">
                 <div class="flex items-baseline gap-2">
                     <span class="text-2xl font-bold text-gray-900">
-                        ${{ displayPrice.toFixed(2) }}
+                        {{ formatPrice(displayPrice) }}
                     </span>
                     <span v-if="hasDiscount" class="text-sm text-gray-500 line-through">
-                        ${{ (typeof product.price === 'string' ? parseFloat(product.price) : product.price).toFixed(2) }}
+                        {{ formatPrice(typeof product.price === 'string' ? parseFloat(product.price) : product.price) }}
                     </span>
                 </div>
             </div>

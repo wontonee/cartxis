@@ -26,12 +26,15 @@ const { getIcon } = useMenuIcons()
 const sidebarOpen = ref(false)
 const sidebarCollapsed = ref(false)
 const userMenuOpen = ref(false)
+const hoveredMenuId = ref<number | null>(null)
+const popoverPosition = ref({ top: 0 })
 
 // Track which parent menus are open
 const openMenus = ref<Set<number>>(new Set())
 
-// LocalStorage key for persisting menu state
+// LocalStorage keys for persisting state
 const MENU_STATE_KEY = 'admin_menu_state'
+const SIDEBAR_COLLAPSED_KEY = 'admin_sidebar_collapsed'
 
 // Load menu state from localStorage
 const loadMenuState = (): Set<number> => {
@@ -45,6 +48,17 @@ const loadMenuState = (): Set<number> => {
     console.error('Error loading menu state:', error)
   }
   return new Set()
+}
+
+// Load sidebar collapsed state from localStorage
+const loadSidebarCollapsed = (): boolean => {
+  try {
+    const saved = localStorage.getItem(SIDEBAR_COLLAPSED_KEY)
+    return saved === 'true'
+  } catch (error) {
+    console.error('Error loading sidebar state:', error)
+  }
+  return false
 }
 
 // Save menu state to localStorage
@@ -134,6 +148,12 @@ const initializeOpenMenus = () => {
 
 // Call on mount
 onMounted(() => {
+  // Load sidebar collapsed state from localStorage
+  sidebarCollapsed.value = loadSidebarCollapsed()
+  
+  // Load menu state from localStorage
+  openMenus.value = loadMenuState()
+  
   initializeOpenMenus()
   
   // Listen for Inertia navigation events - use 'before' event
@@ -175,6 +195,17 @@ const isMenuOpen = (itemId: number) => {
 
 const toggleSidebar = () => {
   sidebarCollapsed.value = !sidebarCollapsed.value
+  // Persist sidebar collapsed state
+  try {
+    localStorage.setItem(SIDEBAR_COLLAPSED_KEY, String(sidebarCollapsed.value))
+  } catch (error) {
+    console.error('Error saving sidebar state:', error)
+  }
+  // Close all submenus when sidebar is collapsed
+  if (sidebarCollapsed.value) {
+    openMenus.value.clear()
+    saveMenuState()
+  }
 }
 </script>
 
@@ -208,7 +239,8 @@ const toggleSidebar = () => {
       </div>
 
       <!-- Navigation -->
-      <nav class="flex-1 px-4 py-6 space-y-1 overflow-y-auto h-[calc(100vh-4rem)]">
+      <nav class="flex-1 h-[calc(100vh-4rem)] overflow-visible">
+        <div class="px-4 py-6 space-y-1 overflow-y-auto h-full">
         <!-- Dynamic Menu Items -->
         <template v-for="item in menuItems" :key="item.id">
           <!-- Parent Menu without children (Direct Link) -->
@@ -232,9 +264,15 @@ const toggleSidebar = () => {
           </Link>
 
           <!-- Parent Menu with children (Expandable) -->
-          <div v-else>
+          <div 
+            v-else 
+            class="relative menu-item-wrapper"
+            @mouseenter="(e) => { if (sidebarCollapsed) { hoveredMenuId = item.id; popoverPosition.top = (e.currentTarget as HTMLElement).getBoundingClientRect().top } }"
+            @mouseleave="sidebarCollapsed && (hoveredMenuId = null)"
+            :data-menu-id="item.id"
+          >
             <button
-              @click="toggleMenu(item.id)"
+              @click="!sidebarCollapsed && toggleMenu(item.id)"
               :class="[
                 'w-full flex items-center px-4 py-3 text-gray-300 rounded-lg hover:bg-gray-800 hover:text-white transition-colors',
                 sidebarCollapsed && 'justify-center'
@@ -254,7 +292,7 @@ const toggleSidebar = () => {
               />
             </button>
             
-            <!-- Child Menu Items -->
+            <!-- Child Menu Items (expanded when sidebar is open) -->
             <div v-if="!sidebarCollapsed" v-show="isMenuOpen(item.id)" class="ml-4 mt-1 space-y-1">
               <Link 
                 v-for="child in item.children" 
@@ -275,8 +313,51 @@ const toggleSidebar = () => {
                 <span class="text-sm">{{ child.title }}</span>
               </Link>
             </div>
+
+            <!-- Hover Popover for collapsed sidebar -->
+            <Teleport to="body">
+              <Transition
+                enter-active-class="transition ease-out duration-100"
+                enter-from-class="transform opacity-0 scale-95"
+                enter-to-class="transform opacity-100 scale-100"
+                leave-active-class="transition ease-in duration-75"
+                leave-from-class="transform opacity-100 scale-100"
+                leave-to-class="transform opacity-0 scale-95"
+              >
+                <div 
+                  v-if="sidebarCollapsed && hoveredMenuId === item.id"
+                  class="fixed left-20 w-56 bg-gray-800 rounded-lg shadow-xl border border-gray-700 py-2 z-[60]"
+                  :style="{ top: `${popoverPosition.top}px` }"
+                  @mouseenter="hoveredMenuId = item.id"
+                  @mouseleave="hoveredMenuId = null"
+                >
+                  <div class="px-3 py-2 border-b border-gray-700">
+                    <p class="text-sm font-medium text-white">{{ item.title }}</p>
+                  </div>
+                  <Link 
+                    v-for="child in item.children" 
+                    :key="child.id"
+                    :href="child.full_url || '#'" 
+                    :class="[
+                      'flex items-center px-4 py-2 text-sm transition-colors cursor-pointer',
+                      isActive(child)
+                        ? 'bg-blue-600 text-white' 
+                        : 'text-gray-300 hover:text-white hover:bg-gray-700'
+                    ]"
+                  >
+                    <component 
+                      :is="getIcon(child.icon)" 
+                      v-if="child.icon"
+                      class="w-4 h-4 mr-3" 
+                    />
+                    <span>{{ child.title }}</span>
+                  </Link>
+                </div>
+              </Transition>
+            </Teleport>
           </div>
         </template>
+        </div>
       </nav>
     </aside>
 
@@ -326,7 +407,10 @@ const toggleSidebar = () => {
                       {{ page.props.auth?.user?.email }}
                     </div>
                   </div>
-                  <div class="flex items-center justify-center w-10 h-10 rounded-full bg-blue-600 text-white hover:bg-blue-700 transition-colors">
+                  <div v-if="page.props.auth?.user?.profile_photo_path" class="w-10 h-10 rounded-full overflow-hidden border-2 border-gray-200 dark:border-gray-600">
+                    <img :src="`/storage/${page.props.auth.user.profile_photo_path}`" :alt="page.props.auth.user.name" class="w-full h-full object-cover" />
+                  </div>
+                  <div v-else class="flex items-center justify-center w-10 h-10 rounded-full bg-blue-600 text-white hover:bg-blue-700 transition-colors">
                     <UserCircle class="w-6 h-6" />
                   </div>
                 </button>
@@ -353,15 +437,15 @@ const toggleSidebar = () => {
                       </p>
                     </div>
                     
-                    <a href="#" class="flex items-center px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700">
+                    <Link href="/admin/profile" class="flex items-center px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700">
                       <User class="w-4 h-4 mr-3" />
-                      Profile
-                    </a>
+                      Update Profile Photo
+                    </Link>
                     
-                    <a href="#" class="flex items-center px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700">
+                    <Link href="/admin/password" class="flex items-center px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700">
                       <Settings class="w-4 h-4 mr-3" />
-                      Account Settings
-                    </a>
+                      Change Password
+                    </Link>
                     
                     <div class="border-t border-gray-200 dark:border-gray-700 my-1"></div>
                     
@@ -392,7 +476,7 @@ const toggleSidebar = () => {
     <div
       v-if="sidebarOpen"
       @click="sidebarOpen = false"
-      class="fixed inset-0 z-40 bg-gray-600 bg-opacity-75 lg:hidden"
+      class="fixed inset-0 z-40 bg-gray-600/75 lg:hidden"
     ></div>
 
     <!-- Toast Notifications -->

@@ -360,7 +360,7 @@ const confirmDelete = () => {
         </div>
 
         <!-- Locale Modal -->
-        <div v-if="showLocaleModal" class="fixed inset-0 bg-black bg-opacity-20 flex items-center justify-center z-50 p-4" @click.self="showLocaleModal = false">
+        <div v-if="showLocaleModal" class="fixed inset-0 bg-gray-500/75 dark:bg-gray-900/75 flex items-center justify-center z-50 p-4" @click.self="showLocaleModal = false">
             <div class="bg-white rounded-lg shadow-xl max-w-md w-full max-h-[90vh] flex flex-col">
                 <div class="px-6 py-4 border-b border-gray-200 flex-shrink-0">
                     <h3 class="text-lg font-medium text-gray-900">{{ localeMode === 'add' ? 'Add Language' : 'Edit Language' }}</h3>
@@ -429,7 +429,7 @@ const confirmDelete = () => {
         </div>
 
         <!-- Currency Modal -->
-        <div v-if="showCurrencyModal" class="fixed inset-0 bg-black bg-opacity-20 flex items-center justify-center z-50 p-4" @click.self="showCurrencyModal = false">
+        <div v-if="showCurrencyModal" class="fixed inset-0 bg-gray-500/75 dark:bg-gray-900/75 flex items-center justify-center z-50 p-4" @click.self="showCurrencyModal = false">
             <div class="bg-white rounded-lg shadow-xl max-w-md w-full max-h-[90vh] flex flex-col">
                 <div class="px-6 py-4 border-b border-gray-200 flex-shrink-0">
                     <h3 class="text-lg font-medium text-gray-900">{{ currencyMode === 'add' ? 'Add Currency' : 'Edit Currency' }}</h3>

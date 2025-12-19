@@ -327,7 +327,7 @@ function goToOrder() {
 
     <!-- Confirmation Modals -->
     <!-- Mark as Sent Modal -->
-    <div v-if="showMarkAsSentModal" class="fixed inset-0 bg-gray-500 bg-opacity-75 flex items-center justify-center z-50">
+    <div v-if="showMarkAsSentModal" class="fixed inset-0 bg-gray-500/75 dark:bg-gray-900/75 flex items-center justify-center z-50">
       <div class="bg-white rounded-lg p-6 max-w-sm w-full mx-4">
         <h3 class="text-lg font-medium text-gray-900 mb-4">Mark as Sent</h3>
         <p class="text-sm text-gray-500 mb-6">
@@ -351,7 +351,7 @@ function goToOrder() {
     </div>
 
     <!-- Mark as Paid Modal -->
-    <div v-if="showMarkAsPaidModal" class="fixed inset-0 bg-gray-500 bg-opacity-75 flex items-center justify-center z-50">
+    <div v-if="showMarkAsPaidModal" class="fixed inset-0 bg-gray-500/75 dark:bg-gray-900/75 flex items-center justify-center z-50">
       <div class="bg-white rounded-lg p-6 max-w-sm w-full mx-4">
         <h3 class="text-lg font-medium text-gray-900 mb-4">Mark as Paid</h3>
         <p class="text-sm text-gray-500 mb-6">
@@ -375,7 +375,7 @@ function goToOrder() {
     </div>
 
     <!-- Cancel Invoice Modal -->
-    <div v-if="showCancelModal" class="fixed inset-0 bg-gray-500 bg-opacity-75 flex items-center justify-center z-50">
+    <div v-if="showCancelModal" class="fixed inset-0 bg-gray-500/75 dark:bg-gray-900/75 flex items-center justify-center z-50">
       <div class="bg-white rounded-lg p-6 max-w-sm w-full mx-4">
         <h3 class="text-lg font-medium text-gray-900 mb-4">Cancel Invoice</h3>
         <p class="text-sm text-gray-500 mb-6">
@@ -399,7 +399,7 @@ function goToOrder() {
     </div>
 
     <!-- Send Email Modal -->
-    <div v-if="showSendEmailModal" class="fixed inset-0 bg-gray-500 bg-opacity-75 flex items-center justify-center z-50">
+    <div v-if="showSendEmailModal" class="fixed inset-0 bg-gray-500/75 dark:bg-gray-900/75 flex items-center justify-center z-50">
       <div class="bg-white rounded-lg p-6 max-w-sm w-full mx-4">
         <h3 class="text-lg font-medium text-gray-900 mb-4">Send Invoice Email</h3>
         <p class="text-sm text-gray-500 mb-6">

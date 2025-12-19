@@ -3,12 +3,16 @@
 namespace Vortex\Razorpay\Providers;
 
 use Illuminate\Support\ServiceProvider;
+use Illuminate\Support\Facades\Schema;
+use Vortex\Core\Models\Extension;
 use Vortex\Core\Models\PaymentMethod;
 use Vortex\Core\Services\PaymentGatewayManager;
 use Vortex\Razorpay\Services\RazorpayGateway;
 
 class RazorpayServiceProvider extends ServiceProvider
 {
+    protected const EXTENSION_CODE = 'vortex-razorpay';
+
     /**
      * Register any application services.
      */
@@ -26,15 +30,59 @@ class RazorpayServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        // Ensure payment method exists even if extension is disabled
+        $this->seedPaymentMethod();
+
+        // If extensions table exists and this extension is disabled, do not boot routes/gateway.
+        if (!$this->isExtensionActive()) {
+            return;
+        }
+
         // Load routes
         $this->loadRoutesFrom(__DIR__ . '/../Routes/web.php');
         $this->loadRoutesFrom(__DIR__ . '/../Routes/admin.php');
 
         // Register the payment gateway
         $this->registerGateway();
+    }
 
-        // Seed payment method (only if not exists)
-        $this->seedPaymentMethod();
+    /**
+     * Determines whether this extension should boot.
+     *
+     * Backwards-compatible behavior:
+     * - If the extensions table isn't available yet, boot as normal.
+     * - If the extension row doesn't exist yet, create it as installed+active.
+     */
+    protected function isExtensionActive(): bool
+    {
+        try {
+            if (!Schema::hasTable('extensions')) {
+                return true;
+            }
+
+            $extension = Extension::firstOrCreate(
+                ['code' => self::EXTENSION_CODE],
+                [
+                    'name' => 'Razorpay Payment Gateway',
+                    'description' => 'Accept payments via Razorpay',
+                    'version' => '1.0.0',
+                    'author' => 'Vortex Team',
+                    'requires' => ['razorpay/razorpay' => '^2.9'],
+                    'config' => [],
+                    'installed' => true,
+                    'active' => true,
+                    'installed_at' => now(),
+                ]
+            );
+
+            if (!$extension->installed) {
+                $extension->update(['installed' => true, 'installed_at' => now()]);
+            }
+
+            return (bool) $extension->active;
+        } catch (\Throwable $e) {
+            return true;
+        }
     }
 
     /**

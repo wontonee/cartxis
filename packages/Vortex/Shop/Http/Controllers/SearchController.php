@@ -64,4 +64,34 @@ class SearchController extends Controller
             ],
         ]);
     }
+
+    /**
+     * Get search suggestions for autocomplete
+     *
+     * @param Request $request
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function suggestions(Request $request)
+    {
+        $query = $request->input('q', '');
+        $limit = $request->input('limit', 8);
+
+        if (strlen($query) < 2) {
+            return response()->json(['suggestions' => []]);
+        }
+
+        $products = $this->productService->searchProducts($query, $limit);
+
+        $suggestions = $products->map(function ($product) {
+            return [
+                'id' => $product->id,
+                'name' => $product->name,
+                'slug' => $product->slug,
+                'price' => $product->special_price ?? $product->price,
+                'image' => $product->image,
+            ];
+        });
+
+        return response()->json(['suggestions' => $suggestions]);
+    }
 }

@@ -169,4 +169,21 @@
     body {
         @apply bg-background text-foreground;
     }
+
+    a,
+    button,
+    [role='button'],
+    [type='button'],
+    [type='submit'],
+    [type='reset'] {
+        @apply cursor-pointer;
+    }
+
+    button:disabled,
+    [role='button'][aria-disabled='true'],
+    [type='button']:disabled,
+    [type='submit']:disabled,
+    [type='reset']:disabled {
+        @apply cursor-not-allowed;
+    }
 }

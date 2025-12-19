@@ -109,7 +109,7 @@ const submit = () => {
         >
             <div
                 v-if="show"
-                class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4"
+                class="fixed inset-0 z-50 flex items-start justify-center overflow-y-auto bg-gray-500/75 dark:bg-gray-900/75 p-4 sm:items-center"
                 @click="close"
             >
                 <Transition
@@ -122,7 +122,7 @@ const submit = () => {
                 >
                     <div
                         v-if="show"
-                        class="relative w-full max-w-2xl rounded-lg bg-white shadow-xl dark:bg-gray-800"
+                        class="relative flex max-h-[calc(100vh-2rem)] w-full max-w-2xl flex-col rounded-lg bg-white shadow-xl dark:bg-gray-800"
                         @click.stop
                     >
                         <!-- Header -->
@@ -139,7 +139,7 @@ const submit = () => {
                         </div>
 
                         <!-- Form -->
-                        <form @submit.prevent="submit" class="space-y-4 px-6 py-4">
+                        <form @submit.prevent="submit" class="flex-1 space-y-4 overflow-y-auto px-6 py-4">
                             <!-- Title -->
                             <div>
                                 <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">

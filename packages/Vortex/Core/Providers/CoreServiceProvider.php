@@ -3,6 +3,12 @@
 namespace Vortex\Core\Providers;
 
 use Illuminate\Support\ServiceProvider;
+use Vortex\Core\Console\Commands\ExtensionsActivateCommand;
+use Vortex\Core\Console\Commands\ExtensionsDeactivateCommand;
+use Vortex\Core\Console\Commands\ExtensionsInstallCommand;
+use Vortex\Core\Console\Commands\ExtensionsListCommand;
+use Vortex\Core\Console\Commands\ExtensionsSyncCommand;
+use Vortex\Core\Console\Commands\ExtensionsUninstallCommand;
 use Vortex\Core\Services\HookService;
 use Vortex\Core\Services\MenuService;
 use Vortex\Core\Services\ExtensionService;
@@ -70,6 +76,17 @@ class CoreServiceProvider extends ServiceProvider
         $this->app->bind(PaymentGatewayManager::class, function ($app) {
             return $app->make('vortex.payment.gateway');
         });
+
+        if ($this->app->runningInConsole()) {
+            $this->commands([
+                ExtensionsListCommand::class,
+                ExtensionsSyncCommand::class,
+                ExtensionsInstallCommand::class,
+                ExtensionsUninstallCommand::class,
+                ExtensionsActivateCommand::class,
+                ExtensionsDeactivateCommand::class,
+            ]);
+        }
     }
 
     /**
@@ -115,11 +132,30 @@ class CoreServiceProvider extends ServiceProvider
                 
                 if ($discovered && isset($discovered['manifest']['provider'])) {
                     $providerClass = $discovered['manifest']['provider'];
-                    $providerPath = $discovered['path'] . '/src/' . str_replace('\\', '/', $providerClass) . '.php';
 
+                    // Prefer autoloaded providers (bundled / composer packages)
+                    if (class_exists($providerClass)) {
+                        $this->app->register($providerClass);
+                        continue;
+                    }
+
+                    // Support explicit provider file path
+                    $providerFile = $discovered['manifest']['provider_file'] ?? null;
+                    if ($providerFile) {
+                        $providerPath = rtrim($discovered['path'], '/\\') . '/' . ltrim($providerFile, '/\\');
+                        if (file_exists($providerPath)) {
+                            require_once $providerPath;
+                            if (class_exists($providerClass)) {
+                                $this->app->register($providerClass);
+                            }
+                        }
+                        continue;
+                    }
+
+                    // Legacy fallback
+                    $providerPath = $discovered['path'] . '/src/' . str_replace('\\', '/', $providerClass) . '.php';
                     if (file_exists($providerPath)) {
                         require_once $providerPath;
-                        
                         if (class_exists($providerClass)) {
                             $this->app->register($providerClass);
                         }

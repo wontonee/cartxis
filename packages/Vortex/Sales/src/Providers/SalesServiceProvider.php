@@ -48,7 +48,7 @@ class SalesServiceProvider extends ServiceProvider
                     ['key' => 'sales', 'location' => 'admin'],
                     [
                         'title' => 'Sales',
-                        'icon' => 'ki-outline ki-chart-line-up',
+                        'icon' => 'chart-line',
                         'route' => null,
                         'order' => 30,
                         'active' => true,
@@ -61,7 +61,7 @@ class SalesServiceProvider extends ServiceProvider
                     ['key' => 'sales-orders', 'location' => 'admin'],
                     [
                         'title' => 'Orders',
-                        'icon' => 'ki-outline ki-package',
+                        'icon' => 'shopping-bag',
                         'route' => 'admin.sales.orders.index',
                         'order' => 10,
                         'parent_id' => $salesMenu->id,
@@ -75,7 +75,7 @@ class SalesServiceProvider extends ServiceProvider
                     ['key' => 'sales-invoices', 'location' => 'admin'],
                     [
                         'title' => 'Invoices',
-                        'icon' => 'ki-outline ki-file-sheet',
+                        'icon' => 'document-text',
                         'route' => 'admin.sales.invoices.index',
                         'order' => 20,
                         'parent_id' => $salesMenu->id,

@@ -8,6 +8,7 @@ import ImageUploader from '@/Components/Admin/ImageUploader.vue';
 import InventoryTracker from '@/Components/Admin/InventoryTracker.vue';
 import * as productRoutes from '@/routes/admin/catalog/products';
 import axios from '@/lib/axios';
+import { useCurrency } from '@/composables/useCurrency';
 
 interface Category {
   id: number;
@@ -114,6 +115,10 @@ interface Props {
 }
 
 const props = defineProps<Props>();
+
+// Currency symbol
+const { getSymbol } = useCurrency();
+const currencySymbol = computed(() => getSymbol());
 
 // Active tab
 const activeTab = ref<'general' | 'images' | 'attributes' | 'inventory' | 'seo'>('general');
@@ -494,6 +499,18 @@ const deleteProduct = () => {
                 Inventory
               </button>
               <button
+                v-if="form.type === 'downloadable'"
+                @click="activeTab = 'downloads'"
+                :class="[
+                  activeTab === 'downloads'
+                    ? 'border-blue-500 text-blue-600'
+                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300',
+                  'whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm'
+                ]"
+              >
+                Downloads
+              </button>
+              <button
                 @click="activeTab = 'seo'"
                 :class="[
                   activeTab === 'seo'
@@ -560,6 +577,31 @@ const deleteProduct = () => {
                   <p v-if="errors?.sku" class="mt-1 text-sm text-red-600">{{ errors.sku }}</p>
                 </div>
 
+                <!-- Product Type -->
+                <div>
+                  <label for="type" class="block text-sm font-medium text-gray-700 mb-1">
+                    Product Type <span class="text-red-500">*</span>
+                  </label>
+                  <select
+                    id="type"
+                    v-model="form.type"
+                    class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    :class="{ 'border-red-500': errors?.type }"
+                  >
+                    <option value="simple">Simple Product</option>
+                    <option value="configurable">Configurable Product (Variants)</option>
+                    <option value="virtual">Virtual Product (No Shipping)</option>
+                    <option value="downloadable">Downloadable Product (Digital)</option>
+                  </select>
+                  <p class="mt-1 text-xs text-gray-500">
+                    <span v-if="form.type === 'simple'">Physical product with no variants</span>
+                    <span v-else-if="form.type === 'configurable'">Product with options like size, color, etc.</span>
+                    <span v-else-if="form.type === 'virtual'">Non-physical product (no shipping required)</span>
+                    <span v-else-if="form.type === 'downloadable'">Digital file product with download links</span>
+                  </p>
+                  <p v-if="errors?.type" class="mt-1 text-sm text-red-600">{{ errors.type }}</p>
+                </div>
+
                 <!-- Brand -->
                 <div>
                   <label for="brand" class="block text-sm font-medium text-gray-700 mb-1">Brand</label>
@@ -620,7 +662,7 @@ const deleteProduct = () => {
                           </div>
 
                           <!-- Actions Overlay -->
-                          <div class="absolute inset-0 bg-opacity-0 group-hover:bg-black group-hover:bg-opacity-50 transition-all duration-200 flex items-center justify-center gap-2">
+                          <div class="absolute inset-0 bg-black/0 group-hover:bg-black/50 transition-all duration-200 flex items-center justify-center gap-2">
                             <button
                               v-if="product.main_image_id !== image.id"
                               type="button"
@@ -688,7 +730,7 @@ const deleteProduct = () => {
                         Price <span class="text-red-500">*</span>
                       </label>
                       <div class="relative">
-                        <span class="absolute inset-y-0 left-0 pl-3 flex items-center text-gray-500">$</span>
+                        <span class="absolute inset-y-0 left-0 pl-3 flex items-center text-gray-500">{{ currencySymbol }}</span>
                         <input
                           id="price"
                           v-model="form.price"
@@ -706,7 +748,7 @@ const deleteProduct = () => {
                         Cost
                       </label>
                       <div class="relative">
-                        <span class="absolute inset-y-0 left-0 pl-3 flex items-center text-gray-500">$</span>
+                        <span class="absolute inset-y-0 left-0 pl-3 flex items-center text-gray-500">{{ currencySymbol }}</span>
                         <input
                           id="cost"
                           v-model="form.cost"
@@ -744,7 +786,7 @@ const deleteProduct = () => {
                           Special Price
                         </label>
                         <div class="relative">
-                          <span class="absolute inset-y-0 left-0 pl-3 flex items-center text-gray-500">$</span>
+                          <span class="absolute inset-y-0 left-0 pl-3 flex items-center text-gray-500">{{ currencySymbol }}</span>
                           <input
                             id="special_price"
                             v-model="form.special_price"
@@ -781,8 +823,8 @@ const deleteProduct = () => {
                     </div>
                   </div>
 
-                  <!-- Weight -->
-                  <div class="border-t border-gray-200 pt-6">
+                  <!-- Weight - Only for physical products -->
+                  <div v-if="form.type === 'simple' || form.type === 'configurable'" class="border-t border-gray-200 pt-6">
                     <h4 class="text-sm font-medium text-gray-900 mb-4">Physical Attributes</h4>
                     <div>
                       <label for="weight" class="block text-sm font-medium text-gray-700 mb-1">
@@ -795,6 +837,58 @@ const deleteProduct = () => {
                         step="0.01"
                         class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                       />
+                    </div>
+                  </div>
+
+                  <!-- Digital Product Notice -->
+                  <div v-if="form.type === 'virtual' || form.type === 'downloadable'" class="border-t border-gray-200 pt-6">
+                    <div class="bg-blue-50 border border-blue-200 rounded-md p-4">
+                      <div class="flex">
+                        <svg class="h-5 w-5 text-blue-400 mr-3 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                        <div>
+                          <p class="text-sm text-blue-800 font-medium">{{ form.type === 'virtual' ? 'Virtual Product' : 'Downloadable Product' }}</p>
+                          <p class="text-sm text-blue-700 mt-1">
+                            {{ form.type === 'virtual' ? 'This product does not require shipping.' : 'This product will be available for download after purchase.' }}
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Downloadable Files Tab -->
+              <div v-show="activeTab === 'downloads'" v-if="form.type === 'downloadable'" class="space-y-6">
+                <div>
+                  <h3 class="text-lg font-medium text-gray-900 mb-4">Downloadable Files</h3>
+                  
+                  <div class="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center hover:border-blue-400 transition-colors">
+                    <svg class="mx-auto h-12 w-12 text-gray-400" stroke="currentColor" fill="none" viewBox="0 0 48 48">
+                      <path d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                    </svg>
+                    <p class="mt-4 text-sm text-gray-600">
+                      <label for="file-upload-edit" class="relative cursor-pointer rounded-md font-medium text-blue-600 hover:text-blue-500">
+                        <span>Upload files</span>
+                        <input id="file-upload-edit" name="file-upload" type="file" class="sr-only" multiple />
+                      </label>
+                      or drag and drop
+                    </p>
+                    <p class="text-xs text-gray-500 mt-1">Any file type up to 50MB</p>
+                  </div>
+
+                  <div class="mt-6 bg-yellow-50 border border-yellow-200 rounded-md p-4">
+                    <div class="flex">
+                      <svg class="h-5 w-5 text-yellow-400 mr-3 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                      </svg>
+                      <div>
+                        <p class="text-sm text-yellow-800 font-medium">File Management Coming Soon</p>
+                        <p class="text-sm text-yellow-700 mt-1">
+                          Downloadable file upload and management will be available in the next update.
+                        </p>
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -1001,7 +1095,7 @@ const deleteProduct = () => {
 
                       <!-- Price -->
                       <div v-if="attribute.type === 'price'" class="relative">
-                        <span class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500">$</span>
+                        <span class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500">{{ currencySymbol }}</span>
                         <input
                           v-model="attributeValues[attribute.code]"
                           type="number"
@@ -1137,7 +1231,7 @@ const deleteProduct = () => {
       role="dialog"
       aria-modal="true"
     >
-      <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity"></div>
+      <div class="fixed inset-0 bg-gray-500/75 dark:bg-gray-900/75 transition-opacity"></div>
 
       <div class="fixed inset-0 z-50 w-screen overflow-y-auto">
         <div class="flex min-h-full items-end justify-center p-4 text-center sm:items-center sm:p-0">

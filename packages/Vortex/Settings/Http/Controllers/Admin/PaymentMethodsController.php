@@ -18,8 +18,22 @@ class PaymentMethodsController extends Controller
     {
         $paymentMethods = PaymentMethod::orderBy('sort_order')->get();
 
+        // Filter out payment methods whose extensions are inactive
+        $paymentMethods = $paymentMethods->filter(function ($method) {
+            // COD and bank_transfer don't require extensions
+            if (in_array($method->code, ['cod', 'bank_transfer'])) {
+                return true;
+            }
+
+            // For extension-based payment methods, check if extension is active
+            $extensionCode = 'vortex-' . $method->code;
+            $extension = \Vortex\Core\Models\Extension::where('code', $extensionCode)->first();
+            
+            return $extension && $extension->active;
+        });
+
         return Inertia::render('Admin/Settings/PaymentMethods/Index', [
-            'paymentMethods' => $paymentMethods,
+            'paymentMethods' => $paymentMethods->values(),
         ]);
     }
 

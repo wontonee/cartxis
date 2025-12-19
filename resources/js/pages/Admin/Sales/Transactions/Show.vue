@@ -340,7 +340,7 @@ const formatJson = (data: any) => {
     <!-- Refund Modal -->
     <div v-if="showRefundModal" class="fixed inset-0 z-50 overflow-y-auto">
       <div class="flex items-center justify-center min-h-screen px-4">
-        <div class="fixed inset-0 transition-opacity bg-gray-500 bg-opacity-75" @click="showRefundModal = false"></div>
+        <div class="fixed inset-0 transition-opacity bg-gray-500/75 dark:bg-gray-900/75" @click="showRefundModal = false"></div>
         
         <div class="relative bg-white rounded-lg max-w-md w-full p-6">
           <h3 class="text-lg font-medium text-gray-900 mb-4">Process Refund</h3>

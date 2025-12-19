@@ -18,6 +18,7 @@ import {
   Truck,
   CreditCard,
   Megaphone,
+  Sparkles,
   Ticket,
   Mail,
   Globe,
@@ -37,6 +38,8 @@ import {
   Box,
   Zap,
   Database,
+  LineChart,
+  FileText as DocumentText,
 } from 'lucide-vue-next'
 
 export interface IconMap {
@@ -63,6 +66,7 @@ export function useMenuIcons() {
     'truck': Truck,
     'credit-card': CreditCard,
     'megaphone': Megaphone,
+    'sparkles': Sparkles,
     'ticket': Ticket,
     'mail': Mail,
     'globe': Globe,
@@ -83,6 +87,8 @@ export function useMenuIcons() {
     'box': Box,
     'zap': Zap,
     'database': Database,
+    'chart-line': LineChart,
+    'document-text': DocumentText,
   }
 
   const getIcon = (iconName: string): Component | null => {

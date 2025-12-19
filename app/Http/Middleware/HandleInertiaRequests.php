@@ -146,6 +146,7 @@ class HandleInertiaRequests extends Middleware
                     'warning' => $request->session()->get('warning'),
                     'info' => $request->session()->get('info'),
                     'redirect_url' => $request->session()->get('redirect_url'),
+                    'payment_response' => $request->session()->get('payment_response'),
                 ];
             }),
             'sidebarOpen' => ! $request->hasCookie('sidebar_state') || $request->cookie('sidebar_state') === 'true',

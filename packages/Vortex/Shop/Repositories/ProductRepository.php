@@ -29,6 +29,7 @@ class ProductRepository extends ShopRepository implements ProductRepositoryInter
             ->where('featured', 1)
             ->where('status', 'enabled')
             ->where('quantity', '>', 0)
+            ->with(['images', 'mainImage'])
             ->limit($limit)
             ->get();
     }
@@ -44,6 +45,7 @@ class ProductRepository extends ShopRepository implements ProductRepositoryInter
         return $this->model
             ->where('status', 'enabled')
             ->where('quantity', '>', 0)
+            ->with(['images', 'mainImage'])
             ->orderBy('created_at', 'desc')
             ->limit($limit)
             ->get();

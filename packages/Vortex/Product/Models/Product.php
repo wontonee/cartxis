@@ -13,6 +13,14 @@ class Product extends Model
 {
     use HasFactory, SoftDeletes;
 
+    /**
+     * Product type constants
+     */
+    const TYPE_SIMPLE = 'simple';
+    const TYPE_CONFIGURABLE = 'configurable';
+    const TYPE_VIRTUAL = 'virtual';
+    const TYPE_DOWNLOADABLE = 'downloadable';
+
     protected $fillable = [
         'sku',
         'name',
@@ -323,6 +331,46 @@ class Product extends Model
     public function getAverageRatingAttribute(): float
     {
         return round($this->approvedReviews()->avg('rating') ?? 0, 1);
+    }
+
+    /**
+     * Check if product is physical (requires shipping)
+     */
+    public function isPhysical(): bool
+    {
+        return in_array($this->type, [self::TYPE_SIMPLE, self::TYPE_CONFIGURABLE]);
+    }
+
+    /**
+     * Check if product is virtual (no shipping)
+     */
+    public function isVirtual(): bool
+    {
+        return $this->type === self::TYPE_VIRTUAL;
+    }
+
+    /**
+     * Check if product is downloadable (digital file)
+     */
+    public function isDownloadable(): bool
+    {
+        return $this->type === self::TYPE_DOWNLOADABLE;
+    }
+
+    /**
+     * Check if product requires shipping
+     */
+    public function requiresShipping(): bool
+    {
+        return $this->isPhysical();
+    }
+
+    /**
+     * Check if product is configurable (has variants)
+     */
+    public function isConfigurable(): bool
+    {
+        return $this->type === self::TYPE_CONFIGURABLE;
     }
 
     /**

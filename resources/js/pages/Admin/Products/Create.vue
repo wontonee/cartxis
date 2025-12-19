@@ -5,6 +5,7 @@ import AdminLayout from '@/Layouts/AdminLayout.vue';
 import TiptapEditor from '@/Components/Admin/TiptapEditor.vue';
 import ImageUploader from '@/Components/Admin/ImageUploader.vue';
 import * as productRoutes from '@/routes/admin/catalog/products';
+import { useCurrency } from '@/composables/useCurrency';
 
 interface Category {
   id: number;
@@ -60,6 +61,10 @@ const images = ref<File[]>([]);
 
 // Attribute values - Initialize multiselect attributes as arrays
 const attributeValues = ref<Record<string, any>>({});
+
+// Currency symbol
+const { getSymbol } = useCurrency();
+const currencySymbol = computed(() => getSymbol());
 
 // Selected attributes to display
 const selectedAttributeIds = ref<number[]>([]);
@@ -232,6 +237,9 @@ const saveDraft = () => {
                 <button type="button" @click="activeTab = 'inventory'" :class="[activeTab === 'inventory' ? 'border-blue-500 text-blue-600' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300', 'whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm']">
                   Inventory & Pricing
                 </button>
+                <button v-if="form.type === 'downloadable'" type="button" @click="activeTab = 'downloads'" :class="[activeTab === 'downloads' ? 'border-blue-500 text-blue-600' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300', 'whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm']">
+                  Downloads
+                </button>
                 <button type="button" @click="activeTab = 'seo'" :class="[activeTab === 'seo' ? 'border-blue-500 text-blue-600' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300', 'whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm']">
                   SEO
                 </button>
@@ -270,6 +278,26 @@ const saveDraft = () => {
                   <input v-model="form.sku" type="text" class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500" :class="{ 'border-red-500': errors?.sku }" placeholder="PROD-001" />
                   <p class="mt-1 text-xs text-gray-500">Stock Keeping Unit - Unique product identifier</p>
                   <p v-if="errors?.sku" class="mt-1 text-sm text-red-600">{{ errors.sku }}</p>
+                </div>
+
+                <!-- Product Type -->
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 mb-2">
+                    Product Type <span class="text-red-500">*</span>
+                  </label>
+                  <select v-model="form.type" class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500" :class="{ 'border-red-500': errors?.type }">
+                    <option value="simple">Simple Product</option>
+                    <option value="configurable">Configurable Product (Variants)</option>
+                    <option value="virtual">Virtual Product (No Shipping)</option>
+                    <option value="downloadable">Downloadable Product (Digital)</option>
+                  </select>
+                  <p class="mt-1 text-xs text-gray-500">
+                    <span v-if="form.type === 'simple'">Physical product with no variants</span>
+                    <span v-else-if="form.type === 'configurable'">Product with options like size, color, etc.</span>
+                    <span v-else-if="form.type === 'virtual'">Non-physical product (no shipping required)</span>
+                    <span v-else-if="form.type === 'downloadable'">Digital file product with download links</span>
+                  </p>
+                  <p v-if="errors?.type" class="mt-1 text-sm text-red-600">{{ errors.type }}</p>
                 </div>
 
                 <!-- Brand -->
@@ -463,7 +491,7 @@ const saveDraft = () => {
 
                     <!-- Price -->
                     <div v-if="attribute.type === 'price'" class="relative">
-                      <span class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500">$</span>
+                      <span class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500">{{ currencySymbol }}</span>
                       <input
                         v-model="attributeValues[attribute.code]"
                         type="number"
@@ -489,7 +517,7 @@ const saveDraft = () => {
                     Regular Price <span class="text-red-500">*</span>
                   </label>
                   <div class="relative">
-                    <span class="absolute left-3 top-2 text-gray-500">$</span>
+                    <span class="absolute left-3 top-2 text-gray-500">{{ currencySymbol }}</span>
                     <input v-model="form.price" type="number" step="0.01" class="w-full pl-7 pr-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500" :class="{ 'border-red-500': errors?.price }" placeholder="0.00" />
                   </div>
                   <p v-if="errors?.price" class="mt-1 text-sm text-red-600">{{ errors.price }}</p>
@@ -499,7 +527,7 @@ const saveDraft = () => {
                 <div>
                   <label class="block text-sm font-medium text-gray-700 mb-2">Cost</label>
                   <div class="relative">
-                    <span class="absolute left-3 top-2 text-gray-500">$</span>
+                    <span class="absolute left-3 top-2 text-gray-500">{{ currencySymbol }}</span>
                     <input v-model="form.cost" type="number" step="0.01" class="w-full pl-7 pr-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500" placeholder="0.00" />
                   </div>
                   <p class="mt-1 text-xs text-gray-500">Cost per unit (for profit calculation)</p>
@@ -528,7 +556,7 @@ const saveDraft = () => {
                   <div>
                     <label class="block text-sm font-medium text-gray-700 mb-2">Special Price</label>
                     <div class="relative">
-                      <span class="absolute left-3 top-2 text-gray-500">$</span>
+                      <span class="absolute left-3 top-2 text-gray-500">{{ currencySymbol }}</span>
                       <input v-model="form.special_price" type="number" step="0.01" class="w-full pl-7 pr-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500" placeholder="0.00" />
                     </div>
                     <p class="mt-1 text-xs text-gray-500">Sale price (optional)</p>
@@ -561,8 +589,8 @@ const saveDraft = () => {
                     <p v-if="errors?.quantity" class="mt-1 text-sm text-red-600">{{ errors.quantity }}</p>
                   </div>
 
-                  <!-- Weight -->
-                  <div>
+                  <!-- Weight - Only for physical products -->
+                  <div v-if="form.type === 'simple' || form.type === 'configurable'">
                     <label class="block text-sm font-medium text-gray-700 mb-2">Weight (kg)</label>
                     <input 
                       v-model="form.weight" 
@@ -573,6 +601,58 @@ const saveDraft = () => {
                     />
                     <p v-if="props.errors?.weight" class="mt-1 text-sm text-red-600">{{ props.errors.weight }}</p>
                     <p v-else class="mt-1 text-xs text-gray-500">Product weight for shipping</p>
+                  </div>
+
+                  <!-- Digital Product Notice -->
+                  <div v-if="form.type === 'virtual' || form.type === 'downloadable'" class="col-span-2">
+                    <div class="bg-blue-50 border border-blue-200 rounded-md p-4">
+                      <div class="flex">
+                        <svg class="h-5 w-5 text-blue-400 mr-3 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                        <div>
+                          <p class="text-sm text-blue-800 font-medium">{{ form.type === 'virtual' ? 'Virtual Product' : 'Downloadable Product' }}</p>
+                          <p class="text-sm text-blue-700 mt-1">
+                            {{ form.type === 'virtual' ? 'This product does not require shipping.' : 'This product will be available for download after purchase.' }}
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Downloadable Files Tab -->
+            <div v-show="activeTab === 'downloads'" v-if="form.type === 'downloadable'" class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+              <h3 class="text-lg font-semibold text-gray-900 mb-6">Downloadable Files</h3>
+              
+              <div class="space-y-6">
+                <div class="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center hover:border-blue-400 transition-colors">
+                  <svg class="mx-auto h-12 w-12 text-gray-400" stroke="currentColor" fill="none" viewBox="0 0 48 48">
+                    <path d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                  </svg>
+                  <p class="mt-4 text-sm text-gray-600">
+                    <label for="file-upload" class="relative cursor-pointer rounded-md font-medium text-blue-600 hover:text-blue-500">
+                      <span>Upload files</span>
+                      <input id="file-upload" name="file-upload" type="file" class="sr-only" multiple />
+                    </label>
+                    or drag and drop
+                  </p>
+                  <p class="text-xs text-gray-500 mt-1">Any file type up to 50MB</p>
+                </div>
+
+                <div class="bg-yellow-50 border border-yellow-200 rounded-md p-4">
+                  <div class="flex">
+                    <svg class="h-5 w-5 text-yellow-400 mr-3 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                    </svg>
+                    <div>
+                      <p class="text-sm text-yellow-800 font-medium">File Management Coming Soon</p>
+                      <p class="text-sm text-yellow-700 mt-1">
+                        Downloadable file upload and management will be available in the next update. For now, you can create the product and add files later.
+                      </p>
+                    </div>
                   </div>
                 </div>
               </div>

@@ -4,6 +4,9 @@ import { Head, Link } from '@inertiajs/vue3';
 import { useCartStore } from '@/stores/cartStore';
 import ThemeLayout from '@/../../themes/vortex-default/resources/views/layouts/ThemeLayout.vue';
 import ProductCard from '@/../../themes/vortex-default/resources/views/components/ProductCard.vue';
+import { useCurrency } from '@/composables/useCurrency';
+
+const { formatPrice } = useCurrency();
 
 interface Brand {
     id: number;
@@ -46,6 +49,7 @@ interface Product {
     name: string;
     slug: string;
     sku: string;
+    type: string;
     description: string;
     short_description: string;
     price: number;
@@ -283,8 +287,8 @@ const handleMouseMove = (e: MouseEvent) => {
 
                     <!-- Price -->
                     <div class="flex items-baseline gap-3">
-                        <span class="text-3xl font-bold text-gray-900">${{ displayPrice?.toFixed(2) }}</span>
-                        <span v-if="hasDiscount" class="text-xl text-gray-500 line-through">${{ product.price.toFixed(2) }}</span>
+                        <span class="text-3xl font-bold text-gray-900">{{ formatPrice(displayPrice) }}</span>
+                        <span v-if="hasDiscount" class="text-xl text-gray-500 line-through">{{ formatPrice(product.price) }}</span>
                         <span v-if="hasDiscount" class="text-sm font-semibold text-green-600 bg-green-50 px-2 py-1 rounded">
                             Save {{ discountPercentage }}%
                         </span>
@@ -312,9 +316,44 @@ const handleMouseMove = (e: MouseEvent) => {
                         </span>
                     </div>
 
-                    <!-- SKU -->
-                    <div class="text-sm text-gray-500">
-                        SKU: <span class="font-medium text-gray-700">{{ product.sku }}</span>
+                    <!-- SKU & Product Type -->
+                    <div class="flex items-center gap-3">
+                        <div class="text-sm text-gray-500">
+                            SKU: <span class="font-medium text-gray-700">{{ product.sku }}</span>
+                        </div>
+                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium" :class="{
+                            'bg-gray-100 text-gray-800': product.type === 'simple',
+                            'bg-purple-100 text-purple-800': product.type === 'configurable',
+                            'bg-blue-100 text-blue-800': product.type === 'virtual',
+                            'bg-cyan-100 text-cyan-800': product.type === 'downloadable',
+                        }">
+                            <svg v-if="product.type === 'virtual' || product.type === 'downloadable'" class="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                                <path d="M3 12v3c0 1.657 3.134 3 7 3s7-1.343 7-3v-3c0 1.657-3.134 3-7 3s-7-1.343-7-3z" />
+                                <path d="M3 7v3c0 1.657 3.134 3 7 3s7-1.343 7-3V7c0 1.657-3.134 3-7 3S3 8.657 3 7z" />
+                                <path d="M17 5c0 1.657-3.134 3-7 3S3 6.657 3 5s3.134-3 7-3 7 1.343 7 3z" />
+                            </svg>
+                            {{ product.type.charAt(0).toUpperCase() + product.type.slice(1) }}
+                        </span>
+                    </div>
+
+                    <!-- Digital Product Info -->
+                    <div v-if="product.type === 'virtual' || product.type === 'downloadable'" class="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                        <div class="flex items-start">
+                            <svg class="w-5 h-5 text-blue-500 mr-3 mt-0.5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                            <div>
+                                <p class="text-sm font-medium text-blue-900">
+                                    {{ product.type === 'downloadable' ? 'Digital Download' : 'Virtual Product' }}
+                                </p>
+                                <p class="text-sm text-blue-700 mt-1">
+                                    {{ product.type === 'downloadable' 
+                                        ? 'This is a digital product. Download link will be available after purchase.' 
+                                        : 'This is a virtual product. No physical shipping required.' 
+                                    }}
+                                </p>
+                            </div>
+                        </div>
                     </div>
 
                     <!-- Short Description -->
@@ -397,8 +436,8 @@ const handleMouseMove = (e: MouseEvent) => {
 
                     <!-- Quantity & Add to Cart -->
                     <div v-if="product.in_stock" class="space-y-4">
-                        <!-- Quantity Selector -->
-                        <div class="flex items-center gap-4">
+                        <!-- Quantity Selector - Hidden for downloadable products -->
+                        <div v-if="product.type !== 'downloadable'" class="flex items-center gap-4">
                             <span class="text-sm font-medium text-gray-700">Quantity:</span>
                             <div class="flex items-center border rounded-lg">
                                 <button
@@ -425,13 +464,18 @@ const handleMouseMove = (e: MouseEvent) => {
                             </div>
                         </div>
 
-                        <!-- Add to Cart Button -->
+                        <!-- Add to Cart / Buy Now Button -->
                         <button
                             @click="addToCart"
                             :disabled="isAddingToCart"
-                            class="w-full bg-indigo-600 text-white px-8 py-3 rounded-lg hover:bg-indigo-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed font-medium cursor-pointer"
+                            class="w-full bg-indigo-600 text-white px-8 py-3 rounded-lg hover:bg-indigo-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed font-medium cursor-pointer flex items-center justify-center gap-2"
                         >
-                            <span v-if="!isAddingToCart">Add to Cart</span>
+                            <svg v-if="product.type === 'downloadable' && !isAddingToCart" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                            </svg>
+                            <span v-if="!isAddingToCart">
+                                {{ product.type === 'downloadable' ? 'Buy Now & Download' : 'Add to Cart' }}
+                            </span>
                             <span v-else>Adding...</span>
                         </button>
                     </div>

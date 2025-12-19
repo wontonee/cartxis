@@ -334,7 +334,7 @@
       <!-- Delete Confirmation Modal -->
       <div
         v-if="showDeleteModal"
-        class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
+        class="fixed inset-0 bg-gray-500/75 dark:bg-gray-900/75 flex items-center justify-center z-50"
         @click.self="showDeleteModal = false"
       >
         <div class="bg-white rounded-lg p-6 max-w-md w-full mx-4">
@@ -360,7 +360,7 @@
       <!-- Tax Class Modal -->
       <div
         v-if="showTaxClassModal"
-        class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
+        class="fixed inset-0 bg-gray-500/75 dark:bg-gray-900/75 flex items-center justify-center z-50"
         @click.self="showTaxClassModal = false"
       >
         <div class="bg-white rounded-lg p-6 max-w-lg w-full mx-4 max-h-[90vh] overflow-y-auto">
@@ -425,7 +425,7 @@
       <!-- Tax Rate Modal -->
       <div
         v-if="showTaxRateModal"
-        class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
+        class="fixed inset-0 bg-gray-500/75 dark:bg-gray-900/75 flex items-center justify-center z-50"
         @click.self="showTaxRateModal = false"
       >
         <div class="bg-white rounded-lg p-6 max-w-lg w-full mx-4 max-h-[90vh] overflow-y-auto">
@@ -512,7 +512,7 @@
       <!-- Tax Zone Modal -->
       <div
         v-if="showTaxZoneModal"
-        class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
+        class="fixed inset-0 bg-gray-500/75 dark:bg-gray-900/75 flex items-center justify-center z-50"
         @click.self="showTaxZoneModal = false"
       >
         <div class="bg-white rounded-lg p-6 max-w-2xl w-full mx-4 max-h-[90vh] overflow-y-auto">

@@ -47,7 +47,29 @@ const user = page.props.auth.user;
                     v-bind="ProfileController.update.form()"
                     class="space-y-6"
                     v-slot="{ errors, processing, recentlySuccessful }"
+                    enctype="multipart/form-data"
                 >
+                    <div class="grid gap-2">
+                        <Label for="profile_photo">Profile Photo</Label>
+                        <div class="flex items-center gap-4">
+                            <div v-if="user.profile_photo_path" class="w-20 h-20 rounded-full overflow-hidden bg-gray-200">
+                                <img :src="`/storage/${user.profile_photo_path}`" alt="Profile photo" class="w-full h-full object-cover" />
+                            </div>
+                            <div v-else class="w-20 h-20 rounded-full bg-gray-200 flex items-center justify-center text-gray-400">
+                                <span class="text-2xl">{{ user.name?.charAt(0).toUpperCase() }}</span>
+                            </div>
+                            <Input
+                                id="profile_photo"
+                                type="file"
+                                name="profile_photo"
+                                accept="image/*"
+                                class="mt-1 block w-full"
+                            />
+                        </div>
+                        <p class="text-sm text-muted-foreground">Upload a new profile photo (JPG, PNG, max 2MB)</p>
+                        <InputError class="mt-2" :message="errors.profile_photo" />
+                    </div>
+
                     <div class="grid gap-2">
                         <Label for="name">Name</Label>
                         <Input

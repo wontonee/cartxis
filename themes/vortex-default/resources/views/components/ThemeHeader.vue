@@ -1,8 +1,17 @@
 <script setup lang="ts">
 import { Link, usePage } from '@inertiajs/vue3';
-import { ref, computed } from 'vue';
+import { ref, computed, onMounted, onUnmounted } from 'vue';
 import CartIcon from './CartIcon.vue';
 import { useStorefrontMenu } from '@/composables/useStorefrontMenu';
+import axios from 'axios';
+
+interface SearchSuggestion {
+    id: number;
+    name: string;
+    slug: string;
+    price: number;
+    image: string;
+}
 
 interface Props {
     theme?: any;
@@ -27,18 +36,44 @@ const auth = computed(() => page.props.auth as any);
 const user = computed(() => auth.value?.user);
 
 const searchQuery = ref('');
+const suggestions = ref<SearchSuggestion[]>([]);
+const showSuggestions = ref(false);
+const selectedIndex = ref(-1);
+const searchInputRef = ref<HTMLInputElement | null>(null);
+const isSearching = ref(false);
+let debounceTimeout: ReturnType<typeof setTimeout> | null = null;
+
 const { menus, loading, getMenuUrl, hasChildren } = useStorefrontMenu();
 const activeDropdown = ref<number | null>(null);
 const showUserMenu = ref(false);
+let closeTimeout: ReturnType<typeof setTimeout> | null = null;
 
 const primaryColor = computed(() => props.theme?.settings?.primary_color ?? '#3b82f6');
 
 const toggleDropdown = (itemId: number) => {
+    if (closeTimeout) {
+        clearTimeout(closeTimeout);
+        closeTimeout = null;
+    }
     activeDropdown.value = activeDropdown.value === itemId ? null : itemId;
 };
 
+const openDropdown = (itemId: number) => {
+    if (closeTimeout) {
+        clearTimeout(closeTimeout);
+        closeTimeout = null;
+    }
+    activeDropdown.value = itemId;
+};
+
 const closeDropdown = () => {
-    activeDropdown.value = null;
+    if (closeTimeout) {
+        clearTimeout(closeTimeout);
+    }
+    closeTimeout = setTimeout(() => {
+        activeDropdown.value = null;
+        closeTimeout = null;
+    }, 150);
 };
 
 const toggleUserMenu = () => {
@@ -48,6 +83,101 @@ const toggleUserMenu = () => {
 const closeUserMenu = () => {
     showUserMenu.value = false;
 };
+
+const fetchSuggestions = async () => {
+    if (searchQuery.value.trim().length < 2) {
+        suggestions.value = [];
+        showSuggestions.value = false;
+        isSearching.value = false;
+        return;
+    }
+
+    try {
+        isSearching.value = true;
+        const response = await axios.get(`/search/suggestions?q=${encodeURIComponent(searchQuery.value.trim())}&limit=8`);
+        suggestions.value = response.data.suggestions || [];
+        showSuggestions.value = suggestions.value.length > 0;
+        selectedIndex.value = -1;
+    } catch (error) {
+        console.error('Error fetching search suggestions:', error);
+        suggestions.value = [];
+        showSuggestions.value = false;
+    } finally {
+        isSearching.value = false;
+    }
+};
+
+const onSearchInput = () => {
+    if (debounceTimeout) {
+        clearTimeout(debounceTimeout);
+    }
+    
+    debounceTimeout = setTimeout(() => {
+        fetchSuggestions();
+    }, 300);
+};
+
+const handleSearch = (suggestion?: SearchSuggestion) => {
+    if (suggestion) {
+        window.location.href = `/product/${suggestion.slug}`;
+    } else if (searchQuery.value.trim().length > 0) {
+        window.location.href = `/search?q=${encodeURIComponent(searchQuery.value.trim())}`;
+    }
+    showSuggestions.value = false;
+};
+
+const handleKeyDown = (event: KeyboardEvent) => {
+    if (!showSuggestions.value || suggestions.value.length === 0) return;
+
+    switch (event.key) {
+        case 'ArrowDown':
+            event.preventDefault();
+            selectedIndex.value = Math.min(selectedIndex.value + 1, suggestions.value.length - 1);
+            break;
+        case 'ArrowUp':
+            event.preventDefault();
+            selectedIndex.value = Math.max(selectedIndex.value - 1, -1);
+            break;
+        case 'Enter':
+            event.preventDefault();
+            if (selectedIndex.value >= 0 && selectedIndex.value < suggestions.value.length) {
+                handleSearch(suggestions.value[selectedIndex.value]);
+            } else {
+                handleSearch();
+            }
+            break;
+        case 'Escape':
+            showSuggestions.value = false;
+            selectedIndex.value = -1;
+            break;
+    }
+};
+
+const closeSuggestions = () => {
+    setTimeout(() => {
+        showSuggestions.value = false;
+        selectedIndex.value = -1;
+    }, 200);
+};
+
+const handleClickOutside = (event: MouseEvent) => {
+    const target = event.target as HTMLElement;
+    if (searchInputRef.value && !searchInputRef.value.contains(target) && !target.closest('.search-suggestions')) {
+        showSuggestions.value = false;
+        selectedIndex.value = -1;
+    }
+};
+
+onMounted(() => {
+    document.addEventListener('click', handleClickOutside);
+});
+
+onUnmounted(() => {
+    document.removeEventListener('click', handleClickOutside);
+    if (debounceTimeout) {
+        clearTimeout(debounceTimeout);
+    }
+});
 </script>
 
 <template>
@@ -73,7 +203,7 @@ const closeUserMenu = () => {
                             v-for="item in menus.header" 
                             :key="item.id"
                             class="relative"
-                            @mouseenter="hasChildren(item) ? toggleDropdown(item.id) : null"
+                            @mouseenter="hasChildren(item) ? openDropdown(item.id) : null"
                             @mouseleave="closeDropdown"
                         >
                             <!-- Menu Item -->
@@ -107,6 +237,8 @@ const closeUserMenu = () => {
                             <div
                                 v-if="hasChildren(item) && activeDropdown === item.id"
                                 class="absolute left-0 mt-2 w-48 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 z-50"
+                                @mouseenter="openDropdown(item.id)"
+                                @mouseleave="closeDropdown"
                             >
                                 <div class="py-1">
                                     <Link
@@ -124,16 +256,19 @@ const closeUserMenu = () => {
 
                     <!-- Fallback to hardcoded menu while loading -->
                     <template v-else>
-                        <Link href="/" class="text-gray-700 hover:text-gray-900 transition-colors">
+                        <Link href="/products" class="text-gray-700 hover:text-gray-900 transition-colors">
                             Shop
                         </Link>
-                        <Link href="/" class="text-gray-700 hover:text-gray-900 transition-colors">
-                            Categories
-                        </Link>
-                        <Link href="/" class="text-gray-700 hover:text-gray-900 transition-colors">
+                        <button class="text-gray-700 hover:text-gray-900 transition-colors flex items-center space-x-1">
+                            <span>Categories</span>
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                            </svg>
+                        </button>
+                        <Link href="/deals" class="text-gray-700 hover:text-gray-900 transition-colors">
                             Deals
                         </Link>
-                        <Link href="/" class="text-gray-700 hover:text-gray-900 transition-colors">
+                        <Link href="/about-us" class="text-gray-700 hover:text-gray-900 transition-colors">
                             About
                         </Link>
                     </template>
@@ -144,12 +279,30 @@ const closeUserMenu = () => {
                     <!-- Search -->
                     <div class="relative hidden md:block">
                         <input
+                            ref="searchInputRef"
                             v-model="searchQuery"
                             type="text"
                             placeholder="Search products..."
-                            class="w-64 rounded-lg border border-gray-300 px-4 py-2 pl-10 focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500"
+                            class="w-64 rounded-lg border border-gray-300 px-4 py-2 pl-10 pr-10 focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500"
+                            @input="onSearchInput"
+                            @keydown="handleKeyDown"
+                            @focus="searchQuery.length >= 2 && fetchSuggestions()"
+                            @blur="closeSuggestions"
+                            autocomplete="off"
                         />
+                        <!-- Loading Spinner -->
                         <svg 
+                            v-if="isSearching"
+                            class="absolute left-3 top-2.5 h-5 w-5 text-indigo-500 animate-spin" 
+                            fill="none" 
+                            viewBox="0 0 24 24"
+                        >
+                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                        </svg>
+                        <!-- Search Icon -->
+                        <svg 
+                            v-else
                             class="absolute left-3 top-2.5 h-5 w-5 text-gray-400" 
                             fill="none" 
                             stroke="currentColor" 
@@ -162,6 +315,60 @@ const closeUserMenu = () => {
                                 d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" 
                             />
                         </svg>
+                        <button
+                            v-if="searchQuery"
+                            @click="handleSearch()"
+                            class="absolute right-3 top-2.5 text-gray-400 hover:text-gray-600 cursor-pointer"
+                            type="button"
+                        >
+                            <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                            </svg>
+                        </button>
+
+                        <!-- Search Suggestions Dropdown -->
+                        <div
+                            v-if="showSuggestions && suggestions.length > 0"
+                            class="search-suggestions absolute left-0 right-0 top-full mt-2 bg-white rounded-lg shadow-lg border border-gray-200 max-h-96 overflow-y-auto z-50"
+                        >
+                            <div
+                                v-for="(suggestion, index) in suggestions"
+                                :key="suggestion.id"
+                                @click="handleSearch(suggestion)"
+                                :class="[
+                                    'flex items-center gap-3 px-4 py-3 cursor-pointer transition-colors',
+                                    selectedIndex === index ? 'bg-indigo-50' : 'hover:bg-gray-50'
+                                ]"
+                            >
+                                <!-- Product Image -->
+                                <div class="flex-shrink-0 w-12 h-12 bg-gray-100 rounded overflow-hidden">
+                                    <img
+                                        v-if="suggestion.image"
+                                        :src="suggestion.image"
+                                        :alt="suggestion.name"
+                                        class="w-full h-full object-cover"
+                                    />
+                                    <div v-else class="w-full h-full flex items-center justify-center text-gray-400 text-xl">
+                                        📦
+                                    </div>
+                                </div>
+                                
+                                <!-- Product Info -->
+                                <div class="flex-1 min-w-0">
+                                    <p class="text-sm font-medium text-gray-900 truncate">
+                                        {{ suggestion.name }}
+                                    </p>
+                                    <p class="text-sm text-indigo-600 font-semibold">
+                                        ${{ Number(suggestion.price).toFixed(2) }}
+                                    </p>
+                                </div>
+
+                                <!-- Arrow Icon -->
+                                <svg class="w-4 h-4 text-gray-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                                </svg>
+                            </div>
+                        </div>
                     </div>
 
                     <!-- Cart Icon (Reusable) -->

@@ -265,9 +265,9 @@ class CheckoutController extends Controller
             'payment_method' => $validated['payment_method'],
             'shipping_method' => $selectedShipping['name'],
             'shipping_address' => $validated['shipping_address'],
-            'billing_address' => $validated['billing_same_as_shipping'] 
+            'billing_address' => ($validated['billing_same_as_shipping'] ?? true)
                 ? $validated['shipping_address'] 
-                : $validated['billing_address'],
+                : ($validated['billing_address'] ?? $validated['shipping_address']),
             'same_as_shipping' => $validated['billing_same_as_shipping'] ?? true,
             'notes' => $validated['order_notes'] ?? null,
             'subtotal' => $subtotal,
@@ -334,28 +334,45 @@ class CheckoutController extends Controller
                 
                 Log::info('Checkout: Gateway returned response', [
                     'gateway_code' => $gateway->getCode(),
-                    'response_type' => get_class($response),
+                    'response_type' => is_object($response) ? get_class($response) : gettype($response),
                 ]);
                 
-                // Only clear cart after successful gateway response
-                // (for redirects, the cart will be cleared when user returns successfully)
-                Session::forget('cart');
-                Session::forget('checkout');
-                
-                // For Inertia requests with external redirects (Stripe, PayPal, etc.)
-                // We need to return the URL as data, not as a redirect
+                // Handle different response types from payment gateways
                 if ($response instanceof \Illuminate\Http\RedirectResponse) {
+                    // External redirect (Stripe Checkout, etc.)
+                    // Cart will be cleared when user returns successfully
                     $redirectUrl = $response->getTargetUrl();
                     Log::info('Checkout: Returning redirect URL for external gateway', [
                         'url' => $redirectUrl,
                     ]);
                     
-                    // Return as Inertia response with redirect URL
                     return back()->with([
                         'redirect_url' => $redirectUrl,
                     ]);
                 }
                 
+                // Handle array response (Razorpay, etc. - payment data for frontend)
+                if (is_array($response)) {
+                    Log::info('Checkout: Returning payment data for frontend integration', [
+                        'has_success' => isset($response['success']),
+                        'has_payment_data' => isset($response['payment_data']),
+                        'payment_data' => $response,
+                    ]);
+                    
+                    // Don't clear cart yet - will be cleared after payment verification in callback
+                    // Store payment data in session for redundancy
+                    Session::put('razorpay_payment_data', $response);
+                    
+                    // Return back to checkout with payment_response as flash data
+                    // Flash data will be automatically included in Inertia props
+                    return back()->with('payment_response', $response);
+                }
+                
+                // For immediate payment methods (COD, etc.), clear cart now
+                Session::forget('cart');
+                Session::forget('checkout');
+                
+                // For any other response type, return as-is
                 return $response;
                 
             } catch (\Exception $e) {

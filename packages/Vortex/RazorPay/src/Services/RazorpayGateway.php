@@ -131,7 +131,11 @@ class RazorpayGateway implements PaymentGatewayInterface
             // Return payment data for frontend
             return [
                 'success' => true,
+                'gateway_type' => 'frontend_integration',
+                'gateway_code' => 'razorpay',
                 'payment_data' => [
+                    'gateway_code' => 'razorpay',
+                    'script_url' => 'https://checkout.razorpay.com/v1/checkout.js',
                     'razorpay_order_id' => $razorpayOrder['id'],
                     'razorpay_key_id' => $this->getConfig('key_id'),
                     'amount' => $razorpayOrder['amount'],

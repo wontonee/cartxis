@@ -462,7 +462,7 @@ const getTypeBadgeColor = (type: string): string => {
     <!-- Delete Confirmation Modal -->
     <div
       v-if="showDeleteModal"
-      class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity z-50"
+      class="fixed inset-0 bg-gray-500/75 dark:bg-gray-900/75 transition-opacity z-50"
       @click="showDeleteModal = false"
     >
       <div class="fixed inset-0 z-50 overflow-y-auto">
@@ -512,7 +512,7 @@ const getTypeBadgeColor = (type: string): string => {
     <!-- Bulk Delete Confirmation Modal -->
     <div
       v-if="showBulkDeleteModal"
-      class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity z-50"
+      class="fixed inset-0 bg-gray-500/75 dark:bg-gray-900/75 transition-opacity z-50"
       @click="showBulkDeleteModal = false"
     >
       <div class="fixed inset-0 z-50 overflow-y-auto">

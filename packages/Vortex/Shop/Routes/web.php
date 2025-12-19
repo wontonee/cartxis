@@ -47,6 +47,15 @@ Route::group([
     |--------------------------------------------------------------------------
     */
     Route::get('/search', [Vortex\Shop\Http\Controllers\SearchController::class, 'index'])->name('shop.search');
+    Route::get('/search/suggestions', [Vortex\Shop\Http\Controllers\SearchController::class, 'suggestions'])->name('shop.search.suggestions');
+
+    /*
+    |--------------------------------------------------------------------------
+    | Newsletter Routes
+    |--------------------------------------------------------------------------
+    */
+    Route::post('/newsletter/subscribe', [Vortex\Shop\Http\Controllers\NewsletterController::class, 'subscribe'])->name('shop.newsletter.subscribe');
+    Route::post('/newsletter/unsubscribe', [Vortex\Shop\Http\Controllers\NewsletterController::class, 'unsubscribe'])->name('shop.newsletter.unsubscribe');
 
     /*
     |--------------------------------------------------------------------------

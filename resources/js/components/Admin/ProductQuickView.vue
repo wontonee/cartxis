@@ -1,5 +1,8 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue';
+import { useCurrency } from '@/composables/useCurrency';
+
+const { formatPrice } = useCurrency();
 
 interface Product {
   id: number;
@@ -148,7 +151,7 @@ const deleteProduct = () => {
     >
       <div
         v-if="show && product"
-        class="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4"
+        class="fixed inset-0 bg-gray-500/75 dark:bg-gray-900/75 z-50 flex items-center justify-center p-4"
         @click.self="close"
       >
         <Transition
@@ -207,7 +210,7 @@ const deleteProduct = () => {
                     <template v-if="hasMultipleImages">
                       <button
                         @click="prevImage"
-                        class="absolute left-2 top-1/2 -translate-y-1/2 w-10 h-10 bg-white bg-opacity-90 hover:bg-opacity-100 rounded-full shadow-lg flex items-center justify-center transition-all cursor-pointer"
+                        class="absolute left-2 top-1/2 -translate-y-1/2 w-10 h-10 bg-white/90 hover:bg-white rounded-full shadow-lg flex items-center justify-center transition-all cursor-pointer"
                       >
                         <svg class="w-6 h-6 text-gray-800" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
@@ -215,7 +218,7 @@ const deleteProduct = () => {
                       </button>
                       <button
                         @click="nextImage"
-                        class="absolute right-2 top-1/2 -translate-y-1/2 w-10 h-10 bg-white bg-opacity-90 hover:bg-opacity-100 rounded-full shadow-lg flex items-center justify-center transition-all cursor-pointer"
+                        class="absolute right-2 top-1/2 -translate-y-1/2 w-10 h-10 bg-white/90 hover:bg-white rounded-full shadow-lg flex items-center justify-center transition-all cursor-pointer"
                       >
                         <svg class="w-6 h-6 text-gray-800" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
@@ -274,8 +277,8 @@ const deleteProduct = () => {
                   <!-- Price -->
                   <div class="border-t border-b border-gray-200 py-4">
                     <div class="flex items-baseline gap-3">
-                      <span class="text-3xl font-bold text-gray-900">${{ finalPrice }}</span>
-                      <span v-if="hasDiscount" class="text-xl text-gray-500 line-through">${{ product.price }}</span>
+                      <span class="text-3xl font-bold text-gray-900">{{ formatPrice(finalPrice) }}</span>
+                      <span v-if="hasDiscount" class="text-xl text-gray-500 line-through">{{ formatPrice(product.price) }}</span>
                     </div>
                   </div>
 

@@ -246,7 +246,7 @@ const handleRemove = async (itemId: string) => {
                                     </button>
                                     
                                     <!-- Item updating spinner -->
-                                    <div v-if="isItemUpdating(item.id)" class="absolute inset-0 flex items-center justify-center bg-white bg-opacity-75 rounded-md">
+                                    <div v-if="isItemUpdating(item.id)" class="absolute inset-0 flex items-center justify-center bg-white/75 rounded-md">
                                         <div class="h-4 w-4 animate-spin rounded-full border-2 border-solid border-blue-600 border-r-transparent"></div>
                                     </div>
                                 </div>
@@ -285,7 +285,8 @@ const handleRemove = async (itemId: string) => {
                             </div>
                             <div class="flex justify-between text-gray-700">
                                 <span>Shipping</span>
-                                <span>{{ formatPrice(cartSummary.shipping.cost) }}</span>
+                                <span v-if="cartSummary.shipping.cost > 0">{{ formatPrice(cartSummary.shipping.cost) }}</span>
+                                <span v-else class="text-sm text-green-600 font-medium">Free (Digital Products)</span>
                             </div>
                             
                             <!-- Tax Breakdown -->

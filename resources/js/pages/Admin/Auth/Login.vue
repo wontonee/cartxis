@@ -1,8 +1,7 @@
 <script setup lang="ts">
 import { Head, useForm } from '@inertiajs/vue3'
-import { ref } from 'vue'
+import { ref, computed } from 'vue'
 import '@admin/css/styles.css'
-import '@admin/vendors/keenicons/styles.bundle.css'
 import admin from '@/routes/admin'
 
 const form = useForm({
@@ -12,6 +11,7 @@ const form = useForm({
 })
 
 const showPassword = ref(false)
+const currentYear = computed(() => new Date().getFullYear())
 
 const submit = () => {
   form.post(admin.login.store.url(), {
@@ -23,137 +23,162 @@ const submit = () => {
 <template>
   <Head title="Admin Login" />
 
-  <div class="antialiased flex h-screen text-base text-foreground bg-background">
-    <div class="grid lg:grid-cols-2 grow">
+  <div class="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 p-4">
+    <div class="w-full max-w-6xl grid lg:grid-cols-2 gap-8 items-center">
+      <!-- Branding Section -->
+      <div class="hidden lg:flex flex-col justify-center space-y-8 p-12">
+        <div class="space-y-4">
+          <div class="flex items-center gap-3 mb-8">
+            <div class="w-12 h-12 bg-gradient-to-br from-blue-600 to-indigo-600 rounded-xl flex items-center justify-center shadow-lg">
+              <svg class="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+              </svg>
+            </div>
+            <span class="text-3xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
+              Vortex
+            </span>
+          </div>
+          
+          <h1 class="text-4xl font-bold text-gray-900 dark:text-white leading-tight">
+            Welcome to<br />Admin Dashboard
+          </h1>
+          
+          <p class="text-lg text-gray-600 dark:text-gray-300 leading-relaxed">
+            Powerful eCommerce management platform designed for modern businesses.
+            Control your entire online store from one unified interface.
+          </p>
+        </div>
+        
+        <div class="grid grid-cols-2 gap-4 pt-8">
+          <div class="p-4 bg-white dark:bg-gray-800 rounded-lg shadow-sm">
+            <div class="text-2xl font-bold text-blue-600 dark:text-blue-400">24/7</div>
+            <div class="text-sm text-gray-600 dark:text-gray-400 mt-1">Support</div>
+          </div>
+          <div class="p-4 bg-white dark:bg-gray-800 rounded-lg shadow-sm">
+            <div class="text-2xl font-bold text-indigo-600 dark:text-indigo-400">99.9%</div>
+            <div class="text-sm text-gray-600 dark:text-gray-400 mt-1">Uptime</div>
+          </div>
+        </div>
+      </div>
+
       <!-- Login Form Section -->
-      <div class="flex justify-center items-center p-8 lg:p-10 order-2 lg:order-1">
-        <div class="kt-card max-w-[370px] w-full">
-          <form @submit.prevent="submit" class="kt-card-content flex flex-col gap-5 p-10">
+      <div class="w-full max-w-md mx-auto lg:mx-0">
+        <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl p-8 lg:p-10">
+          <!-- Mobile Logo -->
+          <div class="lg:hidden flex items-center gap-3 mb-8 justify-center">
+            <div class="w-10 h-10 bg-gradient-to-br from-blue-600 to-indigo-600 rounded-xl flex items-center justify-center shadow-lg">
+              <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+              </svg>
+            </div>
+            <span class="text-2xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
+              Vortex
+            </span>
+          </div>
+
+          <form @submit.prevent="submit" class="space-y-6">
             <!-- Header -->
-            <div class="text-center mb-2.5">
-              <h3 class="text-lg font-medium text-mono leading-none mb-2.5">
-                Admin Sign In
-              </h3>
-              <div class="flex items-center justify-center font-medium">
-                <span class="text-sm text-secondary-foreground">
-                  Secure access to Vortex Commerce Admin Panel
-                </span>
-              </div>
+            <div class="text-center lg:text-left">
+              <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-2">
+                Sign in to Admin
+              </h2>
+              <p class="text-gray-600 dark:text-gray-400">
+                Enter your credentials to access the dashboard
+              </p>
             </div>
 
             <!-- Email Input -->
-            <div class="flex flex-col gap-1">
-              <label class="kt-form-label font-normal text-mono">
-                Email
+            <div class="space-y-2">
+              <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                Email Address
               </label>
               <input
                 v-model="form.email"
-                class="kt-input"
-                :class="{ 'border-red-500': form.errors.email }"
-                placeholder="admin@vortex.com"
                 type="email"
+                class="w-full px-4 py-3 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                :class="{ 'border-red-500 focus:ring-red-500': form.errors.email }"
+                placeholder="admin@vortex.com"
                 autofocus
                 required
               />
-              <div v-if="form.errors.email" class="text-red-500 text-xs mt-1">
+              <p v-if="form.errors.email" class="text-red-500 text-sm mt-1">
                 {{ form.errors.email }}
-              </div>
+              </p>
             </div>
 
             <!-- Password Input -->
-            <div class="flex flex-col gap-1">
-              <div class="flex items-center justify-between gap-1">
-                <label class="kt-form-label font-normal text-mono">
-                  Password
-                </label>
-              </div>
-              <div class="kt-input" data-kt-toggle-password="true">
+            <div class="space-y-2">
+              <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                Password
+              </label>
+              <div class="relative">
                 <input
                   v-model="form.password"
                   :type="showPassword ? 'text' : 'password'"
-                  placeholder="Enter Password"
-                  class="flex-1 border-0 p-0 focus:ring-0"
+                  class="w-full px-4 py-3 pr-12 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                  :class="{ 'border-red-500 focus:ring-red-500': form.errors.password }"
+                  placeholder="Enter your password"
                   required
                 />
                 <button
                   @click="showPassword = !showPassword"
-                  class="kt-btn kt-btn-sm kt-btn-ghost kt-btn-icon bg-transparent! -me-1.5"
                   type="button"
+                  class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors"
                 >
-                  <span v-if="!showPassword">
-                    <i class="ki-filled ki-eye text-muted-foreground"></i>
-                  </span>
-                  <span v-else>
-                    <i class="ki-filled ki-eye-slash text-muted-foreground"></i>
-                  </span>
+                  <svg v-if="!showPassword" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                  </svg>
+                  <svg v-else class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21" />
+                  </svg>
                 </button>
               </div>
-              <div v-if="form.errors.password" class="text-red-500 text-xs mt-1">
+              <p v-if="form.errors.password" class="text-red-500 text-sm mt-1">
                 {{ form.errors.password }}
-              </div>
+              </p>
             </div>
 
             <!-- Remember Me -->
-            <label class="kt-label">
+            <div class="flex items-center">
               <input
                 v-model="form.remember"
-                class="kt-checkbox kt-checkbox-sm"
                 type="checkbox"
+                id="remember"
+                class="w-4 h-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500 focus:ring-2"
               />
-              <span class="kt-checkbox-label">
-                Remember me
-              </span>
-            </label>
+              <label for="remember" class="ml-2 text-sm text-gray-700 dark:text-gray-300">
+                Remember me for 30 days
+              </label>
+            </div>
 
             <!-- Submit Button -->
             <button
               type="submit"
-              class="kt-btn kt-btn-primary flex justify-center grow"
+              class="w-full py-3 px-4 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-medium rounded-lg shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
               :disabled="form.processing"
             >
-              <span v-if="!form.processing">Sign In</span>
-              <span v-else>Signing in...</span>
+              <span v-if="!form.processing" class="flex items-center justify-center gap-2">
+                <span>Sign In</span>
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3" />
+                </svg>
+              </span>
+              <span v-else class="flex items-center justify-center gap-2">
+                <svg class="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                  <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                  <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+                <span>Signing in...</span>
+              </span>
             </button>
           </form>
-        </div>
-      </div>
-
-      <!-- Branded Section -->
-      <div class="lg:rounded-xl lg:border lg:border-border lg:m-5 order-1 lg:order-2 bg-top xxl:bg-center xl:bg-cover bg-no-repeat branded-bg">
-        <div class="flex flex-col p-8 lg:p-16 gap-4">
-          <div class="flex items-center gap-2">
-            <div class="size-10 shrink-0">
-              <img src="/resources/admin/media/app/mini-logo.svg" class="h-[28px] max-w-none" alt="Vortex Logo" />
-            </div>
-          </div>
-          <div class="flex flex-col gap-3">
-            <h3 class="text-2xl font-semibold text-mono">
-              Vortex Commerce Admin
-            </h3>
-            <div class="text-base font-medium text-secondary-foreground">
-              A robust authentication gateway ensuring
-              <br />
-              secure
-              <span class="text-mono font-semibold">
-                efficient management access
-              </span>
-              to your
-              <br />
-              eCommerce platform.
-            </div>
+          
+          <div class="mt-6 text-center text-sm text-gray-600 dark:text-gray-400">
+            <p>© {{ currentYear }} Vortex Commerce. All rights reserved.</p>
           </div>
         </div>
       </div>
     </div>
   </div>
 </template>
-
-<style scoped>
-.branded-bg {
-  background-image: url('@admin/media/images/2600x1600/1.png');
-}
-
-.dark .branded-bg {
-  background-image: url('@admin/media/images/2600x1600/1-dark.png');
-}
-</style>

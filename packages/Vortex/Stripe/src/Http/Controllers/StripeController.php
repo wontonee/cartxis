@@ -31,7 +31,7 @@ class StripeController extends Controller
         $gateway = $this->gatewayManager->get('stripe');
         
         if (!$gateway) {
-            return redirect()->route('shop.cart.index')
+            return redirect()->route('cart.index')
                 ->with('error', 'Payment gateway not found');
         }
 
@@ -40,7 +40,7 @@ class StripeController extends Controller
         ]);
 
         if (!$result['success']) {
-            return redirect()->route('shop.cart.index')
+            return redirect()->route('cart.index')
                 ->with('error', 'Payment verification failed: ' . $result['message']);
         }
 
@@ -92,7 +92,7 @@ class StripeController extends Controller
         ]);
 
         // Redirect back to cart with error
-        return redirect()->route('shop.cart.index')
+        return redirect()->route('cart.index')
             ->with('error', 'Payment was cancelled. Your order has been saved and you can try again later.');
     }
 

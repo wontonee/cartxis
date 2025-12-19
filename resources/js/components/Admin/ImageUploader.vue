@@ -233,7 +233,7 @@ const remainingSlots = computed(() => props.maxFiles - props.modelValue.length);
             />
             
             <!-- Hover Overlay with Delete Button -->
-            <div class="absolute inset-0 bg-opacity-0 group-hover:bg-black group-hover:bg-opacity-50 transition-all duration-200 flex items-center justify-center">
+            <div class="absolute inset-0 bg-black/0 group-hover:bg-black/50 transition-all duration-200 flex items-center justify-center">
               <button
                 type="button"
                 @click.stop="removeFile(index)"

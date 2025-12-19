@@ -474,11 +474,11 @@ class AdminMenuSeeder extends Seeder
                 'key' => 'system-extensions',
                 'title' => 'Extensions',
                 'icon' => 'server',
-                'route' => null,
+                'route' => 'admin.system.extensions.index',
                 'parent_id' => $systemId,
                 'order' => 2,
                 'location' => 'admin',
-                'active' => false,
+                'active' => true,
             ],
             [
                 'key' => 'system-permissions',

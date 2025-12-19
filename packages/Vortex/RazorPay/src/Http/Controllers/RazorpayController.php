@@ -29,7 +29,7 @@ class RazorpayController extends Controller
         $gateway = $this->gatewayManager->get('razorpay');
         
         if (!$gateway) {
-            return redirect()->route('shop.cart.index')
+            return redirect()->route('cart.index')
                 ->with('error', 'Payment gateway not found');
         }
 
@@ -40,7 +40,7 @@ class RazorpayController extends Controller
         ]);
 
         if (!$result['success']) {
-            return redirect()->route('shop.cart.index')
+            return redirect()->route('cart.index')
                 ->with('error', 'Payment verification failed: ' . $result['message']);
         }
 
@@ -75,6 +75,10 @@ class RazorpayController extends Controller
             ]);
         }
 
+        // Clear cart and checkout session after successful payment
+        session()->forget('cart');
+        session()->forget('checkout');
+
         // Redirect to order success page
         return redirect()->route('shop.checkout.success', ['order' => $order->id])
             ->with('success', 'Payment successful! Your order has been confirmed.');
@@ -93,7 +97,7 @@ class RazorpayController extends Controller
         ]);
 
         // Redirect back to cart with error
-        return redirect()->route('shop.cart.index')
+        return redirect()->route('cart.index')
             ->with('error', 'Payment was cancelled. Your order has been saved and you can try again later.');
     }
 

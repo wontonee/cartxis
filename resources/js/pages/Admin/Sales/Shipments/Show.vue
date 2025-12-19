@@ -360,7 +360,7 @@ const canCancel = !['delivered', 'cancelled'].includes(props.shipment.status);
     </div>
 
     <!-- Update Tracking Modal -->
-    <div v-if="showUpdateTrackingModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
+    <div v-if="showUpdateTrackingModal" class="fixed inset-0 bg-gray-500/75 dark:bg-gray-900/75 overflow-y-auto h-full w-full z-50">
       <div class="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-lg bg-white">
         <h3 class="text-lg font-semibold text-gray-900 mb-4">Update Tracking Information</h3>
         <form @submit.prevent="updateTracking" class="space-y-4">
@@ -411,7 +411,7 @@ const canCancel = !['delivered', 'cancelled'].includes(props.shipment.status);
     </div>
 
     <!-- Update Status Modal -->
-    <div v-if="showUpdateStatusModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
+    <div v-if="showUpdateStatusModal" class="fixed inset-0 bg-gray-500/75 dark:bg-gray-900/75 overflow-y-auto h-full w-full z-50">
       <div class="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-lg bg-white">
         <h3 class="text-lg font-semibold text-gray-900 mb-4">Update Shipment Status</h3>
         <form @submit.prevent="updateStatus" class="space-y-4">
@@ -446,7 +446,7 @@ const canCancel = !['delivered', 'cancelled'].includes(props.shipment.status);
     </div>
 
     <!-- Cancel Shipment Modal -->
-    <div v-if="showCancelModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
+    <div v-if="showCancelModal" class="fixed inset-0 bg-gray-500/75 dark:bg-gray-900/75 overflow-y-auto h-full w-full z-50">
       <div class="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-lg bg-white">
         <h3 class="text-lg font-semibold text-gray-900 mb-4">Cancel Shipment</h3>
         <form @submit.prevent="cancelShipment" class="space-y-4">

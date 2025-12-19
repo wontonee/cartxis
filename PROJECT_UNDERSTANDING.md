@@ -561,7 +561,7 @@ add_filter('filter_name', function ($data) {
 | **SSR Framework** | Inertia.js 2.0 |
 | **Styling** | Tailwind CSS v4 |
 | **Routing** | Laravel Wayfinder (Type-safe routes) |
-| **Admin UI Icons** | Keenicons (`ki-outline` prefix) |
+| **Admin UI Icons** | Lucide Icons (via lucide-vue-next) |
 
 ### Component Structure
 
