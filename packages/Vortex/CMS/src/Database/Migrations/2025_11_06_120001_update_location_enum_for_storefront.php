@@ -12,8 +12,10 @@ return new class extends Migration
      */
     public function up(): void
     {
-        // Change location enum to include 'storefront'
-        DB::statement("ALTER TABLE menu_items MODIFY COLUMN location ENUM('admin', 'shop', 'storefront') DEFAULT 'admin'");
+        // Change location enum to include 'storefront' (MySQL only, SQLite doesn't support MODIFY)
+        if (Schema::getConnection()->getDriverName() !== 'sqlite') {
+            DB::statement("ALTER TABLE menu_items MODIFY COLUMN location ENUM('admin', 'shop', 'storefront') DEFAULT 'admin'");
+        }
     }
 
     /**
@@ -21,6 +23,8 @@ return new class extends Migration
      */
     public function down(): void
     {
-        DB::statement("ALTER TABLE menu_items MODIFY COLUMN location ENUM('admin', 'shop') DEFAULT 'admin'");
+        if (Schema::getConnection()->getDriverName() !== 'sqlite') {
+            DB::statement("ALTER TABLE menu_items MODIFY COLUMN location ENUM('admin', 'shop') DEFAULT 'admin'");
+        }
     }
 };

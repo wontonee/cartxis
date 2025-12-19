@@ -66,8 +66,14 @@ return new class extends Migration
             $table->index('extension');
             $table->index('created_by');
             $table->index(['disk', 'path']);
-            $table->fullText(['filename', 'original_filename', 'alt_text', 'title', 'description'], 'media_files_fulltext');
         });
+        
+        // Add fulltext index only for MySQL (not supported in SQLite used for testing)
+        if (Schema::getConnection()->getDriverName() !== 'sqlite') {
+            Schema::table('media_files', function (Blueprint $table) {
+                $table->fullText(['filename', 'original_filename', 'alt_text', 'title', 'description'], 'media_files_fulltext');
+            });
+        }
 
         // Create media_usages table to track where files are used
         Schema::create('media_usages', function (Blueprint $table) {

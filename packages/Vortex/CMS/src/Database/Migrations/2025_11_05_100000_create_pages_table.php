@@ -32,13 +32,19 @@ return new class extends Migration
             $table->index('url_key');
             $table->index('status');
             $table->index('channel_id');
-            $table->fullText(['title', 'content']);
 
             // Foreign keys
             $table->foreign('channel_id')->references('id')->on('channels')->onDelete('set null');
             $table->foreign('created_by')->references('id')->on('users')->onDelete('set null');
             $table->foreign('updated_by')->references('id')->on('users')->onDelete('set null');
         });
+        
+        // Add fulltext index only for MySQL (not supported in SQLite used for testing)
+        if (Schema::getConnection()->getDriverName() !== 'sqlite') {
+            Schema::table('pages', function (Blueprint $table) {
+                $table->fullText(['title', 'content']);
+            });
+        }
     }
 
     /**

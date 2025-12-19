@@ -55,8 +55,14 @@ return new class extends Migration
             $table->index('is_active');
             $table->index('created_at');
             $table->index(['first_name', 'last_name']);
-            $table->fullText(['first_name', 'last_name', 'email']);
         });
+        
+        // Add fulltext index only for MySQL (not supported in SQLite used for testing)
+        if (Schema::getConnection()->getDriverName() !== 'sqlite') {
+            Schema::table('customers', function (Blueprint $table) {
+                $table->fullText(['first_name', 'last_name', 'email']);
+            });
+        }
     }
 
     /**
