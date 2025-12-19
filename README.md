@@ -1,11 +1,13 @@
 # Vortex - Open Source Laravel E-Commerce Platform
 
-A modern, extensible e-commerce platform built with Laravel 11, Inertia.js, Vue 3, and TypeScript. Vortex provides a complete solution for building online stores with a powerful admin panel, flexible theme system, and modular architecture.
+A modern, extensible e-commerce platform built with Laravel 12, Inertia.js, Vue 3.5, and TypeScript. Vortex provides a complete solution for building online stores with a powerful admin panel, flexible theme system, and modular architecture.
 
 ![License](https://img.shields.io/badge/license-MIT-blue.svg)
 ![PHP](https://img.shields.io/badge/PHP-8.2%2B-777BB4?logo=php)
-![Laravel](https://img.shields.io/badge/Laravel-11-FF2D20?logo=laravel)
-![Vue.js](https://img.shields.io/badge/Vue.js-3-4FC08D?logo=vue.js)
+![Laravel](https://img.shields.io/badge/Laravel-12-FF2D20?logo=laravel)
+![Vue.js](https://img.shields.io/badge/Vue.js-3.5-4FC08D?logo=vue.js)
+![TypeScript](https://img.shields.io/badge/TypeScript-5.2%2B-3178C6?logo=typescript)
+![Tailwind CSS](https://img.shields.io/badge/Tailwind-4.1-38B2AC?logo=tailwind-css)
 
 ## ✨ Features
 
