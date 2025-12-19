@@ -97,7 +97,7 @@ const submit = () => {
                 type="email"
                 class="w-full px-4 py-3 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
                 :class="{ 'border-red-500 focus:ring-red-500': form.errors.email }"
-                placeholder="admin@vortex.com"
+                placeholder="admin@wontonee.com"
                 autofocus
                 required
               />

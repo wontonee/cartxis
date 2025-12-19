@@ -15,7 +15,7 @@ class AdminUserSeeder extends Seeder
     {
         // Create default admin user
         User::firstOrCreate(
-            ['email' => 'admin@vortex.com'],
+            ['email' => 'admin@wontonee.com'],
             [
                 'name' => 'Admin User',
                 'password' => Hash::make('password'),
@@ -26,7 +26,7 @@ class AdminUserSeeder extends Seeder
         );
 
         $this->command->info('Admin user created successfully!');
-        $this->command->info('Email: admin@vortex.com');
+        $this->command->info('Email: admin@wontonee.com');
         $this->command->info('Password: password');
     }
 }
