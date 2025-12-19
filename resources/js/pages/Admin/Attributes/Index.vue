@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { Head, Link, router } from '@inertiajs/vue3';
-import AdminLayout from '@/Layouts/AdminLayout.vue';
+import AdminLayout from '@/layouts/AdminLayout.vue';
 import { ref, computed } from 'vue';
 import { debounce } from 'lodash';
 import * as attributeRoutes from '@/routes/admin/catalog/attributes';

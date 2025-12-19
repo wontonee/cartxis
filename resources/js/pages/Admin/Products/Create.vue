@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue';
 import { router, Link, Head } from '@inertiajs/vue3';
-import AdminLayout from '@/Layouts/AdminLayout.vue';
+import AdminLayout from '@/layouts/AdminLayout.vue';
 import TiptapEditor from '@/Components/Admin/TiptapEditor.vue';
 import ImageUploader from '@/Components/Admin/ImageUploader.vue';
 import * as productRoutes from '@/routes/admin/catalog/products';

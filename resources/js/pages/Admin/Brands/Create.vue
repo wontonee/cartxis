@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { Head, Link, useForm } from '@inertiajs/vue3';
-import AdminLayout from '@/Layouts/AdminLayout.vue';
+import AdminLayout from '@/layouts/AdminLayout.vue';
 import ImageUploader from '@/Components/Admin/ImageUploader.vue';
 import { ref } from 'vue';
 import axios from 'axios';

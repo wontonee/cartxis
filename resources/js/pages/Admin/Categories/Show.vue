@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { Head, Link } from '@inertiajs/vue3';
-import AdminLayout from '@/Layouts/AdminLayout.vue';
+import AdminLayout from '@/layouts/AdminLayout.vue';
 import * as categoryRoutes from '@/routes/admin/catalog/categories';
 import * as productRoutes from '@/routes/admin/catalog/products';
 import { useCurrency } from '@/composables/useCurrency';
