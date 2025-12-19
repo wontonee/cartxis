@@ -18,7 +18,5 @@ use Inertia\Inertia;
 |
 */
 
-// Laravel Starter Kit dashboard removed - shop handles all customer dashboard needs
-
 require __DIR__.'/settings.php';
 require __DIR__.'/auth.php';
