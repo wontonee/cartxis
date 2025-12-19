@@ -154,7 +154,7 @@ class CustomerAddressTest extends TestCase
         $response->assertRedirect(route('admin.customers.addresses.index', $this->customer));
         $response->assertSessionHas('success', 'Address deleted successfully.');
 
-        $this->assertDatabaseMissing('customer_addresses', [
+        $this->assertSoftDeleted('customer_addresses', [
             'id' => $address->id,
         ]);
     }

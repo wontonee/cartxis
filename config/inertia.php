@@ -37,6 +37,7 @@ return [
 
         'page_paths' => [
             resource_path('js/pages'),
+            base_path('themes/vortex-default/resources/views/pages'),
         ],
 
         'page_extensions' => [

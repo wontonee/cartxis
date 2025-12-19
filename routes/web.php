@@ -18,5 +18,13 @@ use Inertia\Inertia;
 |
 */
 
+// Dashboard route - redirects to appropriate dashboard based on auth guard
+Route::get('/dashboard', function () {
+    if (auth()->guard('admin')->check()) {
+        return redirect()->route('admin.dashboard');
+    }
+    return redirect()->route('shop.account.dashboard');
+})->middleware(['auth'])->name('dashboard');
+
 require __DIR__.'/settings.php';
 require __DIR__.'/auth.php';

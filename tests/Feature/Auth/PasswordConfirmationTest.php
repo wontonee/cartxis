@@ -11,7 +11,7 @@ test('confirm password screen can be rendered', function () {
     $response->assertStatus(200);
 
     $response->assertInertia(fn (Assert $page) => $page
-        ->component('auth/ConfirmPassword')
+        ->component('themes/vortex-default/pages/Auth/ConfirmPassword', false)
     );
 });
 

@@ -84,7 +84,7 @@ class CustomerAddressController extends Controller
             ->with('success', 'Address deleted successfully.');
     }
 
-    public function setDefaultShipping(CustomerAddress $address): RedirectResponse
+    public function setDefaultShipping(Customer $customer, CustomerAddress $address): RedirectResponse
     {
         $address->update(['is_default_shipping' => true]);
         $address->setAsDefault();
@@ -92,7 +92,7 @@ class CustomerAddressController extends Controller
         return back()->with('success', 'Default shipping address set.');
     }
 
-    public function setDefaultBilling(CustomerAddress $address): RedirectResponse
+    public function setDefaultBilling(Customer $customer, CustomerAddress $address): RedirectResponse
     {
         $address->update(['is_default_billing' => true]);
         $address->setAsDefault();
