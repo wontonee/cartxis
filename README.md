@@ -31,7 +31,7 @@ A modern, extensible e-commerce platform built with Laravel 12, Inertia.js, Vue 
 
 ### 🔧 Technical Features
 - **Modular Architecture**: Package-based structure for easy extension
-- **Multi-Database Support**: MySQL and SQLite compatibility
+- **MySQL Database**: Optimized for MySQL 8.0+
 - **Modern Frontend**: Vue 3 with TypeScript and Tailwind CSS
 - **Inertia.js**: SPA-like experience without API complexity
 - **Two-Factor Authentication**: Enhanced security with 2FA support
@@ -44,7 +44,7 @@ A modern, extensible e-commerce platform built with Laravel 12, Inertia.js, Vue 
 - **Composer**: 2.x
 - **Node.js**: 18.x or higher
 - **NPM**: 9.x or higher
-- **Database**: MySQL 8.0+ or SQLite 3.x
+- **Database**: MySQL 8.0+
 - **Extensions**: OpenSSL, PDO, Mbstring, Tokenizer, XML, Ctype, JSON, BCMath
 
 ## 🚀 Installation
@@ -52,7 +52,7 @@ A modern, extensible e-commerce platform built with Laravel 12, Inertia.js, Vue 
 ### 1. Clone the Repository
 
 ```bash
-git clone https://github.com/yourusername/vortex.git
+git clone https://github.com/wontonee/vortex.git
 cd vortex
 ```
 
@@ -79,8 +79,6 @@ php artisan key:generate
 
 ### 5. Database Setup
 
-#### Option A: Using MySQL
-
 1. Create a MySQL database:
 ```sql
 CREATE DATABASE vortex CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
@@ -94,18 +92,6 @@ DB_PORT=3306
 DB_DATABASE=vortex
 DB_USERNAME=your_username
 DB_PASSWORD=your_password
-```
-
-#### Option B: Using SQLite
-
-1. Create the database file:
-```bash
-touch database/database.sqlite
-```
-
-2. Update your `.env` file:
-```env
-DB_CONNECTION=sqlite
 ```
 
 ### 6. Run Migrations and Seeders
@@ -359,8 +345,8 @@ Built with:
 ## 📞 Support
 
 - **Documentation**: Coming soon
-- **Issues**: [GitHub Issues](https://github.com/yourusername/vortex/issues)
-- **Discussions**: [GitHub Discussions](https://github.com/yourusername/vortex/discussions)
+- **Issues**: [GitHub Issues](https://github.com/wontonee/vortex/issues)
+- **Discussions**: [GitHub Discussions](https://github.com/wontonee/vortex/discussions)
 
 ## 🗺️ Roadmap
 
@@ -368,7 +354,7 @@ Built with:
 - [ ] Advanced inventory management
 - [ ] Subscription products
 - [ ] Advanced SEO tools
-- [ ] Mobile app (React Native)
+- [ ] Mobile app
 - [ ] Multi-language support (i18n)
 - [ ] Advanced analytics dashboard
 - [ ] Integration marketplace
