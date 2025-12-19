@@ -15,6 +15,7 @@
 /design
 /vendor
 .DS_Store
+/.playwright-mcp
 .env
 .env.backup
 .env.production
