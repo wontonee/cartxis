@@ -2,7 +2,7 @@
 import { ref, computed, watch, onMounted, nextTick } from 'vue'
 import { Link, usePage, router } from '@inertiajs/vue3'
 import admin from '@/routes/admin'
-import Toast from '@/Components/Toast.vue'
+import Toast from '@/components/Toast.vue'
 import { useMenuIcons } from '@/composables/useMenuIcons'
 import {
   Menu,

@@ -3,7 +3,7 @@ import { Head, router, Link } from '@inertiajs/vue3';
 import AdminLayout from '@/layouts/AdminLayout.vue';
 import Pagination from '@/components/Admin/Pagination.vue';
 import ConfirmDeleteModal from '@/components/Admin/ConfirmDeleteModal.vue';
-import ProductQuickView from '@/Components/Admin/ProductQuickView.vue';
+import ProductQuickView from '@/components/Admin/ProductQuickView.vue';
 import { ref, computed } from 'vue';
 import { debounce } from 'lodash';
 import * as productRoutes from '@/routes/admin/catalog/products';
