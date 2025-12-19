@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue';
 import { Head, Link } from '@inertiajs/vue3';
-import { useCartStore } from '@/stores/cartStore';
+import { useCartStore } from '@/Stores/cartStore';
 import ThemeLayout from '@/../../themes/vortex-default/resources/views/layouts/ThemeLayout.vue';
 import ProductCard from '@/../../themes/vortex-default/resources/views/components/ProductCard.vue';
 import { useCurrency } from '@/composables/useCurrency';
