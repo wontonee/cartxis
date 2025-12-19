@@ -58,7 +58,7 @@ const updatePreferences = () => {
 };
 
 // Delete Account
-const showDeleteModal = ref(false);
+// const showDeleteModal = ref(false);
 const deleteForm = useForm({
   password: '',
 });

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, computed, watch, onMounted, nextTick } from 'vue';
+import { ref, computed, watch, nextTick } from 'vue';
 import { router, usePage } from '@inertiajs/vue3';
 import { useCurrency } from '@/composables/useCurrency';
 import ThemeLayout from '@/../../themes/vortex-default/resources/views/layouts/ThemeLayout.vue';

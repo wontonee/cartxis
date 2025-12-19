@@ -238,7 +238,7 @@ const generateSlug = () => {
     if (!form.title) return;
     
     // Convert to lowercase and replace spaces with hyphens
-    let slug = form.title
+    const slug = form.title
         .toLowerCase()
         .trim()
         .replace(/[^\w\s-]/g, '') // Remove special characters

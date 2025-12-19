@@ -5,14 +5,6 @@ import { ref, computed } from 'vue';
 import { debounce } from 'lodash';
 import * as attributeRoutes from '@/routes/admin/catalog/attributes';
 
-interface AttributeOption {
-  id: number;
-  label: string;
-  value: string;
-  swatch_value?: string;
-  sort_order: number;
-}
-
 interface Attribute {
   id: number;
   code: string;
@@ -450,8 +442,9 @@ const getTypeBadgeColor = (type: string): string => {
                     index === 0 ? 'rounded-l-md' : '',
                     index === attributes.links.length - 1 ? 'rounded-r-md' : ''
                   ]"
-                  v-html="link.label"
-                />
+                >
+                  <span v-html="link.label" />
+                </Link>
               </nav>
             </div>
           </div>

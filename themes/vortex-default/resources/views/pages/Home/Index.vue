@@ -140,7 +140,7 @@ const subscribeNewsletter = async () => {
                 newsletterMessage.value = '';
             }, 5000);
         }
-    } catch (error) {
+    } catch {
         newsletterMessage.value = 'An error occurred. Please try again later.';
         newsletterSuccess.value = false;
     } finally {

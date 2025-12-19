@@ -146,7 +146,7 @@ const uploadFiles = async () => {
                 isUploading.value = false;
             },
         });
-    } catch (error) {
+    } catch {
         errors.value.push('Upload failed. Please try again.');
         emit('error', 'Upload failed');
         isUploading.value = false;

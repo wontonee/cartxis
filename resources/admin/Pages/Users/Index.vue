@@ -6,7 +6,7 @@ import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
 import { Search, Edit, Trash2, Users } from 'lucide-vue-next'
 
-// @ts-ignore
+// @ts-expect-error - route is globally defined
 const route = window.route
 
 interface User {

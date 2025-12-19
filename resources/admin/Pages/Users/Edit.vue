@@ -7,7 +7,7 @@ import { Button } from '@/components/ui/button'
 import { Label } from '@/components/ui/label'
 import { ArrowLeft, Save, Key, User } from 'lucide-vue-next'
 
-// @ts-ignore
+// @ts-expect-error - route is globally defined
 const route = window.route
 
 interface User {

@@ -43,7 +43,7 @@ interface Props {
   order: Order;
 }
 
-const props = defineProps<Props>();
+defineProps<Props>();
 const page = usePage();
 
 const { formatPrice } = useCurrency();

@@ -58,7 +58,7 @@ const submit = () => {
         'Content-Type': 'multipart/form-data',
       },
     })
-    .then((response) => {
+    .then(() => {
       form.processing = false;
       form.reset();
       images.value = [];
