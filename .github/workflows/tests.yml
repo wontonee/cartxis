@@ -43,6 +43,14 @@ jobs:
       - name: Generate Application Key
         run: php artisan key:generate
 
+      - name: Create Database
+        run: |
+          mkdir -p database
+          touch database/database.sqlite
+
+      - name: Run Migrations
+        run: php artisan migrate --force
+
       - name: Build Assets
         run: npm run build
 

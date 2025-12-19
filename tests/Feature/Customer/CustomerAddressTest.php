@@ -23,6 +23,7 @@ class CustomerAddressTest extends TestCase
         // Create a customer group
         $group = CustomerGroup::create([
             'name' => 'Test Group',
+            'code' => 'test-group',
             'description' => 'Test Description',
             'color' => '#000000',
             'is_active' => true,
