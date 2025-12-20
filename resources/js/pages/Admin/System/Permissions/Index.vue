@@ -43,33 +43,29 @@ const getGroupColor = (group: string) => {
 </script>
 
 <template>
-  <AdminLayout>
-    <Head title="Permissions Management" />
-
-    <div class="py-8">
-      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <!-- Header -->
-        <div class="mb-8">
-          <div class="flex items-center justify-between">
-            <div>
-              <div class="flex items-center gap-3 mb-2">
-                <Shield class="w-8 h-8 text-primary" />
-                <h1 class="text-3xl font-bold text-gray-900">Permissions Management</h1>
-              </div>
-              <p class="text-gray-600">Manage system permissions and access control</p>
-            </div>
-            <Link
-              href="/admin/system/permissions/create"
-              class="flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition-colors"
-            >
-              <Plus class="w-5 h-5" />
-              Add Permission
-            </Link>
+  <Head title="Permissions Management" />
+  
+  <AdminLayout title="Permissions Management">
+    <div class="px-4 sm:px-6 lg:px-8 py-8 w-full max-w-9xl mx-auto">
+      <!-- Header -->
+      <div class="mb-8">
+        <div class="flex items-center justify-between">
+          <div>
+            <h1 class="text-2xl md:text-3xl text-gray-800 font-bold">Permissions Management</h1>
+            <p class="text-sm text-gray-600 mt-1">Manage system permissions and access control</p>
           </div>
+          <Link
+            href="/admin/system/permissions/create"
+            class="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+          >
+            <Plus class="w-5 h-5 mr-2" />
+            Add Permission
+          </Link>
         </div>
+      </div>
 
-        <!-- Permissions by Group -->
-        <div class="space-y-6">
+    <!-- Permissions by Group -->
+    <div class="space-y-6">
           <div
             v-for="(groupPermissions, group) in props.permissions"
             :key="group"
@@ -155,22 +151,21 @@ const getGroupColor = (group: string) => {
           </div>
         </div>
 
-        <!-- Empty State -->
-        <div
-          v-if="Object.keys(props.permissions).length === 0"
-          class="bg-white rounded-lg shadow p-12 text-center"
+      <!-- Empty State -->
+      <div
+        v-if="Object.keys(props.permissions).length === 0"
+        class="bg-white rounded-lg shadow p-12 text-center"
+      >
+        <Shield class="w-16 h-16 text-gray-400 mx-auto mb-4" />
+        <h3 class="text-lg font-medium text-gray-900 mb-2">No permissions found</h3>
+        <p class="text-gray-500 mb-6">Get started by creating your first permission.</p>
+        <Link
+          href="/admin/system/permissions/create"
+          class="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition-colors"
         >
-          <Shield class="w-16 h-16 text-gray-400 mx-auto mb-4" />
-          <h3 class="text-lg font-medium text-gray-900 mb-2">No permissions found</h3>
-          <p class="text-gray-500 mb-6">Get started by creating your first permission.</p>
-          <Link
-            href="/admin/system/permissions/create"
-            class="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition-colors"
-          >
-            <Plus class="w-5 h-5" />
-            Add Permission
-          </Link>
-        </div>
+          <Plus class="w-5 h-5" />
+          Add Permission
+        </Link>
       </div>
     </div>
   </AdminLayout>

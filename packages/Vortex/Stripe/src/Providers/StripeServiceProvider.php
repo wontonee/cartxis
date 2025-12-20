@@ -50,9 +50,6 @@ class StripeServiceProvider extends ServiceProvider
         // Register Stripe gateway with the payment gateway manager
         $this->registerGateway();
 
-        // Register menu items (TODO: Only register if payment-methods menu exists)
-        // $this->registerMenu();
-
         // Publish configuration
         $this->publishes([
             __DIR__ . '/../Config/stripe.php' => config_path('stripe.php'),
@@ -107,24 +104,6 @@ class StripeServiceProvider extends ServiceProvider
     {
         $manager = $this->app->make(PaymentGatewayManager::class);
         $manager->register(new StripeGateway());
-    }
-
-    /**
-     * Register menu items for Stripe configuration.
-     */
-    protected function registerMenu(): void
-    {
-        Menu::register([
-            'key' => 'stripe-configuration',
-            'title' => 'Stripe',
-            'icon' => 'credit-card',
-            'route' => 'admin.stripe.configure',
-            'permission' => 'stripe.manage',
-            'location' => 'admin',
-            'parent_id' => 'payment-methods',
-            'order' => 10,
-            'extension_code' => 'vortex-stripe',
-        ]);
     }
 
     /**

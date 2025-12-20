@@ -1,0 +1,23 @@
+{
+    "name": "vortex/api",
+    "description": "RESTful API package for Vortex eCommerce platform - Mobile app backend",
+    "type": "library",
+    "license": "MIT",
+    "autoload": {
+        "psr-4": {
+            "Vortex\\API\\": ""
+        }
+    },
+    "extra": {
+        "laravel": {
+            "providers": [
+                "Vortex\\API\\Providers\\APIServiceProvider"
+            ]
+        }
+    },
+    "require": {
+        "php": "^8.2",
+        "laravel/framework": "^11.0|^12.0",
+        "laravel/sanctum": "^4.0"
+    }
+}

@@ -19,4 +19,5 @@ return [
     Vortex\System\Providers\SystemServiceProvider::class,
     Vortex\Reports\ReportsServiceProvider::class,
     Vortex\Marketing\MarketingServiceProvider::class,
+    Vortex\API\Providers\APIServiceProvider::class,
 ];

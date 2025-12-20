@@ -484,11 +484,11 @@ class AdminMenuSeeder extends Seeder
                 'key' => 'system-permissions',
                 'title' => 'Permissions',
                 'icon' => 'shield',
-                'route' => null,
+                'route' => 'admin.system.permissions.index',
                 'parent_id' => $systemId,
                 'order' => 3,
                 'location' => 'admin',
-                'active' => false,
+                'active' => true,
             ],
             [
                 'key' => 'system-maintenance',

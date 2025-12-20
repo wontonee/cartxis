@@ -171,16 +171,17 @@ const formatDateTime = (datetime: string | undefined) => {
 <template>
     <Head title="Maintenance Mode" />
     
-    <AdminLayout>
-        <div class="space-y-6">
+    <AdminLayout title="Maintenance Mode">
+        <div class="px-4 sm:px-6 lg:px-8 py-8 w-full max-w-9xl mx-auto">
             <!-- Header -->
-            <div class="flex items-center justify-between">
-                <div>
-                    <h1 class="text-3xl font-bold">Maintenance Mode</h1>
-                    <p class="text-muted-foreground">
-                        Manage site maintenance and scheduled downtime
-                    </p>
-                </div>
+            <div class="mb-8">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <h1 class="text-2xl md:text-3xl text-gray-800 font-bold">Maintenance Mode</h1>
+                        <p class="text-sm text-gray-600 mt-1">
+                            Manage site maintenance and scheduled downtime
+                        </p>
+                    </div>
                 
                 <Button 
                     v-if="settings.enabled"
@@ -200,6 +201,7 @@ const formatDateTime = (datetime: string | undefined) => {
                     <Power class="mr-2 h-4 w-4" />
                     Enable Maintenance
                 </Button>
+            </div>
             </div>
 
             <!-- Current Status Alert -->

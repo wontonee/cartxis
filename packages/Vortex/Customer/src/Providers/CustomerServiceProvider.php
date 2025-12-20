@@ -26,18 +26,5 @@ class CustomerServiceProvider extends ServiceProvider
 
         // Load routes
         $this->loadRoutesFrom(__DIR__ . '/../Routes/customer.php');
-
-        // Register admin menu items
-        $this->registerAdminMenuItems();
-    }
-
-        /**
-     * Register admin menu items
-     * Note: Menu items are seeded via CustomerMenuSeeder during database seeding
-     */
-    protected function registerAdminMenuItems(): void
-    {
-        // Menu items are managed via database seeding (CustomerMenuSeeder)
-        // This method is kept for potential dynamic menu registration in the future
     }
 }

@@ -59,30 +59,29 @@ const submit = () => {
 </script>
 
 <template>
-  <AdminLayout>
-    <Head title="Edit Permission" />
-
-    <div class="py-8">
-      <div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
-        <!-- Header -->
-        <div class="mb-8">
+  <Head title="Edit Permission" />
+  
+  <AdminLayout title="Edit Permission">
+    <div class="px-4 sm:px-6 lg:px-8 py-8 w-full max-w-9xl mx-auto">
+      <!-- Header -->
+      <div class="mb-8">
+        <div class="flex items-center justify-between">
+          <div>
+            <h1 class="text-2xl md:text-3xl text-gray-800 font-bold">Edit Permission</h1>
+            <p class="text-sm text-gray-600 mt-1">Update permission details</p>
+          </div>
           <Link
             href="/admin/system/permissions"
-            class="text-primary hover:text-primary/80 inline-flex items-center gap-2 mb-4"
+            class="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
           >
-            <ArrowLeft class="w-4 h-4" />
+            <ArrowLeft class="w-4 h-4 mr-2" />
             Back to Permissions
           </Link>
-          <div class="flex items-center gap-3 mb-2">
-            <Shield class="w-8 h-8 text-primary" />
-            <h1 class="text-3xl font-bold text-gray-900">Edit Permission</h1>
-          </div>
-          <p class="text-gray-600">Update permission details</p>
         </div>
-
-        <!-- Form -->
-        <div class="bg-white rounded-lg shadow">
-          <form @submit.prevent="submit" class="p-6 space-y-6">
+      </div>
+      <!-- Form -->
+      <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+        <form @submit.prevent="submit" class="space-y-6">
             <!-- Name -->
             <div class="space-y-2">
               <Label for="name" class="required">Permission Name</Label>
@@ -205,7 +204,6 @@ const submit = () => {
           </form>
         </div>
       </div>
-    </div>
   </AdminLayout>
 </template>
 

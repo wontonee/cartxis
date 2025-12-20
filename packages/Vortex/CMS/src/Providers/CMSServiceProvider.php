@@ -5,9 +5,7 @@ declare(strict_types=1);
 namespace Vortex\CMS\Providers;
 
 use Illuminate\Support\ServiceProvider;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Blade;
-use Vortex\Core\Models\MenuItem;
 use Vortex\CMS\Repositories\BlockRepository;
 use Vortex\CMS\Services\BlockService;
 
@@ -50,9 +48,6 @@ class CMSServiceProvider extends ServiceProvider
 
         // Register @block Blade directive
         $this->registerBlockDirective();
-
-        // Register admin menu items
-        $this->registerAdminMenuItems();
     }
 
     /**
@@ -63,62 +58,5 @@ class CMSServiceProvider extends ServiceProvider
         Blade::directive('block', function ($expression) {
             return "<?php echo app(\Vortex\CMS\Services\BlockService::class)->renderBlock(app(\Vortex\CMS\Repositories\BlockRepository::class)->findByIdentifier({$expression})); ?>";
         });
-    }
-
-    /**
-     * Register admin menu items in the database.
-     */
-    protected function registerAdminMenuItems(): void
-    {
-        if ($this->app->runningInConsole()) {
-            return; // Skip during console commands
-        }
-
-        try {
-            // Check if menu_items table exists
-            if (!DB::getSchemaBuilder()->hasTable('menu_items')) {
-                return;
-            }
-
-            // Check if Content parent menu exists
-            $contentMenu = MenuItem::where('key', 'content')->first();
-
-            if (!$contentMenu) {
-                // Create Content parent menu
-                $contentMenu = MenuItem::create([
-                    'parent_id' => null,
-                    'key' => 'content',
-                    'title' => 'Content',
-                    'icon' => 'file-text',
-                    'route' => null,
-                    'location' => 'admin',
-                    'order' => 70,
-                    'active' => true,
-                ]);
-            }
-
-            // Create Storefront Menu item if it doesn't exist
-            $storefrontMenuItem = MenuItem::where('key', 'content.storefront-menus')->first();
-            
-            if (!$storefrontMenuItem) {
-                MenuItem::create([
-                    'parent_id' => $contentMenu->id,
-                    'key' => 'content.storefront-menus',
-                    'title' => 'Storefront Menu',
-                    'icon' => 'menu',
-                    'route' => 'admin.content.storefront-menus.index',
-                    'location' => 'admin',
-                    'order' => 20,
-                    'active' => true,
-                ]);
-            }
-
-            // Pages menu is now managed by AdminMenuSeeder
-            // No need to auto-create it here
-
-        } catch (\Exception $e) {
-            // Silently fail if database is not ready
-            report($e);
-        }
     }
 }

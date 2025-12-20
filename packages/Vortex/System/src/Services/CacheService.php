@@ -180,7 +180,7 @@ class CacheService
     /**
      * Get cache hit rate
      */
-    protected function getHitRate(): string
+    protected function getHitRate(): ?string
     {
         $driver = config('cache.default');
         
@@ -200,17 +200,17 @@ class CacheService
                 $rate = ($hits / $total) * 100;
                 return number_format($rate, 1) . '%';
             } catch (\Exception $e) {
-                return 'N/A';
+                return null;
             }
         }
         
-        return 'N/A';
+        return null;
     }
     
     /**
      * Get cache miss rate
      */
-    protected function getMissRate(): string
+    protected function getMissRate(): ?string
     {
         $driver = config('cache.default');
         
@@ -230,17 +230,17 @@ class CacheService
                 $rate = ($misses / $total) * 100;
                 return number_format($rate, 1) . '%';
             } catch (\Exception $e) {
-                return 'N/A';
+                return null;
             }
         }
         
-        return 'N/A';
+        return null;
     }
     
     /**
      * Get cache uptime
      */
-    protected function getUptime(): string
+    protected function getUptime(): ?string
     {
         $driver = config('cache.default');
         
@@ -252,11 +252,11 @@ class CacheService
                 
                 return $this->formatUptime($seconds);
             } catch (\Exception $e) {
-                return 'N/A';
+                return null;
             }
         }
         
-        return 'N/A';
+        return null;
     }
     
     /**

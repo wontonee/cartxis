@@ -38,9 +38,21 @@ const checkFlashMessages = () => {
   }
 };
 
+// Listen for custom toast events
+const handleCustomToast = (event: CustomEvent) => {
+  if (event.detail && event.detail.message) {
+    showToast(event.detail.message, event.detail.type || 'info');
+  }
+};
+
 // Check on mount (for page loads after redirects)
 onMounted(() => {
   checkFlashMessages();
+  window.addEventListener('show-toast', handleCustomToast as EventListener);
+});
+
+onUnmounted(() => {
+  window.removeEventListener('show-toast', handleCustomToast as EventListener);
 });
 
 // Watch for changes in flash messages (for same-page operations)
