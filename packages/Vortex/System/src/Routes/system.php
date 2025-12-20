@@ -5,6 +5,7 @@ use Vortex\System\Http\Controllers\CacheController;
 use Vortex\System\Http\Controllers\MaintenanceController;
 use Vortex\System\Http\Controllers\Admin\MenuController;
 use Vortex\System\Http\Controllers\Admin\ExtensionsController;
+use Vortex\System\Http\Controllers\Admin\PermissionController;
 
 Route::middleware(['web', 'auth:admin'])
     ->prefix('admin/system')
@@ -49,5 +50,15 @@ Route::middleware(['web', 'auth:admin'])
             Route::post('/{code}/activate', [ExtensionsController::class, 'activate'])->name('activate');
             Route::post('/{code}/deactivate', [ExtensionsController::class, 'deactivate'])->name('deactivate');
             Route::delete('/{code}', [ExtensionsController::class, 'uninstall'])->name('uninstall');
+        });
+
+        // Permission Management Routes
+        Route::prefix('permissions')->name('permissions.')->group(function () {
+            Route::get('/', [PermissionController::class, 'index'])->name('index');
+            Route::get('/create', [PermissionController::class, 'create'])->name('create');
+            Route::post('/', [PermissionController::class, 'store'])->name('store');
+            Route::get('/{id}/edit', [PermissionController::class, 'edit'])->name('edit');
+            Route::put('/{id}', [PermissionController::class, 'update'])->name('update');
+            Route::delete('/{id}', [PermissionController::class, 'destroy'])->name('destroy');
         });
     });
