@@ -34,6 +34,10 @@ export default defineConfig({
         hmr: {
             host: 'vortex.test',
         },
+        cors: {
+            origin: ['https://vortex.test', 'http://vortex.test'],
+            credentials: true,
+        },
     },
     resolve: {
         alias: {

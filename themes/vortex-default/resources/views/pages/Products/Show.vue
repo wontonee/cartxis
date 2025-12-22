@@ -4,6 +4,7 @@ import { Head, Link } from '@inertiajs/vue3';
 import { useCartStore } from '@/Stores/cartStore';
 import ThemeLayout from '@/../../themes/vortex-default/resources/views/layouts/ThemeLayout.vue';
 import ProductCard from '@/../../themes/vortex-default/resources/views/components/ProductCard.vue';
+import QuickViewModal from '@/../../themes/vortex-default/resources/views/components/QuickViewModal.vue';
 import { useCurrency } from '@/composables/useCurrency';
 
 const { formatPrice } = useCurrency();
@@ -86,6 +87,15 @@ const isAddingToCart = ref(false);
 
 // Selected attribute values (for configurable products)
 const selectedAttributes = ref<Record<string, string>>({});
+
+// Quick view state
+const showQuickView = ref(false);
+const quickViewSlug = ref('');
+
+const handleQuickView = (slug: string) => {
+    quickViewSlug.value = slug;
+    showQuickView.value = true;
+};
 
 // All images (main + gallery)
 const allImages = computed(() => {
@@ -511,9 +521,17 @@ const handleMouseMove = (e: MouseEvent) => {
                         v-for="relatedProduct in relatedProducts"
                         :key="relatedProduct.id"
                         :product="relatedProduct"
+                        @quick-view="handleQuickView"
                     />
                 </div>
             </div>
         </div>
+
+        <!-- Quick View Modal -->
+        <QuickViewModal
+            :is-open="showQuickView"
+            :product-slug="quickViewSlug"
+            @close="showQuickView = false"
+        />
     </ThemeLayout>
 </template>

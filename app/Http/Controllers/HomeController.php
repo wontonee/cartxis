@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Inertia\Response;
 use Vortex\Core\Models\Theme;
+use Vortex\Product\Models\Category;
 
 class HomeController extends Controller
 {
@@ -17,45 +18,30 @@ class HomeController extends Controller
         // Get active theme
         $theme = Theme::active();
         
-        // Get featured categories (will be dynamic when Category module is ready)
-        $featuredCategories = [
-            [
-                'id' => 1,
-                'name' => 'Electronics',
-                'slug' => 'electronics',
-                'icon' => '💻',
-                'description' => 'Latest gadgets and tech',
-                'products_count' => 0,
-                'image' => null
-            ],
-            [
-                'id' => 2,
-                'name' => 'Fashion',
-                'slug' => 'fashion',
-                'icon' => '👕',
-                'description' => 'Trendy clothing and accessories',
-                'products_count' => 0,
-                'image' => null
-            ],
-            [
-                'id' => 3,
-                'name' => 'Home & Garden',
-                'slug' => 'home-garden',
-                'icon' => '🏠',
-                'description' => 'Furniture and decor',
-                'products_count' => 0,
-                'image' => null
-            ],
-            [
-                'id' => 4,
-                'name' => 'Sports',
-                'slug' => 'sports',
-                'icon' => '⚽',
-                'description' => 'Equipment and gear',
-                'products_count' => 0,
-                'image' => null
-            ]
-        ];
+        // Get real categories from database
+        $categories = Category::where('status', true)
+            ->whereNull('parent_id')
+            ->with('children')
+            ->orderBy('order', 'asc')
+            ->get(['id', 'name', 'slug', 'parent_id', 'image'])
+            ->map(function ($category) {
+                return [
+                    'id' => $category->id,
+                    'name' => $category->name,
+                    'slug' => $category->slug,
+                    'image' => $category->image,
+                    'children' => $category->children->map(function ($child) {
+                        return [
+                            'id' => $child->id,
+                            'name' => $child->name,
+                            'slug' => $child->slug,
+                        ];
+                    })
+                ];
+            });
+        
+        // Get featured categories for homepage showcase
+        $featuredCategories = $categories->take(4);
         
         // Get featured products (will be dynamic when Product module is ready)
         $featuredProducts = [];
@@ -96,6 +82,7 @@ class HomeController extends Controller
                 'slug' => $theme?->slug ?? 'default',
                 'settings' => $themeSettings
             ],
+            'categories' => $categories,
             'featuredCategories' => $featuredCategories,
             'featuredProducts' => $featuredProducts,
             'platformStatus' => $platformStatus,

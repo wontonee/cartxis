@@ -20,6 +20,7 @@ interface Props {
         url: string;
         description: string;
     };
+    categories?: any[];
 }
 
 const props = withDefaults(defineProps<Props>(), {
@@ -28,7 +29,8 @@ const props = withDefaults(defineProps<Props>(), {
         name: 'Vortex',
         url: '/',
         description: 'E-commerce Platform'
-    })
+    }),
+    categories: () => []
 });
 
 const page = usePage();
@@ -46,6 +48,7 @@ let debounceTimeout: ReturnType<typeof setTimeout> | null = null;
 const { menus, loading, getMenuUrl, hasChildren } = useStorefrontMenu();
 const activeDropdown = ref<number | null>(null);
 const showUserMenu = ref(false);
+const showCategoriesDropdown = ref(false);
 let closeTimeout: ReturnType<typeof setTimeout> | null = null;
 
 const primaryColor = computed(() => props.theme?.settings?.primary_color ?? '#3b82f6');
@@ -82,6 +85,20 @@ const toggleUserMenu = () => {
 
 const closeUserMenu = () => {
     showUserMenu.value = false;
+};
+
+const toggleCategoriesDropdown = () => {
+    showCategoriesDropdown.value = !showCategoriesDropdown.value;
+};
+
+const closeCategoriesDropdown = () => {
+    setTimeout(() => {
+        showCategoriesDropdown.value = false;
+    }, 150);
+};
+
+const openCategoriesDropdown = () => {
+    showCategoriesDropdown.value = true;
 };
 
 const fetchSuggestions = async () => {
@@ -259,12 +276,60 @@ onUnmounted(() => {
                         <Link href="/products" class="text-gray-700 hover:text-gray-900 transition-colors">
                             Shop
                         </Link>
-                        <button class="text-gray-700 hover:text-gray-900 transition-colors flex items-center space-x-1">
-                            <span>Categories</span>
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
-                            </svg>
-                        </button>
+                        
+                        <!-- Categories Dropdown -->
+                        <div class="relative" @mouseenter="openCategoriesDropdown" @mouseleave="closeCategoriesDropdown">
+                            <button 
+                                @click="toggleCategoriesDropdown"
+                                class="text-gray-700 hover:text-gray-900 transition-colors flex items-center space-x-1"
+                            >
+                                <span>Categories</span>
+                                <svg 
+                                    class="w-4 h-4 transition-transform duration-200" 
+                                    :class="{ 'rotate-180': showCategoriesDropdown }"
+                                    fill="none" 
+                                    stroke="currentColor" 
+                                    viewBox="0 0 24 24"
+                                >
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                                </svg>
+                            </button>
+                            
+                            <!-- Categories Dropdown Menu -->
+                            <div 
+                                v-show="showCategoriesDropdown"
+                                class="absolute left-0 mt-2 w-64 bg-white rounded-lg shadow-xl border border-gray-200 z-50"
+                            >
+                                <div class="py-2">
+                                    <template v-if="categories && categories.length > 0">
+                                        <Link
+                                            v-for="category in categories"
+                                            :key="category.id"
+                                            :href="`/category/${category.slug}`"
+                                            class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors"
+                                        >
+                                            <div class="flex items-center justify-between">
+                                                <span>{{ category.name }}</span>
+                                                <span v-if="category.children && category.children.length > 0" class="text-xs text-gray-400">
+                                                    ({{ category.children.length }})
+                                                </span>
+                                            </div>
+                                        </Link>
+                                        <hr class="my-2" />
+                                        <Link
+                                            href="/products"
+                                            class="block px-4 py-2 text-sm text-indigo-600 hover:bg-gray-100 font-medium transition-colors"
+                                        >
+                                            View All Categories →
+                                        </Link>
+                                    </template>
+                                    <div v-else class="px-4 py-3 text-sm text-gray-500">
+                                        No categories available
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
                         <Link href="/deals" class="text-gray-700 hover:text-gray-900 transition-colors">
                             Deals
                         </Link>

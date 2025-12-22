@@ -8,11 +8,12 @@ const page = usePage();
 
 const theme = computed(() => page.props.theme);
 const siteConfig = computed(() => page.props.siteConfig);
+const categories = computed(() => page.props.categories || []);
 </script>
 
 <template>
     <div class="min-h-screen bg-gray-50 flex flex-col">
-        <ThemeHeader :theme="theme" :site-config="siteConfig" />
+        <ThemeHeader :theme="theme" :site-config="siteConfig" :categories="categories" />
         
         <main class="flex-1">
             <slot />

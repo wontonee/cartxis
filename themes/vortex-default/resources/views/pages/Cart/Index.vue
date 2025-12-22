@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue';
-import { Head, Link } from '@inertiajs/vue3';
+import { Head, Link, router } from '@inertiajs/vue3';
 import ThemeLayout from '@/../../themes/vortex-default/resources/views/layouts/ThemeLayout.vue';
 import CartItemSkeleton from '@/../../themes/vortex-default/resources/views/components/CartItemSkeleton.vue';
 import { useCart } from '@/composables/useCart';
@@ -86,8 +86,8 @@ const handleQuantityChange = async (itemId: string, newQuantity: number) => {
     if (!result.success) {
         alert('Failed to update quantity');
     } else {
-        // Reload page to refresh cart summary with new calculations
-        window.location.reload();
+        // Reload cart data without full page refresh using Inertia
+        router.reload({ only: ['cartSummary'] });
     }
 };
 
@@ -104,8 +104,8 @@ const handleRemove = async (itemId: string) => {
     if (!result.success) {
         alert('Failed to remove item');
     } else {
-        // Reload page to refresh cart summary
-        window.location.reload();
+        // Reload cart data without full page refresh using Inertia
+        router.reload({ only: ['cartSummary'] });
     }
 };
 </script>
