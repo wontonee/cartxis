@@ -42,6 +42,12 @@ const selectSource = (source) => {
     migrationOutput.value = '';
 };
 
+const showToast = (message, type = 'success') => {
+    window.dispatchEvent(new CustomEvent('show-toast', { 
+        detail: { message, type }
+    }));
+};
+
 const testConnection = async () => {
     if (!selectedSource.value) return;
     
@@ -63,12 +69,12 @@ const testConnection = async () => {
         const data = await response.json();
         
         if (data.success) {
-            alert('✓ Connection successful!');
+            showToast('Connection successful!', 'success');
         } else {
-            alert('✗ Connection failed: ' + data.message);
+            showToast('Connection failed: ' + data.message, 'error');
         }
     } catch (error) {
-        alert('✗ Connection test failed: ' + error.message);
+        showToast('Connection test failed: ' + error.message, 'error');
     } finally {
         isProcessing.value = false;
     }
