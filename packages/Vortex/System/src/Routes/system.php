@@ -6,11 +6,20 @@ use Vortex\System\Http\Controllers\MaintenanceController;
 use Vortex\System\Http\Controllers\Admin\MenuController;
 use Vortex\System\Http\Controllers\Admin\ExtensionsController;
 use Vortex\System\Http\Controllers\Admin\PermissionController;
+use Vortex\System\Http\Controllers\Admin\DataMigrationController;
 
 Route::middleware(['web', 'auth:admin'])
     ->prefix('admin/system')
     ->name('admin.system.')
     ->group(function () {
+        
+        // Data Migration Routes
+        Route::prefix('migration')->name('migration.')->group(function () {
+            Route::get('/', [DataMigrationController::class, 'index'])->name('index');
+            Route::post('/migrate', [DataMigrationController::class, 'migrate'])->name('migrate');
+            Route::get('/status', [DataMigrationController::class, 'status'])->name('status');
+            Route::post('/test-connection', [DataMigrationController::class, 'testConnection'])->name('test-connection');
+        });
         
         // Cache Management Routes
         Route::prefix('cache')->name('cache.')->group(function () {

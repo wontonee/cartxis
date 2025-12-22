@@ -112,6 +112,37 @@ return [
             // 'trust_server_certificate' => env('DB_TRUST_SERVER_CERTIFICATE', 'false'),
         ],
 
+        // Data Migration Connections
+        'woocommerce' => [
+            'driver' => 'mysql',
+            'host' => env('WOOCOMMERCE_DB_HOST', '127.0.0.1'),
+            'port' => env('WOOCOMMERCE_DB_PORT', '3306'),
+            'database' => env('WOOCOMMERCE_DB_DATABASE'),
+            'username' => env('WOOCOMMERCE_DB_USERNAME', 'root'),
+            'password' => env('WOOCOMMERCE_DB_PASSWORD', ''),
+            'unix_socket' => '',
+            'charset' => 'utf8mb4',
+            'collation' => 'utf8mb4_unicode_ci',
+            'prefix' => '',
+            'strict' => false,
+            'engine' => null,
+        ],
+
+        'bagisto' => [
+            'driver' => 'mysql',
+            'host' => env('BAGISTO_DB_HOST', '127.0.0.1'),
+            'port' => env('BAGISTO_DB_PORT', '3306'),
+            'database' => env('BAGISTO_DB_DATABASE'),
+            'username' => env('BAGISTO_DB_USERNAME', 'root'),
+            'password' => env('BAGISTO_DB_PASSWORD', ''),
+            'unix_socket' => '',
+            'charset' => 'utf8mb4',
+            'collation' => 'utf8mb4_unicode_ci',
+            'prefix' => '',
+            'strict' => false,
+            'engine' => null,
+        ],
+
     ],
 
     /*
