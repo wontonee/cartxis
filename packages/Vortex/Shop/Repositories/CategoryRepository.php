@@ -26,7 +26,7 @@ class CategoryRepository extends ShopRepository implements CategoryRepositoryInt
     {
         return $this->model
             ->whereNull('parent_id')
-            ->where('status', 1)
+            ->where('status', 'enabled')
             ->orderBy('sort_order')
             ->get();
     }

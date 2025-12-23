@@ -50,6 +50,8 @@ const activeDropdown = ref<number | null>(null);
 const showUserMenu = ref(false);
 const showCategoriesDropdown = ref(false);
 let closeTimeout: ReturnType<typeof setTimeout> | null = null;
+let userMenuTimeout: ReturnType<typeof setTimeout> | null = null;
+let categoriesTimeout: ReturnType<typeof setTimeout> | null = null;
 
 const primaryColor = computed(() => props.theme?.settings?.primary_color ?? '#3b82f6');
 
@@ -80,24 +82,54 @@ const closeDropdown = () => {
 };
 
 const toggleUserMenu = () => {
+    if (userMenuTimeout) {
+        clearTimeout(userMenuTimeout);
+        userMenuTimeout = null;
+    }
     showUserMenu.value = !showUserMenu.value;
 };
 
 const closeUserMenu = () => {
-    showUserMenu.value = false;
+    if (userMenuTimeout) {
+        clearTimeout(userMenuTimeout);
+    }
+    userMenuTimeout = setTimeout(() => {
+        showUserMenu.value = false;
+        userMenuTimeout = null;
+    }, 150);
+};
+
+const openUserMenu = () => {
+    if (userMenuTimeout) {
+        clearTimeout(userMenuTimeout);
+        userMenuTimeout = null;
+    }
+    showUserMenu.value = true;
 };
 
 const toggleCategoriesDropdown = () => {
+    if (categoriesTimeout) {
+        clearTimeout(categoriesTimeout);
+        categoriesTimeout = null;
+    }
     showCategoriesDropdown.value = !showCategoriesDropdown.value;
 };
 
 const closeCategoriesDropdown = () => {
-    setTimeout(() => {
+    if (categoriesTimeout) {
+        clearTimeout(categoriesTimeout);
+    }
+    categoriesTimeout = setTimeout(() => {
         showCategoriesDropdown.value = false;
+        categoriesTimeout = null;
     }, 150);
 };
 
 const openCategoriesDropdown = () => {
+    if (categoriesTimeout) {
+        clearTimeout(categoriesTimeout);
+        categoriesTimeout = null;
+    }
     showCategoriesDropdown.value = true;
 };
 
@@ -258,14 +290,27 @@ onUnmounted(() => {
                                 @mouseleave="closeDropdown"
                             >
                                 <div class="py-1">
-                                    <Link
-                                        v-for="child in item.children"
-                                        :key="child.id"
-                                        :href="getMenuUrl(child)"
-                                        class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900"
-                                    >
-                                        {{ child.title }}
-                                    </Link>
+                                    <!-- Use categories prop for "Categories" menu item, otherwise use children -->
+                                    <template v-if="item.title === 'Categories' && categories && categories.length > 0">
+                                        <Link
+                                            v-for="category in categories"
+                                            :key="category.id"
+                                            :href="`/category/${category.slug}`"
+                                            class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900"
+                                        >
+                                            {{ category.name }}
+                                        </Link>
+                                    </template>
+                                    <template v-else>
+                                        <Link
+                                            v-for="child in item.children"
+                                            :key="child.id"
+                                            :href="getMenuUrl(child)"
+                                            class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900"
+                                        >
+                                            {{ child.title }}
+                                        </Link>
+                                    </template>
                                 </div>
                             </div>
                         </div>
@@ -458,7 +503,7 @@ onUnmounted(() => {
                     </template>
 
                     <!-- User Menu - Show if logged in -->
-                    <div v-else class="relative" @mouseleave="closeUserMenu">
+                    <div v-else class="relative" @mouseenter="openUserMenu" @mouseleave="closeUserMenu">
                         <button
                             @click="toggleUserMenu"
                             class="flex items-center space-x-2 rounded-lg px-3 py-2 hover:bg-gray-100 transition-colors"
@@ -482,6 +527,8 @@ onUnmounted(() => {
                         <div
                             v-if="showUserMenu"
                             class="absolute right-0 mt-2 w-56 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 z-[100]"
+                            @mouseenter="openUserMenu"
+                            @mouseleave="closeUserMenu"
                         >
                             <div class="py-1">
                                 <Link

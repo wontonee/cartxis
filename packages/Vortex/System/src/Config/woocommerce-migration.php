@@ -16,10 +16,10 @@ return [
     
     'mappings' => [
         'product_status' => [
-            'publish' => 'active',
-            'draft' => 'draft',
-            'pending' => 'draft',
-            'private' => 'inactive',
+            'publish' => 'enabled',
+            'draft' => 'disabled',
+            'pending' => 'disabled',
+            'private' => 'disabled',
         ],
         'order_status' => [
             'wc-pending' => 'pending',

@@ -228,7 +228,7 @@ const subscribeNewsletter = async () => {
                 </div>
                 <div v-if="featuredCategories && featuredCategories.length > 0" class="grid grid-cols-2 md:grid-cols-4 gap-6">
                     <a 
-                        v-for="category in featuredCategories.slice(0, 8)" 
+                        v-for="category in featuredCategories" 
                         :key="category.id"
                         :href="`/products?category=${category.slug}`"
                         class="group relative bg-white rounded-2xl overflow-hidden shadow-md hover:shadow-2xl transition-all duration-300 cursor-pointer transform hover:-translate-y-2"

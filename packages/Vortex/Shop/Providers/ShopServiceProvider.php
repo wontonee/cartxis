@@ -36,6 +36,22 @@ class ShopServiceProvider extends ServiceProvider
         $this->publishes([
             __DIR__ . '/../Resources/assets' => public_path('vendor/shop'),
         ], 'shop-assets');
+        
+        // Register middleware for frontend data sharing
+        $this->registerMiddleware();
+    }
+    
+    /**
+     * Register middleware.
+     *
+     * @return void
+     */
+    protected function registerMiddleware()
+    {
+        $router = $this->app['router'];
+        
+        // Add to web middleware group
+        $router->pushMiddlewareToGroup('web', \Vortex\Shop\Http\Middleware\ShareFrontendData::class);
     }
 
     /**
