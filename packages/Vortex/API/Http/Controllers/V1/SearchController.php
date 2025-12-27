@@ -33,8 +33,7 @@ class SearchController extends Controller
         );
 
         $products = Product::query()
-            ->where('status', 'active')
-            ->where('visible_individually', true)
+            ->where('status', 'enabled')
             ->where(function($q) use ($query) {
                 $q->where('name', 'like', "%{$query}%")
                   ->orWhere('description', 'like', "%{$query}%")
@@ -64,8 +63,7 @@ class SearchController extends Controller
         $limit = min($request->get('limit', 10), config('vortex-api.search.suggestions_limit', 10));
 
         $suggestions = Product::query()
-            ->where('status', 'active')
-            ->where('visible_individually', true)
+            ->where('status', 'enabled')
             ->where('name', 'like', "%{$query}%")
             ->select('id', 'name', 'sku')
             ->limit($limit)

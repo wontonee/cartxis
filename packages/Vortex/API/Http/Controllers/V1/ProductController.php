@@ -18,8 +18,7 @@ class ProductController extends Controller
         $perPage = min($request->get('per_page', 20), config('vortex-api.pagination.max_per_page'));
         
         $query = Product::query()
-            ->where('status', 'active')
-            ->where('visible_individually', true);
+            ->where('status', 'enabled');
 
         // Filtering
         if ($request->has('category_id')) {
@@ -77,7 +76,7 @@ class ProductController extends Controller
             return ApiResponse::notFound('Product not found', 'PRODUCT_NOT_FOUND');
         }
 
-        if ($product->status !== 'active') {
+        if ($product->status !== 'enabled') {
             return ApiResponse::error('Product is not available', null, 403, 'PRODUCT_UNAVAILABLE');
         }
 
@@ -95,7 +94,7 @@ class ProductController extends Controller
         $limit = min($request->get('limit', 10), 50);
 
         $products = Product::query()
-            ->where('status', 'active')
+            ->where('status', 'enabled')
             ->where('featured', true)
             ->with(['images', 'brand'])
             ->latest()
@@ -116,7 +115,7 @@ class ProductController extends Controller
         $perPage = min($request->get('per_page', 20), config('vortex-api.pagination.max_per_page'));
 
         $products = Product::query()
-            ->where('status', 'active')
+            ->where('status', 'enabled')
             ->where('special_price', '>', 0)
             ->whereColumn('special_price', '<', 'price')
             ->where(function($q) {
@@ -144,7 +143,7 @@ class ProductController extends Controller
         $limit = min($request->get('limit', 20), 50);
 
         $products = Product::query()
-            ->where('status', 'active')
+            ->where('status', 'enabled')
             ->where('new', true)
             ->orWhere('created_at', '>=', now()->subDays(30))
             ->with(['images', 'brand'])
@@ -172,7 +171,7 @@ class ProductController extends Controller
         $categoryIds = $product->categories->pluck('id')->toArray();
 
         $relatedProducts = Product::query()
-            ->where('status', 'active')
+            ->where('status', 'enabled')
             ->where('id', '!=', $id)
             ->whereHas('categories', fn($q) => $q->whereIn('category_id', $categoryIds))
             ->with(['images', 'brand'])

@@ -16,7 +16,7 @@ class CategoryController extends Controller
     public function index(Request $request)
     {
         $query = Category::query()
-            ->where('status', 'active')
+            ->where('status', 'enabled')
             ->with(['parent', 'children']);
 
         // Filter by parent
@@ -27,7 +27,7 @@ class CategoryController extends Controller
             $query->whereNull('parent_id');
         }
 
-        $categories = $query->orderBy('position')->get();
+        $categories = $query->orderBy('sort_order')->get();
 
         return ApiResponse::success(
             CategoryResource::collection($categories),
@@ -92,8 +92,7 @@ class CategoryController extends Controller
         $perPage = min($request->get('per_page', 20), config('vortex-api.pagination.max_per_page'));
 
         $products = $category->products()
-            ->where('status', 'active')
-            ->where('visible_individually', true)
+            ->where('status', 'enabled')
             ->with(['images', 'brand'])
             ->paginate($perPage);
 

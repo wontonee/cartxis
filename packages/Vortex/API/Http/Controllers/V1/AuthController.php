@@ -103,7 +103,7 @@ class AuthController extends Controller
     public function me(Request $request)
     {
         return ApiResponse::success(
-            new UserResource($request->user()->load('addresses')),
+            new UserResource($request->user()),
             'User details retrieved'
         );
     }
