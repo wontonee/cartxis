@@ -7,8 +7,11 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use Vortex\API\Helpers\ApiResponse;
 use Vortex\Cart\Models\Cart;
-use Vortex\Sales\Models\Order;
+use Vortex\Shop\Models\Order;
+use Vortex\Customer\Models\Customer;
 use Vortex\Customer\Models\CustomerAddress;
+use Vortex\Core\Models\PaymentMethod;
+use Vortex\Core\Services\PaymentGatewayManager;
 
 class CheckoutController extends Controller
 {
@@ -150,36 +153,31 @@ class CheckoutController extends Controller
      */
     public function getPaymentMethods()
     {
-        $paymentMethods = [];
-
-        if (config('vortex-api.payment_gateways.stripe')) {
-            $paymentMethods[] = [
-                'code' => 'stripe',
-                'name' => 'Credit/Debit Card',
-                'description' => 'Pay securely with your card via Stripe',
-                'icon' => 'credit-card',
-            ];
-        }
-
-        if (config('vortex-api.payment_gateways.razorpay')) {
-            $paymentMethods[] = [
-                'code' => 'razorpay',
-                'name' => 'Razorpay',
-                'description' => 'Pay with UPI, Cards, Wallets & more',
-                'icon' => 'razorpay',
-            ];
-        }
-
-        if (config('vortex-api.payment_gateways.cod')) {
-            $paymentMethods[] = [
-                'code' => 'cod',
-                'name' => 'Cash on Delivery',
-                'description' => 'Pay when you receive the order',
-                'icon' => 'money',
-            ];
-        }
+        // Get active payment methods from database
+        $paymentMethods = PaymentMethod::where('is_active', true)
+            ->orderBy('sort_order')
+            ->orderBy('name')
+            ->get()
+            ->map(function ($method) {
+                return [
+                    'code' => $method->code,
+                    'name' => $method->name,
+                    'description' => $method->description,
+                    'icon' => $method->getConfigValue('icon', 'payment'),
+                ];
+            });
 
         return ApiResponse::success($paymentMethods, 'Payment methods retrieved successfully');
+    }
+
+    /**
+     * Get available payment method codes for validation.
+     */
+    protected function getAvailablePaymentMethodCodes(): array
+    {
+        return PaymentMethod::where('is_active', true)
+            ->pluck('code')
+            ->toArray();
     }
 
     /**
@@ -235,15 +233,52 @@ class CheckoutController extends Controller
      */
     public function placeOrder(Request $request)
     {
+        $availablePaymentMethods = $this->getAvailablePaymentMethodCodes();
+        
+        if (empty($availablePaymentMethods)) {
+            return ApiResponse::error('No payment methods available', null, 400, 'NO_PAYMENT_METHODS');
+        }
+
+        $validator = Validator::make($request->all(), [
+            'shipping_address_id' => 'required|exists:customer_addresses,id',
+            'payment_method' => 'required|string|in:' . implode(',', $availablePaymentMethods),
+            'notes' => 'nullable|string|max:500',
+        ]);
+
+        if ($validator->fails()) {
+            return ApiResponse::validationError($validator);
+        }
+
         $cart = Cart::with(['items.product'])->where('user_id', $request->user()->id)->first();
 
         if (!$cart || $cart->items->isEmpty()) {
             return ApiResponse::error('Cart is empty', null, 400, 'CART_EMPTY');
         }
 
-        if (!session('checkout.shipping_address') || !session('checkout.payment_method')) {
-            return ApiResponse::error('Checkout incomplete', null, 400, 'CHECKOUT_INCOMPLETE');
+        // Get customer for this user
+        $customer = Customer::where('user_id', $request->user()->id)->first();
+        
+        if (!$customer) {
+            return ApiResponse::error('Customer profile not found', null, 400, 'CUSTOMER_NOT_FOUND');
         }
+
+        // Verify shipping address belongs to customer
+        $shippingAddress = CustomerAddress::where('id', $request->shipping_address_id)
+            ->where('customer_id', $customer->id)
+            ->first();
+            
+        if (!$shippingAddress) {
+            return ApiResponse::error('Invalid shipping address', null, 400, 'INVALID_ADDRESS');
+        }
+
+        // Calculate totals
+        $subtotal = $cart->items->sum(function ($item) {
+            return $item->price * $item->quantity;
+        });
+        
+        $shippingCost = 10.00; // TODO: Calculate based on address/method
+        $tax = $subtotal * 0.1; // TODO: Calculate based on address
+        $total = $subtotal + $shippingCost + $tax;
 
         // TODO: Implement order creation logic
         // This should:
@@ -254,20 +289,26 @@ class CheckoutController extends Controller
         // 5. Send confirmation email
 
         $order = Order::create([
-            'customer_id' => $request->user()->id,
+            'customer_id' => $customer->id,
+            'order_number' => Order::generateOrderNumber(),
             'status' => 'pending',
-            'payment_method' => session('checkout.payment_method'),
-            // ... other order fields
+            'payment_method' => $request->payment_method,
+            'shipping_address_id' => $request->shipping_address_id,
+            'subtotal' => $subtotal,
+            'shipping_cost' => $shippingCost,
+            'tax' => $tax,
+            'total' => $total,
+            'notes' => $request->notes,
         ]);
 
-        // Clear cart and session
+        // Clear cart
         $cart->items()->delete();
-        session()->forget(['checkout']);
 
         return ApiResponse::success([
             'order_id' => $order->id,
-            'order_number' => $order->increment_id,
+            'order_number' => $order->order_number ?? $order->id,
             'status' => $order->status,
+            'total' => $total,
         ], 'Order placed successfully', 201);
     }
 }
