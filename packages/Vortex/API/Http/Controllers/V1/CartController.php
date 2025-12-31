@@ -35,7 +35,6 @@ class CartController extends Controller
         $validator = Validator::make($request->all(), [
             'product_id' => 'required|exists:products,id',
             'quantity' => 'required|integer|min:1',
-            'variant_id' => 'nullable|exists:product_variants,id',
         ]);
 
         if ($validator->fails()) {
@@ -44,7 +43,7 @@ class CartController extends Controller
 
         $product = Product::find($request->product_id);
 
-        if (!$product || $product->status !== 'active') {
+        if (!$product || $product->status !== 'enabled') {
             return ApiResponse::error('Product not available', null, 400, 'PRODUCT_UNAVAILABLE');
         }
 
@@ -59,11 +58,10 @@ class CartController extends Controller
             [
                 'cart_id' => $cart->id,
                 'product_id' => $request->product_id,
-                'variant_id' => $request->variant_id,
             ],
             [
                 'quantity' => \DB::raw("quantity + {$request->quantity}"),
-                'price' => $product->final_price,
+                'price' => $product->special_price ?? $product->price,
             ]
         );
 

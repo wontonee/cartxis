@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\Validator;
 use Vortex\API\Helpers\ApiResponse;
 use Vortex\API\Http\Resources\UserResource;
 use Vortex\API\Http\Resources\AddressResource;
+use Vortex\Customer\Models\Customer;
 use Vortex\Customer\Models\CustomerAddress;
 
 class CustomerController extends Controller
@@ -59,7 +60,17 @@ class CustomerController extends Controller
      */
     public function addresses(Request $request)
     {
-        $addresses = CustomerAddress::where('customer_id', $request->user()->id)
+        // Get customer for this user
+        $customer = Customer::where('user_id', $request->user()->id)->first();
+        
+        if (!$customer) {
+            return ApiResponse::success(
+                [],
+                'No addresses found'
+            );
+        }
+
+        $addresses = CustomerAddress::where('customer_id', $customer->id)
             ->orderBy('is_default_shipping', 'desc')
             ->orderBy('is_default_billing', 'desc')
             ->get();
@@ -76,37 +87,54 @@ class CustomerController extends Controller
     public function storeAddress(Request $request)
     {
         $validator = Validator::make($request->all(), [
-            'first_name' => 'required|string|max:255',
-            'last_name' => 'required|string|max:255',
-            'address1' => 'required|string|max:255',
-            'address2' => 'nullable|string|max:255',
+            'first_name' => 'nullable|string|max:255',
+            'last_name' => 'nullable|string|max:255',
+            'company' => 'nullable|string|max:255',
+            'address_line_1' => 'required|string|max:255',
+            'address_line_2' => 'nullable|string|max:255',
             'city' => 'required|string|max:255',
             'state' => 'required|string|max:255',
-            'country' => 'required|string|max:255',
-            'zip_code' => 'required|string|max:20',
+            'country' => 'required|string|size:2', // 2-letter country code (e.g., US, GB, IN)
+            'postal_code' => 'required|string|max:20',
             'phone' => 'required|string|max:20',
-            'is_default_shipping' => 'nullable|boolean',
-            'is_default_billing' => 'nullable|boolean',
+            'is_default' => 'nullable|boolean',
         ]);
 
         if ($validator->fails()) {
             return ApiResponse::validationError($validator);
         }
 
-        // If setting as default, unset other defaults
-        if ($request->is_default_shipping) {
-            CustomerAddress::where('customer_id', $request->user()->id)
-                ->update(['is_default_shipping' => false]);
-        }
+        // Get or create customer for this user
+        $customer = Customer::firstOrCreate(
+            ['user_id' => $request->user()->id],
+            [
+                'email' => $request->user()->email,
+                'first_name' => $request->user()->name,
+                'last_name' => '',
+                'is_active' => true,
+            ]
+        );
 
-        if ($request->is_default_billing) {
-            CustomerAddress::where('customer_id', $request->user()->id)
-                ->update(['is_default_billing' => false]);
+        // If setting as default, unset other defaults
+        if ($request->is_default) {
+            CustomerAddress::where('customer_id', $customer->id)
+                ->update(['is_default_shipping' => false, 'is_default_billing' => false]);
         }
 
         $address = CustomerAddress::create([
-            'customer_id' => $request->user()->id,
-            ...$request->all(),
+            'customer_id' => $customer->id,
+            'first_name' => $request->first_name ?? $request->user()->name,
+            'last_name' => $request->last_name ?? '',
+            'company' => $request->company,
+            'address_line_1' => $request->address_line_1,
+            'address_line_2' => $request->address_line_2,
+            'city' => $request->city,
+            'state' => $request->state,
+            'postal_code' => $request->postal_code,
+            'country' => $request->country,
+            'phone' => $request->phone,
+            'is_default_shipping' => $request->is_default ?? false,
+            'is_default_billing' => $request->is_default ?? false,
         ]);
 
         return ApiResponse::success(
