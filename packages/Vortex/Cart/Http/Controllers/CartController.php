@@ -2,6 +2,7 @@
 
 namespace Vortex\Cart\Http\Controllers;
 
+use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
 use Illuminate\Support\Facades\Session;
 use Vortex\Core\Services\ThemeViewResolver;
@@ -95,5 +96,121 @@ class CartController extends Controller
         }
         
         return $items;
+    }
+    
+    /**
+     * Add item to cart
+     */
+    public function add(Request $request)
+    {
+        $request->validate([
+            'product_id' => 'required|exists:products,id',
+            'quantity' => 'required|integer|min:1',
+        ]);
+        
+        $product = Product::with('mainImage')->find($request->product_id);
+        
+        if (!$product || $product->status !== 'enabled') {
+            if ($request->expectsJson()) {
+                return response()->json(['message' => 'Product not available'], 400);
+            }
+            return back()->with('error', 'Product not available');
+        }
+        
+        // Check stock
+        if ($product->track_inventory && $product->quantity < $request->quantity) {
+            if ($request->expectsJson()) {
+                return response()->json(['message' => 'Insufficient stock available'], 400);
+            }
+            return back()->with('error', 'Insufficient stock');
+        }
+        
+        // Get existing cart
+        $cart = Session::get('cart', []);
+        
+        // Check if product already in cart
+        $found = false;
+        foreach ($cart as &$item) {
+            if ($item['product_id'] == $request->product_id) {
+                $item['quantity'] += $request->quantity;
+                $found = true;
+                break;
+            }
+        }
+        
+        // Add new item if not found
+        if (!$found) {
+            $cart[] = [
+                'id' => uniqid('cart_'),
+                'product_id' => $product->id,
+                'name' => $product->name,
+                'slug' => $product->slug,
+                'sku' => $product->sku,
+                'price' => $product->special_price ?? $product->price,
+                'quantity' => $request->quantity,
+                'image' => $product->mainImage?->url,
+                'tax_class_id' => $product->tax_class_id,
+                'weight' => $product->weight,
+            ];
+        }
+        
+        Session::put('cart', $cart);
+        
+        if ($request->expectsJson()) {
+            return response()->json([
+                'message' => 'Product added to cart successfully',
+                'items' => $cart,
+                'count' => collect($cart)->sum('quantity'),
+                'subtotal' => collect($cart)->sum(fn($item) => $item['price'] * $item['quantity']),
+            ]);
+        }
+        
+        return back()->with('success', 'Product added to cart');
+    }
+    
+    /**
+     * Update cart item quantity
+     */
+    public function update(Request $request, $index)
+    {
+        $request->validate([
+            'quantity' => 'required|integer|min:1',
+        ]);
+        
+        $cart = Session::get('cart', []);
+        
+        if (isset($cart[$index])) {
+            $cart[$index]['quantity'] = $request->quantity;
+            Session::put('cart', $cart);
+            return back()->with('success', 'Cart updated');
+        }
+        
+        return back()->with('error', 'Item not found');
+    }
+    
+    /**
+     * Remove item from cart
+     */
+    public function remove($index)
+    {
+        $cart = Session::get('cart', []);
+        
+        if (isset($cart[$index])) {
+            unset($cart[$index]);
+            $cart = array_values($cart); // Reindex array
+            Session::put('cart', $cart);
+            return back()->with('success', 'Item removed from cart');
+        }
+        
+        return back()->with('error', 'Item not found');
+    }
+    
+    /**
+     * Clear all cart items
+     */
+    public function clear()
+    {
+        Session::forget('cart');
+        return back()->with('success', 'Cart cleared');
     }
 }

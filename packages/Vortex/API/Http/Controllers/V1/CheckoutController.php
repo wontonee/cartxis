@@ -11,7 +11,10 @@ use Vortex\Shop\Models\Order;
 use Vortex\Customer\Models\Customer;
 use Vortex\Customer\Models\CustomerAddress;
 use Vortex\Core\Models\PaymentMethod;
+use Vortex\Core\Models\Currency;
 use Vortex\Core\Services\PaymentGatewayManager;
+use Stripe\Stripe;
+use Stripe\PaymentIntent;
 
 class CheckoutController extends Controller
 {
@@ -159,12 +162,39 @@ class CheckoutController extends Controller
             ->orderBy('name')
             ->get()
             ->map(function ($method) {
-                return [
+                $data = [
                     'code' => $method->code,
                     'name' => $method->name,
                     'description' => $method->description,
+                    'type' => $method->type,
                     'icon' => $method->getConfigValue('icon', 'payment'),
                 ];
+
+                // Add gateway credentials for mobile app if it's an online payment method
+                if (in_array($method->code, ['razorpay', 'stripe', 'paypal'])) {
+                    $data['gateway_config'] = [
+                        'key' => $method->getConfigValue('api_key') ?? $method->getConfigValue('public_key'),
+                        'environment' => $method->getConfigValue('mode', 'sandbox'),
+                    ];
+
+                    // Add Razorpay specific config
+                    if ($method->code === 'razorpay') {
+                        $data['gateway_config']['key_id'] = $method->getConfigValue('key_id');
+                        $data['gateway_config']['currency'] = $method->getConfigValue('currency', 'INR');
+                        $data['gateway_config']['name'] = $method->getConfigValue('merchant_name', config('app.name'));
+                        $data['gateway_config']['logo'] = $method->getConfigValue('merchant_logo');
+                        $data['gateway_config']['theme_color'] = $method->getConfigValue('theme_color', '#3399cc');
+                    }
+
+                    // Add Stripe specific config
+                    if ($method->code === 'stripe') {
+                        $defaultCurrency = Currency::getDefault();
+                        $data['gateway_config']['publishable_key'] = $method->getConfigValue('publishable_key');
+                        $data['gateway_config']['currency'] = $defaultCurrency ? $defaultCurrency->code : 'USD';
+                    }
+                }
+
+                return $data;
             });
 
         return ApiResponse::success($paymentMethods, 'Payment methods retrieved successfully');
@@ -193,11 +223,85 @@ class CheckoutController extends Controller
             return ApiResponse::validationError($validator);
         }
 
+        // Get payment method details from database
+        $paymentMethod = PaymentMethod::where('code', $request->payment_method_code)
+            ->where('is_active', true)
+            ->first();
+
+        if (!$paymentMethod) {
+            return ApiResponse::error('Payment method not available', null, 400, 'PAYMENT_METHOD_NOT_AVAILABLE');
+        }
+
         session(['checkout.payment_method' => $request->payment_method_code]);
 
-        return ApiResponse::success([
+        // Prepare response with payment method details
+        $response = [
             'payment_method' => $request->payment_method_code,
-        ], 'Payment method set successfully');
+            'name' => $paymentMethod->name,
+            'description' => $paymentMethod->description,
+            'type' => $paymentMethod->type,
+            'instructions' => $paymentMethod->instructions,
+        ];
+
+        // Add gateway credentials for mobile app if it's an online payment method
+        if (in_array($request->payment_method_code, ['razorpay', 'stripe', 'paypal'])) {
+            $response['gateway_config'] = [
+                'key' => $paymentMethod->getConfigValue('api_key') ?? $paymentMethod->getConfigValue('public_key'),
+                'environment' => $paymentMethod->getConfigValue('mode', 'sandbox'),
+            ];
+
+            // Add additional Razorpay specific config
+            if ($request->payment_method_code === 'razorpay') {
+                $response['gateway_config']['key_id'] = $paymentMethod->getConfigValue('key_id');
+                $response['gateway_config']['currency'] = $paymentMethod->getConfigValue('currency', 'INR');
+                $response['gateway_config']['name'] = $paymentMethod->getConfigValue('merchant_name', config('app.name'));
+                $response['gateway_config']['logo'] = $paymentMethod->getConfigValue('merchant_logo');
+                $response['gateway_config']['theme_color'] = $paymentMethod->getConfigValue('theme_color', '#3399cc');
+            }
+
+            // Add additional Stripe specific config and create payment intent
+            if ($request->payment_method_code === 'stripe') {
+                // Get default currency
+                $defaultCurrency = Currency::getDefault();
+                $currencyCode = $defaultCurrency ? $defaultCurrency->code : 'USD';
+
+                $response['gateway_config']['publishable_key'] = $paymentMethod->getConfigValue('publishable_key');
+                $response['gateway_config']['currency'] = $currencyCode;
+
+                // Create Stripe payment intent
+                try {
+                    // Get cart total for payment intent
+                    $cart = Cart::with(['items.product'])->where('user_id', $request->user()->id)->first();
+                    
+                    if ($cart && !$cart->items->isEmpty()) {
+                        $subtotal = $cart->items->sum(fn($item) => $item->price * $item->quantity);
+                        $shippingCost = session('checkout.shipping_cost', 0);
+                        $total = $subtotal + $shippingCost;
+
+                        // Initialize Stripe with secret key
+                        Stripe::setApiKey($paymentMethod->getConfigValue('secret_key'));
+
+                        // Create payment intent
+                        $paymentIntent = PaymentIntent::create([
+                            'amount' => (int)($total * 100), // Amount in cents
+                            'currency' => strtolower($currencyCode),
+                            'metadata' => [
+                                'user_id' => $request->user()->id,
+                                'cart_id' => $cart->id,
+                            ],
+                        ]);
+
+                        $response['gateway_config']['client_secret'] = $paymentIntent->client_secret;
+                        $response['gateway_config']['payment_intent_id'] = $paymentIntent->id;
+                    }
+                } catch (\Exception $e) {
+                    \Log::error('Stripe payment intent creation failed: ' . $e->getMessage());
+                    return ApiResponse::error('Failed to initialize payment gateway', null, 500, 'PAYMENT_GATEWAY_ERROR');
+                }
+            }
+        }
+
+        return ApiResponse::success($response, 'Payment method set successfully');
     }
 
     /**

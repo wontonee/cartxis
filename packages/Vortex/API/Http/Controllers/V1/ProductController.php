@@ -18,7 +18,9 @@ class ProductController extends Controller
         $perPage = min($request->get('per_page', 20), config('vortex-api.pagination.max_per_page'));
         
         $query = Product::query()
-            ->where('status', 'enabled');
+            ->where('status', 'enabled')
+            ->where('price', '>', 0)
+            ->where('quantity', '>', 0);
 
         // Filtering
         if ($request->has('category_id')) {
@@ -96,6 +98,8 @@ class ProductController extends Controller
         $products = Product::query()
             ->where('status', 'enabled')
             ->where('featured', true)
+            ->where('price', '>', 0)
+            ->where('quantity', '>', 0)
             ->with(['images', 'brand'])
             ->latest()
             ->limit($limit)
@@ -116,6 +120,8 @@ class ProductController extends Controller
 
         $products = Product::query()
             ->where('status', 'enabled')
+            ->where('price', '>', 0)
+            ->where('quantity', '>', 0)
             ->where('special_price', '>', 0)
             ->whereColumn('special_price', '<', 'price')
             ->where(function($q) {
@@ -144,8 +150,12 @@ class ProductController extends Controller
 
         $products = Product::query()
             ->where('status', 'enabled')
-            ->where('new', true)
-            ->orWhere('created_at', '>=', now()->subDays(30))
+            ->where('price', '>', 0)
+            ->where('quantity', '>', 0)
+            ->where(function($q) {
+                $q->where('new', true)
+                  ->orWhere('created_at', '>=', now()->subDays(30));
+            })
             ->with(['images', 'brand'])
             ->latest()
             ->limit($limit)
@@ -172,6 +182,8 @@ class ProductController extends Controller
 
         $relatedProducts = Product::query()
             ->where('status', 'enabled')
+            ->where('price', '>', 0)
+            ->where('quantity', '>', 0)
             ->where('id', '!=', $id)
             ->whereHas('categories', fn($q) => $q->whereIn('category_id', $categoryIds))
             ->with(['images', 'brand'])

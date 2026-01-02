@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use Vortex\Product\Models\Product;
 use Vortex\Product\Models\Category;
 use Vortex\Product\Models\InventoryAdjustment;
+use Vortex\Core\Models\Currency;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -53,10 +54,24 @@ class ProductController extends Controller
 
         $products = $query->paginate(15)->withQueryString();
 
+        // Get default currency
+        $currency = Currency::getDefault();
+
         return Inertia::render('Admin/Products/Index', [
             'products' => $products,
             'filters' => $request->only(['search', 'status', 'category_id', 'stock_status', 'sort_by', 'sort_order']),
             'categories' => Category::enabled()->orderBy('name')->get(['id', 'name']),
+            'currency' => $currency ? [
+                'code' => $currency->code,
+                'symbol' => $currency->symbol,
+                'symbol_position' => $currency->symbol_position,
+                'decimal_places' => $currency->decimal_places,
+            ] : [
+                'code' => 'USD',
+                'symbol' => '$',
+                'symbol_position' => 'before',
+                'decimal_places' => 2,
+            ],
         ]);
     }
 
@@ -167,6 +182,9 @@ class ProductController extends Controller
             ->take(10)
             ->get();
 
+        // Get default currency
+        $currency = Currency::getDefault();
+
         return Inertia::render('Admin/Products/Edit', [
             'product' => $product,
             'categories' => Category::enabled()->with('children')->whereNull('parent_id')->orderBy('name')->get(),
@@ -180,6 +198,17 @@ class ProductController extends Controller
                 ->orderBy('sort_order')
                 ->get(['id', 'name', 'code', 'type', 'is_required', 'is_filterable', 'is_configurable']),
             'adjustmentHistory' => $adjustmentHistory,
+            'currency' => $currency ? [
+                'code' => $currency->code,
+                'symbol' => $currency->symbol,
+                'symbol_position' => $currency->symbol_position,
+                'decimal_places' => $currency->decimal_places,
+            ] : [
+                'code' => 'USD',
+                'symbol' => '$',
+                'symbol_position' => 'before',
+                'decimal_places' => 2,
+            ],
         ]);
     }
 

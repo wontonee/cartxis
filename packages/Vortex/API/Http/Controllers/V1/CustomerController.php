@@ -47,7 +47,24 @@ class CustomerController extends Controller
         }
 
         $user = $request->user();
-        $user->update($request->only(['name', 'phone', 'date_of_birth', 'gender']));
+        
+        // Update only the fields that are present in the request
+        $updateData = [];
+        if ($request->has('name')) {
+            $updateData['name'] = $request->name;
+        }
+        if ($request->has('phone')) {
+            $updateData['phone'] = $request->phone;
+        }
+        if ($request->has('date_of_birth')) {
+            $updateData['date_of_birth'] = $request->date_of_birth;
+        }
+        if ($request->has('gender')) {
+            $updateData['gender'] = $request->gender;
+        }
+        
+        $user->update($updateData);
+        $user->refresh();
 
         return ApiResponse::success(
             new UserResource($user),

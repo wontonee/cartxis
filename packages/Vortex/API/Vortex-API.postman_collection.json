@@ -519,6 +519,44 @@
 			"description": "Category navigation and product browsing"
 		},
 		{
+			"name": "Currency",
+			"item": [
+				{
+					"name": "Get Default Currency",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/v1/currency/default",
+							"host": ["{{base_url}}"],
+							"path": ["api", "v1", "currency", "default"]
+						},
+						"description": "Get the default currency for the application with symbol, format, and exchange rate"
+					}
+				},
+				{
+					"name": "List All Currencies",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/v1/currency",
+							"host": ["{{base_url}}"],
+							"path": ["api", "v1", "currency"]
+						},
+						"description": "Get all active currencies available in the system"
+					}
+				}
+			],
+			"description": "Currency information for mobile app localization and pricing display"
+		},
+		{
 			"name": "Cart",
 			"item": [
 				{

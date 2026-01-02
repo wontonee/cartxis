@@ -82,6 +82,8 @@ class ProductRepository extends ShopRepository implements ProductRepositoryInter
                 $query->where('category_id', $categoryId);
             })
             ->where('status', 'enabled')
+            ->where('price', '>', 0)
+            ->where('quantity', '>', 0)
             ->paginate($perPage);
     }
 
@@ -96,6 +98,8 @@ class ProductRepository extends ShopRepository implements ProductRepositoryInter
     {
         return $this->model
             ->where('status', 'enabled')
+            ->where('price', '>', 0)
+            ->where('quantity', '>', 0)
             ->where(function ($q) use ($query) {
                 $q->where('name', 'like', "%{$query}%")
                   ->orWhere('description', 'like', "%{$query}%")

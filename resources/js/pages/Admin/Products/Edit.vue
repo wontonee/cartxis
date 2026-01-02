@@ -101,6 +101,12 @@ interface Props {
   brands: Brand[];
   taxClasses: TaxClass[];
   attributes: Attribute[];
+  currency?: {
+    code: string;
+    symbol: string;
+    symbol_position: string;
+    decimal_places: number;
+  };
   adjustmentHistory?: Array<{
     id: number;
     type: 'addition' | 'subtraction' | 'correction';
@@ -116,9 +122,9 @@ interface Props {
 
 const props = defineProps<Props>();
 
-// Currency symbol
+// Currency symbol - use from props if available, otherwise use composable
 const { getSymbol } = useCurrency();
-const currencySymbol = computed(() => getSymbol());
+const currencySymbol = computed(() => props.currency?.symbol || getSymbol());
 
 // Active tab
 const activeTab = ref<'general' | 'images' | 'attributes' | 'inventory' | 'seo'>('general');
@@ -496,7 +502,7 @@ const deleteProduct = () => {
                   'whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm'
                 ]"
               >
-                Inventory
+                Inventory & Pricing
               </button>
               <button
                 v-if="form.type === 'downloadable'"

@@ -54,16 +54,25 @@ class CartController extends Controller
 
         $cart = Cart::firstOrCreate(['user_id' => $request->user()->id]);
 
-        $cartItem = CartItem::updateOrCreate(
-            [
+        // Check if item already exists in cart
+        $cartItem = CartItem::where('cart_id', $cart->id)
+            ->where('product_id', $request->product_id)
+            ->first();
+
+        if ($cartItem) {
+            // Update existing item - increment quantity
+            $cartItem->quantity += $request->quantity;
+            $cartItem->price = $product->special_price ?? $product->price;
+            $cartItem->save();
+        } else {
+            // Create new item with requested quantity
+            $cartItem = CartItem::create([
                 'cart_id' => $cart->id,
                 'product_id' => $request->product_id,
-            ],
-            [
-                'quantity' => \DB::raw("quantity + {$request->quantity}"),
+                'quantity' => $request->quantity,
                 'price' => $product->special_price ?? $product->price,
-            ]
-        );
+            ]);
+        }
 
         $cart->load(['items.product.images', 'items.product.brand']);
 

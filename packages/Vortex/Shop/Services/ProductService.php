@@ -121,7 +121,9 @@ class ProductService extends ShopService
         try {
             // Use the Product model directly to start the query
             $query = \Vortex\Product\Models\Product::query()
-                ->where('status', 'enabled');
+                ->where('status', 'enabled')
+                ->where('price', '>', 0)
+                ->where('quantity', '>', 0);
 
             // Filter by category
             if (!empty($filters['category'])) {

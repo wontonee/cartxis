@@ -11,6 +11,7 @@ use Vortex\API\Http\Controllers\V1\OrderController;
 use Vortex\API\Http\Controllers\V1\WishlistController;
 use Vortex\API\Http\Controllers\V1\ReviewController;
 use Vortex\API\Http\Controllers\V1\SearchController;
+use Vortex\API\Http\Controllers\V1\CurrencyController;
 
 /*
 |--------------------------------------------------------------------------
@@ -56,6 +57,12 @@ Route::prefix('api/v1')->group(function () {
         Route::get('/tree', [CategoryController::class, 'tree']);
         Route::get('/{id}', [CategoryController::class, 'show']);
         Route::get('/{id}/products', [CategoryController::class, 'products']);
+    });
+
+    // Currency (Public)
+    Route::prefix('currency')->group(function () {
+        Route::get('/default', [CurrencyController::class, 'default']);
+        Route::get('/', [CurrencyController::class, 'index']);
     });
 
     // Search (Public)

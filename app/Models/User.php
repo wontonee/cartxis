@@ -28,6 +28,9 @@ class User extends Authenticatable
         'role',
         'is_active',
         'profile_photo_path',
+        'phone',
+        'date_of_birth',
+        'gender',
     ];
 
     /**
