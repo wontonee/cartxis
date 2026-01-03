@@ -4,6 +4,7 @@ namespace Vortex\API\Http\Controllers\V1;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
 use Vortex\API\Helpers\ApiResponse;
 use Vortex\API\Http\Resources\UserResource;
@@ -107,14 +108,17 @@ class CustomerController extends Controller
             'first_name' => 'nullable|string|max:255',
             'last_name' => 'nullable|string|max:255',
             'company' => 'nullable|string|max:255',
+            'label' => 'nullable|string|max:50',
             'address_line_1' => 'required|string|max:255',
             'address_line_2' => 'nullable|string|max:255',
             'city' => 'required|string|max:255',
             'state' => 'required|string|max:255',
-            'country' => 'required|string|size:2', // 2-letter country code (e.g., US, GB, IN)
+            'country' => 'required|string|max:3',
             'postal_code' => 'required|string|max:20',
             'phone' => 'required|string|max:20',
             'is_default' => 'nullable|boolean',
+            'is_default_shipping' => 'nullable|boolean',
+            'is_default_billing' => 'nullable|boolean',
         ]);
 
         if ($validator->fails()) {
@@ -132,27 +136,40 @@ class CustomerController extends Controller
             ]
         );
 
-        // If setting as default, unset other defaults
-        if ($request->is_default) {
-            CustomerAddress::where('customer_id', $customer->id)
-                ->update(['is_default_shipping' => false, 'is_default_billing' => false]);
-        }
+        // Determine if setting as default
+        $isDefaultShipping = $request->is_default_shipping ?? $request->is_default ?? false;
+        $isDefaultBilling = $request->is_default_billing ?? $request->is_default ?? false;
 
-        $address = CustomerAddress::create([
-            'customer_id' => $customer->id,
-            'first_name' => $request->first_name ?? $request->user()->name,
-            'last_name' => $request->last_name ?? '',
-            'company' => $request->company,
-            'address_line_1' => $request->address_line_1,
-            'address_line_2' => $request->address_line_2,
-            'city' => $request->city,
-            'state' => $request->state,
-            'postal_code' => $request->postal_code,
-            'country' => $request->country,
-            'phone' => $request->phone,
-            'is_default_shipping' => $request->is_default ?? false,
-            'is_default_billing' => $request->is_default ?? false,
-        ]);
+        // Use transaction to ensure atomicity
+        $address = DB::transaction(function () use ($customer, $request, $isDefaultShipping, $isDefaultBilling) {
+            // If setting as default, unset other defaults
+            if ($isDefaultShipping) {
+                CustomerAddress::where('customer_id', $customer->id)
+                    ->update(['is_default_shipping' => false]);
+            }
+            
+            if ($isDefaultBilling) {
+                CustomerAddress::where('customer_id', $customer->id)
+                    ->update(['is_default_billing' => false]);
+            }
+
+            return CustomerAddress::create([
+                'customer_id' => $customer->id,
+                'first_name' => $request->first_name ?? $request->user()->name,
+                'last_name' => $request->last_name ?? '',
+                'company' => $request->company,
+                'label' => $request->label,
+                'address_line_1' => $request->address_line_1,
+                'address_line_2' => $request->address_line_2,
+                'city' => $request->city,
+                'state' => $request->state,
+                'postal_code' => $request->postal_code,
+                'country' => $request->country,
+                'phone' => $request->phone,
+                'is_default_shipping' => $isDefaultShipping,
+                'is_default_billing' => $isDefaultBilling,
+            ]);
+        });
 
         return ApiResponse::success(
             new AddressResource($address),
@@ -166,7 +183,16 @@ class CustomerController extends Controller
      */
     public function updateAddress(Request $request, $id)
     {
-        $address = CustomerAddress::where('customer_id', $request->user()->id)->find($id);
+        // Get customer for this user
+        $customer = Customer::where('user_id', $request->user()->id)->first();
+        
+        if (!$customer) {
+            return ApiResponse::notFound('Customer not found', 'CUSTOMER_NOT_FOUND');
+        }
+
+        $address = CustomerAddress::where('customer_id', $customer->id)
+            ->where('id', $id)
+            ->first();
 
         if (!$address) {
             return ApiResponse::notFound('Address not found', 'ADDRESS_NOT_FOUND');
@@ -175,12 +201,14 @@ class CustomerController extends Controller
         $validator = Validator::make($request->all(), [
             'first_name' => 'nullable|string|max:255',
             'last_name' => 'nullable|string|max:255',
-            'address1' => 'nullable|string|max:255',
-            'address2' => 'nullable|string|max:255',
+            'company' => 'nullable|string|max:255',
+            'label' => 'nullable|string|max:50',
+            'address_line_1' => 'nullable|string|max:255',
+            'address_line_2' => 'nullable|string|max:255',
             'city' => 'nullable|string|max:255',
             'state' => 'nullable|string|max:255',
-            'country' => 'nullable|string|max:255',
-            'zip_code' => 'nullable|string|max:20',
+            'country' => 'nullable|string|max:3',
+            'postal_code' => 'nullable|string|max:20',
             'phone' => 'nullable|string|max:20',
             'is_default_shipping' => 'nullable|boolean',
             'is_default_billing' => 'nullable|boolean',
@@ -190,20 +218,23 @@ class CustomerController extends Controller
             return ApiResponse::validationError($validator);
         }
 
-        // If setting as default, unset other defaults
-        if ($request->is_default_shipping) {
-            CustomerAddress::where('customer_id', $request->user()->id)
-                ->where('id', '!=', $id)
-                ->update(['is_default_shipping' => false]);
-        }
+        // Use transaction to ensure atomicity
+        DB::transaction(function () use ($customer, $address, $request, $id) {
+            // If setting as default, unset other defaults first
+            if ($request->has('is_default_shipping') && $request->is_default_shipping) {
+                CustomerAddress::where('customer_id', $customer->id)
+                    ->where('id', '!=', $id)
+                    ->update(['is_default_shipping' => false]);
+            }
 
-        if ($request->is_default_billing) {
-            CustomerAddress::where('customer_id', $request->user()->id)
-                ->where('id', '!=', $id)
-                ->update(['is_default_billing' => false]);
-        }
+            if ($request->has('is_default_billing') && $request->is_default_billing) {
+                CustomerAddress::where('customer_id', $customer->id)
+                    ->where('id', '!=', $id)
+                    ->update(['is_default_billing' => false]);
+            }
 
-        $address->update($request->all());
+            $address->update($request->all());
+        });
 
         return ApiResponse::success(
             new AddressResource($address),
@@ -216,7 +247,16 @@ class CustomerController extends Controller
      */
     public function deleteAddress(Request $request, $id)
     {
-        $address = CustomerAddress::where('customer_id', $request->user()->id)->find($id);
+        // Get customer for this user
+        $customer = Customer::where('user_id', $request->user()->id)->first();
+        
+        if (!$customer) {
+            return ApiResponse::notFound('Customer not found', 'CUSTOMER_NOT_FOUND');
+        }
+
+        $address = CustomerAddress::where('customer_id', $customer->id)
+            ->where('id', $id)
+            ->first();
 
         if (!$address) {
             return ApiResponse::notFound('Address not found', 'ADDRESS_NOT_FOUND');
@@ -225,44 +265,5 @@ class CustomerController extends Controller
         $address->delete();
 
         return ApiResponse::success(null, 'Address deleted successfully');
-    }
-
-    /**
-     * Set default address.
-     */
-    public function setDefaultAddress(Request $request, $id)
-    {
-        $validator = Validator::make($request->all(), [
-            'type' => 'required|in:shipping,billing,both',
-        ]);
-
-        if ($validator->fails()) {
-            return ApiResponse::validationError($validator);
-        }
-
-        $address = CustomerAddress::where('customer_id', $request->user()->id)->find($id);
-
-        if (!$address) {
-            return ApiResponse::notFound('Address not found', 'ADDRESS_NOT_FOUND');
-        }
-
-        $type = $request->type;
-
-        if (in_array($type, ['shipping', 'both'])) {
-            CustomerAddress::where('customer_id', $request->user()->id)
-                ->update(['is_default_shipping' => false]);
-            $address->update(['is_default_shipping' => true]);
-        }
-
-        if (in_array($type, ['billing', 'both'])) {
-            CustomerAddress::where('customer_id', $request->user()->id)
-                ->update(['is_default_billing' => false]);
-            $address->update(['is_default_billing' => true]);
-        }
-
-        return ApiResponse::success(
-            new AddressResource($address->fresh()),
-            'Default address set successfully'
-        );
     }
 }

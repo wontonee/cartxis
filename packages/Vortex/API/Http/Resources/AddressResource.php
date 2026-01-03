@@ -19,12 +19,14 @@ class AddressResource extends JsonResource
             'first_name' => $this->first_name,
             'last_name' => $this->last_name,
             'full_name' => "{$this->first_name} {$this->last_name}",
-            'address1' => $this->address1,
-            'address2' => $this->address2,
+            'company' => $this->company,
+            'label' => $this->label,
+            'address_line_1' => $this->address_line_1,
+            'address_line_2' => $this->address_line_2,
             'city' => $this->city,
             'state' => $this->state,
             'country' => $this->country,
-            'zip_code' => $this->zip_code,
+            'postal_code' => $this->postal_code,
             'phone' => $this->phone,
             'is_default_shipping' => (bool) ($this->is_default_shipping ?? false),
             'is_default_billing' => (bool) ($this->is_default_billing ?? false),
@@ -42,11 +44,11 @@ class AddressResource extends JsonResource
     private function getFormattedAddress(): string
     {
         $parts = array_filter([
-            $this->address1,
-            $this->address2,
+            $this->address_line_1,
+            $this->address_line_2,
             $this->city,
             $this->state,
-            $this->zip_code,
+            $this->postal_code,
             $this->country,
         ]);
 

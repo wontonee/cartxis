@@ -721,14 +721,14 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"address_id\": 1\n}"
+							"raw": "{\n    \"first_name\": \"John\",\n    \"last_name\": \"Doe\",\n    \"phone\": \"9876543210\",\n    \"address_line_1\": \"123 Main Street\",\n    \"address_line_2\": \"Apt 4B\",\n    \"city\": \"Delhi\",\n    \"state\": \"Delhi\",\n    \"postal_code\": \"110001\",\n    \"country\": \"IN\"\n}"
 						},
 						"url": {
 							"raw": "{{base_url}}/api/v1/checkout/shipping-address",
 							"host": ["{{base_url}}"],
 							"path": ["api", "v1", "checkout", "shipping-address"]
 						},
-						"description": "Set shipping address for order"
+						"description": "Set shipping address for order. REQUIRED before Stripe payment. Can use address_id: 1 for saved address OR provide full address details."
 					}
 				},
 				{
@@ -743,14 +743,14 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"address_id\": 1,\n    \"use_shipping_address\": false\n}"
+							"raw": "{\n    \"same_as_shipping\": false,\n    \"first_name\": \"Jane\",\n    \"last_name\": \"Doe\",\n    \"phone\": \"9876543210\",\n    \"address_line_1\": \"456 Business Street\",\n    \"address_line_2\": \"Suite 200\",\n    \"city\": \"Mumbai\",\n    \"state\": \"Maharashtra\",\n    \"postal_code\": \"400001\",\n    \"country\": \"IN\"\n}"
 						},
 						"url": {
 							"raw": "{{base_url}}/api/v1/checkout/billing-address",
 							"host": ["{{base_url}}"],
 							"path": ["api", "v1", "checkout", "billing-address"]
 						},
-						"description": "Set billing address for order"
+						"description": "Set billing address for order. Can use address_id: 1 for saved address, same_as_shipping: true, OR provide full address details."
 					}
 				},
 				{
@@ -802,7 +802,7 @@
 					}
 				},
 				{
-					"name": "Set Payment Method",
+					"name": "Set Payment Method (Stripe)",
 					"request": {
 						"method": "POST",
 						"header": [
@@ -813,14 +813,36 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"payment_method\": \"razorpay\"\n}"
+							"raw": "{\n    \"payment_method_code\": \"stripe\"\n}"
 						},
 						"url": {
 							"raw": "{{base_url}}/api/v1/checkout/payment-method",
 							"host": ["{{base_url}}"],
 							"path": ["api", "v1", "checkout", "payment-method"]
 						},
-						"description": "Select payment method"
+						"description": "Select Stripe payment method. Returns payment_intent with client_secret. NOTE: Set shipping address first for Indian regulations compliance."
+					}
+				},
+				{
+					"name": "Set Payment Method (Razorpay)",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"payment_method_code\": \"razorpay\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/v1/checkout/payment-method",
+							"host": ["{{base_url}}"],
+							"path": ["api", "v1", "checkout", "payment-method"]
+						},
+						"description": "Select Razorpay payment method"
 					}
 				},
 				{
@@ -946,14 +968,14 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"address_line_1\": \"456 Oak Avenue\",\n    \"city\": \"Los Angeles\",\n    \"state\": \"CA\",\n    \"postal_code\": \"90001\",\n    \"country\": \"USA\"\n}"
+							"raw": "{\n    \"address_line_1\": \"456 Oak Avenue\",\n    \"city\": \"Los Angeles\",\n    \"state\": \"CA\",\n    \"postal_code\": \"90001\",\n    \"country\": \"USA\",\n    \"is_default_shipping\": true,\n    \"is_default_billing\": false\n}"
 						},
 						"url": {
 							"raw": "{{base_url}}/api/v1/customer/addresses/1",
 							"host": ["{{base_url}}"],
 							"path": ["api", "v1", "customer", "addresses", "1"]
 						},
-						"description": "Update existing address"
+						"description": "Update address. Set is_default_shipping: true or is_default_billing: true to make it default."
 					}
 				},
 				{
@@ -967,19 +989,6 @@
 							"path": ["api", "v1", "customer", "addresses", "1"]
 						},
 						"description": "Delete saved address"
-					}
-				},
-				{
-					"name": "Set Default Address",
-					"request": {
-						"method": "POST",
-						"header": [],
-						"url": {
-							"raw": "{{base_url}}/api/v1/customer/addresses/1/set-default",
-							"host": ["{{base_url}}"],
-							"path": ["api", "v1", "customer", "addresses", "1", "set-default"]
-						},
-						"description": "Set address as default"
 					}
 				}
 			],

@@ -47,15 +47,15 @@ class CheckoutController extends Controller
     public function setShippingAddress(Request $request)
     {
         $validator = Validator::make($request->all(), [
-            'address_id' => 'required_without_all:first_name,last_name,address1,city,state,country,zip_code|exists:customer_addresses,id',
+            'address_id' => 'required_without_all:first_name,last_name,address_line_1,city,state,country,postal_code|exists:customer_addresses,id',
             'first_name' => 'required_without:address_id|string|max:255',
             'last_name' => 'required_without:address_id|string|max:255',
-            'address1' => 'required_without:address_id|string|max:255',
-            'address2' => 'nullable|string|max:255',
+            'address_line_1' => 'required_without:address_id|string|max:255',
+            'address_line_2' => 'nullable|string|max:255',
             'city' => 'required_without:address_id|string|max:255',
             'state' => 'required_without:address_id|string|max:255',
             'country' => 'required_without:address_id|string|max:255',
-            'zip_code' => 'required_without:address_id|string|max:20',
+            'postal_code' => 'required_without:address_id|string|max:20',
             'phone' => 'nullable|string|max:20',
         ]);
 
@@ -81,11 +81,13 @@ class CheckoutController extends Controller
             'address_id' => 'required_without_all:same_as_shipping,first_name|exists:customer_addresses,id',
             'first_name' => 'required_without_all:same_as_shipping,address_id|string|max:255',
             'last_name' => 'required_without_all:same_as_shipping,address_id|string|max:255',
-            'address1' => 'required_without_all:same_as_shipping,address_id|string|max:255',
+            'address_line_1' => 'required_without_all:same_as_shipping,address_id|string|max:255',
+            'address_line_2' => 'nullable|string|max:255',
             'city' => 'required_without_all:same_as_shipping,address_id|string|max:255',
             'state' => 'required_without_all:same_as_shipping,address_id|string|max:255',
             'country' => 'required_without_all:same_as_shipping,address_id|string|max:255',
-            'zip_code' => 'required_without_all:same_as_shipping,address_id|string|max:20',
+            'postal_code' => 'required_without_all:same_as_shipping,address_id|string|max:20',
+            'phone' => 'nullable|string|max:20',
         ]);
 
         if ($validator->fails()) {
@@ -280,23 +282,109 @@ class CheckoutController extends Controller
 
                         // Initialize Stripe with secret key
                         Stripe::setApiKey($paymentMethod->getConfigValue('secret_key'));
+                        
+                        // Set API version for consistency
+                        Stripe::setApiVersion('2023-10-16');
 
-                        // Create payment intent
-                        $paymentIntent = PaymentIntent::create([
-                            'amount' => (int)($total * 100), // Amount in cents
+                        // Calculate amount in smallest currency unit (cents/paise)
+                        $amount = (int)round($total * 100);
+                        
+                        // Ensure amount is positive
+                        if ($amount <= 0) {
+                            return ApiResponse::error('Invalid payment amount', null, 400, 'INVALID_AMOUNT');
+                        }
+
+                        // Get user information
+                        $user = $request->user();
+
+                        // Get shipping address from session
+                        $shippingAddress = session('checkout.shipping_address');
+
+                        // Log payment intent creation attempt
+                        \Log::info('Creating Stripe Payment Intent', [
+                            'amount' => $amount,
                             'currency' => strtolower($currencyCode),
-                            'metadata' => [
-                                'user_id' => $request->user()->id,
-                                'cart_id' => $cart->id,
+                            'user_id' => $user->id,
+                            'cart_id' => $cart->id,
+                        ]);
+
+                        // Create payment intent with automatic_payment_methods for mobile
+                        $paymentIntentData = [
+                            'amount' => $amount, // Amount in smallest currency unit (cents/paise)
+                            'currency' => strtolower($currencyCode), // Must be lowercase
+                            'automatic_payment_methods' => [
+                                'enabled' => true, // REQUIRED for mobile payment sheet
                             ],
+                            'description' => 'Order payment for ' . config('app.name'),
+                            'metadata' => [
+                                'user_id' => $user->id,
+                                'user_email' => $user->email,
+                                'cart_id' => $cart->id,
+                                'integration' => 'mobile_app',
+                            ],
+                        ];
+
+                        // Add customer email if available
+                        if ($user->email) {
+                            $paymentIntentData['receipt_email'] = $user->email;
+                        }
+
+                        // Add shipping details (REQUIRED for Indian regulations)
+                        if ($shippingAddress) {
+                            $paymentIntentData['shipping'] = [
+                                'name' => ($shippingAddress['first_name'] ?? '') . ' ' . ($shippingAddress['last_name'] ?? ''),
+                                'phone' => $shippingAddress['phone'] ?? null,
+                                'address' => [
+                                    'line1' => $shippingAddress['address_line_1'] ?? '',
+                                    'line2' => $shippingAddress['address_line_2'] ?? null,
+                                    'city' => $shippingAddress['city'] ?? '',
+                                    'state' => $shippingAddress['state'] ?? '',
+                                    'postal_code' => $shippingAddress['postal_code'] ?? '',
+                                    'country' => $shippingAddress['country'] ?? 'IN',
+                                ],
+                            ];
+                        } elseif ($user->name) {
+                            // Fallback: Use user name if no shipping address
+                            $paymentIntentData['shipping'] = [
+                                'name' => $user->name,
+                                'address' => [
+                                    'line1' => 'Address not provided',
+                                    'city' => 'Unknown',
+                                    'state' => 'Unknown',
+                                    'postal_code' => '000000',
+                                    'country' => 'IN',
+                                ],
+                            ];
+                        }
+
+                        $paymentIntent = PaymentIntent::create($paymentIntentData);
+
+                        // Log successful creation
+                        \Log::info('Stripe Payment Intent Created Successfully', [
+                            'payment_intent_id' => $paymentIntent->id,
+                            'status' => $paymentIntent->status,
+                            'amount' => $paymentIntent->amount,
+                            'currency' => $paymentIntent->currency,
                         ]);
 
                         $response['gateway_config']['client_secret'] = $paymentIntent->client_secret;
                         $response['gateway_config']['payment_intent_id'] = $paymentIntent->id;
+                        $response['gateway_config']['amount'] = $amount;
+                        $response['gateway_config']['status'] = $paymentIntent->status;
                     }
+                } catch (\Stripe\Exception\ApiErrorException $e) {
+                    \Log::error('Stripe API Error: ' . $e->getMessage(), [
+                        'type' => $e->getError()->type ?? null,
+                        'code' => $e->getError()->code ?? null,
+                        'param' => $e->getError()->param ?? null,
+                        'message' => $e->getError()->message ?? null,
+                    ]);
+                    return ApiResponse::error('Payment gateway error: ' . $e->getMessage(), null, 500, 'STRIPE_API_ERROR');
                 } catch (\Exception $e) {
-                    \Log::error('Stripe payment intent creation failed: ' . $e->getMessage());
-                    return ApiResponse::error('Failed to initialize payment gateway', null, 500, 'PAYMENT_GATEWAY_ERROR');
+                    \Log::error('Stripe payment intent creation failed: ' . $e->getMessage(), [
+                        'trace' => $e->getTraceAsString(),
+                    ]);
+                    return ApiResponse::error('Failed to initialize payment gateway: ' . $e->getMessage(), null, 500, 'PAYMENT_GATEWAY_ERROR');
                 }
             }
         }

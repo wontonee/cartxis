@@ -130,9 +130,8 @@ Route::prefix('api/v1')->group(function () {
             // Addresses
             Route::get('/addresses', [CustomerController::class, 'addresses']);
             Route::post('/addresses', [CustomerController::class, 'storeAddress']);
-            Route::put('/addresses/{id}', [CustomerController::class, 'updateAddress']);
+            Route::put('/addresses/{id}', [CustomerController::class, 'updateAddress']); // Use this to set default: {"is_default_shipping": true}
             Route::delete('/addresses/{id}', [CustomerController::class, 'deleteAddress']);
-            Route::post('/addresses/{id}/set-default', [CustomerController::class, 'setDefaultAddress']);
             
             // Wishlist
             Route::get('/wishlist', [WishlistController::class, 'index']);
