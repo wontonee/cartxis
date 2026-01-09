@@ -19,14 +19,21 @@ class CustomerController extends Controller
      */
     public function profile(Request $request)
     {
-        $user = $request->user()->load(['addresses', 'orders']);
+        $user = $request->user()->load(['addresses']);
+
+        // Load orders if relationship exists
+        try {
+            $user->load('orders');
+        } catch (\Exception $e) {
+            // Orders relationship might not be available
+        }
 
         return ApiResponse::success([
             'profile' => new UserResource($user),
             'statistics' => [
-                'total_orders' => $user->orders->count(),
-                'total_spent' => $user->orders->where('status', 'completed')->sum('grand_total'),
-                'addresses_count' => $user->addresses->count(),
+                'total_orders' => $user->orders ? $user->orders->count() : 0,
+                'total_spent' => $user->orders ? $user->orders->where('status', 'completed')->sum('grand_total') : 0,
+                'addresses_count' => $user->addresses ? $user->addresses->count() : 0,
             ],
         ], 'Profile retrieved successfully');
     }
@@ -41,6 +48,7 @@ class CustomerController extends Controller
             'phone' => 'nullable|string|max:20',
             'date_of_birth' => 'nullable|date',
             'gender' => 'nullable|in:male,female,other',
+            'avatar' => 'nullable|image|mimes:jpeg,jpg,png,gif|max:2048',
         ]);
 
         if ($validator->fails()) {
@@ -62,6 +70,18 @@ class CustomerController extends Controller
         }
         if ($request->has('gender')) {
             $updateData['gender'] = $request->gender;
+        }
+
+        // Handle profile photo upload
+        if ($request->hasFile('avatar')) {
+            // Delete old avatar if exists
+            if ($user->avatar && \Storage::disk('public')->exists($user->avatar)) {
+                \Storage::disk('public')->delete($user->avatar);
+            }
+
+            // Store new avatar
+            $path = $request->file('avatar')->store('avatars', 'public');
+            $updateData['avatar'] = $path;
         }
         
         $user->update($updateData);

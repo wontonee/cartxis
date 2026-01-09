@@ -39,12 +39,12 @@ class ProductResource extends JsonResource
                 'width' => $this->width,
                 'height' => $this->height,
             ],
-            'brand' => $this->whenLoaded('brand', fn() => [
+            'brand' => $this->whenLoaded('brand', fn() => $this->brand ? [
                 'id' => $this->brand->id,
                 'name' => $this->brand->name,
                 'slug' => $this->brand->slug,
                 'logo' => $this->brand->logo ? \Storage::url($this->brand->logo) : null,
-            ]),
+            ] : null),
             'categories' => $this->whenLoaded('categories', fn() => 
                 CategoryResource::collection($this->categories)
             ),

@@ -41,13 +41,13 @@ class CategoryController extends Controller
     public function tree()
     {
         $categories = Category::query()
-            ->where('status', 'active')
+            ->where('status', 'enabled')
             ->whereNull('parent_id')
             ->with(['children' => function($q) {
-                $q->where('status', 'active')
-                  ->orderBy('position');
+                $q->where('status', 'enabled')
+                  ->orderBy('sort_order');
             }])
-            ->orderBy('position')
+            ->orderBy('sort_order')
             ->get();
 
         return ApiResponse::success(
@@ -61,14 +61,14 @@ class CategoryController extends Controller
      */
     public function show($id)
     {
-        $category = Category::with(['parent', 'children' => fn($q) => $q->where('status', 'active')])
+        $category = Category::with(['parent', 'children' => fn($q) => $q->where('status', 'enabled')])
             ->find($id);
 
         if (!$category) {
             return ApiResponse::notFound('Category not found', 'CATEGORY_NOT_FOUND');
         }
 
-        if ($category->status !== 'active') {
+        if ($category->status !== 'enabled') {
             return ApiResponse::error('Category is not available', null, 403, 'CATEGORY_UNAVAILABLE');
         }
 
@@ -91,7 +91,13 @@ class CategoryController extends Controller
 
         $perPage = min($request->get('per_page', 20), config('vortex-api.pagination.max_per_page'));
 
-        $products = $category->products()
+        // Get all subcategory IDs recursively
+        $categoryIds = $this->getAllCategoryIds($category);
+
+        $products = \Vortex\Product\Models\Product::query()
+            ->whereHas('categories', function($query) use ($categoryIds) {
+                $query->whereIn('categories.id', $categoryIds);
+            })
             ->where('status', 'enabled')
             ->with(['images', 'brand'])
             ->paginate($perPage);
@@ -100,5 +106,21 @@ class CategoryController extends Controller
             $products->through(fn($product) => new \Vortex\API\Http\Resources\ProductResource($product)),
             "Products in '{$category->name}' retrieved successfully"
         );
+    }
+
+    /**
+     * Get all category IDs including subcategories recursively.
+     */
+    private function getAllCategoryIds($category)
+    {
+        $ids = [$category->id];
+        
+        $subcategories = Category::where('parent_id', $category->id)->get();
+        
+        foreach ($subcategories as $subcategory) {
+            $ids = array_merge($ids, $this->getAllCategoryIds($subcategory));
+        }
+        
+        return $ids;
     }
 }

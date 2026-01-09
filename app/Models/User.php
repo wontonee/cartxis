@@ -31,6 +31,7 @@ class User extends Authenticatable
         'phone',
         'date_of_birth',
         'gender',
+        'avatar',
     ];
 
     /**
@@ -64,5 +65,13 @@ class User extends Authenticatable
     public function orders()
     {
         return $this->hasMany(\Vortex\Shop\Models\Order::class);
+    }
+
+    /**
+     * Get the addresses for the user.
+     */
+    public function addresses()
+    {
+        return $this->hasMany(\Vortex\Customer\Models\CustomerAddress::class, 'customer_id');
     }
 }
