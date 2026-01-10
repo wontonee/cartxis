@@ -182,6 +182,14 @@ class Product extends Model
     }
 
     /**
+     * Get order items (for popularity sorting)
+     */
+    public function orderItems()
+    {
+        return $this->hasMany(\Vortex\Shop\Models\OrderItem::class);
+    }
+
+    /**
      * Check if product is in stock
      */
     public function isInStock(): bool

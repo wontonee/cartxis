@@ -11,6 +11,9 @@ class APIServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        // Load migrations
+        $this->loadMigrationsFrom(__DIR__ . '/../Database/Migrations');
+
         // Load API routes
         $this->loadRoutesFrom(__DIR__ . '/../Routes/api.php');
 

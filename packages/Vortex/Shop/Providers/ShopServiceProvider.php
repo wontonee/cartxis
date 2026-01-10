@@ -50,6 +50,9 @@ class ShopServiceProvider extends ServiceProvider
     {
         $router = $this->app['router'];
         
+        // Add setup incomplete check to web middleware group
+        $router->pushMiddlewareToGroup('web', 'setup.incomplete');
+        
         // Add to web middleware group
         $router->pushMiddlewareToGroup('web', \Vortex\Shop\Http\Middleware\ShareFrontendData::class);
     }

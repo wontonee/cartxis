@@ -40,6 +40,12 @@ class ProductImage extends Model
      */
     public function getUrlAttribute(): string
     {
+        // Check if path is already a full URL (e.g., Unsplash, external CDN)
+        if (filter_var($this->path, FILTER_VALIDATE_URL)) {
+            return $this->path;
+        }
+        
+        // For local files, prepend storage path
         return asset('storage/' . $this->path);
     }
 }

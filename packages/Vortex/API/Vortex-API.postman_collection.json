@@ -259,7 +259,7 @@
 						"method": "GET",
 						"header": [],
 						"url": {
-							"raw": "{{base_url}}/api/v1/products?page=1&per_page=20&sort=created_at&order=desc",
+							"raw": "{{base_url}}/api/v1/products?page=1&per_page=20&sort_by=created_at&sort_order=desc",
 							"host": ["{{base_url}}"],
 							"path": ["api", "v1", "products"],
 							"query": [
@@ -271,22 +271,54 @@
 								{
 									"key": "per_page",
 									"value": "20",
-									"description": "Items per page"
+									"description": "Items per page (max: 50)"
 								},
 								{
-									"key": "sort",
-									"value": "created_at",
-									"description": "Sort field: name, price, created_at"
+									"key": "search",
+									"value": "",
+									"description": "Search by name, SKU, or description",
+									"disabled": true
 								},
 								{
-									"key": "order",
-									"value": "desc",
-									"description": "Sort order: asc, desc"
+									"key": "featured",
+									"value": "",
+									"description": "Filter by featured (true/false)",
+									"disabled": true
+								},
+								{
+									"key": "new",
+									"value": "",
+									"description": "Filter by new arrivals (true/false)",
+									"disabled": true
+								},
+								{
+									"key": "on_sale",
+									"value": "",
+									"description": "Filter products on sale (true/false)",
+									"disabled": true
 								},
 								{
 									"key": "category_id",
 									"value": "",
-									"description": "Filter by category",
+									"description": "Filter by single category ID",
+									"disabled": true
+								},
+								{
+									"key": "category_ids",
+									"value": "",
+									"description": "Filter by multiple category IDs (comma-separated: 1,2,3)",
+									"disabled": true
+								},
+								{
+									"key": "brand_id",
+									"value": "",
+									"description": "Filter by single brand ID",
+									"disabled": true
+								},
+								{
+									"key": "brand_ids",
+									"value": "",
+									"description": "Filter by multiple brand IDs (comma-separated: 1,2,3)",
 									"disabled": true
 								},
 								{
@@ -302,14 +334,30 @@
 									"disabled": true
 								},
 								{
-									"key": "in_stock",
-									"value": "1",
-									"description": "Show only in-stock items",
+									"key": "min_rating",
+									"value": "",
+									"description": "Minimum average rating (1-5)",
 									"disabled": true
+								},
+								{
+									"key": "in_stock",
+									"value": "",
+									"description": "Show only in-stock items (true/false)",
+									"disabled": true
+								},
+								{
+									"key": "sort_by",
+									"value": "created_at",
+									"description": "Sort field: price, name, created_at, popularity, rating, discount"
+								},
+								{
+									"key": "sort_order",
+									"value": "desc",
+									"description": "Sort order: asc, desc"
 								}
 							]
 						},
-						"description": "Get paginated list of products with filters and sorting"
+						"description": "Get paginated list of products with comprehensive filters and sorting options"
 					}
 				},
 				{
@@ -456,9 +504,29 @@
 						"url": {
 							"raw": "{{base_url}}/api/v1/categories",
 							"host": ["{{base_url}}"],
-							"path": ["api", "v1", "categories"]
+							"path": ["api", "v1", "categories"],
+							"query": [
+								{
+									"key": "search",
+									"value": "",
+									"description": "Search by category name, slug, or description",
+									"disabled": true
+								},
+								{
+									"key": "parent_id",
+									"value": "",
+									"description": "Filter by parent category ID (null for root categories)",
+									"disabled": true
+								},
+								{
+									"key": "with_product_count",
+									"value": "",
+									"description": "Include product count for each category (true/false)",
+									"disabled": true
+								}
+							]
 						},
-						"description": "Get flat list of all categories"
+						"description": "Get list of categories with optional search and filters"
 					}
 				},
 				{

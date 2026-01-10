@@ -418,7 +418,7 @@ function formatDate(date: string): string {
                 </td>
                 <td class="px-6 py-4">
                   <div v-if="product.main_image" class="w-12 h-12 rounded-lg overflow-hidden bg-gray-100">
-                    <img :src="`/storage/${product.main_image.thumbnail_path || product.main_image.path}`" :alt="product.name" class="w-full h-full object-cover" />
+                    <img :src="product.main_image.url" :alt="product.name" class="w-full h-full object-cover" />
                   </div>
                   <div v-else class="w-12 h-12 rounded-lg bg-gray-100 flex items-center justify-center">
                     <svg class="w-6 h-6 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">

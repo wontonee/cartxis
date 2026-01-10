@@ -19,12 +19,27 @@ class CategoryController extends Controller
             ->where('status', 'enabled')
             ->with(['parent', 'children']);
 
+        // Search by name or slug
+        if ($request->has('search')) {
+            $search = $request->search;
+            $query->where(function($q) use ($search) {
+                $q->where('name', 'like', "%{$search}%")
+                  ->orWhere('slug', 'like', "%{$search}%")
+                  ->orWhere('description', 'like', "%{$search}%");
+            });
+        }
+
         // Filter by parent
         if ($request->has('parent_id')) {
             $query->where('parent_id', $request->parent_id);
-        } else {
-            // Root categories by default
+        } elseif (!$request->has('search')) {
+            // Root categories by default (unless searching)
             $query->whereNull('parent_id');
+        }
+
+        // Add product count
+        if ($request->get('with_product_count', false)) {
+            $query->withCount('products');
         }
 
         $categories = $query->orderBy('sort_order')->get();

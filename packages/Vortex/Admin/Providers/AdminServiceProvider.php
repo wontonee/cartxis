@@ -23,6 +23,9 @@ class AdminServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        // Load migrations
+        $this->loadMigrationsFrom(__DIR__ . '/../Database/Migrations');
+
         // Load routes
         $this->loadRoutesFrom(__DIR__ . '/../Routes/admin.php');
 

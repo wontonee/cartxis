@@ -22,11 +22,46 @@ class ProductController extends Controller
             ->where('price', '>', 0)
             ->where('quantity', '>', 0);
 
-        // Filtering
-        if ($request->has('category_id')) {
-            $query->whereHas('categories', fn($q) => $q->where('category_id', $request->category_id));
+        // Search by name or SKU
+        if ($request->has('search')) {
+            $search = $request->search;
+            $query->where(function($q) use ($search) {
+                $q->where('name', 'like', "%{$search}%")
+                  ->orWhere('sku', 'like', "%{$search}%")
+                  ->orWhere('description', 'like', "%{$search}%");
+            });
         }
 
+        // Filter by featured
+        if ($request->has('featured')) {
+            $query->where('featured', filter_var($request->featured, FILTER_VALIDATE_BOOLEAN));
+        }
+
+        // Filter by new arrivals
+        if ($request->has('new')) {
+            $query->where('new', filter_var($request->new, FILTER_VALIDATE_BOOLEAN));
+        }
+
+        // Filter by on sale
+        if ($request->has('on_sale') && filter_var($request->on_sale, FILTER_VALIDATE_BOOLEAN)) {
+            $query->where('special_price', '>', 0)
+                  ->whereColumn('special_price', '<', 'price');
+        }
+
+        // Filtering by category
+        if ($request->has('category_id')) {
+            $query->whereHas('categories', fn($q) => $q->where('categories.id', $request->category_id));
+        }
+
+        // Filter by multiple categories
+        if ($request->has('category_ids')) {
+            $categoryIds = is_array($request->category_ids) 
+                ? $request->category_ids 
+                : explode(',', $request->category_ids);
+            $query->whereHas('categories', fn($q) => $q->whereIn('categories.id', $categoryIds));
+        }
+
+        // Price range filtering
         if ($request->has('min_price')) {
             $query->where('price', '>=', $request->min_price);
         }
@@ -35,18 +70,43 @@ class ProductController extends Controller
             $query->where('price', '<=', $request->max_price);
         }
 
+        // Brand filtering
         if ($request->has('brand_id')) {
             $query->where('brand_id', $request->brand_id);
+        }
+
+        // Multiple brands
+        if ($request->has('brand_ids')) {
+            $brandIds = is_array($request->brand_ids) 
+                ? $request->brand_ids 
+                : explode(',', $request->brand_ids);
+            $query->whereIn('brand_id', $brandIds);
+        }
+
+        // Rating filter
+        if ($request->has('min_rating')) {
+            $query->whereHas('reviews', function($q) use ($request) {
+                $q->havingRaw('AVG(rating) >= ?', [$request->min_rating]);
+            });
+        }
+
+        // Stock status
+        if ($request->has('in_stock') && filter_var($request->in_stock, FILTER_VALIDATE_BOOLEAN)) {
+            $query->where('quantity', '>', 0);
         }
 
         // Sorting
         $sortBy = $request->get('sort_by', 'created_at');
         $sortOrder = $request->get('sort_order', 'desc');
         
-        $allowedSorts = ['price', 'name', 'created_at', 'popularity'];
+        $allowedSorts = ['price', 'name', 'created_at', 'popularity', 'rating', 'discount'];
         if (in_array($sortBy, $allowedSorts)) {
             if ($sortBy === 'popularity') {
                 $query->withCount('orderItems')->orderBy('order_items_count', $sortOrder);
+            } elseif ($sortBy === 'rating') {
+                $query->withAvg('reviews', 'rating')->orderBy('reviews_avg_rating', $sortOrder);
+            } elseif ($sortBy === 'discount') {
+                $query->orderByRaw('((price - special_price) / price * 100) ' . $sortOrder);
             } else {
                 $query->orderBy($sortBy, $sortOrder);
             }

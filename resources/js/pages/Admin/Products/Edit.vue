@@ -657,7 +657,7 @@ const deleteProduct = () => {
                            :class="{ 'border-blue-500': product.main_image_id === image.id }">
                         <div class="w-full h-full group relative">
                           <img
-                            :src="`/storage/${image.path}`"
+                            :src="image.url"
                             :alt="image.alt_text || product.name"
                             class="w-full h-full object-cover block"
                           />

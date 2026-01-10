@@ -19,12 +19,14 @@ interface Product {
     id: number;
     path: string;
     thumbnail_path: string;
+    url: string;
   };
   images?: Array<{
     id: number;
     path: string;
     thumbnail_path: string;
     alt_text: string | null;
+    url: string;
   }>;
   categories: Array<{ id: number; name: string }>;
   main_image_id?: number | null;
@@ -189,7 +191,7 @@ const deleteProduct = () => {
                   <div class="relative bg-gray-100 rounded-lg overflow-hidden aspect-square">
                     <img
                       v-if="currentImage"
-                      :src="`/storage/${currentImage.path}`"
+                      :src="currentImage.url"
                       :alt="currentImage.alt_text || product.name"
                       :class="[
                         'w-full h-full object-contain transition-transform duration-300',
@@ -247,7 +249,7 @@ const deleteProduct = () => {
                       ]"
                     >
                       <img
-                        :src="`/storage/${image.thumbnail_path || image.path}`"
+                        :src="image.url"
                         :alt="image.alt_text || product.name"
                         class="w-full h-full object-cover"
                       />

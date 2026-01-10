@@ -1,0 +1,18 @@
+{
+    "name": "vortex/setup",
+    "description": "Setup wizard for Vortex eCommerce platform",
+    "type": "library",
+    "license": "MIT",
+    "autoload": {
+        "psr-4": {
+            "Vortex\\Setup\\": "src/"
+        }
+    },
+    "extra": {
+        "laravel": {
+            "providers": [
+                "Vortex\\Setup\\Providers\\SetupServiceProvider"
+            ]
+        }
+    }
+}

@@ -57,7 +57,9 @@
             "Vortex\\System\\": "packages/Vortex/System/src/",
             "Vortex\\Reports\\": "packages/Vortex/Reports/src/",
             "Vortex\\Marketing\\": "packages/Vortex/Marketing/src/",
-            "Vortex\\API\\": "packages/Vortex/API/"
+            "Vortex\\API\\": "packages/Vortex/API/",
+            "Vortex\\Setup\\": "packages/Vortex/Setup/src/",
+            "Vortex\\Setup\\Database\\Seeders\\": "packages/Vortex/Setup/src/Database/Seeders/"
         }
     },
     "autoload-dev": {
