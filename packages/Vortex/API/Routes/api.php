@@ -5,6 +5,7 @@ use Vortex\API\Http\Controllers\V1\AuthController;
 use Vortex\API\Http\Controllers\V1\ProductController;
 use Vortex\API\Http\Controllers\V1\CategoryController;
 use Vortex\API\Http\Controllers\V1\CartController;
+use Vortex\API\Http\Controllers\V1\BannerController;
 use Vortex\API\Http\Controllers\V1\CheckoutController;
 use Vortex\API\Http\Controllers\V1\CustomerController;
 use Vortex\API\Http\Controllers\V1\OrderController;
@@ -50,6 +51,10 @@ Route::prefix('api/v1')->group(function () {
         Route::get('/{id}/related', [ProductController::class, 'related']);
         Route::get('/{id}/reviews', [ReviewController::class, 'productReviews']);
     });
+
+    // Home/mobile banners (CMS blocks of type=banner)
+    Route::get('banners', [BannerController::class, 'index']);
+    Route::get('banners/{identifier}', [BannerController::class, 'show']);
 
     // Categories (Public browsing)
     Route::prefix('categories')->group(function () {

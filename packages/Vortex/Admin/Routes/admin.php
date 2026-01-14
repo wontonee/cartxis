@@ -24,13 +24,13 @@ use Vortex\Settings\Http\Controllers\Admin\ChannelsController;
 
 Route::prefix('admin')->name('admin.')->middleware(['web'])->group(function () {
     // Admin Authentication Routes (Guest)
-    Route::middleware('guest:admin')->group(function () {
+    Route::middleware(\Vortex\Admin\Http\Middleware\RedirectIfAdminAuthenticated::class)->group(function () {
         Route::get('/login', [AdminLoginController::class, 'create'])->name('login');
         Route::post('/login', [AdminLoginController::class, 'store'])->name('login.store');
     });
 
     // Admin Authenticated Routes
-    Route::middleware(['auth:admin'])->group(function () {
+    Route::middleware(['auth:admin', 'prevent.user.admin'])->group(function () {
         Route::post('/logout', [AdminLoginController::class, 'destroy'])->name('logout');
         
         // Dashboard

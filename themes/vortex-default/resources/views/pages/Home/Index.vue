@@ -50,6 +50,7 @@ interface Props {
     newProducts?: Product[];
     cmsBlocks?: {
         hero?: CMSBlock;
+        hero_slides?: CMSBlock[];
         deal?: CMSBlock;
         features?: CMSBlock;
         testimonials?: CMSBlock;
@@ -67,21 +68,44 @@ const props = defineProps<Props>();
 const primaryColor = computed(() => props.theme.settings.primary_color);
 const secondaryColor = computed(() => props.theme.settings.secondary_color);
 
-// Hero slider - uses CMS banner block data
-const heroSlides = ref([
-    {
-        id: 1,
-        title: props.cmsBlocks?.hero?.data?.title || props.cmsBlocks?.hero?.title || 'Welcome to Our Store',
-        subtitle: '',
-        description: props.cmsBlocks?.hero?.data?.description || 'Discover the latest products',
-        buttonText: props.cmsBlocks?.hero?.data?.cta_text || 'Shop Now',
-        buttonUrl: props.cmsBlocks?.hero?.data?.cta_url || '/products',
-        image: props.cmsBlocks?.hero?.data?.image || '/images/hero/slide1.jpg',
-        imageAlt: props.cmsBlocks?.hero?.data?.alt || 'Hero banner',
-        badge: 'New',
-        isBannerType: props.cmsBlocks?.hero?.type === 'banner'
+const buildHeroSlides = () => {
+    const slides = props.cmsBlocks?.hero_slides && props.cmsBlocks.hero_slides.length > 0
+        ? props.cmsBlocks.hero_slides
+        : (props.cmsBlocks?.hero ? [props.cmsBlocks.hero] : []);
+
+    if (!slides || slides.length === 0) {
+        return [
+            {
+                id: 1,
+                title: 'Welcome to Our Store',
+                subtitle: '',
+                description: 'Discover the latest products',
+                buttonText: 'Shop Now',
+                buttonUrl: '/products',
+                image: '/images/hero/slide1.jpg',
+                imageAlt: 'Hero banner',
+                badge: 'New',
+                isBannerType: false,
+            },
+        ];
     }
-]);
+
+    return slides.map((block, index) => ({
+        id: block.id ?? (index + 1),
+        title: block.data?.title || block.title || 'Welcome to Our Store',
+        subtitle: block.data?.subtitle || '',
+        description: block.data?.description || '',
+        buttonText: block.data?.cta_text || 'Shop Now',
+        buttonUrl: block.data?.cta_url || '/products',
+        image: block.data?.image || '/images/hero/slide1.jpg',
+        imageAlt: block.data?.alt || 'Hero banner',
+        badge: block.data?.label || block.data?.badge || '',
+        isBannerType: block.type === 'banner',
+    }));
+};
+
+// Hero slider - uses CMS banner block data
+const heroSlides = ref(buildHeroSlides());
 
 const currentSlide = ref(0);
 

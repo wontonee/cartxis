@@ -85,7 +85,13 @@ Route::group([
         Route::put('/addresses/{address}/default', [Vortex\Shop\Http\Controllers\Account\AddressController::class, 'setDefault'])->name('addresses.default');
         Route::delete('/addresses/{address}', [Vortex\Shop\Http\Controllers\Account\AddressController::class, 'destroy'])->name('addresses.destroy');
         
-        // Route::get('/wishlist', [Vortex\Shop\Http\Controllers\Account\WishlistController::class, 'index'])->name('wishlist.index');
+        // Wishlist
+        Route::get('/wishlist', [Vortex\Shop\Http\Controllers\Account\WishlistController::class, 'index'])->name('wishlist.index');
+        Route::get('/wishlist/get', [Vortex\Shop\Http\Controllers\Account\WishlistController::class, 'get'])->name('wishlist.get');
+        Route::post('/wishlist/add', [Vortex\Shop\Http\Controllers\Account\WishlistController::class, 'add'])->name('wishlist.add');
+        Route::delete('/wishlist/{id}', [Vortex\Shop\Http\Controllers\Account\WishlistController::class, 'remove'])->name('wishlist.remove');
+        Route::post('/wishlist/{id}/move-to-cart', [Vortex\Shop\Http\Controllers\Account\WishlistController::class, 'moveToCart'])->name('wishlist.moveToCart');
+        
         // Route::get('/reviews', [Vortex\Shop\Http\Controllers\Account\ReviewController::class, 'index'])->name('reviews.index');
     });
 

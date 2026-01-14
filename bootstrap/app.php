@@ -9,6 +9,8 @@ use Illuminate\Foundation\Configuration\Middleware;
 use Illuminate\Http\Middleware\AddLinkHeadersForPreloadedAssets;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\RateLimiter;
+use Vortex\Admin\Http\Middleware\PreventAdminFrontendAccess;
+use Vortex\Admin\Http\Middleware\PreventUserAdminAccess;
 
 return Application::configure(basePath: dirname(__DIR__))
     ->withRouting(
@@ -32,6 +34,12 @@ return Application::configure(basePath: dirname(__DIR__))
             HandleAppearance::class,
             HandleInertiaRequests::class,
             AddLinkHeadersForPreloadedAssets::class,
+            PreventAdminFrontendAccess::class, // Prevent admins from accessing frontend
+        ]);
+
+        // Add middleware to admin routes to prevent regular users
+        $middleware->alias([
+            'prevent.user.admin' => PreventUserAdminAccess::class,
         ]);
 
         // Redirect guests based on the guard

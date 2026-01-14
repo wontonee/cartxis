@@ -17,8 +17,11 @@ class WishlistController extends Controller
      */
     public function index(Request $request)
     {
+        $user = $request->user();
+        $customerId = $user->customer ? $user->customer->id : $user->id;
+
         $wishlistItems = Wishlist::with(['product.images', 'product.brand'])
-            ->where('customer_id', $request->user()->id)
+            ->where('customer_id', $customerId)
             ->latest()
             ->get();
 
@@ -45,14 +48,17 @@ class WishlistController extends Controller
             return ApiResponse::validationError($validator);
         }
 
+        $user = $request->user();
+        $customerId = $user->customer ? $user->customer->id : $user->id;
+
         $product = Product::find($request->product_id);
 
-        if (!$product || $product->status !== 'active') {
+        if (!$product || $product->status !== 'enabled') {
             return ApiResponse::error('Product not available', null, 400, 'PRODUCT_UNAVAILABLE');
         }
 
         // Check if already in wishlist
-        $exists = Wishlist::where('customer_id', $request->user()->id)
+        $exists = Wishlist::where('customer_id', $customerId)
             ->where('product_id', $request->product_id)
             ->exists();
 
@@ -61,7 +67,7 @@ class WishlistController extends Controller
         }
 
         $wishlistItem = Wishlist::create([
-            'customer_id' => $request->user()->id,
+            'customer_id' => $customerId,
             'product_id' => $request->product_id,
         ]);
 
@@ -79,7 +85,10 @@ class WishlistController extends Controller
      */
     public function remove(Request $request, $id)
     {
-        $wishlistItem = Wishlist::where('customer_id', $request->user()->id)->find($id);
+        $user = $request->user();
+        $customerId = $user->customer ? $user->customer->id : $user->id;
+
+        $wishlistItem = Wishlist::where('customer_id', $customerId)->find($id);
 
         if (!$wishlistItem) {
             return ApiResponse::notFound('Wishlist item not found', 'WISHLIST_ITEM_NOT_FOUND');
@@ -95,8 +104,11 @@ class WishlistController extends Controller
      */
     public function moveToCart(Request $request, $id)
     {
+        $user = $request->user();
+        $customerId = $user->customer ? $user->customer->id : $user->id;
+
         $wishlistItem = Wishlist::with('product')
-            ->where('customer_id', $request->user()->id)
+            ->where('customer_id', $customerId)
             ->find($id);
 
         if (!$wishlistItem) {

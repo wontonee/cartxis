@@ -3,8 +3,11 @@ import { ref, computed } from 'vue';
 import { Link, router } from '@inertiajs/vue3';
 import { useCart } from '@/composables/useCart';
 import { useCurrency } from '@/composables/useCurrency';
+import { useWishlist } from '@/composables/useWishlist';
+import { Heart } from 'lucide-vue-next';
 
 const { formatPrice } = useCurrency();
+const { toggleWishlist, isInWishlist, loading: wishlistLoading } = useWishlist();
 
 interface Product {
     id: number;
@@ -94,6 +97,10 @@ const renderStars = (rating: number) => {
     
     return stars.join('');
 };
+
+const handleWishlistToggle = async () => {
+    await toggleWishlist(props.product.id);
+};
 </script>
 
 <template>
@@ -135,7 +142,21 @@ const renderStars = (rating: number) => {
                     </span>
                 </div>
                 
-                <!-- Stock Status -->
+                <!-- Wishlist Button -->
+                <button
+                    v-if="product.in_stock"
+                    @click.prevent="handleWishlistToggle"
+                    :disabled="wishlistLoading"
+                    class="absolute top-4 right-4 p-2 bg-white/90 hover:bg-white rounded-full shadow-md transition-all hover:scale-110 disabled:opacity-50 z-10"
+                    title="Add to wishlist"
+                >
+                    <Heart
+                        :class="{ 'fill-red-500 text-red-500': isInWishlist(product.id), 'text-gray-600': !isInWishlist(product.id) }"
+                        class="w-5 h-5 transition-colors"
+                    />
+                </button>
+
+                <!-- Stock Status Badge -->
                 <div v-if="!product.in_stock" class="absolute top-4 right-4">
                     <span class="px-3 py-1 bg-gray-900 text-white text-sm font-semibold rounded-full">
                         Out of Stock

@@ -37,8 +37,12 @@ class AdminLoginController extends Controller
         )) {
             $user = Auth::guard('admin')->user();
 
+            $roleIsAdmin = (string) ($user->role ?? '') === 'admin';
+            $permissionsIsAdmin = method_exists($user, 'isAdmin') ? (bool) $user->isAdmin() : false;
+            $isAdmin = $roleIsAdmin || $permissionsIsAdmin;
+
             // Check if user has admin role
-            if ($user->role !== 'admin') {
+            if (!$isAdmin) {
                 Auth::guard('admin')->logout();
                 throw ValidationException::withMessages([
                     'email' => __('You do not have admin access.'),

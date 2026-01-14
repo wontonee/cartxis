@@ -587,6 +587,70 @@
 			"description": "Category navigation and product browsing"
 		},
 		{
+			"name": "Banners",
+			"item": [
+				{
+					"name": "List Banners",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/v1/banners?identifier=homepage-hero&limit=10",
+							"host": ["{{base_url}}"],
+							"path": ["api", "v1", "banners"],
+							"query": [
+								{
+									"key": "identifier",
+									"value": "homepage-hero",
+									"description": "Exact CMS block identifier",
+									"disabled": true
+								},
+								{
+									"key": "identifiers",
+									"value": "homepage-hero,electronics-hero-banner",
+									"description": "Comma-separated list of identifiers",
+									"disabled": true
+								},
+								{
+									"key": "channel_id",
+									"value": "1",
+									"description": "Optional channel filter",
+									"disabled": true
+								},
+								{
+									"key": "limit",
+									"value": "10",
+									"description": "Max items (default 10, max 50)",
+									"disabled": true
+								}
+							]
+						},
+						"description": "List active & scheduled banners (backed by CMS blocks type=banner)"
+					}
+				},
+				{
+					"name": "Get Banner By Identifier",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/v1/banners/homepage-hero",
+							"host": ["{{base_url}}"],
+							"path": ["api", "v1", "banners", "homepage-hero"]
+						},
+						"description": "Fetch a single banner by identifier (403 if not visible)"
+					}
+				}
+			],
+			"description": "Mobile/home banners powered by CMS blocks"
+		},
+		{
 			"name": "Currency",
 			"item": [
 				{

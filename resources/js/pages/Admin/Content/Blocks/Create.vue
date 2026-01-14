@@ -114,6 +114,37 @@
                         <!-- Banner Type -->
                         <div v-if="form.type === 'banner'" class="space-y-4">
                             <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Target Device</label>
+                                <select
+                                    v-model="bannerData.device"
+                                    class="w-full px-3 py-2 border border-gray-300 rounded-lg"
+                                >
+                                    <option value="desktop">Desktop / Web</option>
+                                    <option value="mobile">Mobile App</option>
+                                </select>
+                                <p class="mt-1 text-xs text-gray-500">Mobile banners use identifier prefix <code class="text-blue-600">mobile-</code>.</p>
+                            </div>
+                            <div class="grid grid-cols-2 gap-4">
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">Label (Badge)</label>
+                                    <input
+                                        v-model="bannerData.label"
+                                        type="text"
+                                        class="w-full px-3 py-2 border border-gray-300 rounded-lg"
+                                        placeholder="PROMO / NEW"
+                                    />
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">Subtitle</label>
+                                    <input
+                                        v-model="bannerData.subtitle"
+                                        type="text"
+                                        class="w-full px-3 py-2 border border-gray-300 rounded-lg"
+                                        placeholder="Up to 50% Off Electronics"
+                                    />
+                                </div>
+                            </div>
+                            <div>
                                 <label class="block text-sm font-medium text-gray-700 mb-1">Banner Title</label>
                                 <input
                                     v-model="bannerData.title"
@@ -148,6 +179,16 @@
                                     class="w-full px-3 py-2 border border-gray-300 rounded-lg"
                                     placeholder="Image description"
                                 />
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Overlay Color (Hex with alpha)</label>
+                                <input
+                                    v-model="bannerData.overlay_color"
+                                    type="text"
+                                    class="w-full px-3 py-2 border border-gray-300 rounded-lg"
+                                    placeholder="#00000099"
+                                />
+                                <p class="mt-1 text-xs text-gray-500">Example: <code class="text-blue-600">#00000099</code> = black @ 60% opacity.</p>
                             </div>
                             <div class="grid grid-cols-2 gap-4">
                                 <div>
@@ -342,6 +383,10 @@ const form = useForm({
 const identifierStatus = ref('');
 
 const bannerData = reactive({
+    device: 'desktop',
+    label: '',
+    subtitle: '',
+    overlay_color: '',
     title: '',
     description: '',
     image: '',
@@ -373,7 +418,9 @@ const generateIdentifier = debounce(() => {
         .replace(/[^a-z0-9]+/g, '-')
         .replace(/^-+|-+$/g, '');
     
-    form.identifier = slug;
+    form.identifier = bannerData.device === 'mobile' && !slug.startsWith('mobile-')
+        ? `mobile-${slug}`
+        : slug;
 }, 300);
 
 const regenerateIdentifier = () => {
@@ -382,6 +429,21 @@ const regenerateIdentifier = () => {
         checkIdentifier();
     }
 };
+
+watch(() => bannerData.device, (device) => {
+    if (form.type !== 'banner') return;
+    if (!form.identifier) return;
+
+    if (device === 'mobile' && !form.identifier.startsWith('mobile-')) {
+        form.identifier = `mobile-${form.identifier}`;
+        checkIdentifier();
+    }
+
+    if (device === 'desktop' && form.identifier.startsWith('mobile-')) {
+        form.identifier = form.identifier.replace(/^mobile-/, '');
+        checkIdentifier();
+    }
+});
 
 const checkIdentifier = debounce(() => {
     if (!form.identifier) return;

@@ -41,6 +41,12 @@ return [
         'show_categories' => true,
         'show_featured_products' => true,
         'show_new_products' => true,
+        // CMS Block identifier used for the storefront hero banner.
+        // You can point this to a theme/demo identifier (e.g. 'fashion-hero-banner').
+        'hero_block_identifier' => 'homepage-hero',
+        // Optional: multiple CMS block identifiers for hero slides.
+        // Example: ['fashion-hero-banner', 'fashion-hero-banner-2']
+        'hero_block_identifiers' => [],
     ],
 
     /*

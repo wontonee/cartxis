@@ -95,6 +95,14 @@ class Customer extends Model
     }
 
     /**
+     * Get the customer's wishlist items.
+     */
+    public function wishlists(): HasMany
+    {
+        return $this->hasMany(Wishlist::class);
+    }
+
+    /**
      * Get the customer's full name.
      */
     public function getFullNameAttribute(): string

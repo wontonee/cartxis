@@ -68,10 +68,33 @@ class User extends Authenticatable
     }
 
     /**
+     * Get the customer record for the user.
+     */
+    public function customer()
+    {
+        return $this->hasOne(\Vortex\Customer\Models\Customer::class);
+    }
+
+    /**
      * Get the addresses for the user.
      */
     public function addresses()
     {
         return $this->hasMany(\Vortex\Customer\Models\CustomerAddress::class, 'customer_id');
+    }
+
+    /**
+     * Get the wishlist items for the user (through customer).
+     */
+    public function wishlist()
+    {
+        return $this->hasManyThrough(
+            \Vortex\Customer\Models\Wishlist::class,
+            \Vortex\Customer\Models\Customer::class,
+            'user_id', // Foreign key on customers table
+            'customer_id', // Foreign key on wishlists table
+            'id', // Local key on users table
+            'id' // Local key on customers table
+        );
     }
 }

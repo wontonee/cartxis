@@ -41,32 +41,55 @@ class HomeService extends ShopService
     public function getHomepageData()
     {
         try {
-            return $this->remember('homepage.data', 3600, function () {
-                $featuredCount = config('shop.homepage.featured_products_count', 12);
-                
-                // Get active CMS blocks for homepage
-                $blockIdentifiers = [
+            $featuredCount = config('shop.homepage.featured_products_count', 12);
+
+            // Primary hero identifier is configurable; fall back to existing demo identifiers.
+            $primaryHeroIdentifier = (string) config('shop.homepage.hero_block_identifier', 'homepage-hero');
+            $configuredHeroIdentifiers = config('shop.homepage.hero_block_identifiers');
+            if (!is_array($configuredHeroIdentifiers)) {
+                $configuredHeroIdentifiers = [];
+            }
+
+            $heroCandidates = array_values(array_unique(array_filter(array_merge(
+                $configuredHeroIdentifiers,
+                [
+                    $primaryHeroIdentifier,
                     'homepage-hero',
-                    'homepage-deal',
-                    'homepage-features',
-                    'homepage-testimonials',
-                    'homepage-brands'
-                ];
-                
+                    'homepage-hero-2',
+                    'fashion-hero-banner',
+                    'fashion-hero-banner-2',
+                ]
+            ))));
+
+            $blockIdentifiers = array_values(array_unique(array_filter(array_merge([
+                'homepage-deal',
+                'homepage-features',
+                'homepage-testimonials',
+                'homepage-brands',
+            ], $heroCandidates))));
+
+            // Version cache key by CMS block updates so homepage banners update immediately.
+            $blocksUpdatedAt = Block::whereIn('identifier', $blockIdentifiers)->max('updated_at');
+            $blocksVersion = $blocksUpdatedAt ? (int) strtotime((string) $blocksUpdatedAt) : 0;
+
+            return $this->remember('homepage.data.v2.' . $blocksVersion, 3600, function () use ($featuredCount, $blockIdentifiers, $heroCandidates) {
+                // Get active CMS blocks for homepage
                 $blocks = Block::whereIn('identifier', $blockIdentifiers)
-                    ->where('status', true)
-                    ->where(function ($query) {
-                        $query->whereNull('start_date')
-                            ->orWhere('start_date', '<=', now());
-                    })
-                    ->where(function ($query) {
-                        $query->whereNull('end_date')
-                            ->orWhere('end_date', '>=', now());
-                    })
+                    ->active()
+                    ->scheduled()
                     ->get()
                     ->keyBy('identifier');
-                
-                $heroBlock = $blocks->get('homepage-hero');
+
+                $heroBlocks = [];
+                foreach ($heroCandidates as $identifier) {
+                    $block = $blocks->get($identifier);
+                    if ($block) {
+                        $heroBlocks[] = $block;
+                    }
+                }
+
+                $heroBlock = $heroBlocks[0] ?? null;
+
                 $dealBlock = $blocks->get('homepage-deal');
                 $featuresBlock = $blocks->get('homepage-features');
                 $testimonialsBlock = $blocks->get('homepage-testimonials');
@@ -104,6 +127,15 @@ class HomeService extends ShopService
                             'type' => $heroBlock->type,
                             'data' => $heroBlock->type === 'banner' ? json_decode($heroBlock->content, true) : null,
                         ] : null,
+                        'hero_slides' => !empty($heroBlocks) ? array_values(array_map(function ($block) {
+                            return [
+                                'id' => $block->id,
+                                'title' => $block->title,
+                                'content' => $block->content,
+                                'type' => $block->type,
+                                'data' => $block->type === 'banner' ? json_decode($block->content, true) : null,
+                            ];
+                        }, $heroBlocks)) : [],
                         'deal' => $dealBlock ? [
                             'id' => $dealBlock->id,
                             'title' => $dealBlock->title,

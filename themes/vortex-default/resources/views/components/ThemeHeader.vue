@@ -3,6 +3,8 @@ import { Link, usePage } from '@inertiajs/vue3';
 import { ref, computed, onMounted, onUnmounted } from 'vue';
 import CartIcon from './CartIcon.vue';
 import { useStorefrontMenu } from '@/composables/useStorefrontMenu';
+import { useWishlist } from '@/composables/useWishlist';
+import { Heart } from 'lucide-vue-next';
 import axios from 'axios';
 
 interface SearchSuggestion {
@@ -36,6 +38,8 @@ const props = withDefaults(defineProps<Props>(), {
 const page = usePage();
 const auth = computed(() => page.props.auth as any);
 const user = computed(() => auth.value?.user);
+
+const { wishlistCount, fetchWishlist } = useWishlist();
 
 const searchQuery = ref('');
 const suggestions = ref<SearchSuggestion[]>([]);
@@ -219,6 +223,9 @@ const handleClickOutside = (event: MouseEvent) => {
 
 onMounted(() => {
     document.addEventListener('click', handleClickOutside);
+    if (user.value) {
+        fetchWishlist();
+    }
 });
 
 onUnmounted(() => {
@@ -483,6 +490,22 @@ onUnmounted(() => {
 
                     <!-- Cart Icon (Reusable) -->
                     <CartIcon />
+
+                    <!-- Wishlist Icon -->
+                    <Link 
+                        v-if="user"
+                        href="/account/wishlist" 
+                        class="relative p-2 text-gray-700 hover:text-red-500 transition-colors"
+                        title="Wishlist"
+                    >
+                        <Heart class="w-6 h-6" />
+                        <span 
+                            v-if="wishlistCount > 0"
+                            class="absolute -top-1 -right-1 bg-red-500 text-white text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center"
+                        >
+                            {{ wishlistCount }}
+                        </span>
+                    </Link>
 
                     <!-- Auth Links - Show if NOT logged in -->
                     <template v-if="!user">
