@@ -8,7 +8,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Password;
 use Inertia\Inertia;
 use Inertia\Response;
-use Vortex\Core\Services\ThemeViewResolver;
+use Cartxis\Core\Services\ThemeViewResolver;
 
 class PasswordResetLinkController extends Controller
 {

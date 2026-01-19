@@ -7,7 +7,7 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Inertia\Response;
-use Vortex\Core\Services\ThemeViewResolver;
+use Cartxis\Core\Services\ThemeViewResolver;
 
 class EmailVerificationPromptController extends Controller
 {

@@ -22,8 +22,12 @@ const startSetup = () => {
             <!-- Header -->
             <div class="bg-gradient-to-r from-blue-600 to-indigo-600 p-8 text-white">
                 <div class="flex items-center justify-center mb-4">
-                    <div class="w-20 h-20 bg-white rounded-full flex items-center justify-center text-4xl font-bold text-blue-600">
-                        V
+                    <div class="w-20 h-20 bg-white rounded-full flex items-center justify-center">
+                        <img
+                            src="/logos/logo_icon.png"
+                            alt="Cartxis logo"
+                            class="w-12 h-12 object-contain"
+                        />
                     </div>
                 </div>
                 <h1 class="text-4xl font-bold text-center mb-2">{{ appName }}</h1>

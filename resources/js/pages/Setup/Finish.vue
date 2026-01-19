@@ -131,7 +131,7 @@ const completeSetup = async () => {
 
             <!-- Footer -->
             <div class="bg-gray-50 px-8 py-4 text-center text-sm text-gray-600">
-                <p>Thank you for choosing Vortex eCommerce Platform! 🚀</p>
+                <p>Thank you for choosing Cartxis eCommerce Platform! 🚀</p>
             </div>
         </div>
     </div>

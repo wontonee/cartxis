@@ -86,6 +86,25 @@ const handleFiles = (files: FileList | null) => {
   const fileArray = Array.from(files);
   const validFiles: File[] = [];
 
+  if (props.maxFiles === 1) {
+    const file = fileArray[0];
+    if (!file) return;
+
+    if (!file.type.startsWith('image/')) {
+      alert(`${file.name} is not an image file`);
+      return;
+    }
+
+    const sizeMB = file.size / 1024 / 1024;
+    if (sizeMB > props.maxSize) {
+      alert(`${file.name} exceeds ${props.maxSize}MB size limit`);
+      return;
+    }
+
+    emit('update:modelValue', [file]);
+    return;
+  }
+
   for (const file of fileArray) {
     // Check max files BEFORE adding
     if (props.modelValue.length + validFiles.length >= props.maxFiles) {

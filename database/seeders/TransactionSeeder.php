@@ -3,8 +3,8 @@
 namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
-use Vortex\Sales\Models\Transaction;
-use Vortex\Shop\Models\Order;
+use Cartxis\Sales\Models\Transaction;
+use Cartxis\Shop\Models\Order;
 
 class TransactionSeeder extends Seeder
 {

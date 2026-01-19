@@ -8,7 +8,7 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Fortify\TwoFactorAuthenticatable;
 use Laravel\Sanctum\HasApiTokens;
-use Vortex\Core\Traits\HasPermissions;
+use Cartxis\Core\Traits\HasPermissions;
 
 class User extends Authenticatable
 {
@@ -64,7 +64,7 @@ class User extends Authenticatable
      */
     public function orders()
     {
-        return $this->hasMany(\Vortex\Shop\Models\Order::class);
+        return $this->hasMany(\Cartxis\Shop\Models\Order::class);
     }
 
     /**
@@ -72,7 +72,7 @@ class User extends Authenticatable
      */
     public function customer()
     {
-        return $this->hasOne(\Vortex\Customer\Models\Customer::class);
+        return $this->hasOne(\Cartxis\Customer\Models\Customer::class);
     }
 
     /**
@@ -80,7 +80,7 @@ class User extends Authenticatable
      */
     public function addresses()
     {
-        return $this->hasMany(\Vortex\Customer\Models\CustomerAddress::class, 'customer_id');
+        return $this->hasMany(\Cartxis\Customer\Models\CustomerAddress::class, 'customer_id');
     }
 
     /**
@@ -89,8 +89,8 @@ class User extends Authenticatable
     public function wishlist()
     {
         return $this->hasManyThrough(
-            \Vortex\Customer\Models\Wishlist::class,
-            \Vortex\Customer\Models\Customer::class,
+            \Cartxis\Customer\Models\Wishlist::class,
+            \Cartxis\Customer\Models\Customer::class,
             'user_id', // Foreign key on customers table
             'customer_id', // Foreign key on wishlists table
             'id', // Local key on users table

@@ -3,7 +3,7 @@
 namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
-use Vortex\CMS\Models\Block;
+use Cartxis\CMS\Models\Block;
 
 class MobileHeroBannersSeeder extends Seeder
 {

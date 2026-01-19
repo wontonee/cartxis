@@ -5,9 +5,10 @@ namespace App\Http\Middleware;
 use Illuminate\Foundation\Inspiring;
 use Illuminate\Http\Request;
 use Inertia\Middleware;
-use Vortex\Core\Models\Theme;
-use Vortex\Core\Models\Currency;
-use Vortex\Core\Services\MenuService;
+use Cartxis\Core\Models\Theme;
+use Cartxis\Core\Models\Currency;
+use Cartxis\Core\Services\MenuService;
+use Cartxis\Core\Services\SettingService;
 
 class HandleInertiaRequests extends Middleware
 {
@@ -84,6 +85,7 @@ class HandleInertiaRequests extends Middleware
         }
 
         $menuService = app(MenuService::class);
+        $settingService = app(SettingService::class);
 
         // Build menu trees with error handling
         $adminMenu = [];
@@ -107,6 +109,21 @@ class HandleInertiaRequests extends Middleware
             'auth' => [
                 'user' => $request->user(),
             ],
+            'adminConfig' => function () use ($request, $settingService) {
+                // Only load for admin routes
+                if (!$request->is('admin/*') && !$request->is('admin')) {
+                    return null;
+                }
+                
+                try {
+                    return [
+                        'logo' => $settingService->get('admin_logo') ?? null,
+                        'site_name' => $settingService->get('site_name') ?? config('app.name'),
+                    ];
+                } catch (\Exception $e) {
+                    return null;
+                }
+            },
             'menu' => [
                 'admin' => $adminMenu,
                 'shop' => $shopMenu,

@@ -4,9 +4,9 @@ namespace Acme\ExampleGateway\Providers;
 
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Facades\Schema;
-use Vortex\Core\Models\Extension;
-use Vortex\Core\Models\PaymentMethod;
-use Vortex\Core\Services\PaymentGatewayManager;
+use Cartxis\Core\Models\Extension;
+use Cartxis\Core\Models\PaymentMethod;
+use Cartxis\Core\Services\PaymentGatewayManager;
 use Acme\ExampleGateway\Services\AcmeExampleGateway;
 
 class AcmeExampleServiceProvider extends ServiceProvider
@@ -53,12 +53,12 @@ class AcmeExampleServiceProvider extends ServiceProvider
                 ['code' => self::EXTENSION_CODE],
                 [
                     'name' => 'Acme Example Gateway',
-                    'description' => 'Example payment gateway extension for Vortex.',
+                    'description' => 'Example payment gateway extension for Cartxis.',
                     'version' => '1.0.0',
                     'author' => 'Acme Inc.',
                     'author_url' => 'https://acme.test',
                     'icon' => 'credit-card',
-                    'requires' => ['php' => '^8.2', 'vortex/core' => '^1.0'],
+                    'requires' => ['php' => '^8.2', 'cartxis/core' => '^1.0'],
                     'config' => [],
                     'installed' => false,
                     'active' => false,

@@ -1,0 +1,10 @@
+{
+    "code": "cartxis-paypal",
+    "name": "PayPal Payment Gateway",
+    "description": "Accept payments worldwide using PayPal. Supports credit cards, PayPal balance, and local payment methods.",
+    "version": "1.0.0",
+    "author": "Vortex Team",
+    "provider": "Cartxis\\PayPal\\Providers\\PayPalServiceProvider",
+    "type": "extension",
+    "category": "payment-gateway"
+}

@@ -13,6 +13,7 @@
 /example-shop
 /Agent-Mac
 /design
+/_backup
 /vendor
 .DS_Store
 /.playwright-mcp

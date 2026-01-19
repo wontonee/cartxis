@@ -12,7 +12,7 @@ use Illuminate\Validation\ValidationException;
 use Inertia\Inertia;
 use Inertia\Response;
 use Laravel\Fortify\Features;
-use Vortex\Core\Services\ThemeViewResolver;
+use Cartxis\Core\Services\ThemeViewResolver;
 
 class AuthenticatedSessionController extends Controller
 {

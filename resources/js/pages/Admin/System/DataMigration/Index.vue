@@ -123,7 +123,7 @@ const startMigration = async () => {
         <div class="mb-6">
             <h1 class="text-2xl font-semibold text-gray-900">Data Migration</h1>
             <p class="mt-1 text-sm text-gray-600">
-                Import data from WooCommerce or Bagisto to Vortex
+                Import data from WooCommerce or Bagisto to Cartxis
             </p>
         </div>
 

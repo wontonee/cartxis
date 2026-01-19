@@ -1,6 +1,6 @@
-# Vortex - Open Source Laravel E-Commerce Platform
+# Cartxis - Open Source Laravel E-Commerce Platform
 
-A modern, extensible e-commerce platform built with Laravel 12, Inertia.js, Vue 3.5, and TypeScript. Vortex provides a complete solution for building online stores with a powerful admin panel, flexible theme system, and modular architecture.
+A modern, extensible e-commerce platform built with Laravel 12, Inertia.js, Vue 3.5, and TypeScript. Cartxis provides a complete solution for building online stores with a powerful admin panel, flexible theme system, and modular architecture.
 
 ![License](https://img.shields.io/badge/license-MIT-blue.svg)
 ![PHP](https://img.shields.io/badge/PHP-8.2%2B-777BB4?logo=php)
@@ -52,8 +52,8 @@ A modern, extensible e-commerce platform built with Laravel 12, Inertia.js, Vue 
 ### 1. Clone the Repository
 
 ```bash
-git clone https://github.com/wontonee/vortex.git
-cd vortex
+git clone https://github.com/wontonee/cartxis.git
+cd cartxis
 ```
 
 ### 2. Install PHP Dependencies
@@ -81,7 +81,7 @@ php artisan key:generate
 
 1. Create a MySQL database:
 ```sql
-CREATE DATABASE vortex CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+CREATE DATABASE cartxis CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 ```
 
 2. Update your `.env` file:
@@ -89,7 +89,7 @@ CREATE DATABASE vortex CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 DB_CONNECTION=mysql
 DB_HOST=127.0.0.1
 DB_PORT=3306
-DB_DATABASE=vortex
+DB_DATABASE=cartxis
 DB_USERNAME=your_username
 DB_PASSWORD=your_password
 ```
@@ -132,7 +132,7 @@ php artisan storage:link
 php artisan serve
 ```
 
-Your Vortex installation should now be accessible at `http://localhost:8000`
+Your Cartxis installation should now be accessible at `http://localhost:8000`
 
 ## 🔐 Default Credentials
 
@@ -192,7 +192,7 @@ Enable payment methods in **Settings > Payment Methods** in the admin panel.
 
 ## 🧪 Running Tests
 
-Vortex includes a comprehensive test suite using Pest PHP:
+Cartxis includes a comprehensive test suite using Pest PHP:
 
 ```bash
 # Run all tests
@@ -208,13 +208,13 @@ Vortex includes a comprehensive test suite using Pest PHP:
 
 ## 🎨 Theme Development
 
-Vortex uses a flexible theme system. The default theme is located in `themes/vortex-default/`.
+Cartxis uses a flexible theme system. The default theme is located in `themes/cartxis-default/`.
 
 ### Creating a Custom Theme
 
 1. Copy the default theme:
 ```bash
-cp -r themes/vortex-default themes/your-theme-name
+cp -r themes/cartxis-default themes/your-theme-name
 ```
 
 2. Update theme configuration in `config/theme.php`:
@@ -229,10 +229,10 @@ cp -r themes/vortex-default themes/your-theme-name
 
 ## 📦 Package Structure
 
-Vortex is organized into modular packages:
+Cartxis is organized into modular packages:
 
 ```
-packages/Vortex/
+packages/Cartxis/
 ├── Admin/          # Admin panel functionality
 ├── Cart/           # Shopping cart management
 ├── CMS/            # Content management
@@ -253,7 +253,7 @@ packages/Vortex/
 
 ### Code Style
 
-Vortex follows PSR-12 coding standards for PHP and ESLint rules for JavaScript/TypeScript.
+Cartxis follows PSR-12 coding standards for PHP and ESLint rules for JavaScript/TypeScript.
 
 Run linters:
 ```bash
@@ -297,7 +297,7 @@ php artisan optimize:clear
 
 ### Queue Workers
 
-Vortex uses queues for background jobs. Set up a queue worker:
+Cartxis uses queues for background jobs. Set up a queue worker:
 
 ```bash
 php artisan queue:work
@@ -331,7 +331,7 @@ We welcome contributions! Please follow these guidelines:
 
 ## 📝 License
 
-Vortex is open-source software licensed under the [MIT license](LICENSE).
+Cartxis is open-source software licensed under the [MIT license](LICENSE).
 
 ## 🙏 Credits
 
@@ -345,8 +345,8 @@ Built with:
 ## 📞 Support
 
 - **Documentation**: Coming soon
-- **Issues**: [GitHub Issues](https://github.com/wontonee/vortex/issues)
-- **Discussions**: [GitHub Discussions](https://github.com/wontonee/vortex/discussions)
+- **Issues**: [GitHub Issues](https://github.com/wontonee/cartxis/issues)
+- **Discussions**: [GitHub Discussions](https://github.com/wontonee/cartxis/discussions)
 
 ## 🗺️ Roadmap
 

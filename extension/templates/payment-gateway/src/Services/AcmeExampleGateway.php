@@ -2,9 +2,9 @@
 
 namespace Acme\ExampleGateway\Services;
 
-use Vortex\Core\Contracts\PaymentGatewayInterface;
-use Vortex\Core\Models\PaymentMethod;
-use Vortex\Shop\Models\Order;
+use Cartxis\Core\Contracts\PaymentGatewayInterface;
+use Cartxis\Core\Models\PaymentMethod;
+use Cartxis\Shop\Models\Order;
 
 /**
  * Template gateway implementation.

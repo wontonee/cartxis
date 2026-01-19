@@ -23,6 +23,7 @@ import {
   Mail,
   Globe,
   BookOpen,
+  LayoutGrid,
   Newspaper,
   Image,
   Server,
@@ -40,6 +41,7 @@ import {
   Database,
   LineChart,
   FileText as DocumentText,
+  RefreshCw,
 } from 'lucide-vue-next'
 
 export interface IconMap {
@@ -71,6 +73,7 @@ export function useMenuIcons() {
     'mail': Mail,
     'globe': Globe,
     'book-open': BookOpen,
+    'layout-grid': LayoutGrid,
     'newspaper': Newspaper,
     'image': Image,
     'server': Server,
@@ -89,6 +92,7 @@ export function useMenuIcons() {
     'database': Database,
     'chart-line': LineChart,
     'document-text': DocumentText,
+    'refresh-cw': RefreshCw,
   }
 
   const getIcon = (iconName: string): Component | null => {

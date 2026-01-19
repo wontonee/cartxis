@@ -32,10 +32,10 @@ export default defineConfig({
         port: 5173,
         strictPort: true,
         hmr: {
-            host: 'vortex.test',
+            host: 'cartxis.test',
         },
         cors: {
-            origin: ['https://vortex.test', 'http://vortex.test'],
+            origin: ['https://cartxis.test', 'http://cartxis.test'],
             credentials: true,
         },
     },

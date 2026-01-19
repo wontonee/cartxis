@@ -2,7 +2,7 @@
 import { onMounted } from 'vue'
 import { Head, Link } from '@inertiajs/vue3'
 import { useWishlist } from '@/composables/useWishlist'
-import ThemeLayout from '@/../../themes/vortex-default/resources/views/layouts/ThemeLayout.vue'
+import ThemeLayout from '@/../../themes/cartxis-default/resources/views/layouts/ThemeLayout.vue'
 import { Heart, ShoppingCart, Trash2, Loader2 } from 'lucide-vue-next'
 
 const { wishlistItems, wishlistCount, loading, removeFromWishlist, moveToCart, fetchWishlist } = useWishlist()

@@ -2,6 +2,8 @@
 
 use App\Http\Middleware\HandleAppearance;
 use App\Http\Middleware\HandleInertiaRequests;
+use Cartxis\Admin\Http\Middleware\PreventAdminFrontendAccess;
+use Cartxis\Admin\Http\Middleware\PreventUserAdminAccess;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
@@ -9,8 +11,6 @@ use Illuminate\Foundation\Configuration\Middleware;
 use Illuminate\Http\Middleware\AddLinkHeadersForPreloadedAssets;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\RateLimiter;
-use Vortex\Admin\Http\Middleware\PreventAdminFrontendAccess;
-use Vortex\Admin\Http\Middleware\PreventUserAdminAccess;
 
 return Application::configure(basePath: dirname(__DIR__))
     ->withRouting(

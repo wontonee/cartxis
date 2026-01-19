@@ -35,7 +35,7 @@ const submit = () => {
               </svg>
             </div>
             <span class="text-3xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
-              Vortex
+              Cartxis
             </span>
           </div>
           
@@ -72,7 +72,7 @@ const submit = () => {
               </svg>
             </div>
             <span class="text-2xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
-              Vortex
+              Cartxis
             </span>
           </div>
 
@@ -175,7 +175,7 @@ const submit = () => {
           </form>
           
           <div class="mt-6 text-center text-sm text-gray-600 dark:text-gray-400">
-            <p>© {{ currentYear }} Vortex Commerce. All rights reserved.</p>
+            <p>© {{ currentYear }} Cartxis Commerce. All rights reserved.</p>
           </div>
         </div>
       </div>

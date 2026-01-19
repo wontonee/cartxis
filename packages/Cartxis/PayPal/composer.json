@@ -1,0 +1,23 @@
+{
+    "name": "cartxis/paypal",
+    "description": "PayPal Payment Gateway for Cartxis E-Commerce",
+    "type": "library",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Cartxis Team",
+            "email": "support@cartxis.test"
+        }
+    ],
+    "require": {
+        "php": "^8.2",
+        "guzzlehttp/guzzle": "^7.0"
+    },
+    "autoload": {
+        "psr-4": {
+            "Cartxis\\PayPal\\": "src/"
+        }
+    },
+    "minimum-stability": "dev",
+    "prefer-stable": true
+}
