@@ -13,11 +13,11 @@ const pinia = createPinia();
 createInertiaApp({
     title: (title) => (title ? `${title} - ${appName}` : appName),
     resolve: (name) => {
-        // Check if it's a theme component (e.g., "themes/vortex-default/pages/Home")
+        // Check if it's a theme component (e.g., "themes/cartxis-default/pages/Home")
         if (name.startsWith('themes/')) {
             // Extract theme slug and component path
             const parts = name.split('/');
-            const themeSlug = parts[1]; // e.g., "vortex-default"
+            const themeSlug = parts[1]; // e.g., "cartxis-default"
             const componentPath = parts.slice(2).join('/'); // e.g., "pages/Home"
             
             return resolvePageComponent(

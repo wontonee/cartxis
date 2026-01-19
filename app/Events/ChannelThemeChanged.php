@@ -2,7 +2,7 @@
 
 namespace App\Events;
 
-use Vortex\Core\Models\Channel;
+use Cartxis\Core\Models\Channel;
 use Illuminate\Broadcasting\Channel as BroadcastChannel;
 use Illuminate\Foundation\Events\Dispatchable;
 use Illuminate\Queue\SerializesModels;

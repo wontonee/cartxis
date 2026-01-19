@@ -1,0 +1,28 @@
+{
+    "name": "cartxis/customer",
+    "description": "Customer Management Module for Cartxis Admin",
+    "type": "library",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Cartxis Team"
+        }
+    ],
+    "require": {
+        "php": "^8.2",
+        "illuminate/support": "^11.0"
+    },
+    "autoload": {
+        "psr-4": {
+            "Cartxis\\Customer\\": "src/"
+        }
+    },
+    "extra": {
+        "laravel": {
+            "providers": [
+                "Cartxis\\Customer\\Providers\\CustomerServiceProvider"
+            ]
+        }
+    },
+    "minimum-stability": "stable"
+}

@@ -32,13 +32,19 @@ export default defineConfig({
         port: 5173,
         strictPort: true,
         hmr: {
-            host: 'vortex.test',
+            host: 'cartxis.test',
+        },
+        cors: {
+            origin: ['https://cartxis.test', 'http://cartxis.test'],
+            credentials: true,
         },
     },
     resolve: {
-        alias: {
-            '@admin': '/resources/admin',
-            '@themes': '/themes',
-        },
+        alias: [
+            { find: /^@\/Layouts/, replacement: '/resources/js/layouts' },
+            { find: '@admin', replacement: '/resources/admin' },
+            { find: '@themes', replacement: '/themes' },
+            { find: '@', replacement: '/resources/js' },
+        ],
     },
 });

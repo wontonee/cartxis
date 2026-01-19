@@ -1,0 +1,13 @@
+{
+  "code": "cartxis-razorpay",
+  "name": "Razorpay Payment Gateway",
+  "description": "Accept payments via Razorpay",
+  "version": "1.0.0",
+  "author": "Cartxis Team",
+  "type": "extension",
+  "category": "payment-gateway",
+  "provider": "Cartxis\\Razorpay\\Providers\\RazorpayServiceProvider",
+  "require": {
+    "razorpay/razorpay": "^2.9"
+  }
+}

@@ -13,6 +13,19 @@ on:
 jobs:
   ci:
     runs-on: ubuntu-latest
+    services:
+      mysql:
+        image: mysql:8.0
+        env:
+          MYSQL_ROOT_PASSWORD: root
+          MYSQL_DATABASE: cartxis
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd="mysqladmin ping -h 127.0.0.1 -proot"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=5
 
     steps:
       - name: Checkout
@@ -24,6 +37,7 @@ jobs:
           php-version: 8.4
           tools: composer:v2
           coverage: xdebug
+          extensions: pdo_mysql
 
       - name: Setup Node
         uses: actions/setup-node@v4
@@ -40,13 +54,32 @@ jobs:
       - name: Copy Environment File
         run: cp .env.example .env
 
+      - name: Configure MySQL Environment
+        run: |
+          {
+            echo "DB_CONNECTION=mysql";
+            echo "DB_HOST=127.0.0.1";
+            echo "DB_PORT=3306";
+            echo "DB_DATABASE=cartxis";
+            echo "DB_USERNAME=root";
+            echo "DB_PASSWORD=root";
+          } >> .env
+
       - name: Generate Application Key
         run: php artisan key:generate
 
-      - name: Create Database
+      - name: Install MySQL Client
+        run: sudo apt-get update && sudo apt-get install -y mysql-client
+
+      - name: Wait for MySQL
         run: |
-          mkdir -p database
-          touch database/database.sqlite
+          for i in {1..30}; do
+            mysqladmin ping -h 127.0.0.1 -proot && break
+            sleep 2
+          done
+
+      - name: Ensure Database Exists
+        run: mysql -h 127.0.0.1 -uroot -proot -e "CREATE DATABASE IF NOT EXISTS cartxis;"
 
       - name: Run Migrations
         run: php artisan migrate --force

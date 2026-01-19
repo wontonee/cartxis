@@ -1,0 +1,15 @@
+{
+    "name": "cartxis/marketing",
+    "description": "Marketing module with coupons, promotions, and campaigns for Cartxis E-commerce platform",
+    "type": "library",
+    "license": "MIT",
+    "autoload": {
+        "psr-4": {
+            "Cartxis\\Marketing\\": "src/"
+        }
+    },
+    "require": {
+        "php": "^8.2",
+        "illuminate/support": "^12.0"
+    }
+}

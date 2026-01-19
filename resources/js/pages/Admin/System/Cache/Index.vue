@@ -78,8 +78,10 @@ function toggleSelectAll() {
 async function fetchStatistics() {
     try {
         const response = await fetch('/admin/system/cache/statistics');
-        const data = await response.json();
-        statistics.value = data;
+        const result = await response.json();
+        if (result.success && result.data) {
+            statistics.value = result.data;
+        }
     } catch (error) {
         console.error('Failed to fetch statistics:', error);
     }
@@ -107,6 +109,16 @@ function rebuildCache(types: string[]) {
     const validTypes = types.filter(t => rebuildableTypes.includes(t));
     
     if (validTypes.length === 0) {
+        // Show message when trying to rebuild non-rebuildable cache types
+        const invalidTypes = types.filter(t => !rebuildableTypes.includes(t));
+        if (invalidTypes.length > 0) {
+            window.dispatchEvent(new CustomEvent('show-toast', {
+                detail: {
+                    message: `Cannot rebuild ${invalidTypes.join(', ')} cache. Only Config, Route, and Event caches can be rebuilt.`,
+                    type: 'error'
+                }
+            }));
+        }
         return;
     }
 
@@ -147,38 +159,40 @@ onUnmounted(() => {
 
 <template>
     <Head title="Cache Management" />
-    <AdminLayout>
-        <div class="space-y-6">
+    <AdminLayout title="Cache Management">
+        <div class="px-4 sm:px-6 lg:px-8 py-8 w-full max-w-9xl mx-auto">
             <!-- Page Header -->
-            <div class="flex justify-between items-center">
-                <div>
-                    <h1 class="text-2xl font-bold text-gray-900">Cache Management</h1>
-                    <p class="mt-1 text-sm text-gray-500">Manage and monitor application cache</p>
-                </div>
-                <div class="flex items-center gap-3">
-                    <label class="flex items-center gap-2 text-sm text-gray-600">
-                        <input
-                            v-model="autoRefresh"
-                            type="checkbox"
-                            class="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
-                        />
-                        Auto-refresh
-                    </label>
-                    <button
-                        @click="fetchStatistics"
-                        :disabled="isLoading"
-                        class="inline-flex items-center px-4 py-2 bg-white border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
-                    >
-                        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-                        </svg>
-                        Refresh
-                    </button>
+            <div class="mb-8">
+                <div class="flex justify-between items-center">
+                    <div>
+                        <h1 class="text-2xl md:text-3xl text-gray-800 font-bold">Cache Management</h1>
+                        <p class="text-sm text-gray-600 mt-1">Manage and monitor application cache</p>
+                    </div>
+                    <div class="flex items-center gap-3">
+                        <label class="flex items-center gap-2 text-sm text-gray-600">
+                            <input
+                                v-model="autoRefresh"
+                                type="checkbox"
+                                class="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                            />
+                            Auto-refresh
+                        </label>
+                        <button
+                            @click="fetchStatistics"
+                            :disabled="isLoading"
+                            class="inline-flex items-center px-4 py-2 bg-white border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
+                        >
+                            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                            </svg>
+                            Refresh
+                        </button>
+                    </div>
                 </div>
             </div>
 
             <!-- Statistics Cards -->
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
                 <div class="bg-white rounded-lg shadow p-6">
                     <div class="text-sm font-medium text-gray-500">Cache Driver</div>
                     <div class="mt-2 text-2xl font-bold text-gray-900">{{ statistics.driver }}</div>
@@ -198,7 +212,7 @@ onUnmounted(() => {
             </div>
 
             <!-- Additional Stats (Redis only) -->
-            <div v-if="statistics.memory_usage || statistics.uptime" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div v-if="statistics.memory_usage || statistics.uptime" class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
                 <div v-if="statistics.memory_usage" class="bg-white rounded-lg shadow p-6">
                     <div class="text-sm font-medium text-gray-500">Memory Usage</div>
                     <div class="mt-2 text-lg font-semibold text-gray-900">{{ statistics.memory_usage }}</div>

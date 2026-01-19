@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref, watch } from 'vue'
 import { Head, useForm, router } from '@inertiajs/vue3'
 import AdminLayout from '@/layouts/AdminLayout.vue'
 import TiptapEditor from '@/components/Admin/TiptapEditor.vue'
@@ -110,6 +110,27 @@ const form = useForm({
 })
 
 const save = () => {
+  if (activeTab.value === 'checkout') {
+    router.post('/admin/settings/store', {
+      _section: 'checkout',
+      checkout_allow_guest: form.checkout_allow_guest,
+      checkout_require_account: form.checkout_require_account,
+    }, {
+      preserveScroll: true,
+      onSuccess: () => {
+        console.log('Store configuration saved successfully');
+      },
+      onError: (errors) => {
+        console.error('Validation errors:', errors);
+        const firstError = Object.values(errors)[0];
+        if (firstError) {
+          console.error('First error:', firstError);
+        }
+      },
+    })
+    return
+  }
+
   form.post('/admin/settings/store', {
     preserveScroll: true,
     onSuccess: () => {
@@ -127,6 +148,12 @@ const save = () => {
     },
   })
 }
+
+watch(() => form.store_email, (newEmail) => {
+  if (!form.support_email || form.support_email === '') {
+    form.support_email = newEmail
+  }
+})
 </script>
 
 <template>

@@ -7,12 +7,13 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Fortify\TwoFactorAuthenticatable;
-use Vortex\Core\Traits\HasPermissions;
+use Laravel\Sanctum\HasApiTokens;
+use Cartxis\Core\Traits\HasPermissions;
 
 class User extends Authenticatable
 {
     /** @use HasFactory<\Database\Factories\UserFactory> */
-    use HasFactory, Notifiable, TwoFactorAuthenticatable, HasPermissions;
+    use HasApiTokens, HasFactory, Notifiable, TwoFactorAuthenticatable, HasPermissions;
 
     /**
      * The attributes that are mass assignable.
@@ -27,6 +28,10 @@ class User extends Authenticatable
         'role',
         'is_active',
         'profile_photo_path',
+        'phone',
+        'date_of_birth',
+        'gender',
+        'avatar',
     ];
 
     /**
@@ -59,6 +64,37 @@ class User extends Authenticatable
      */
     public function orders()
     {
-        return $this->hasMany(\Vortex\Shop\Models\Order::class);
+        return $this->hasMany(\Cartxis\Shop\Models\Order::class);
+    }
+
+    /**
+     * Get the customer record for the user.
+     */
+    public function customer()
+    {
+        return $this->hasOne(\Cartxis\Customer\Models\Customer::class);
+    }
+
+    /**
+     * Get the addresses for the user.
+     */
+    public function addresses()
+    {
+        return $this->hasMany(\Cartxis\Customer\Models\CustomerAddress::class, 'customer_id');
+    }
+
+    /**
+     * Get the wishlist items for the user (through customer).
+     */
+    public function wishlist()
+    {
+        return $this->hasManyThrough(
+            \Cartxis\Customer\Models\Wishlist::class,
+            \Cartxis\Customer\Models\Customer::class,
+            'user_id', // Foreign key on customers table
+            'customer_id', // Foreign key on wishlists table
+            'id', // Local key on users table
+            'id' // Local key on customers table
+        );
     }
 }

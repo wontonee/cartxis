@@ -15,13 +15,18 @@ const props = withDefaults(defineProps<Props>(), {
 // Active tab
 const activeTab = ref<'site' | 'seo'>('site')
 
+const existingSiteLogo = ref(props.settings['site_logo'] || '')
+const existingAdminLogo = ref(props.settings['admin_logo'] || '')
+const existingSiteFavicon = ref(props.settings['site_favicon'] || '')
+const siteLogoFiles = ref<File[]>([])
+const adminLogoFiles = ref<File[]>([])
+const siteFaviconFiles = ref<File[]>([])
+
 const form = useForm({
   // Site Information
-  site_name: props.settings['site_name'] || 'Vortex Shop',
+  site_name: props.settings['site_name'] || 'Cartxis Shop',
   site_tagline: props.settings['site_tagline'] || '',
   admin_email: props.settings['admin_email'] || '',
-  site_logo: props.settings['site_logo'] || '',
-  site_favicon: props.settings['site_favicon'] || '',
   contact_phone: props.settings['contact_phone'] || '',
   contact_address: props.settings['contact_address'] || '',
   
@@ -35,8 +40,47 @@ const form = useForm({
 })
 
 const save = () => {
+  form.transform((data) => {
+    const payload: Record<string, any> = { ...data }
+
+    if (siteLogoFiles.value.length > 0) {
+      payload.site_logo = siteLogoFiles.value[0]
+    } else {
+      delete payload.site_logo
+    }
+
+    if (adminLogoFiles.value.length > 0) {
+      payload.admin_logo = adminLogoFiles.value[0]
+    } else {
+      delete payload.admin_logo
+    }
+
+    if (siteFaviconFiles.value.length > 0) {
+      payload.site_favicon = siteFaviconFiles.value[0]
+    } else {
+      delete payload.site_favicon
+    }
+
+    return payload
+  })
+
   form.post('/admin/settings/general', {
     preserveScroll: true,
+    forceFormData: true,
+    onSuccess: () => {
+      if (siteLogoFiles.value.length > 0) {
+        existingSiteLogo.value = ''
+        siteLogoFiles.value = []
+      }
+      if (adminLogoFiles.value.length > 0) {
+        existingAdminLogo.value = ''
+        adminLogoFiles.value = []
+      }
+      if (siteFaviconFiles.value.length > 0) {
+        existingSiteFavicon.value = ''
+        siteFaviconFiles.value = []
+      }
+    },
   })
 }
 </script>
@@ -143,16 +187,36 @@ const save = () => {
 
               <!-- Site Logo -->
               <div>
-                <label class="block text-sm font-medium text-gray-700 mb-2">Site Logo</label>
-                <ImageUploader v-model="form.site_logo" :maxFiles="1" :maxSize="2" accept="image/*" />
-                <p class="mt-1 text-xs text-gray-500">Recommended size: 200x60 pixels</p>
+                <label class="block text-sm font-medium text-gray-700 mb-2">Site Logo (Frontend)</label>
+                <div v-if="existingSiteLogo && siteLogoFiles.length === 0" class="mb-4">
+                  <img :src="`/storage/${existingSiteLogo}`" alt="Site logo" class="h-16 object-contain border border-gray-200 rounded" />
+                  <p class="text-xs text-gray-500 mt-1">Current logo</p>
+                </div>
+                <ImageUploader v-model="siteLogoFiles" :maxFiles="1" :maxSize="2" accept="image/*" />
+                <p class="mt-1 text-xs text-gray-500">Recommended size: 200x60 pixels. Max 2MB. Displayed on storefront header.</p>
                 <p v-if="form.errors.site_logo" class="mt-1 text-sm text-red-600">{{ form.errors.site_logo }}</p>
+              </div>
+
+              <!-- Admin Logo -->
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-2">Admin Logo (Dashboard)</label>
+                <div v-if="existingAdminLogo && adminLogoFiles.length === 0" class="mb-4">
+                  <img :src="`/storage/${existingAdminLogo}`" alt="Admin logo" class="h-12 object-contain border border-gray-200 rounded" />
+                  <p class="text-xs text-gray-500 mt-1">Current admin logo</p>
+                </div>
+                <ImageUploader v-model="adminLogoFiles" :maxFiles="1" :maxSize="2" accept="image/*" />
+                <p class="mt-1 text-xs text-gray-500">Recommended size: 150x40 pixels. Max 2MB. Displayed in admin sidebar.</p>
+                <p v-if="form.errors.admin_logo" class="mt-1 text-sm text-red-600">{{ form.errors.admin_logo }}</p>
               </div>
 
               <!-- Site Favicon -->
               <div>
                 <label class="block text-sm font-medium text-gray-700 mb-2">Site Favicon</label>
-                <ImageUploader v-model="form.site_favicon" :maxFiles="1" :maxSize="1" accept="image/*" />
+                <div v-if="existingSiteFavicon && siteFaviconFiles.length === 0" class="mb-4">
+                  <img :src="`/storage/${existingSiteFavicon}`" alt="Site favicon" class="h-10 w-10 object-contain border border-gray-200 rounded" />
+                  <p class="text-xs text-gray-500 mt-1">Current favicon</p>
+                </div>
+                <ImageUploader v-model="siteFaviconFiles" :maxFiles="1" :maxSize="1" accept="image/*" />
                 <p class="mt-1 text-xs text-gray-500">Recommended size: 32x32 pixels, ICO or PNG format</p>
                 <p v-if="form.errors.site_favicon" class="mt-1 text-sm text-red-600">{{ form.errors.site_favicon }}</p>
               </div>

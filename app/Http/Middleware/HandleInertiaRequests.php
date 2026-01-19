@@ -5,9 +5,10 @@ namespace App\Http\Middleware;
 use Illuminate\Foundation\Inspiring;
 use Illuminate\Http\Request;
 use Inertia\Middleware;
-use Vortex\Core\Models\Theme;
-use Vortex\Core\Models\Currency;
-use Vortex\Core\Services\MenuService;
+use Cartxis\Core\Models\Theme;
+use Cartxis\Core\Models\Currency;
+use Cartxis\Core\Services\MenuService;
+use Cartxis\Core\Services\SettingService;
 
 class HandleInertiaRequests extends Middleware
 {
@@ -80,38 +81,11 @@ class HandleInertiaRequests extends Middleware
                 'ziggy' => fn () => [
                     'location' => $request->url(),
                 ],
-                'theme' => null,
-                'siteConfig' => null,
-                'currency' => null,
             ]);
         }
 
         $menuService = app(MenuService::class);
-
-        // Load active theme for frontend routes
-        $theme = null;
-        $siteConfig = null;
-        $currency = null;
-        
-        try {
-            $currency = Currency::getDefault();
-        } catch (\Exception $e) {
-            // Silently fail during migration when table doesn't exist
-        }
-        
-        if (!$request->is('admin/*') && !$request->is('admin')) {
-            try {
-                $theme = Theme::where('is_active', true)->first();
-            } catch (\Exception $e) {
-                // Silently fail during migration when table doesn't exist
-            }
-            
-            $siteConfig = [
-                'name' => config('app.name'),
-                'url' => config('app.url'),
-                'description' => 'Vortex E-commerce Platform',
-            ];
-        }
+        $settingService = app(SettingService::class);
 
         // Build menu trees with error handling
         $adminMenu = [];
@@ -135,6 +109,21 @@ class HandleInertiaRequests extends Middleware
             'auth' => [
                 'user' => $request->user(),
             ],
+            'adminConfig' => function () use ($request, $settingService) {
+                // Only load for admin routes
+                if (!$request->is('admin/*') && !$request->is('admin')) {
+                    return null;
+                }
+                
+                try {
+                    return [
+                        'logo' => $settingService->get('admin_logo') ?? null,
+                        'site_name' => $settingService->get('site_name') ?? config('app.name'),
+                    ];
+                } catch (\Exception $e) {
+                    return null;
+                }
+            },
             'menu' => [
                 'admin' => $adminMenu,
                 'shop' => $shopMenu,
@@ -154,16 +143,25 @@ class HandleInertiaRequests extends Middleware
                 ...\Illuminate\Support\Facades\Route::current()->originalParameters(),
                 'location' => $request->url(),
             ],
-            // Theme and site config for frontend
-            'theme' => $theme,
-            'siteConfig' => $siteConfig,
             // Currency configuration
-            'currency' => $currency ? [
-                'code' => $currency->code,
-                'symbol' => $currency->symbol,
-                'symbolPosition' => $currency->symbol_position,
-                'decimalPlaces' => $currency->decimal_places,
-            ] : null,
+            'currency' => function () use ($request) {
+                // Only load currency for frontend routes
+                if ($request->is('admin/*') || $request->is('admin')) {
+                    return null;
+                }
+                
+                try {
+                    $currency = Currency::getDefault();
+                    return $currency ? [
+                        'code' => $currency->code,
+                        'symbol' => $currency->symbol,
+                        'symbolPosition' => $currency->symbol_position,
+                        'decimalPlaces' => $currency->decimal_places,
+                    ] : null;
+                } catch (\Exception $e) {
+                    return null;
+                }
+            },
         ]);
     }
 }

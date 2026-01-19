@@ -1,0 +1,15 @@
+{
+  "name": "cartxis/razorpay",
+  "description": "Razorpay payment gateway integration for Cartxis",
+  "type": "library",
+  "license": "MIT",
+  "autoload": {
+    "psr-4": {
+      "Cartxis\\Razorpay\\": "src/"
+    }
+  },
+  "require": {
+    "php": "^8.2",
+    "razorpay/razorpay": "^2.9"
+  }
+}

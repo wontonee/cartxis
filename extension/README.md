@@ -1,10 +1,10 @@
-# Vortex Extension Development Guide
+# Cartxis Extension Development Guide
 
-This guide explains how to create a Vortex extension (plugin) that can be installed/activated/deactivated via the `extensions` table.
+This guide explains how to create a Cartxis extension (plugin) that can be installed/activated/deactivated via the `extensions` table.
 
-Vortex supports two extension sources:
+Cartxis supports two extension sources:
 
-1. **Bundled extensions** (first-party): discovered from `packages/Vortex/*/extension.json`.
+1. **Bundled extensions** (first-party): discovered from `packages/Cartxis/*/extension.json`.
 2. **Filesystem extensions** (third-party / custom): discovered from `extensions/<your-extension>/extension.json`.
 
 The extension system is backed by the database table **`extensions`** and a JSON manifest file **`extension.json`**.
@@ -51,7 +51,7 @@ Example:
 ### Option B — Bundled/first-party extension
 Add a new package folder under:
 
-- `packages/Vortex/<ExtensionName>/`
+- `packages/Cartxis/<ExtensionName>/`
 
 Bundled packages are discovered automatically via their `extension.json`.
 
@@ -75,7 +75,7 @@ extensions/acme-example-gateway/
 
 ## 4) Example `extension.json`
 
-For filesystem extensions, include `provider_file` so Vortex can `require_once` your provider without Composer autoload.
+For filesystem extensions, include `provider_file` so Cartxis can `require_once` your provider without Composer autoload.
 
 ```json
 {
@@ -89,7 +89,7 @@ For filesystem extensions, include `provider_file` so Vortex can `require_once` 
   "category": "payment-gateway",
   "requires": {
     "php": "^8.2",
-    "vortex/core": "^1.0"
+    "cartxis/core": "^1.0"
   },
   "provider": "Acme\\ExampleGateway\\Providers\\AcmeExampleServiceProvider",
   "provider_file": "src/Providers/AcmeExampleServiceProvider.php"
@@ -111,10 +111,10 @@ Best practice:
 - Always keep **seeding / lightweight checks** safe.
 - Only register routes/gateways/hooks if the extension is active.
 
-Vortex already gates bundled Stripe/Razorpay by the `extensions` table. For third-party extensions, you should do the same.
+Cartxis already gates bundled Stripe/Razorpay by the `extensions` table. For third-party extensions, you should do the same.
 
 Typical provider responsibilities:
-- Register your gateway into `Vortex\Core\Services\PaymentGatewayManager`
+- Register your gateway into `Cartxis\Core\Services\PaymentGatewayManager`
 - Load your routes
 - Load your migrations
 - Register hooks/menus
@@ -124,9 +124,9 @@ Typical provider responsibilities:
 
 ## 6) Payment gateway extensions
 
-Vortex uses:
-- `Vortex\Core\Contracts\PaymentGatewayInterface` for gateway implementations
-- `Vortex\Core\Services\PaymentGatewayManager` as the registry
+Cartxis uses:
+- `Cartxis\Core\Contracts\PaymentGatewayInterface` for gateway implementations
+- `Cartxis\Core\Services\PaymentGatewayManager` as the registry
 - `payment_methods` table for admin configuration (API keys, enabled/disabled, etc.)
 
 A typical gateway extension:
@@ -141,19 +141,19 @@ A typical gateway extension:
 
 These commands are available:
 
-- `php artisan vortex:extensions:list`
-- `php artisan vortex:extensions:sync`
-- `php artisan vortex:extensions:install <code>`
-- `php artisan vortex:extensions:activate <code>`
-- `php artisan vortex:extensions:deactivate <code>`
-- `php artisan vortex:extensions:uninstall <code>`
+- `php artisan cartxis:extensions:list`
+- `php artisan cartxis:extensions:sync`
+- `php artisan cartxis:extensions:install <code>`
+- `php artisan cartxis:extensions:activate <code>`
+- `php artisan cartxis:extensions:deactivate <code>`
+- `php artisan cartxis:extensions:uninstall <code>`
 
 Recommended workflow (filesystem extension):
 
 1. Place your extension folder under `extensions/`.
-2. Run `php artisan vortex:extensions:sync`.
-3. Run `php artisan vortex:extensions:install <code>`.
-4. Run `php artisan vortex:extensions:activate <code>`.
+2. Run `php artisan cartxis:extensions:sync`.
+3. Run `php artisan cartxis:extensions:install <code>`.
+4. Run `php artisan cartxis:extensions:activate <code>`.
 
 ---
 

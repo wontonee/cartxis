@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, computed, watch, onMounted, nextTick } from 'vue'
+import { ref, computed, watch, onMounted, onUnmounted, nextTick } from 'vue'
 import { Link, usePage, router } from '@inertiajs/vue3'
 import admin from '@/routes/admin'
 import Toast from '@/components/Toast.vue'
@@ -28,6 +28,9 @@ const sidebarCollapsed = ref(false)
 const userMenuOpen = ref(false)
 const hoveredMenuId = ref<number | null>(null)
 const popoverPosition = ref({ top: 0 })
+
+// Admin config for logo
+const adminConfig = computed(() => page.props.adminConfig as any)
 
 // Track which parent menus are open
 const openMenus = ref<Set<number>>(new Set())
@@ -75,6 +78,49 @@ const saveMenuState = () => {
 const menuItems = computed(() => {
   return page.props.menu?.admin || []
 })
+
+// Search
+const searchOpen = ref(false)
+const searchQuery = ref('')
+const searchResults = computed(() => {
+  const query = searchQuery.value.trim().toLowerCase()
+  if (!query) return []
+
+  const results: any[] = []
+  const walk = (items: any[]) => {
+    items.forEach((item) => {
+      if (item.full_url && item.title?.toLowerCase().includes(query)) {
+        results.push(item)
+      }
+      if (item.children && item.children.length) {
+        walk(item.children)
+      }
+    })
+  }
+
+  walk(menuItems.value || [])
+  return results
+})
+
+const openSearch = () => {
+  searchOpen.value = true
+  searchQuery.value = ''
+  nextTick(() => {
+    const el = document.getElementById('admin-search-input') as HTMLInputElement | null
+    el?.focus()
+  })
+}
+
+const closeSearch = () => {
+  searchOpen.value = false
+  searchQuery.value = ''
+}
+
+const handleSearchKeydown = (event: KeyboardEvent) => {
+  if (event.key === 'Escape') {
+    closeSearch()
+  }
+}
 
 // Helper function to check if menu item is active
 const isActive = (item: any) => {
@@ -170,6 +216,12 @@ onMounted(() => {
       initializeOpenMenus()
     })
   })
+
+  window.addEventListener('keydown', handleSearchKeydown)
+})
+
+onUnmounted(() => {
+  window.removeEventListener('keydown', handleSearchKeydown)
 })
 
 // Also watch URL changes as backup
@@ -222,10 +274,15 @@ const toggleSidebar = () => {
       <!-- Logo -->
       <div class="flex items-center justify-between h-16 px-6 border-b border-gray-800">
         <Link :href="admin.dashboard.url()" class="flex items-center space-x-3">
-          <div class="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center flex-shrink-0">
-            <span class="text-white font-bold text-xl">V</span>
-          </div>
-          <span v-if="!sidebarCollapsed" class="text-white font-semibold text-lg transition-opacity duration-200">Vortex</span>
+          <template v-if="adminConfig?.logo && !sidebarCollapsed">
+            <img :src="`/storage/${adminConfig.logo}`" :alt="adminConfig?.site_name || 'Admin'" class="h-8 object-contain" />
+          </template>
+          <template v-else>
+            <div class="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center flex-shrink-0">
+              <span class="text-white font-bold text-xl">{{ adminConfig?.site_name?.charAt(0) || 'C' }}</span>
+            </div>
+            <span v-if="!sidebarCollapsed" class="text-white font-semibold text-lg transition-opacity duration-200">{{ adminConfig?.site_name || 'Cartxis' }}</span>
+          </template>
         </Link>
         
         <!-- Desktop Toggle Button -->
@@ -383,7 +440,10 @@ const toggleSidebar = () => {
             <!-- Right side -->
             <div class="flex items-center space-x-4">
               <!-- Search -->
-              <button class="text-gray-500 hover:text-gray-600 dark:text-gray-400 dark:hover:text-gray-300">
+              <button
+                @click="openSearch"
+                class="text-gray-500 hover:text-gray-600 dark:text-gray-400 dark:hover:text-gray-300"
+              >
                 <Search class="w-5 h-5" />
               </button>
 
@@ -478,6 +538,53 @@ const toggleSidebar = () => {
       @click="sidebarOpen = false"
       class="fixed inset-0 z-40 bg-gray-600/75 lg:hidden"
     ></div>
+
+    <!-- Search Modal -->
+    <div
+      v-if="searchOpen"
+      @click.self="closeSearch"
+      class="fixed inset-0 z-50 flex items-start justify-center bg-black/40 px-4"
+    >
+      <div class="mt-20 w-full max-w-xl overflow-hidden rounded-xl bg-white shadow-xl ring-1 ring-black/10">
+        <div class="flex items-center gap-2 border-b border-gray-200 px-4 py-3">
+          <Search class="h-4 w-4 text-gray-400" />
+          <input
+            id="admin-search-input"
+            v-model="searchQuery"
+            type="text"
+            placeholder="Search modules, pages, settings..."
+            class="w-full bg-transparent text-sm text-gray-900 placeholder:text-gray-400 focus:outline-none"
+          />
+          <button
+            @click="closeSearch"
+            class="text-xs text-gray-500 hover:text-gray-700"
+          >
+            Esc
+          </button>
+        </div>
+
+        <div class="max-h-80 overflow-y-auto">
+          <div v-if="!searchQuery" class="px-4 py-6 text-sm text-gray-500">
+            Start typing to search the admin menu.
+          </div>
+          <div v-else-if="searchResults.length === 0" class="px-4 py-6 text-sm text-gray-500">
+            No results found.
+          </div>
+          <div v-else class="py-2">
+            <Link
+              v-for="item in searchResults"
+              :key="item.id"
+              :href="item.full_url"
+              @click="closeSearch"
+              class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+            >
+              <div class="font-medium text-gray-900">{{ item.title }}</div>
+              <div class="text-xs text-gray-500">{{ item.full_url }}</div>
+            </Link>
+          </div>
+        </div>
+      </div>
+    </div>
 
     <!-- Toast Notifications -->
     <Toast />

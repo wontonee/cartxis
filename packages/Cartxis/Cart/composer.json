@@ -1,0 +1,15 @@
+{
+    "name": "cartxis/cart",
+    "description": "Shopping cart functionality for Cartxis E-commerce platform",
+    "type": "library",
+    "license": "MIT",
+    "autoload": {
+        "psr-4": {
+            "Cartxis\\Cart\\": ""
+        }
+    },
+    "require": {
+        "php": "^8.2",
+        "illuminate/support": "^12.0"
+    }
+}

@@ -1,0 +1,16 @@
+{
+  "code": "cartxis-stripe",
+  "name": "Stripe Payment Gateway",
+  "description": "Accept payments via Stripe - credit cards, digital wallets, and more",
+  "version": "1.0.0",
+  "author": "Cartxis Commerce",
+  "author_url": "https://cartxis-commerce.com",
+  "icon": "credit-card",
+  "requires": {
+    "vortex/core": "^1.0",
+    "php": "^8.2"
+  },
+  "provider": "Cartxis\\Stripe\\Providers\\StripeServiceProvider",
+  "type": "extension",
+  "category": "payment-gateway"
+}

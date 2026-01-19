@@ -40,6 +40,6 @@ test('two factor challenge can be rendered', function () {
     $this->get(route('two-factor.login'))
         ->assertOk()
         ->assertInertia(fn (Assert $page) => $page
-            ->component('themes/vortex-default/pages/Auth/TwoFactorChallenge', false)
+            ->component('themes/cartxis-default/pages/Auth/TwoFactorChallenge', false)
         );
 });

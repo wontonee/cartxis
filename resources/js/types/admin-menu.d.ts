@@ -1,5 +1,5 @@
 /**
- * MenuItem interface matching Vortex\Core\Models\MenuItem
+ * MenuItem interface matching Cartxis\Core\Models\MenuItem
  * Used for admin menu management
  */
 export interface MenuItem {

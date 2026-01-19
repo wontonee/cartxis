@@ -1,6 +1,6 @@
-# Vortex - Open Source Laravel E-Commerce Platform
+# Cartxis - Open Source Laravel E-Commerce Platform
 
-A modern, extensible e-commerce platform built with Laravel 12, Inertia.js, Vue 3.5, and TypeScript. Vortex provides a complete solution for building online stores with a powerful admin panel, flexible theme system, and modular architecture.
+A modern, extensible e-commerce platform built with Laravel 12, Inertia.js, Vue 3.5, and TypeScript. Cartxis provides a complete solution for building online stores with a powerful admin panel, flexible theme system, and modular architecture.
 
 ![License](https://img.shields.io/badge/license-MIT-blue.svg)
 ![PHP](https://img.shields.io/badge/PHP-8.2%2B-777BB4?logo=php)
@@ -31,7 +31,7 @@ A modern, extensible e-commerce platform built with Laravel 12, Inertia.js, Vue 
 
 ### 🔧 Technical Features
 - **Modular Architecture**: Package-based structure for easy extension
-- **Multi-Database Support**: MySQL and SQLite compatibility
+- **MySQL Database**: Optimized for MySQL 8.0+
 - **Modern Frontend**: Vue 3 with TypeScript and Tailwind CSS
 - **Inertia.js**: SPA-like experience without API complexity
 - **Two-Factor Authentication**: Enhanced security with 2FA support
@@ -44,7 +44,7 @@ A modern, extensible e-commerce platform built with Laravel 12, Inertia.js, Vue 
 - **Composer**: 2.x
 - **Node.js**: 18.x or higher
 - **NPM**: 9.x or higher
-- **Database**: MySQL 8.0+ or SQLite 3.x
+- **Database**: MySQL 8.0+
 - **Extensions**: OpenSSL, PDO, Mbstring, Tokenizer, XML, Ctype, JSON, BCMath
 
 ## 🚀 Installation
@@ -52,8 +52,8 @@ A modern, extensible e-commerce platform built with Laravel 12, Inertia.js, Vue 
 ### 1. Clone the Repository
 
 ```bash
-git clone https://github.com/yourusername/vortex.git
-cd vortex
+git clone https://github.com/wontonee/cartxis.git
+cd cartxis
 ```
 
 ### 2. Install PHP Dependencies
@@ -79,11 +79,9 @@ php artisan key:generate
 
 ### 5. Database Setup
 
-#### Option A: Using MySQL
-
 1. Create a MySQL database:
 ```sql
-CREATE DATABASE vortex CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+CREATE DATABASE cartxis CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 ```
 
 2. Update your `.env` file:
@@ -91,21 +89,9 @@ CREATE DATABASE vortex CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 DB_CONNECTION=mysql
 DB_HOST=127.0.0.1
 DB_PORT=3306
-DB_DATABASE=vortex
+DB_DATABASE=cartxis
 DB_USERNAME=your_username
 DB_PASSWORD=your_password
-```
-
-#### Option B: Using SQLite
-
-1. Create the database file:
-```bash
-touch database/database.sqlite
-```
-
-2. Update your `.env` file:
-```env
-DB_CONNECTION=sqlite
 ```
 
 ### 6. Run Migrations and Seeders
@@ -146,7 +132,7 @@ php artisan storage:link
 php artisan serve
 ```
 
-Your Vortex installation should now be accessible at `http://localhost:8000`
+Your Cartxis installation should now be accessible at `http://localhost:8000`
 
 ## 🔐 Default Credentials
 
@@ -206,7 +192,7 @@ Enable payment methods in **Settings > Payment Methods** in the admin panel.
 
 ## 🧪 Running Tests
 
-Vortex includes a comprehensive test suite using Pest PHP:
+Cartxis includes a comprehensive test suite using Pest PHP:
 
 ```bash
 # Run all tests
@@ -222,13 +208,13 @@ Vortex includes a comprehensive test suite using Pest PHP:
 
 ## 🎨 Theme Development
 
-Vortex uses a flexible theme system. The default theme is located in `themes/vortex-default/`.
+Cartxis uses a flexible theme system. The default theme is located in `themes/cartxis-default/`.
 
 ### Creating a Custom Theme
 
 1. Copy the default theme:
 ```bash
-cp -r themes/vortex-default themes/your-theme-name
+cp -r themes/cartxis-default themes/your-theme-name
 ```
 
 2. Update theme configuration in `config/theme.php`:
@@ -243,10 +229,10 @@ cp -r themes/vortex-default themes/your-theme-name
 
 ## 📦 Package Structure
 
-Vortex is organized into modular packages:
+Cartxis is organized into modular packages:
 
 ```
-packages/Vortex/
+packages/Cartxis/
 ├── Admin/          # Admin panel functionality
 ├── Cart/           # Shopping cart management
 ├── CMS/            # Content management
@@ -267,7 +253,7 @@ packages/Vortex/
 
 ### Code Style
 
-Vortex follows PSR-12 coding standards for PHP and ESLint rules for JavaScript/TypeScript.
+Cartxis follows PSR-12 coding standards for PHP and ESLint rules for JavaScript/TypeScript.
 
 Run linters:
 ```bash
@@ -311,7 +297,7 @@ php artisan optimize:clear
 
 ### Queue Workers
 
-Vortex uses queues for background jobs. Set up a queue worker:
+Cartxis uses queues for background jobs. Set up a queue worker:
 
 ```bash
 php artisan queue:work
@@ -345,7 +331,7 @@ We welcome contributions! Please follow these guidelines:
 
 ## 📝 License
 
-Vortex is open-source software licensed under the [MIT license](LICENSE).
+Cartxis is open-source software licensed under the [MIT license](LICENSE).
 
 ## 🙏 Credits
 
@@ -359,8 +345,8 @@ Built with:
 ## 📞 Support
 
 - **Documentation**: Coming soon
-- **Issues**: [GitHub Issues](https://github.com/yourusername/vortex/issues)
-- **Discussions**: [GitHub Discussions](https://github.com/yourusername/vortex/discussions)
+- **Issues**: [GitHub Issues](https://github.com/wontonee/cartxis/issues)
+- **Discussions**: [GitHub Discussions](https://github.com/wontonee/cartxis/discussions)
 
 ## 🗺️ Roadmap
 
@@ -368,11 +354,11 @@ Built with:
 - [ ] Advanced inventory management
 - [ ] Subscription products
 - [ ] Advanced SEO tools
-- [ ] Mobile app (React Native)
+- [ ] Mobile app
 - [ ] Multi-language support (i18n)
 - [ ] Advanced analytics dashboard
 - [ ] Integration marketplace
 
 ---
 
-Made with ❤️ by the Vortex Team
+Made with ❤️ by the Wontonee Team

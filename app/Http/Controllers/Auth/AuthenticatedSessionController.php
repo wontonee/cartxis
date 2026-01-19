@@ -8,10 +8,11 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
+use Illuminate\Validation\ValidationException;
 use Inertia\Inertia;
 use Inertia\Response;
 use Laravel\Fortify\Features;
-use Vortex\Core\Services\ThemeViewResolver;
+use Cartxis\Core\Services\ThemeViewResolver;
 
 class AuthenticatedSessionController extends Controller
 {
@@ -39,6 +40,16 @@ class AuthenticatedSessionController extends Controller
     public function store(LoginRequest $request): RedirectResponse
     {
         $user = $request->validateCredentials();
+
+        $roleIsAdmin = (string) ($user->role ?? '') === 'admin';
+        $permissionsIsAdmin = method_exists($user, 'isAdmin') ? (bool) $user->isAdmin() : false;
+        $isAdmin = $roleIsAdmin || $permissionsIsAdmin;
+
+        if ($isAdmin) {
+            throw ValidationException::withMessages([
+                'email' => 'Admin users cannot login to the storefront. Please use the admin panel login.',
+            ]);
+        }
 
         if (Features::enabled(Features::twoFactorAuthentication()) && $user->hasEnabledTwoFactorAuthentication()) {
             $request->session()->put([
