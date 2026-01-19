@@ -11,7 +11,11 @@ return new class extends Migration
      */
     public function up(): void
     {
-        // Modify the type enum to add 'grouped' and 'bundle' types
+        // Modify the type enum to add 'grouped' and 'bundle' types (MySQL only)
+        if (\DB::getDriverName() !== 'mysql') {
+            throw new RuntimeException('This migration supports MySQL only.');
+        }
+
         \DB::statement("ALTER TABLE `products` MODIFY COLUMN `type` ENUM('simple', 'configurable', 'virtual', 'downloadable', 'grouped', 'bundle') NOT NULL DEFAULT 'simple'");
     }
 
@@ -20,7 +24,11 @@ return new class extends Migration
      */
     public function down(): void
     {
-        // Revert back to original types
+        // Revert back to original types (MySQL only)
+        if (\DB::getDriverName() !== 'mysql') {
+            throw new RuntimeException('This migration supports MySQL only.');
+        }
+
         \DB::statement("ALTER TABLE `products` MODIFY COLUMN `type` ENUM('simple', 'configurable', 'virtual', 'downloadable') NOT NULL DEFAULT 'simple'");
     }
 };
