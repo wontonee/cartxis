@@ -131,10 +131,17 @@ class PayPalGateway implements PaymentGatewayInterface
             $response = $client->request($method, $endpoint, $options);
             return json_decode($response->getBody()->getContents(), true);
         } catch (\Exception $e) {
+            $responseBody = null;
+
+            if ($e instanceof \GuzzleHttp\Exception\RequestException && $e->hasResponse()) {
+                $responseBody = (string) $e->getResponse()->getBody();
+            }
+
             Log::error('PayPal API request failed', [
                 'method' => $method,
                 'endpoint' => $endpoint,
                 'error' => $e->getMessage(),
+                'response' => $responseBody,
             ]);
 
             throw $e;
@@ -180,6 +187,41 @@ class PayPalGateway implements PaymentGatewayInterface
             // Get shipping address
             $shippingAddress = $order->shippingAddress();
 
+            $currency = strtoupper($order->currency_code ?? 'USD');
+            $parseAmount = static function ($value): float {
+                if (is_null($value)) {
+                    return 0.0;
+                }
+
+                if (is_numeric($value)) {
+                    return (float) $value;
+                }
+
+                $normalized = preg_replace('/[^0-9.\-]/', '', (string) $value);
+                return is_numeric($normalized) ? (float) $normalized : 0.0;
+            };
+
+            $subTotal = $parseAmount($order->subtotal ?? ($order->sub_total ?? 0));
+            $shippingAmount = $parseAmount($order->shipping_cost ?? ($order->shipping_amount ?? 0));
+            $taxAmount = $parseAmount($order->tax ?? ($order->tax_amount ?? 0));
+            $discountRaw = $parseAmount($order->discount ?? ($order->discount_amount ?? 0));
+            $discountAmount = max(0, abs($discountRaw));
+
+            $calculatedTotal = $subTotal + $shippingAmount + $taxAmount - $discountAmount;
+            $calculatedTotal = max(0, $calculatedTotal);
+
+            $grandTotal = $parseAmount($order->total ?? ($order->grand_total ?? $calculatedTotal));
+            $grandTotal = max(0, $grandTotal);
+            if ($grandTotal <= 0 && $calculatedTotal > 0) {
+                $grandTotal = $calculatedTotal;
+            }
+
+            if ($grandTotal <= 0) {
+                throw new \Exception('PayPal amount must be greater than zero.');
+            }
+
+            $formatAmount = static fn ($value) => number_format($value, 2, '.', '');
+
             // Create PayPal Order
             $orderData = [
                 'intent' => 'CAPTURE',
@@ -188,39 +230,8 @@ class PayPalGateway implements PaymentGatewayInterface
                         'reference_id' => $order->order_number,
                         'description' => 'Order #' . $order->order_number,
                         'amount' => [
-                            'currency_code' => $order->currency_code ?? 'USD',
-                            'value' => number_format($order->grand_total, 2, '.', ''),
-                            'breakdown' => [
-                                'item_total' => [
-                                    'currency_code' => $order->currency_code ?? 'USD',
-                                    'value' => number_format($order->sub_total, 2, '.', ''),
-                                ],
-                                'shipping' => [
-                                    'currency_code' => $order->currency_code ?? 'USD',
-                                    'value' => number_format($order->shipping_amount, 2, '.', ''),
-                                ],
-                                'tax_total' => [
-                                    'currency_code' => $order->currency_code ?? 'USD',
-                                    'value' => number_format($order->tax_amount, 2, '.', ''),
-                                ],
-                                'discount' => [
-                                    'currency_code' => $order->currency_code ?? 'USD',
-                                    'value' => number_format($order->discount_amount, 2, '.', ''),
-                                ],
-                            ],
-                        ],
-                        'shipping' => [
-                            'name' => [
-                                'full_name' => $shippingAddress->first_name . ' ' . $shippingAddress->last_name,
-                            ],
-                            'address' => [
-                                'address_line_1' => $shippingAddress->address_line_1,
-                                'address_line_2' => $shippingAddress->address_line_2 ?? '',
-                                'admin_area_2' => $shippingAddress->city,
-                                'admin_area_1' => $shippingAddress->state,
-                                'postal_code' => $shippingAddress->postcode,
-                                'country_code' => $shippingAddress->country_code,
-                            ],
+                            'currency_code' => $currency,
+                            'value' => $formatAmount($grandTotal),
                         ],
                     ],
                 ],
@@ -229,9 +240,29 @@ class PayPalGateway implements PaymentGatewayInterface
                     'landing_page' => 'BILLING',
                     'user_action' => 'PAY_NOW',
                     'return_url' => route('paypal.callback', ['order' => $order->id]),
-                    'cancel_url' => route('checkout.index'),
+                    'cancel_url' => route('shop.checkout.index'),
                 ],
             ];
+
+            if ($shippingAddress) {
+                $countryCode = $this->normalizeCountryCode($shippingAddress->country_code ?? $shippingAddress->country ?? '');
+
+                if ($countryCode) {
+                    $orderData['purchase_units'][0]['shipping'] = [
+                        'name' => [
+                            'full_name' => trim($shippingAddress->first_name . ' ' . $shippingAddress->last_name),
+                        ],
+                        'address' => [
+                            'address_line_1' => $shippingAddress->address_line_1,
+                            'address_line_2' => $shippingAddress->address_line_2 ?? '',
+                            'admin_area_2' => $shippingAddress->city,
+                            'admin_area_1' => $shippingAddress->state,
+                            'postal_code' => $shippingAddress->postcode,
+                            'country_code' => $countryCode,
+                        ],
+                    ];
+                }
+            }
 
             Log::info('PayPalGateway: Creating PayPal order', [
                 'order_id' => $order->id,
@@ -348,6 +379,30 @@ class PayPalGateway implements PaymentGatewayInterface
                 'message' => 'Payment verification failed: ' . $e->getMessage(),
             ];
         }
+    }
+
+    private function normalizeCountryCode(string $country): ?string
+    {
+        $value = strtoupper(trim($country));
+        if ($value === '') {
+            return null;
+        }
+
+        if (strlen($value) === 2 && ctype_alpha($value)) {
+            return $value;
+        }
+
+        $map = [
+            'UNITED STATES' => 'US',
+            'USA' => 'US',
+            'UNITED STATES OF AMERICA' => 'US',
+            'CANADA' => 'CA',
+            'INDIA' => 'IN',
+            'UNITED KINGDOM' => 'GB',
+            'GREAT BRITAIN' => 'GB',
+        ];
+
+        return $map[$value] ?? null;
     }
 
     /**

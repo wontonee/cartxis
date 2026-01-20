@@ -9,6 +9,7 @@ use Cartxis\Shop\Models\Order;
 use Cartxis\Sales\Services\TransactionService;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Session;
 
 class PayPalController extends Controller
 {
@@ -22,27 +23,25 @@ class PayPalController extends Controller
      */
     public function callback(Request $request)
     {
-        Log::info('PayPal callback received', $request->all());
-
         try {
             $orderId = $request->query('order');
             $paypalOrderId = $request->query('token');
 
             if (!$orderId || !$paypalOrderId) {
-                return redirect()->route('checkout.index')->with('error', 'Invalid payment callback');
+                return redirect()->route('shop.checkout.index')->with('error', 'Invalid payment callback');
             }
 
             $order = Order::find($orderId);
 
             if (!$order) {
-                return redirect()->route('checkout.index')->with('error', 'Order not found');
+                return redirect()->route('shop.checkout.index')->with('error', 'Order not found');
             }
 
             // Get PayPal gateway
             $gateway = $this->gatewayManager->get('paypal');
 
             if (!$gateway) {
-                return redirect()->route('checkout.index')->with('error', 'PayPal gateway not found');
+                return redirect()->route('shop.checkout.index')->with('error', 'PayPal gateway not found');
             }
 
             // Handle callback
@@ -58,7 +57,7 @@ class PayPalController extends Controller
                         'payment_method' => 'paypal',
                         'gateway' => 'paypal',
                         'gateway_transaction_id' => $result['transaction_id'],
-                        'amount' => $order->grand_total,
+                        'amount' => $order->total,
                         'status' => 'completed',
                         'response_data' => $result['response_data'] ?? null,
                         'notes' => 'Payment completed via PayPal',
@@ -75,12 +74,12 @@ class PayPalController extends Controller
                     ]);
                 });
 
-                Log::info('PayPal payment completed', [
-                    'order_id' => $order->id,
-                    'transaction_id' => $result['transaction_id'],
-                ]);
 
-                return redirect()->route('checkout.success', ['order' => $order->id])
+                Session::forget('cart');
+                Session::forget('checkout');
+                Session::forget('checkout.last_order_id');
+
+                return redirect()->route('shop.checkout.success', ['order' => $order->id])
                     ->with('success', 'Payment completed successfully!');
             }
 
@@ -89,7 +88,7 @@ class PayPalController extends Controller
                 'message' => $result['message'] ?? 'Unknown error',
             ]);
 
-            return redirect()->route('checkout.index')
+            return redirect()->route('shop.checkout.index')
                 ->with('error', $result['message'] ?? 'Payment failed. Please try again.');
         } catch (\Exception $e) {
             Log::error('PayPal callback error', [
@@ -97,7 +96,7 @@ class PayPalController extends Controller
                 'trace' => $e->getTraceAsString(),
             ]);
 
-            return redirect()->route('checkout.index')
+            return redirect()->route('shop.checkout.index')
                 ->with('error', 'Payment processing failed. Please try again.');
         }
     }
@@ -107,8 +106,6 @@ class PayPalController extends Controller
      */
     public function webhook(Request $request)
     {
-        Log::info('PayPal webhook received', $request->all());
-
         try {
             // PayPal webhook signature verification would go here
             // For now, we'll just log the webhook data
@@ -116,10 +113,6 @@ class PayPalController extends Controller
             $event = $request->input('event_type');
             $resource = $request->input('resource', []);
 
-            Log::info('PayPal webhook event', [
-                'event_type' => $event,
-                'resource_id' => $resource['id'] ?? null,
-            ]);
 
             // Handle different webhook events
             switch ($event) {

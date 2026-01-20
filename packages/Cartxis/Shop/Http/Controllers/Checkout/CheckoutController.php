@@ -357,6 +357,8 @@ class CheckoutController extends Controller
                     Log::info('Checkout: Returning redirect URL for external gateway', [
                         'url' => $redirectUrl,
                     ]);
+
+                    Session::put('checkout.last_order_id', $order->id);
                     
                     return back()->with([
                         'redirect_url' => $redirectUrl,
@@ -374,10 +376,14 @@ class CheckoutController extends Controller
                     // Don't clear cart yet - will be cleared after payment verification in callback
                     // Store payment data in session for redundancy
                     Session::put('razorpay_payment_data', $response);
+                    Session::put('checkout.last_order_id', $order->id);
                     
                     // Return back to checkout with payment_response as flash data
                     // Flash data will be automatically included in Inertia props
-                    return back()->with('payment_response', $response);
+                    return back()->with([
+                        'payment_response' => $response,
+                        'redirect_url' => $response['redirect_url'] ?? null,
+                    ]);
                 }
                 
                 // For immediate payment methods (COD, etc.), clear cart now
@@ -453,6 +459,12 @@ class CheckoutController extends Controller
         // Verify order belongs to current user or session
         if (Auth::check() && $order->user_id !== Auth::id()) {
             abort(403);
+        }
+
+        if (Session::get('checkout.last_order_id') === $order->id) {
+            Session::forget('cart');
+            Session::forget('checkout');
+            Session::forget('checkout.last_order_id');
         }
 
         return Inertia::render($this->themeResolver->resolve('Checkout/Success'), [

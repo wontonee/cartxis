@@ -189,12 +189,40 @@ const selectShipping = (shippingId: number) => {
   });
 };
 
+const submitGatewayForm = (paymentData: any) => {
+  if (!paymentData?.action_url || !paymentData?.params) {
+    console.error('Missing PayUMoney form data');
+    processing.value = false;
+    return;
+  }
+
+  const form = document.createElement('form');
+  form.action = paymentData.action_url;
+  form.method = paymentData.method || 'POST';
+
+  Object.entries(paymentData.params).forEach(([key, value]) => {
+    const input = document.createElement('input');
+    input.type = 'hidden';
+    input.name = key;
+    input.value = String(value ?? '');
+    form.appendChild(input);
+  });
+
+  document.body.appendChild(form);
+  form.submit();
+};
+
 // Generic payment gateway handler - works with any gateway extension
 const initiatePaymentGateway = (paymentResponse: any) => {
   console.log('Initiating payment gateway with response:', paymentResponse);
   
   const paymentData = paymentResponse.payment_data;
   const gatewayType = paymentResponse.gateway_type || 'frontend_integration';
+
+  if (gatewayType === 'form_post' && paymentData) {
+    submitGatewayForm(paymentData);
+    return;
+  }
   
   // Gateway returned frontend integration data (modal, script, etc.)
   if (gatewayType === 'frontend_integration' && paymentData) {
@@ -284,6 +312,20 @@ watch(() => page.props.flash, (flash: any) => {
   if (flash?.payment_response) {
     console.log('Payment response detected in flash:', flash.payment_response);
     if (flash.payment_response.success && flash.payment_response.payment_data) {
+      if (flash.payment_response.gateway_type === 'redirect') {
+        const redirectUrl = flash.payment_response.redirect_url
+          || flash.payment_response.payment_data.approve_url;
+        if (redirectUrl) {
+          window.location.href = redirectUrl;
+          return;
+        }
+      }
+
+      if (flash.payment_response.gateway_type === 'form_post') {
+        submitGatewayForm(flash.payment_response.payment_data);
+        return;
+      }
+
       console.log('Initiating payment gateway integration');
       initiatePaymentGateway(flash.payment_response);
     }
@@ -389,8 +431,8 @@ const submitOrder = () => {
 
   // Submit checkout - let the backend determine how to handle the payment method
   router.post('/checkout', formData, {
-    preserveState: false,
-    preserveScroll: false,
+    preserveState: true,
+    preserveScroll: true,
     onSuccess: () => {
       console.log('Checkout success, checking for gateway response');
       
@@ -411,6 +453,20 @@ const submitOrder = () => {
         console.log('Payment response from flash:', paymentResponse);
         
         if (paymentResponse && paymentResponse.success && paymentResponse.payment_data) {
+          if (paymentResponse.gateway_type === 'redirect') {
+            const redirectUrl = paymentResponse.redirect_url
+              || paymentResponse.payment_data.approve_url;
+            if (redirectUrl) {
+              window.location.href = redirectUrl;
+              return;
+            }
+          }
+
+          if (paymentResponse.gateway_type === 'form_post') {
+            submitGatewayForm(paymentResponse.payment_data);
+            return;
+          }
+
           console.log('Initiating frontend payment integration');
           initiatePaymentGateway(paymentResponse);
         }
