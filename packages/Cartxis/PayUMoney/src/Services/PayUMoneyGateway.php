@@ -87,37 +87,36 @@ class PayUMoneyGateway implements PaymentGatewayInterface
     protected function verifyHash(array $response): bool
     {
         $salt = $this->getConfig('merchant_salt');
+        $additionalCharges = $response['additionalCharges'] ?? null;
 
         // Reverse hash sequence for response verification
-        $hashString = sprintf(
-            '%s|%s|%s|%s|%s|%s|%s|%s|%s|%s|%s|%s|%s|%s|%s',
+        // salt|status|udf10|udf9|udf8|udf7|udf6|udf5|udf4|udf3|udf2|udf1|email|firstname|productinfo|amount|txnid|key
+        $parts = [
             $salt,
             $response['status'] ?? '',
-            '',
-            '',
-            '',
-            '',
-            '',
-            '',
-            '',
-            '',
+            $response['udf10'] ?? '',
+            $response['udf9'] ?? '',
+            $response['udf8'] ?? '',
+            $response['udf7'] ?? '',
+            $response['udf6'] ?? '',
             $response['udf5'] ?? '',
             $response['udf4'] ?? '',
             $response['udf3'] ?? '',
             $response['udf2'] ?? '',
-            $response['udf1'] ?? ''
-        );
-
-        $hashString .= sprintf(
-            '|%s|%s|%s|%s|%s',
+            $response['udf1'] ?? '',
             $response['email'] ?? '',
             $response['firstname'] ?? '',
             $response['productinfo'] ?? '',
             $response['amount'] ?? '',
-            $response['txnid'] ?? ''
-        );
+            $response['txnid'] ?? '',
+            $this->getConfig('merchant_key'),
+        ];
 
-        $hashString .= '|' . $this->getConfig('merchant_key');
+        $hashString = implode('|', $parts);
+
+        if (!empty($additionalCharges)) {
+            $hashString = $additionalCharges . '|' . $hashString;
+        }
 
         $calculatedHash = hash('sha512', $hashString);
 
@@ -168,21 +167,32 @@ class PayUMoneyGateway implements PaymentGatewayInterface
             }
 
             // Get customer details
-            $billingAddress = $order->billingAddress();
+            $billingAddress = $order->billingAddress() ?? $order->shippingAddress();
             $customer = $order->customer;
+
+            if (!$billingAddress) {
+                throw new \Exception('Billing address not found');
+            }
+
+            $customerEmail = $customer?->email ?? $order->customer_email;
+            if (!$customerEmail) {
+                throw new \Exception('Customer email not found');
+            }
 
             // Generate unique transaction ID
             $txnId = 'TXN' . $order->id . '_' . time();
 
             // Prepare payment parameters
+            $amount = $order->total ?? $order->grand_total ?? $order->subtotal ?? 0;
+
             $params = [
                 'key' => $merchantKey,
                 'txnid' => $txnId,
-                'amount' => number_format($order->grand_total, 2, '.', ''),
+                'amount' => number_format((float) $amount, 2, '.', ''),
                 'productinfo' => 'Order #' . $order->order_number,
                 'firstname' => $billingAddress->first_name,
                 'lastname' => $billingAddress->last_name,
-                'email' => $customer->email,
+                'email' => $customerEmail,
                 'phone' => $billingAddress->phone,
                 'address1' => $billingAddress->address_line_1,
                 'address2' => $billingAddress->address_line_2 ?? '',

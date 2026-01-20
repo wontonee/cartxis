@@ -9,6 +9,7 @@ use Cartxis\Shop\Models\Order;
 use Cartxis\Sales\Services\TransactionService;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Session;
 
 class PayUMoneyController extends Controller
 {
@@ -22,27 +23,25 @@ class PayUMoneyController extends Controller
      */
     public function callback(Request $request)
     {
-        Log::info('PayUMoney callback received', $request->all());
-
         try {
             $orderId = $request->input('udf1');
             $status = $request->input('status');
 
             if (!$orderId) {
-                return redirect()->route('checkout.index')->with('error', 'Invalid payment callback');
+                return redirect()->route('shop.checkout.index')->with('error', 'Invalid payment callback');
             }
 
             $order = Order::find($orderId);
 
             if (!$order) {
-                return redirect()->route('checkout.index')->with('error', 'Order not found');
+                return redirect()->route('shop.checkout.index')->with('error', 'Order not found');
             }
 
             // Get PayUMoney gateway
             $gateway = $this->gatewayManager->get('payumoney');
 
             if (!$gateway) {
-                return redirect()->route('checkout.index')->with('error', 'PayUMoney gateway not found');
+                return redirect()->route('shop.checkout.index')->with('error', 'PayUMoney gateway not found');
             }
 
             // Handle callback
@@ -55,7 +54,7 @@ class PayUMoneyController extends Controller
                         'payment_method' => 'payumoney',
                         'gateway' => 'payumoney',
                         'gateway_transaction_id' => $result['transaction_id'],
-                        'amount' => $order->grand_total,
+                        'amount' => $order->total,
                         'status' => 'completed',
                         'response_data' => $result['response_data'] ?? null,
                         'notes' => 'Payment completed via PayUMoney',
@@ -72,12 +71,11 @@ class PayUMoneyController extends Controller
                     ]);
                 });
 
-                Log::info('PayUMoney payment completed', [
-                    'order_id' => $order->id,
-                    'transaction_id' => $result['transaction_id'],
-                ]);
+                Session::forget('cart');
+                Session::forget('checkout');
+                Session::forget('checkout.last_order_id');
 
-                return redirect()->route('checkout.success', ['order' => $order->id])
+                return redirect()->route('shop.checkout.success', ['order' => $order->id])
                     ->with('success', 'Payment completed successfully!');
             }
 
@@ -87,7 +85,7 @@ class PayUMoneyController extends Controller
                 'message' => $result['message'] ?? 'Unknown error',
             ]);
 
-            return redirect()->route('checkout.index')
+            return redirect()->route('shop.checkout.index')
                 ->with('error', $result['message'] ?? 'Payment failed. Please try again.');
         } catch (\Exception $e) {
             Log::error('PayUMoney callback error', [
@@ -95,7 +93,7 @@ class PayUMoneyController extends Controller
                 'trace' => $e->getTraceAsString(),
             ]);
 
-            return redirect()->route('checkout.index')
+            return redirect()->route('shop.checkout.index')
                 ->with('error', 'Payment processing failed. Please try again.');
         }
     }

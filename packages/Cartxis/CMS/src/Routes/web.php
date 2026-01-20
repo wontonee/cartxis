@@ -19,6 +19,5 @@ Route::middleware('web')->group(function () {
     // Exclude auth routes and other system routes
     Route::get('/{slug}', [PageController::class, 'show'])
         ->name('page.show')
-        ->where('slug', '[a-z0-9-]+')
-        ->where('slug', '^(?!register|login|logout|forgot-password|reset-password|verify-email|dashboard|settings|admin|api).*$');
+        ->where('slug', '^(?!register|login|logout|forgot-password|reset-password|verify-email|dashboard|settings|admin|api)[a-z0-9-]+$');
 });
