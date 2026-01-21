@@ -101,6 +101,11 @@ interface Props {
   brands: Brand[];
   taxClasses: TaxClass[];
   attributes: Attribute[];
+  ai?: {
+    enabled?: boolean;
+    agents?: Array<{ name: string }>;
+    product_description_agent?: string;
+  };
   currency?: {
     code: string;
     symbol: string;
@@ -121,6 +126,8 @@ interface Props {
 }
 
 const props = defineProps<Props>();
+
+const aiEnabled = computed(() => props.ai?.enabled ?? false);
 
 // Currency symbol - use from props if available, otherwise use composable
 const { getSymbol } = useCurrency();
@@ -300,6 +307,40 @@ const form = ref({
   meta_keywords: props.product.meta_keywords || '',
 });
 
+// AI Description Generator
+const aiTone = ref<'professional' | 'casual' | 'luxury' | 'minimalist'>('professional');
+const aiLanguage = ref('en');
+const aiTargetAudience = ref('');
+const aiKeyFeatures = ref('');
+const aiIsGenerating = ref(false);
+const aiResult = ref<any | null>(null);
+const aiError = ref<string | null>(null);
+const resolveAgents = (): Array<{ name: string }> => {
+  const raw = props.ai?.agents || [];
+  if (Array.isArray(raw)) {
+    return raw as Array<{ name: string }>;
+  }
+  if (typeof raw === 'string') {
+    try {
+      const parsed = JSON.parse(raw);
+      return Array.isArray(parsed) ? parsed : [];
+    } catch {
+      return [];
+    }
+  }
+  return [];
+};
+
+const aiAgentOptions = computed(() => {
+  return resolveAgents().map(agent => agent.name).filter(Boolean);
+});
+
+const aiAgent = ref(props.ai?.product_description_agent || '');
+
+if (!aiAgent.value && aiAgentOptions.value.length > 0) {
+  aiAgent.value = aiAgentOptions.value[0];
+}
+
 // Generate slug from name
 const generateSlug = () => {
   form.value.slug = form.value.name
@@ -321,6 +362,77 @@ const flatCategories = computed(() => {
   };
   return flatten(props.categories);
 });
+
+const selectedCategoryPath = computed(() => {
+  const names = flatCategories.value
+    .filter(cat => form.value.category_ids.includes(cat.id))
+    .map(cat => cat.name);
+  return names.join(' > ');
+});
+
+const selectedBrandName = computed(() => {
+  return props.brands.find(brand => brand.id === form.value.brand_id)?.name || '';
+});
+
+const keyFeaturesList = computed(() => {
+  return aiKeyFeatures.value
+    .split(',')
+    .map(item => item.trim())
+    .filter(Boolean);
+});
+
+const generateAiDescription = async () => {
+  aiIsGenerating.value = true;
+  aiError.value = null;
+  try {
+    const response = await axios.post(
+      `/admin/catalog/products/${props.product.id}/generate-description`,
+      {
+        product_title: form.value.name,
+        category: selectedCategoryPath.value || undefined,
+        attributes: attributeValues.value,
+        brand: selectedBrandName.value || undefined,
+        key_features: keyFeaturesList.value,
+        target_audience: aiTargetAudience.value || undefined,
+        tone_preference: aiTone.value,
+        language: aiLanguage.value,
+        agent: aiAgent.value || undefined,
+      }
+    );
+
+    if (response.data?.success) {
+      aiResult.value = response.data.data?.data || response.data.data;
+    } else {
+      aiError.value = response.data?.message || 'AI generation failed.';
+    }
+  } catch (error: any) {
+    aiError.value = error.response?.data?.message || error.message || 'AI generation failed.';
+  } finally {
+    aiIsGenerating.value = false;
+  }
+};
+
+const applyAiDescription = () => {
+  if (!aiResult.value) {
+    return;
+  }
+
+  if (aiResult.value.short_description) {
+    form.value.short_description = aiResult.value.short_description;
+  }
+
+  if (aiResult.value.long_description) {
+    form.value.description = aiResult.value.long_description;
+  }
+
+  if (aiResult.value.meta_description) {
+    form.value.meta_description = aiResult.value.meta_description;
+  }
+
+  if (Array.isArray(aiResult.value.keywords)) {
+    form.value.meta_keywords = aiResult.value.keywords.join(', ');
+  }
+};
 
 // Toggle category selection
 const toggleCategory = (categoryId: number) => {
@@ -622,6 +734,99 @@ const deleteProduct = () => {
                     </option>
                   </select>
                   <p class="mt-1 text-xs text-gray-500">Associate this product with a brand</p>
+                </div>
+
+                <!-- AI Description Generator -->
+                <div v-if="aiEnabled" class="border border-gray-200 rounded-lg bg-gray-50 p-4 space-y-4">
+                  <div class="flex items-center justify-between">
+                    <div>
+                      <h3 class="text-sm font-semibold text-gray-900">AI Product Description</h3>
+                      <p class="text-xs text-gray-500">Generate SEO-optimized descriptions from product data.</p>
+                    </div>
+                    <button
+                      type="button"
+                      @click="generateAiDescription"
+                      :disabled="aiIsGenerating"
+                      class="inline-flex items-center px-3 py-2 text-xs font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700 disabled:opacity-50"
+                    >
+                      {{ aiIsGenerating ? 'Generating...' : 'Generate Description' }}
+                    </button>
+                  </div>
+
+                  <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <label class="block text-xs font-medium text-gray-700 mb-1">Tone</label>
+                      <select v-model="aiTone" class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm">
+                        <option value="professional">Professional</option>
+                        <option value="casual">Casual</option>
+                        <option value="luxury">Luxury</option>
+                        <option value="minimalist">Minimalist</option>
+                      </select>
+                    </div>
+                    <div>
+                      <label class="block text-xs font-medium text-gray-700 mb-1">Language</label>
+                      <select v-model="aiLanguage" class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm">
+                        <option value="en">English</option>
+                        <option value="es">Spanish</option>
+                        <option value="fr">French</option>
+                        <option value="de">German</option>
+                        <option value="zh">Chinese</option>
+                      </select>
+                    </div>
+                    <div>
+                      <label class="block text-xs font-medium text-gray-700 mb-1">AI Agent</label>
+                      <select v-model="aiAgent" class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm">
+                        <option value="">Select agent</option>
+                        <option v-for="agent in aiAgentOptions" :key="agent" :value="agent">
+                          {{ agent }}
+                        </option>
+                      </select>
+                    </div>
+                    <div>
+                      <label class="block text-xs font-medium text-gray-700 mb-1">Target Audience</label>
+                      <input v-model="aiTargetAudience" type="text" class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm" placeholder="e.g., gym enthusiasts" />
+                    </div>
+                    <div>
+                      <label class="block text-xs font-medium text-gray-700 mb-1">Key Features (comma separated)</label>
+                      <input v-model="aiKeyFeatures" type="text" class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm" placeholder="Active noise cancellation, 30-hour battery" />
+                    </div>
+                  </div>
+
+                  <p v-if="aiError" class="text-xs text-red-600">{{ aiError }}</p>
+
+                  <div v-if="aiResult" class="border-t border-gray-200 pt-4 space-y-3">
+                    <div>
+                      <label class="block text-xs font-medium text-gray-700 mb-1">Short Description</label>
+                      <p class="text-sm text-gray-700 bg-white border border-gray-200 rounded-md p-3" v-text="aiResult.short_description"></p>
+                    </div>
+                    <div>
+                      <label class="block text-xs font-medium text-gray-700 mb-1">Long Description</label>
+                      <p class="text-sm text-gray-700 bg-white border border-gray-200 rounded-md p-3 whitespace-pre-line" v-text="aiResult.long_description"></p>
+                    </div>
+                    <div>
+                      <label class="block text-xs font-medium text-gray-700 mb-1">Meta Description</label>
+                      <p class="text-sm text-gray-700 bg-white border border-gray-200 rounded-md p-3" v-text="aiResult.meta_description"></p>
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div>
+                        <label class="block text-xs font-medium text-gray-700 mb-1">Bullet Points</label>
+                        <ul class="text-sm text-gray-700 bg-white border border-gray-200 rounded-md p-3 list-disc pl-5" v-if="Array.isArray(aiResult.bullet_points)">
+                          <li v-for="(item, idx) in aiResult.bullet_points" :key="idx">{{ item }}</li>
+                        </ul>
+                      </div>
+                      <div>
+                        <label class="block text-xs font-medium text-gray-700 mb-1">Keywords</label>
+                        <div class="text-sm text-gray-700 bg-white border border-gray-200 rounded-md p-3">
+                          {{ Array.isArray(aiResult.keywords) ? aiResult.keywords.join(', ') : '' }}
+                        </div>
+                      </div>
+                    </div>
+                    <div class="flex justify-end">
+                      <button type="button" class="px-3 py-2 text-xs font-medium text-blue-600 border border-blue-200 rounded-md" @click="applyAiDescription">
+                        Apply to Product Fields
+                      </button>
+                    </div>
+                  </div>
                 </div>
 
                 <!-- Short Description -->

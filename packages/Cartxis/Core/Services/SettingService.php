@@ -36,10 +36,16 @@ class SettingService
      */
     public function set(string $key, $value, string $type = 'string', ?string $group = null): Setting
     {
+        $storedValue = $value;
+
+        if (in_array($type, ['json', 'array'], true)) {
+            $storedValue = is_string($value) ? $value : json_encode($value);
+        }
+
         $setting = Setting::updateOrCreate(
             ['key' => $key],
             [
-                'value' => $value,
+                'value' => $storedValue,
                 'type' => $type,
                 'group' => $group,
             ]

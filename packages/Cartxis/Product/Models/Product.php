@@ -149,6 +149,7 @@ class Product extends Model
     {
         return $this->hasMany(ProductAttributeValue::class);
     }
+
     
     /**
      * Get attribute options (for product variations like size, color)

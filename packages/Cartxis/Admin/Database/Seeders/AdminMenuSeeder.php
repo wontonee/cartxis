@@ -414,6 +414,16 @@ class AdminMenuSeeder extends Seeder
                 'location' => 'admin',
                 'active' => true,
             ],
+            [
+                'key' => 'settings-ai',
+                'title' => 'AI Settings',
+                'icon' => 'sparkles',
+                'route' => 'admin.settings.ai.index',
+                'parent_id' => $settingsId,
+                'order' => 9,
+                'location' => 'admin',
+                'active' => true,
+            ],
 
             // System Children (Maintenance tools)
             [
