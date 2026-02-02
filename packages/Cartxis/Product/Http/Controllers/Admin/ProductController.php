@@ -7,6 +7,7 @@ use Cartxis\Product\Models\Product;
 use Cartxis\Product\Models\Category;
 use Cartxis\Product\Models\InventoryAdjustment;
 use Cartxis\Core\Models\Currency;
+use Cartxis\Core\Services\SettingService;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -171,7 +172,7 @@ class ProductController extends Controller
     /**
      * Show the form for editing the product
      */
-    public function edit(Product $product): Response
+    public function edit(Product $product, SettingService $settings): Response
     {
         $product->load(['categories', 'images', 'attributeValues.attribute', 'attributeValues.option']);
 
@@ -208,6 +209,11 @@ class ProductController extends Controller
                 'symbol' => '$',
                 'symbol_position' => 'before',
                 'decimal_places' => 2,
+            ],
+            'ai' => [
+                'enabled' => (bool) $settings->get('ai.enabled', false),
+                'agents' => $settings->get('ai.agents', []),
+                'product_description_agent' => (string) $settings->get('ai.product_description_agent', ''),
             ],
         ]);
     }

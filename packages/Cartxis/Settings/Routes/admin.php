@@ -9,6 +9,7 @@ use Cartxis\Settings\Http\Controllers\Admin\TaxRatesController;
 use Cartxis\Settings\Http\Controllers\Admin\TaxZonesController;
 use Cartxis\Settings\Http\Controllers\Admin\TaxRulesController;
 use Cartxis\Settings\Http\Controllers\Admin\EmailController;
+use Cartxis\Settings\Http\Controllers\Admin\AiSettingsController;
 use Illuminate\Support\Facades\Route;
 
 Route::middleware(['web', 'auth:admin'])
@@ -93,5 +94,9 @@ Route::middleware(['web', 'auth:admin'])
             Route::get('/templates/{id}/preview', [EmailController::class, 'previewTemplate'])->name('templates.preview');
             Route::post('/templates/{id}/send-test', [EmailController::class, 'sendTestTemplate'])->name('templates.send-test');
         });
+
+        // AI Settings
+        Route::get('ai', [AiSettingsController::class, 'index'])->name('ai.index');
+        Route::post('ai', [AiSettingsController::class, 'save'])->name('ai.save');
     });
 

@@ -14,6 +14,7 @@ use Cartxis\API\Http\Controllers\V1\ReviewController;
 use Cartxis\API\Http\Controllers\V1\SearchController;
 use Cartxis\API\Http\Controllers\V1\CurrencyController;
 use Cartxis\API\Http\Controllers\V1\ApiSyncController;
+use Cartxis\API\Http\Controllers\V1\ProductAiController;
 use Cartxis\API\Http\Middleware\TrackApiSync;
 
 /*
@@ -154,6 +155,9 @@ Route::prefix('api/v1')->group(function () {
             Route::delete('/{id}', [ReviewController::class, 'destroy']);
             Route::post('/{id}/vote', [ReviewController::class, 'vote']);
         });
+
+        // AI Product Description Generator
+        Route::post('products/{id}/generate-description', [ProductAiController::class, 'generateDescription']);
 
         // API Sync (Mobile connectivity)
         Route::prefix('system/api-sync')->group(function () {

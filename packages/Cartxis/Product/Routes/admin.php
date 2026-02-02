@@ -6,6 +6,7 @@ use Cartxis\Product\Http\Controllers\Admin\CategoryController;
 use Cartxis\Product\Http\Controllers\Admin\AttributeController;
 use Cartxis\Product\Http\Controllers\Admin\BrandController;
 use Cartxis\Product\Http\Controllers\Admin\ReviewController;
+use Cartxis\Product\Http\Controllers\Admin\ProductAiController;
 use Illuminate\Support\Facades\Route;
 
 Route::middleware(['web', 'auth:admin'])
@@ -16,6 +17,7 @@ Route::middleware(['web', 'auth:admin'])
         Route::resource('products', ProductController::class);
         Route::post('products/bulk-destroy', [ProductController::class, 'bulkDestroy'])->name('products.bulk-destroy');
         Route::post('products/bulk-status', [ProductController::class, 'bulkUpdateStatus'])->name('products.bulk-status');
+        Route::post('products/{product}/generate-description', [ProductAiController::class, 'generateDescription'])->name('products.generate-description');
         
         // Product Image Management
         Route::post('products/{product}/images/upload', [ProductImageController::class, 'upload'])->name('products.images.upload');

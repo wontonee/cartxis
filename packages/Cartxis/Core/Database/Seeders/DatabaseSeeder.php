@@ -23,6 +23,7 @@ use Cartxis\Marketing\Database\Seeders\SampleMarketingSeeder;
 use Cartxis\Reports\Database\Seeders\ReportsMenuSeeder;
 use Cartxis\Sales\Database\Seeders\CreditMemoEmailTemplatesSeeder;
 use Cartxis\Sales\Database\Seeders\ShipmentEmailTemplatesSeeder;
+use Cartxis\Settings\Database\Seeders\AiSettingsSeeder;
 
 class DatabaseSeeder extends Seeder
 {
@@ -42,6 +43,7 @@ class DatabaseSeeder extends Seeder
             ShippingMethodSeeder::class,
             TaxSeeder::class,
             EmailSeeder::class,
+            AiSettingsSeeder::class,
 
             // Customer Package Seeders
             CustomerMenuSeeder::class,
