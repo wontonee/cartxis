@@ -82,7 +82,23 @@ class DemoDataService
                 // Run the seeders for this business type
                 foreach ($config['seeders'] as $seederClass) {
                     Log::info("Running seeder: {$seederClass}");
-                    Artisan::call('db:seed', ['--class' => $seederClass]);
+                    
+                    // Check if seeder class exists
+                    if (!class_exists($seederClass)) {
+                        throw new \Exception("Seeder class not found: {$seederClass}. Run 'composer dump-autoload' on the server.");
+                    }
+                    
+                    $exitCode = Artisan::call('db:seed', [
+                        '--class' => $seederClass,
+                        '--force' => true, // Required for production
+                    ]);
+                    
+                    $output = Artisan::output();
+                    Log::info("Seeder output: {$output}, Exit code: {$exitCode}");
+                    
+                    if ($exitCode !== 0) {
+                        throw new \Exception("Seeder failed with exit code {$exitCode}: {$output}");
+                    }
                 }
 
                 // Get import statistics

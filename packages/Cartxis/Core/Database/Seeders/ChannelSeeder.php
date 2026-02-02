@@ -12,6 +12,8 @@ class ChannelSeeder extends Seeder
      */
     public function run(): void
     {
+        $appUrl = config('app.url', 'http://localhost');
+        
         // Default channel
         Channel::updateOrCreate(
             ['slug' => 'default-store'],
@@ -20,7 +22,7 @@ class ChannelSeeder extends Seeder
                 'theme_id' => 1,
                 'status' => 'active',
                 'is_default' => true,
-                'url' => 'http://cartxis.test',
+                'url' => $appUrl,
                 'description' => 'Main storefront channel',
             ]
         );
@@ -33,7 +35,7 @@ class ChannelSeeder extends Seeder
                 'theme_id' => 1,
                 'status' => 'active',
                 'is_default' => false,
-                'url' => 'http://mobile.cartxis.test',
+                'url' => str_replace(['http://', 'https://'], ['http://mobile.', 'https://mobile.'], $appUrl),
                 'description' => 'Mobile-optimized storefront',
             ]
         );
