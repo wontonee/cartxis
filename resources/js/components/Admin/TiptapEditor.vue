@@ -31,7 +31,7 @@ const editor = useEditor({
   content: props.modelValue,
   editorProps: {
     attributes: {
-      class: 'prose max-w-none focus:outline-none min-h-[200px] px-4 py-3',
+      class: 'prose dark:prose-invert max-w-none focus:outline-none min-h-[200px] px-4 py-3',
     },
   },
   onUpdate: ({ editor }) => {
@@ -49,9 +49,9 @@ watch(() => props.modelValue, (value) => {
 </script>
 
 <template>
-  <div class="border border-gray-300 rounded-md overflow-hidden">
+  <div class="border border-gray-300 dark:border-gray-600 rounded-md overflow-hidden">
     <!-- Toolbar -->
-    <div v-if="editor" class="border-b border-gray-300 bg-gray-50 px-2 py-2 flex flex-wrap gap-1">
+    <div v-if="editor" class="border-b border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-700 px-2 py-2 flex flex-wrap gap-1">
       <!-- Bold -->
       <button
         type="button"
@@ -60,7 +60,7 @@ watch(() => props.modelValue, (value) => {
           'px-3 py-1.5 rounded text-sm font-medium transition-colors',
           editor.isActive('bold')
             ? 'bg-blue-600 text-white'
-            : 'bg-white text-gray-700 hover:bg-gray-100'
+            : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-600'
         ]"
         title="Bold (Ctrl+B)"
       >
@@ -77,7 +77,7 @@ watch(() => props.modelValue, (value) => {
           'px-3 py-1.5 rounded text-sm font-medium transition-colors',
           editor.isActive('italic')
             ? 'bg-blue-600 text-white'
-            : 'bg-white text-gray-700 hover:bg-gray-100'
+            : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-600'
         ]"
         title="Italic (Ctrl+I)"
       >
@@ -94,7 +94,7 @@ watch(() => props.modelValue, (value) => {
           'px-3 py-1.5 rounded text-sm font-medium transition-colors',
           editor.isActive('strike')
             ? 'bg-blue-600 text-white'
-            : 'bg-white text-gray-700 hover:bg-gray-100'
+            : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-600'
         ]"
         title="Strikethrough"
       >
@@ -103,7 +103,7 @@ watch(() => props.modelValue, (value) => {
         </svg>
       </button>
 
-      <div class="w-px h-6 bg-gray-300 mx-1"></div>
+      <div class="w-px h-6 bg-gray-300 dark:bg-gray-600 mx-1"></div>
 
       <!-- Heading 1 -->
       <button
@@ -113,7 +113,7 @@ watch(() => props.modelValue, (value) => {
           'px-3 py-1.5 rounded text-sm font-medium transition-colors',
           editor.isActive('heading', { level: 1 })
             ? 'bg-blue-600 text-white'
-            : 'bg-white text-gray-700 hover:bg-gray-100'
+            : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-600'
         ]"
         title="Heading 1"
       >
@@ -128,7 +128,7 @@ watch(() => props.modelValue, (value) => {
           'px-3 py-1.5 rounded text-sm font-medium transition-colors',
           editor.isActive('heading', { level: 2 })
             ? 'bg-blue-600 text-white'
-            : 'bg-white text-gray-700 hover:bg-gray-100'
+            : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-600'
         ]"
         title="Heading 2"
       >
@@ -143,14 +143,14 @@ watch(() => props.modelValue, (value) => {
           'px-3 py-1.5 rounded text-sm font-medium transition-colors',
           editor.isActive('heading', { level: 3 })
             ? 'bg-blue-600 text-white'
-            : 'bg-white text-gray-700 hover:bg-gray-100'
+            : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-600'
         ]"
         title="Heading 3"
       >
         H3
       </button>
 
-      <div class="w-px h-6 bg-gray-300 mx-1"></div>
+      <div class="w-px h-6 bg-gray-300 dark:bg-gray-600 mx-1"></div>
 
       <!-- Bullet List -->
       <button
@@ -160,7 +160,7 @@ watch(() => props.modelValue, (value) => {
           'px-3 py-1.5 rounded text-sm font-medium transition-colors',
           editor.isActive('bulletList')
             ? 'bg-blue-600 text-white'
-            : 'bg-white text-gray-700 hover:bg-gray-100'
+            : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-600'
         ]"
         title="Bullet List"
       >
@@ -177,7 +177,7 @@ watch(() => props.modelValue, (value) => {
           'px-3 py-1.5 rounded text-sm font-medium transition-colors',
           editor.isActive('orderedList')
             ? 'bg-blue-600 text-white'
-            : 'bg-white text-gray-700 hover:bg-gray-100'
+            : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-600'
         ]"
         title="Numbered List"
       >
@@ -194,7 +194,7 @@ watch(() => props.modelValue, (value) => {
           'px-3 py-1.5 rounded text-sm font-medium transition-colors',
           editor.isActive('blockquote')
             ? 'bg-blue-600 text-white'
-            : 'bg-white text-gray-700 hover:bg-gray-100'
+            : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-600'
         ]"
         title="Blockquote"
       >
@@ -203,14 +203,14 @@ watch(() => props.modelValue, (value) => {
         </svg>
       </button>
 
-      <div class="w-px h-6 bg-gray-300 mx-1"></div>
+      <div class="w-px h-6 bg-gray-300 dark:bg-gray-600 mx-1"></div>
 
       <!-- Undo -->
       <button
         type="button"
         @click="editor.chain().focus().undo().run()"
         :disabled="!editor.can().undo()"
-        class="px-3 py-1.5 rounded text-sm font-medium bg-white text-gray-700 hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+        class="px-3 py-1.5 rounded text-sm font-medium bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
         title="Undo (Ctrl+Z)"
       >
         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -223,7 +223,7 @@ watch(() => props.modelValue, (value) => {
         type="button"
         @click="editor.chain().focus().redo().run()"
         :disabled="!editor.can().redo()"
-        class="px-3 py-1.5 rounded text-sm font-medium bg-white text-gray-700 hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+        class="px-3 py-1.5 rounded text-sm font-medium bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
         title="Redo (Ctrl+Y)"
       >
         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -233,7 +233,7 @@ watch(() => props.modelValue, (value) => {
     </div>
 
     <!-- Editor Content -->
-    <div class="bg-white">
+    <div class="bg-white dark:bg-gray-800">
       <EditorContent :editor="editor" />
     </div>
   </div>
@@ -247,7 +247,7 @@ watch(() => props.modelValue, (value) => {
 
 .ProseMirror p.is-editor-empty:first-child::before {
   content: attr(data-placeholder);
-  color: #9ca3af;
+  @apply text-gray-400 dark:text-gray-500;
   pointer-events: none;
   height: 0;
   float: left;
@@ -276,6 +276,11 @@ watch(() => props.modelValue, (value) => {
   padding-left: 1rem;
   margin: 1rem 0;
   color: #6b7280;
+}
+
+.dark .ProseMirror blockquote {
+  border-left-color: #4b5563;
+  color: #9ca3af;
 }
 
 .ProseMirror h1 {
@@ -313,20 +318,11 @@ watch(() => props.modelValue, (value) => {
 }
 
 .ProseMirror code {
-  background-color: #f3f4f6;
-  padding: 0.125rem 0.25rem;
-  border-radius: 0.25rem;
-  font-family: monospace;
-  font-size: 0.875em;
+  @apply bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-200 px-1 py-0.5 rounded font-mono text-sm;
 }
 
 .ProseMirror pre {
-  background-color: #1f2937;
-  color: #f3f4f6;
-  padding: 1rem;
-  border-radius: 0.375rem;
-  overflow-x: auto;
-  margin: 1rem 0;
+  @apply bg-gray-800 dark:bg-gray-900 text-gray-100 p-4 rounded-md overflow-x-auto my-4;
 }
 
 .ProseMirror pre code {

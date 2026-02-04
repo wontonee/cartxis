@@ -150,22 +150,22 @@ function exportOrders() {
 
 function getStatusBadge(status: string): string {
   const badges: Record<string, string> = {
-    pending: 'bg-yellow-100 text-yellow-800',
-    processing: 'bg-blue-100 text-blue-800',
-    completed: 'bg-green-100 text-green-800',
-    cancelled: 'bg-red-100 text-red-800',
-    refunded: 'bg-purple-100 text-purple-800',
-    failed: 'bg-gray-100 text-gray-800',
+    pending: 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-300',
+    processing: 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300',
+    completed: 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300',
+    cancelled: 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300',
+    refunded: 'bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-300',
+    failed: 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300',
   };
   return badges[status] || badges.pending;
 }
 
 function getPaymentStatusBadge(status: string): string {
   const badges: Record<string, string> = {
-    pending: 'bg-yellow-100 text-yellow-800',
-    paid: 'bg-green-100 text-green-800',
-    failed: 'bg-red-100 text-red-800',
-    refunded: 'bg-purple-100 text-purple-800',
+    pending: 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-300',
+    paid: 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300',
+    failed: 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300',
+    refunded: 'bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-300',
   };
   return badges[status] || badges.pending;
 }
@@ -187,13 +187,13 @@ function formatDate(date: string): string {
       <!-- Page Header -->
       <div class="flex items-center justify-between">
         <div>
-          <h1 class="text-2xl font-bold text-gray-900">Orders</h1>
-          <p class="mt-1 text-sm text-gray-600">Manage customer orders</p>
+          <h1 class="text-2xl font-bold text-gray-900 dark:text-white">Orders</h1>
+          <p class="mt-1 text-sm text-gray-600 dark:text-gray-400">Manage customer orders</p>
         </div>
         <div class="flex gap-2">
           <button
             @click="exportOrders"
-            class="flex items-center gap-2 px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
+            class="flex items-center gap-2 px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-200 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
           >
             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
@@ -213,27 +213,27 @@ function formatDate(date: string): string {
       </div>
 
       <!-- Filters Card -->
-      <div class="bg-white rounded-lg shadow-sm p-4">
+      <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-4">
         <div class="grid grid-cols-1 md:grid-cols-6 gap-4">
           <!-- Search -->
           <div class="md:col-span-2">
-            <label class="block text-sm font-medium text-gray-700 mb-1">Search</label>
+            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Search</label>
             <input
               v-model="search"
               @input="performSearch"
               type="text"
               placeholder="Order #, customer email, name..."
-              class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             />
           </div>
 
           <!-- Status Filter -->
           <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">Status</label>
+            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Status</label>
             <select
               v-model="statusFilter"
               @change="applyFilters"
-              class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             >
               <option value="">All Status</option>
               <option v-for="status in statuses" :key="status.value" :value="status.value">
@@ -244,11 +244,11 @@ function formatDate(date: string): string {
 
           <!-- Payment Status Filter -->
           <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">Payment</label>
+            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Payment</label>
             <select
               v-model="paymentStatusFilter"
               @change="applyFilters"
-              class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             >
               <option value="">All Payments</option>
               <option v-for="status in paymentStatuses" :key="status.value" :value="status.value">
@@ -259,23 +259,23 @@ function formatDate(date: string): string {
 
           <!-- Date From -->
           <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">From Date</label>
+            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">From Date</label>
             <input
               v-model="dateFrom"
               @change="applyFilters"
               type="date"
-              class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             />
           </div>
 
           <!-- Date To -->
           <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">To Date</label>
+            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">To Date</label>
             <input
               v-model="dateTo"
               @change="applyFilters"
               type="date"
-              class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             />
           </div>
         </div>
@@ -284,7 +284,7 @@ function formatDate(date: string): string {
         <div v-if="search || statusFilter || paymentStatusFilter || dateFrom || dateTo" class="mt-3 flex justify-end">
           <button
             @click="clearFilters"
-            class="text-sm text-gray-600 hover:text-gray-900"
+            class="text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200"
           >
             Clear Filters
           </button>
@@ -292,9 +292,9 @@ function formatDate(date: string): string {
       </div>
 
       <!-- Bulk Actions -->
-      <div v-if="selectedOrders.length > 0" class="bg-blue-50 border border-blue-200 rounded-lg px-4 py-3">
+      <div v-if="selectedOrders.length > 0" class="bg-blue-50 dark:bg-blue-900/30 border border-blue-200 dark:border-blue-800 rounded-lg px-4 py-3">
         <div class="flex items-center justify-between">
-          <span class="text-sm font-medium text-blue-900">
+          <span class="text-sm font-medium text-blue-900 dark:text-blue-200">
             {{ selectedOrders.length }} {{ selectedOrders.length === 1 ? 'order' : 'orders' }} selected
           </span>
           <div class="flex gap-2">
@@ -309,19 +309,19 @@ function formatDate(date: string): string {
       </div>
 
       <!-- Table -->
-      <div class="bg-white shadow overflow-hidden sm:rounded-lg">
+      <div class="bg-white dark:bg-gray-800 shadow overflow-hidden sm:rounded-lg">
         <div class="overflow-x-auto">
-          <table class="min-w-full divide-y divide-gray-200">
-            <thead class="bg-gray-50">
+          <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+            <thead class="bg-gray-50 dark:bg-gray-700">
               <tr>
                 <th scope="col" class="px-6 py-3 text-left">
                   <input
                     type="checkbox"
                     v-model="selectAll"
-                    class="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                    class="h-4 w-4 rounded border-gray-300 dark:border-gray-600 text-blue-600 focus:ring-blue-500 dark:bg-gray-700"
                   />
                 </th>
-                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer" @click="sortTable('order_number')">
+                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider cursor-pointer" @click="sortTable('order_number')">
                   <div class="flex items-center gap-1">
                     Order #
                     <svg v-if="sortBy === 'order_number'" class="w-4 h-4" :class="sortOrder === 'asc' ? '' : 'rotate-180'" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -329,16 +329,16 @@ function formatDate(date: string): string {
                     </svg>
                   </div>
                 </th>
-                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
                   Customer
                 </th>
-                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
                   Status
                 </th>
-                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
                   Payment
                 </th>
-                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer" @click="sortTable('total')">
+                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider cursor-pointer" @click="sortTable('total')">
                   <div class="flex items-center gap-1">
                     Total
                     <svg v-if="sortBy === 'total'" class="w-4 h-4" :class="sortOrder === 'asc' ? '' : 'rotate-180'" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -346,7 +346,7 @@ function formatDate(date: string): string {
                     </svg>
                   </div>
                 </th>
-                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer" @click="sortTable('created_at')">
+                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider cursor-pointer" @click="sortTable('created_at')">
                   <div class="flex items-center gap-1">
                     Date
                     <svg v-if="sortBy === 'created_at'" class="w-4 h-4" :class="sortOrder === 'asc' ? '' : 'rotate-180'" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -354,32 +354,32 @@ function formatDate(date: string): string {
                     </svg>
                   </div>
                 </th>
-                <th scope="col" class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th scope="col" class="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
                   Actions
                 </th>
               </tr>
             </thead>
-            <tbody class="bg-white divide-y divide-gray-200">
-              <tr v-for="order in orders.data" :key="order.id" class="hover:bg-gray-50">
+            <tbody class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
+              <tr v-for="order in orders.data" :key="order.id" class="hover:bg-gray-50 dark:hover:bg-gray-700">
                 <td class="px-6 py-4 whitespace-nowrap">
                   <input
                     type="checkbox"
                     :value="order.id"
                     v-model="selectedOrders"
-                    class="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                    class="h-4 w-4 rounded border-gray-300 dark:border-gray-600 text-blue-600 focus:ring-blue-500 dark:bg-gray-700"
                   />
                 </td>
                 <td class="px-6 py-4 whitespace-nowrap">
                   <Link
                     :href="`/admin/sales/orders/${order.id}`"
-                    class="text-sm font-medium text-blue-600 hover:text-blue-900"
+                    class="text-sm font-medium text-blue-600 dark:text-blue-400 hover:text-blue-900 dark:hover:text-blue-300"
                   >
                     {{ order.order_number }}
                   </Link>
                 </td>
                 <td class="px-6 py-4 whitespace-nowrap">
-                  <div class="text-sm text-gray-900">{{ order.user?.name || 'Guest' }}</div>
-                  <div class="text-sm text-gray-500">{{ order.customer_email }}</div>
+                  <div class="text-sm text-gray-900 dark:text-white">{{ order.user?.name || 'Guest' }}</div>
+                  <div class="text-sm text-gray-500 dark:text-gray-400">{{ order.customer_email }}</div>
                 </td>
                 <td class="px-6 py-4 whitespace-nowrap">
                   <span :class="['px-2 inline-flex text-xs leading-5 font-semibold rounded-full', getStatusBadge(order.status)]">
@@ -391,17 +391,17 @@ function formatDate(date: string): string {
                     {{ order.payment_status }}
                   </span>
                 </td>
-                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white">
                   {{ formatPrice(order.total) }}
                 </td>
-                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
                   {{ formatDate(order.created_at) }}
                 </td>
                 <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                   <div class="flex items-center justify-end gap-2">
                     <Link
                       :href="`/admin/sales/orders/${order.id}`"
-                      class="text-blue-600 hover:text-blue-900 cursor-pointer"
+                      class="text-blue-600 hover:text-blue-900 dark:text-blue-400 dark:hover:text-blue-300 cursor-pointer"
                       title="View Order"
                     >
                       <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -414,8 +414,8 @@ function formatDate(date: string): string {
               </tr>
               <tr v-if="orders.data.length === 0">
                 <td colspan="8" class="px-6 py-12 text-center">
-                  <div class="text-gray-500">
-                    <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <div class="text-gray-500 dark:text-gray-400">
+                    <svg class="mx-auto h-12 w-12 text-gray-400 dark:text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4" />
                     </svg>
                     <p class="mt-2 text-sm">No orders found</p>
@@ -435,15 +435,15 @@ function formatDate(date: string): string {
     <div v-if="showBulkModal" class="fixed inset-0 z-50 overflow-y-auto">
       <div class="flex items-center justify-center min-h-screen px-4 pt-4 pb-20 text-center sm:block sm:p-0">
         <div class="fixed inset-0 transition-opacity bg-gray-500/75 dark:bg-gray-900/75" @click="showBulkModal = false"></div>
-        <div class="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full">
-          <div class="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
-            <h3 class="text-lg font-medium text-gray-900 mb-4">Bulk Update Status</h3>
+        <div class="inline-block align-bottom bg-white dark:bg-gray-800 rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full">
+          <div class="bg-white dark:bg-gray-800 px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
+            <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-4">Bulk Update Status</h3>
             <div class="space-y-4">
               <div>
-                <label class="block text-sm font-medium text-gray-700 mb-1">New Status</label>
+                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">New Status</label>
                 <select
                   v-model="bulkStatus"
-                  class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 >
                   <option value="">Select status...</option>
                   <option v-for="status in statuses" :key="status.value" :value="status.value">
@@ -455,13 +455,13 @@ function formatDate(date: string): string {
                 <input
                   type="checkbox"
                   v-model="bulkNotifyCustomer"
-                  class="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                  class="h-4 w-4 rounded border-gray-300 dark:border-gray-600 text-blue-600 focus:ring-blue-500 dark:bg-gray-700"
                 />
-                <label class="ml-2 text-sm text-gray-700">Notify customers</label>
+                <label class="ml-2 text-sm text-gray-700 dark:text-gray-300">Notify customers</label>
               </div>
             </div>
           </div>
-          <div class="bg-gray-50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
+          <div class="bg-gray-50 dark:bg-gray-700/50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse border-t border-gray-200 dark:border-gray-700">
             <button
               @click="bulkUpdateStatus"
               :disabled="!bulkStatus"
@@ -471,7 +471,7 @@ function formatDate(date: string): string {
             </button>
             <button
               @click="showBulkModal = false"
-              class="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm"
+              class="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 dark:border-gray-600 shadow-sm px-4 py-2 bg-white dark:bg-gray-800 text-base font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 focus:outline-none sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm"
             >
               Cancel
             </button>

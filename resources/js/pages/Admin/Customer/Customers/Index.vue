@@ -219,8 +219,8 @@ function formatDate(dateString: string): string {
       <div class="mb-6">
         <div class="flex justify-between items-center mb-4">
           <div>
-            <h1 class="text-2xl font-semibold text-gray-900">Customers</h1>
-            <p class="mt-1 text-sm text-gray-600">Manage your customer database</p>
+            <h1 class="text-2xl font-semibold text-gray-900 dark:text-white">Customers</h1>
+            <p class="mt-1 text-sm text-gray-600 dark:text-gray-400">Manage your customer database</p>
           </div>
           <Link
             :href="'/admin/customers/create'"
@@ -235,46 +235,46 @@ function formatDate(dateString: string): string {
 
       <!-- Statistics Cards -->
       <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
-        <div class="bg-white rounded-lg shadow p-6">
-          <div class="text-sm font-medium text-gray-600">Total Customers</div>
-          <div class="mt-2 text-3xl font-semibold text-gray-900">{{ statistics.total_customers }}</div>
+        <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
+          <div class="text-sm font-medium text-gray-600 dark:text-gray-400">Total Customers</div>
+          <div class="mt-2 text-3xl font-semibold text-gray-900 dark:text-white">{{ statistics.total_customers }}</div>
         </div>
-        <div class="bg-white rounded-lg shadow p-6">
-          <div class="text-sm font-medium text-gray-600">Active Customers</div>
-          <div class="mt-2 text-3xl font-semibold text-green-600">{{ statistics.active_customers }}</div>
+        <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
+          <div class="text-sm font-medium text-gray-600 dark:text-gray-400">Active Customers</div>
+          <div class="mt-2 text-3xl font-semibold text-green-600 dark:text-green-400">{{ statistics.active_customers }}</div>
         </div>
-        <div class="bg-white rounded-lg shadow p-6">
-          <div class="text-sm font-medium text-gray-600">Verified</div>
-          <div class="mt-2 text-3xl font-semibold text-blue-600">{{ statistics.verified_customers }}</div>
+        <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
+          <div class="text-sm font-medium text-gray-600 dark:text-gray-400">Verified</div>
+          <div class="mt-2 text-3xl font-semibold text-blue-600 dark:text-blue-400">{{ statistics.verified_customers }}</div>
         </div>
-        <div class="bg-white rounded-lg shadow p-6">
-          <div class="text-sm font-medium text-gray-600">Newsletter Subscribers</div>
-          <div class="mt-2 text-3xl font-semibold text-purple-600">{{ statistics.newsletter_subscribers }}</div>
+        <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
+          <div class="text-sm font-medium text-gray-600 dark:text-gray-400">Newsletter Subscribers</div>
+          <div class="mt-2 text-3xl font-semibold text-purple-600 dark:text-purple-400">{{ statistics.newsletter_subscribers }}</div>
         </div>
       </div>
 
       <!-- Filters -->
-      <div class="bg-white rounded-lg shadow-sm p-4">
+      <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-4">
         <div class="grid grid-cols-1 md:grid-cols-6 gap-4">
           <!-- Search -->
           <div class="md:col-span-2">
-            <label class="block text-sm font-medium text-gray-700 mb-1">Search</label>
+            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Search</label>
             <input
               v-model="search"
               @input="performSearch"
               type="text"
               placeholder="Name, email, phone..."
-              class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             />
           </div>
 
           <!-- Customer Group Filter -->
           <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">Group</label>
+            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Group</label>
             <select
               v-model="customerGroupFilter"
               @change="applyFilters"
-              class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             >
               <option value="">All Groups</option>
               <option v-for="group in customerGroups" :key="group.id" :value="group.id">
@@ -285,11 +285,11 @@ function formatDate(dateString: string): string {
 
           <!-- Status Filter -->
           <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">Status</label>
+            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Status</label>
             <select
               v-model="statusFilter"
               @change="applyFilters"
-              class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             >
               <option value="">All Status</option>
               <option value="active">Active</option>
@@ -299,11 +299,11 @@ function formatDate(dateString: string): string {
 
           <!-- Customer Type Filter -->
           <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">Customer Type</label>
+            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Customer Type</label>
             <select
               v-model="customerTypeFilter"
               @change="applyFilters"
-              class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             >
               <option value="">All Types</option>
               <option value="registered">Registered</option>
@@ -313,11 +313,11 @@ function formatDate(dateString: string): string {
 
           <!-- Verified Filter -->
           <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">Verified</label>
+            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Verified</label>
             <select
               v-model="verifiedFilter"
               @change="applyFilters"
-              class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             >
               <option value="">All</option>
               <option value="true">Verified</option>
@@ -327,11 +327,11 @@ function formatDate(dateString: string): string {
 
           <!-- Newsletter Filter -->
           <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">Newsletter</label>
+            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Newsletter</label>
             <select
               v-model="newsletterFilter"
               @change="applyFilters"
-              class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             >
               <option value="">All</option>
               <option value="true">Subscribed</option>
@@ -343,38 +343,38 @@ function formatDate(dateString: string): string {
         <!-- Date Range Filters -->
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
           <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">From Date</label>
+            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">From Date</label>
             <input
               v-model="dateFrom"
               @change="applyFilters"
               type="date"
-              class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             />
           </div>
           <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">To Date</label>
+            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">To Date</label>
             <input
               v-model="dateTo"
               @change="applyFilters"
               type="date"
-              class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             />
           </div>
         </div>
 
         <!-- Filter Actions -->
-        <div class="flex items-center justify-between mt-4 pt-4 border-t border-gray-200">
+        <div class="flex items-center justify-between mt-4 pt-4 border-t border-gray-200 dark:border-gray-700">
           <button
             v-if="search || customerGroupFilter || statusFilter || customerTypeFilter || verifiedFilter || newsletterFilter || dateFrom || dateTo"
             @click="clearFilters"
-            class="text-sm text-gray-600 hover:text-gray-900"
+            class="text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200"
           >
             Clear Filters
           </button>
           <div class="flex gap-2 ml-auto">
             <button
               @click="exportCustomers"
-              class="flex items-center gap-2 px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
+              class="flex items-center gap-2 px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-200 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
             >
               <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
@@ -388,9 +388,9 @@ function formatDate(dateString: string): string {
 
     <!-- Bulk Actions -->
       <!-- Bulk Actions -->
-      <div v-if="selectedCustomers.length > 0" class="mb-4 bg-blue-50 border border-blue-200 rounded-lg px-4 py-3">
+      <div v-if="selectedCustomers.length > 0" class="mb-4 bg-blue-50 dark:bg-blue-900/30 border border-blue-200 dark:border-blue-800 rounded-lg px-4 py-3">
         <div class="flex items-center justify-between">
-          <span class="text-sm font-medium text-blue-900">
+          <span class="text-sm font-medium text-blue-900 dark:text-blue-200">
             {{ selectedCustomers.length }} {{ selectedCustomers.length === 1 ? 'customer' : 'customers' }} selected
           </span>
           <div class="flex gap-2">
@@ -405,10 +405,10 @@ function formatDate(dateString: string): string {
       </div>
 
       <!-- Table -->
-      <div class="bg-white shadow overflow-hidden sm:rounded-lg">
+      <div class="bg-white dark:bg-gray-800 shadow overflow-hidden sm:rounded-lg">
         <div class="overflow-x-auto">
-          <table class="min-w-full divide-y divide-gray-200">
-            <thead class="bg-gray-50">
+          <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+            <thead class="bg-gray-50 dark:bg-gray-700">
           <tr>
             <th class="w-12 px-6 py-3">
               <input
@@ -416,45 +416,45 @@ function formatDate(dateString: string): string {
                 :checked="allSelected"
                 :indeterminate="someSelected"
                 @change="toggleSelectAll"
-                class="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                class="rounded border-gray-300 dark:border-gray-600 text-blue-600 focus:ring-blue-500 dark:bg-gray-700"
               />
             </th>
-            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
               Customer
             </th>
-            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
               Contact
             </th>
-            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
               Group
             </th>
-            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
               Orders
             </th>
-            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
               Total Spent
             </th>
-            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
               Status
             </th>
-            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
               Created
             </th>
-            <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+            <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
               Actions
             </th>
           </tr>
         </thead>
-        <tbody class="bg-white divide-y divide-gray-200">
+        <tbody class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
           <!-- Empty State -->
           <tr v-if="customers.data.length === 0">
             <td colspan="9" class="px-6 py-12 text-center">
               <div class="flex flex-col items-center justify-center">
-                <svg class="w-16 h-16 text-gray-400 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg class="w-16 h-16 text-gray-400 dark:text-gray-500 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
                 </svg>
-                <h3 class="text-lg font-medium text-gray-900 mb-1">No customers found</h3>
-                <p class="text-gray-500 mb-4">Get started by creating your first customer.</p>
+                <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-1">No customers found</h3>
+                <p class="text-gray-500 dark:text-gray-400 mb-4">Get started by creating your first customer.</p>
                 <Link
                   href="/admin/customers/create"
                   class="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
@@ -469,31 +469,31 @@ function formatDate(dateString: string): string {
           </tr>
           
           <!-- Customer Rows -->
-          <tr v-for="customer in customers.data" :key="customer.id" class="hover:bg-gray-50">
+          <tr v-for="customer in customers.data" :key="customer.id" class="hover:bg-gray-50 dark:hover:bg-gray-700">
             <td class="px-6 py-4">
               <input
                 type="checkbox"
                 :value="customer.id"
                 v-model="selectedCustomers"
-                class="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                class="rounded border-gray-300 dark:border-gray-600 text-blue-600 focus:ring-blue-500 dark:bg-gray-700"
               />
             </td>
             <td class="px-6 py-4">
               <div class="flex items-center">
-                <div class="w-10 h-10 flex-shrink-0 bg-gray-200 rounded-full flex items-center justify-center">
-                  <span class="text-sm font-medium text-gray-600">
+                <div class="w-10 h-10 flex-shrink-0 bg-gray-200 dark:bg-gray-600 rounded-full flex items-center justify-center">
+                  <span class="text-sm font-medium text-gray-600 dark:text-gray-300">
                     {{ customer.first_name.charAt(0) }}{{ customer.last_name.charAt(0) }}
                   </span>
                 </div>
                 <div class="ml-4">
-                  <div class="text-sm font-medium text-gray-900">{{ customer.full_name }}</div>
-                  <div v-if="customer.company_name" class="text-sm text-gray-500">{{ customer.company_name }}</div>
+                  <div class="text-sm font-medium text-gray-900 dark:text-white">{{ customer.full_name }}</div>
+                  <div v-if="customer.company_name" class="text-sm text-gray-500 dark:text-gray-400">{{ customer.company_name }}</div>
                 </div>
               </div>
             </td>
             <td class="px-6 py-4">
-              <div class="text-sm text-gray-900">{{ customer.email }}</div>
-              <div v-if="customer.phone" class="text-sm text-gray-500">{{ customer.phone }}</div>
+              <div class="text-sm text-gray-900 dark:text-white">{{ customer.email }}</div>
+              <div v-if="customer.phone" class="text-sm text-gray-500 dark:text-gray-400">{{ customer.phone }}</div>
             </td>
             <td class="px-6 py-4">
               <span
@@ -503,10 +503,10 @@ function formatDate(dateString: string): string {
                 {{ customer.customer_group.name }}
               </span>
             </td>
-            <td class="px-6 py-4 text-sm text-gray-900">
+            <td class="px-6 py-4 text-sm text-gray-900 dark:text-white">
               {{ customer.total_orders }}
             </td>
-            <td class="px-6 py-4 text-sm font-medium text-gray-900">
+            <td class="px-6 py-4 text-sm font-medium text-gray-900 dark:text-white">
               {{ formatCurrency(customer.total_spent) }}
             </td>
             <td class="px-6 py-4">
@@ -514,33 +514,33 @@ function formatDate(dateString: string): string {
                 <span
                   :class="[
                     'inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium',
-                    customer.is_active ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
+                    customer.is_active ? 'bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-300' : 'bg-red-100 dark:bg-red-900/30 text-red-800 dark:text-red-300'
                   ]"
                 >
                   {{ customer.is_active ? 'Active' : 'Inactive' }}
                 </span>
                 <span
                   v-if="customer.is_guest"
-                  class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-purple-100 text-purple-800"
+                  class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-purple-100 dark:bg-purple-900/30 text-purple-800 dark:text-purple-300"
                 >
                   Guest
                 </span>
                 <span
                   v-if="customer.is_verified"
-                  class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800"
+                  class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-300"
                 >
                   Verified
                 </span>
               </div>
             </td>
-            <td class="px-6 py-4 text-sm text-gray-500">
+            <td class="px-6 py-4 text-sm text-gray-500 dark:text-gray-400">
               {{ formatDate(customer.created_at) }}
             </td>
             <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
               <div class="flex items-center justify-end gap-2">
                 <Link
                   :href="`/admin/customers/${customer.id}`"
-                  class="text-blue-600 hover:text-blue-900 cursor-pointer"
+                  class="text-blue-600 hover:text-blue-900 dark:text-blue-400 dark:hover:text-blue-300 cursor-pointer"
                   title="View Customer"
                 >
                   <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -550,7 +550,7 @@ function formatDate(dateString: string): string {
                 </Link>
                 <Link
                   :href="`/admin/customers/${customer.id}/edit`"
-                  class="text-indigo-600 hover:text-indigo-900 cursor-pointer"
+                  class="text-indigo-600 hover:text-indigo-900 dark:text-indigo-400 dark:hover:text-indigo-300 cursor-pointer"
                   title="Edit Customer"
                 >
                   <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -559,7 +559,7 @@ function formatDate(dateString: string): string {
                 </Link>
                 <button
                   @click="confirmDelete(customer.id)"
-                  class="text-red-600 hover:text-red-900 cursor-pointer"
+                  class="text-red-600 hover:text-red-900 dark:text-red-400 dark:hover:text-red-300 cursor-pointer"
                   title="Delete Customer"
                 >
                   <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">

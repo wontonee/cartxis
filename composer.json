@@ -8,6 +8,24 @@
         "framework"
     ],
     "license": "MIT",
+    "repositories": [
+        {
+            "type": "package",
+            "package": {
+                "name": "phonepe/pg-php-sdk-v2",
+                "version": "2.0.0",
+                "dist": {
+                    "url": "https://phonepe.mycloudrepo.io/public/repositories/phonepe-pg-php-sdk/v2-sdk.zip",
+                    "type": "zip"
+                },
+                "autoload": {
+                    "classmap": [
+                        "/"
+                    ]
+                }
+            }
+        }
+    ],
     "require": {
         "php": "^8.2",
         "aws/aws-sdk-php": "^3.357",
@@ -21,7 +39,9 @@
         "mews/purifier": "^3.4",
         "mpdf/mpdf": "^8.2",
         "razorpay/razorpay": "^2.9",
-        "stripe/stripe-php": "^18.0"
+        "stripe/stripe-php": "^18.0",
+        "phonepe/pg-php-sdk-v2": "^2.0",
+        "netresearch/jsonmapper": "^4.4"
     },
     "require-dev": {
         "fakerphp/faker": "^1.23",
@@ -53,6 +73,7 @@
             "Cartxis\\Razorpay\\": "packages/Cartxis/Razorpay/src/",
             "Cartxis\\PayPal\\": "packages/Cartxis/PayPal/src/",
             "Cartxis\\PayUMoney\\": "packages/Cartxis/PayUMoney/src/",
+            "Cartxis\\PhonePe\\": "packages/Cartxis/PhonePe/src/",
             "Cartxis\\Sales\\": "packages/Cartxis/Sales/src/",
             "Cartxis\\Customer\\": "packages/Cartxis/Customer/src/",
             "Cartxis\\CMS\\": "packages/Cartxis/CMS/src/",

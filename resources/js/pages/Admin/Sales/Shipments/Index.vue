@@ -83,13 +83,13 @@ const clearFilters = () => {
 
 const getStatusBadge = (status: string) => {
   const badges: Record<string, string> = {
-    pending: 'bg-yellow-100 text-yellow-800 border border-yellow-200',
-    shipped: 'bg-blue-100 text-blue-800 border border-blue-200',
-    in_transit: 'bg-indigo-100 text-indigo-800 border border-indigo-200',
-    out_for_delivery: 'bg-purple-100 text-purple-800 border border-purple-200',
-    delivered: 'bg-green-100 text-green-800 border border-green-200',
-    failed: 'bg-red-100 text-red-800 border border-red-200',
-    cancelled: 'bg-gray-100 text-gray-800 border border-gray-200',
+    pending: 'bg-yellow-100 dark:bg-yellow-900/30 text-yellow-800 dark:text-yellow-400 border border-yellow-200 dark:border-yellow-700',
+    shipped: 'bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-400 border border-blue-200 dark:border-blue-700',
+    in_transit: 'bg-indigo-100 dark:bg-indigo-900/30 text-indigo-800 dark:text-indigo-400 border border-indigo-200 dark:border-indigo-700',
+    out_for_delivery: 'bg-purple-100 dark:bg-purple-900/30 text-purple-800 dark:text-purple-400 border border-purple-200 dark:border-purple-700',
+    delivered: 'bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-400 border border-green-200 dark:border-green-700',
+    failed: 'bg-red-100 dark:bg-red-900/30 text-red-800 dark:text-red-400 border border-red-200 dark:border-red-700',
+    cancelled: 'bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-300 border border-gray-200 dark:border-gray-600',
   };
   return badges[status] || badges.pending;
 };
@@ -114,62 +114,62 @@ const viewShipment = (id: number) => {
     <div class="space-y-6">
       <!-- Header -->
       <div>
-        <h1 class="text-2xl font-bold text-gray-900">Shipments</h1>
-        <p class="text-gray-600 mt-1">Manage order shipments and tracking</p>
+        <h1 class="text-2xl font-bold text-gray-900 dark:text-white">Shipments</h1>
+        <p class="text-gray-600 dark:text-gray-400 mt-1">Manage order shipments and tracking</p>
       </div>
 
       <!-- Statistics Cards -->
       <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <div class="bg-white rounded-lg shadow-sm p-4">
+        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-4">
           <div class="flex items-center justify-between">
             <div>
-              <p class="text-sm text-gray-600">Total</p>
-              <p class="text-2xl font-bold text-gray-900">{{ statistics.total }}</p>
+              <p class="text-sm text-gray-600 dark:text-gray-400">Total</p>
+              <p class="text-2xl font-bold text-gray-900 dark:text-white">{{ statistics.total }}</p>
             </div>
-            <div class="p-3 bg-gray-100 rounded-lg">
-              <svg class="w-6 h-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <div class="p-3 bg-gray-100 dark:bg-gray-700 rounded-lg">
+              <svg class="w-6 h-6 text-gray-600 dark:text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
               </svg>
             </div>
           </div>
         </div>
 
-        <div class="bg-white rounded-lg shadow-sm p-4">
+        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-4">
           <div class="flex items-center justify-between">
             <div>
-              <p class="text-sm text-gray-600">Pending</p>
-              <p class="text-2xl font-bold text-yellow-600">{{ statistics.pending }}</p>
+              <p class="text-sm text-gray-600 dark:text-gray-400">Pending</p>
+              <p class="text-2xl font-bold text-yellow-600 dark:text-yellow-400">{{ statistics.pending }}</p>
             </div>
-            <div class="p-3 bg-yellow-100 rounded-lg">
-              <svg class="w-6 h-6 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <div class="p-3 bg-yellow-100 dark:bg-yellow-900/30 rounded-lg">
+              <svg class="w-6 h-6 text-yellow-600 dark:text-yellow-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
               </svg>
             </div>
           </div>
         </div>
 
-        <div class="bg-white rounded-lg shadow-sm p-4">
+        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-4">
           <div class="flex items-center justify-between">
             <div>
-              <p class="text-sm text-gray-600">In Transit</p>
-              <p class="text-2xl font-bold text-indigo-600">{{ statistics.in_transit }}</p>
+              <p class="text-sm text-gray-600 dark:text-gray-400">In Transit</p>
+              <p class="text-2xl font-bold text-indigo-600 dark:text-indigo-400">{{ statistics.in_transit }}</p>
             </div>
-            <div class="p-3 bg-indigo-100 rounded-lg">
-              <svg class="w-6 h-6 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <div class="p-3 bg-indigo-100 dark:bg-indigo-900/30 rounded-lg">
+              <svg class="w-6 h-6 text-indigo-600 dark:text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
               </svg>
             </div>
           </div>
         </div>
 
-        <div class="bg-white rounded-lg shadow-sm p-4">
+        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-4">
           <div class="flex items-center justify-between">
             <div>
-              <p class="text-sm text-gray-600">Delivered</p>
-              <p class="text-2xl font-bold text-green-600">{{ statistics.delivered }}</p>
+              <p class="text-sm text-gray-600 dark:text-gray-400">Delivered</p>
+              <p class="text-2xl font-bold text-green-600 dark:text-green-400">{{ statistics.delivered }}</p>
             </div>
-            <div class="p-3 bg-green-100 rounded-lg">
-              <svg class="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <div class="p-3 bg-green-100 dark:bg-green-900/30 rounded-lg">
+              <svg class="w-6 h-6 text-green-600 dark:text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
               </svg>
             </div>
@@ -178,26 +178,26 @@ const viewShipment = (id: number) => {
       </div>
 
       <!-- Filters -->
-      <div class="bg-white rounded-lg shadow-sm p-6">
+      <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-6">
         <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
           <!-- Search -->
           <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">Search</label>
+            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Search</label>
             <input
               v-model="searchQuery"
               @input="performSearch"
               type="text"
               placeholder="Shipment #, Order #, Tracking..."
-              class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             />
           </div>
 
           <!-- Status Filter -->
           <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">Status</label>
+            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Status</label>
             <select
               v-model="statusFilter"
-              class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               @change="applyFilters"
             >
               <option value="">All Statuses</option>
@@ -209,22 +209,22 @@ const viewShipment = (id: number) => {
 
           <!-- Date From -->
           <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">From Date</label>
+            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">From Date</label>
             <input
               v-model="dateFromFilter"
               type="date"
-              class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               @change="applyFilters"
             />
           </div>
 
           <!-- Date To -->
           <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">To Date</label>
+            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">To Date</label>
             <input
               v-model="dateToFilter"
               type="date"
-              class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               @change="applyFilters"
             />
           </div>
@@ -234,7 +234,7 @@ const viewShipment = (id: number) => {
         <div v-if="searchQuery || statusFilter || dateFromFilter || dateToFilter" class="mt-3 flex justify-end">
           <button
             @click="clearFilters"
-            class="text-sm text-gray-600 hover:text-gray-900"
+            class="text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200"
           >
             Clear Filters
           </button>
@@ -242,64 +242,64 @@ const viewShipment = (id: number) => {
       </div>
 
       <!-- Shipments Table -->
-      <div class="bg-white rounded-lg shadow-sm overflow-hidden">
+      <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm overflow-hidden">
         <div class="overflow-x-auto">
-          <table class="min-w-full divide-y divide-gray-200">
-            <thead class="bg-gray-50">
+          <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+            <thead class="bg-gray-50 dark:bg-gray-700">
               <tr>
-                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
                   Shipment #
                 </th>
-                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
                   Order #
                 </th>
-                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
                   Customer
                 </th>
-                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
                   Carrier
                 </th>
-                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
                   Tracking #
                 </th>
-                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
                   Date
                 </th>
-                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
                   Status
                 </th>
-                <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
                   Actions
                 </th>
               </tr>
             </thead>
-            <tbody class="bg-white divide-y divide-gray-200">
+            <tbody class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
               <tr
                 v-for="shipment in shipments.data"
                 :key="shipment.id"
-                class="hover:bg-gray-50 cursor-pointer"
+                class="hover:bg-gray-50 dark:hover:bg-gray-700 cursor-pointer"
                 @click="viewShipment(shipment.id)"
               >
                 <td class="px-6 py-4 whitespace-nowrap">
-                  <div class="text-sm font-medium text-blue-600">{{ shipment.shipment_number }}</div>
+                  <div class="text-sm font-medium text-blue-600 dark:text-blue-400">{{ shipment.shipment_number }}</div>
                 </td>
                 <td class="px-6 py-4 whitespace-nowrap">
-                  <div class="text-sm text-gray-900">{{ shipment.order.order_number }}</div>
+                  <div class="text-sm text-gray-900 dark:text-white">{{ shipment.order.order_number }}</div>
                 </td>
                 <td class="px-6 py-4">
-                  <div class="text-sm text-gray-900">
+                  <div class="text-sm text-gray-900 dark:text-white">
                     {{ shipment.order.user?.name || 'Guest' }}
                   </div>
-                  <div class="text-sm text-gray-500">{{ shipment.order.customer_email }}</div>
+                  <div class="text-sm text-gray-500 dark:text-gray-400">{{ shipment.order.customer_email }}</div>
                 </td>
                 <td class="px-6 py-4 whitespace-nowrap">
-                  <div class="text-sm text-gray-900">{{ shipment.carrier || '-' }}</div>
+                  <div class="text-sm text-gray-900 dark:text-white">{{ shipment.carrier || '-' }}</div>
                 </td>
                 <td class="px-6 py-4 whitespace-nowrap">
-                  <div class="text-sm text-gray-900">{{ shipment.tracking_number || '-' }}</div>
+                  <div class="text-sm text-gray-900 dark:text-white">{{ shipment.tracking_number || '-' }}</div>
                 </td>
                 <td class="px-6 py-4 whitespace-nowrap">
-                  <div class="text-sm text-gray-900">
+                  <div class="text-sm text-gray-900 dark:text-white">
                     {{ shipment.shipped_at ? formatDate(shipment.shipped_at) : formatDate(shipment.created_at) }}
                   </div>
                 </td>
@@ -311,7 +311,7 @@ const viewShipment = (id: number) => {
                 <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                   <button
                     @click.stop="viewShipment(shipment.id)"
-                    class="text-blue-600 hover:text-blue-900"
+                    class="text-blue-600 hover:text-blue-900 dark:text-blue-400 dark:hover:text-blue-300"
                     title="View Shipment"
                   >
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -328,7 +328,7 @@ const viewShipment = (id: number) => {
         <!-- Empty State -->
         <div v-if="shipments.data.length === 0" class="text-center py-12">
           <svg
-            class="mx-auto h-12 w-12 text-gray-400"
+            class="mx-auto h-12 w-12 text-gray-400 dark:text-gray-500"
             fill="none"
             stroke="currentColor"
             viewBox="0 0 24 24"
@@ -340,14 +340,14 @@ const viewShipment = (id: number) => {
               d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"
             />
           </svg>
-          <h3 class="mt-2 text-sm font-medium text-gray-900">No shipments found</h3>
-          <p class="mt-1 text-sm text-gray-500">Try adjusting your filters or create a new shipment from an order.</p>
+          <h3 class="mt-2 text-sm font-medium text-gray-900 dark:text-white">No shipments found</h3>
+          <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">Try adjusting your filters or create a new shipment from an order.</p>
         </div>
 
         <!-- Pagination -->
-        <div v-if="shipments.data.length > 0" class="bg-white px-4 py-3 border-t border-gray-200 sm:px-6">
+        <div v-if="shipments.data.length > 0" class="bg-white dark:bg-gray-800 px-4 py-3 border-t border-gray-200 dark:border-gray-700 sm:px-6">
           <div class="flex items-center justify-between">
-            <div class="text-sm text-gray-700">
+            <div class="text-sm text-gray-700 dark:text-gray-300">
               Showing <span class="font-medium">{{ ((shipments.current_page - 1) * shipments.per_page) + 1 }}</span>
               to <span class="font-medium">{{ Math.min(shipments.current_page * shipments.per_page, shipments.total) }}</span>
               of <span class="font-medium">{{ shipments.total }}</span> results
@@ -356,14 +356,14 @@ const viewShipment = (id: number) => {
               <button
                 v-if="shipments.current_page > 1"
                 @click="router.get('/admin/sales/shipments', { ...filters, page: shipments.current_page - 1 })"
-                class="px-3 py-1 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50"
+                class="px-3 py-1 text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-600"
               >
                 Previous
               </button>
               <button
                 v-if="shipments.current_page < shipments.last_page"
                 @click="router.get('/admin/sales/shipments', { ...filters, page: shipments.current_page + 1 })"
-                class="px-3 py-1 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50"
+                class="px-3 py-1 text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-600"
               >
                 Next
               </button>

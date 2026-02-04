@@ -124,8 +124,8 @@ const cancelCreditMemo = (id: number) => {
       <!-- Header -->
       <div class="flex justify-between items-center">
         <div>
-          <h1 class="text-2xl font-bold text-gray-900">Credit Memos</h1>
-          <p class="text-gray-600 mt-1">Manage refunds and credit memos</p>
+          <h1 class="text-2xl font-bold text-gray-900 dark:text-white">Credit Memos</h1>
+          <p class="text-gray-600 dark:text-gray-400 mt-1">Manage refunds and credit memos</p>
         </div>
         <button
           @click="createCreditMemo"
@@ -140,56 +140,56 @@ const cancelCreditMemo = (id: number) => {
 
       <!-- Statistics Cards -->
       <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
-        <div class="bg-white rounded-lg shadow-sm p-6">
+        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-6">
           <div class="flex items-center justify-between">
             <div>
-              <p class="text-sm text-gray-600">Total</p>
-              <p class="text-2xl font-bold text-gray-900 mt-1">{{ statistics.total }}</p>
+              <p class="text-sm text-gray-600 dark:text-gray-400">Total</p>
+              <p class="text-2xl font-bold text-gray-900 dark:text-white mt-1">{{ statistics.total }}</p>
             </div>
-            <div class="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
-              <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <div class="w-12 h-12 bg-blue-100 dark:bg-blue-900/30 rounded-lg flex items-center justify-center">
+              <svg class="w-6 h-6 text-blue-600 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 14l6-6m-5.5.5h.01m4.99 5h.01M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16l3.5-2 3.5 2 3.5-2 3.5 2z" />
               </svg>
             </div>
           </div>
         </div>
 
-        <div class="bg-white rounded-lg shadow-sm p-6">
+        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-6">
           <div class="flex items-center justify-between">
             <div>
-              <p class="text-sm text-gray-600">Pending</p>
-              <p class="text-2xl font-bold text-yellow-600 mt-1">{{ statistics.pending }}</p>
+              <p class="text-sm text-gray-600 dark:text-gray-400">Pending</p>
+              <p class="text-2xl font-bold text-yellow-600 dark:text-yellow-400 mt-1">{{ statistics.pending }}</p>
             </div>
-            <div class="w-12 h-12 bg-yellow-100 rounded-lg flex items-center justify-center">
-              <svg class="w-6 h-6 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <div class="w-12 h-12 bg-yellow-100 dark:bg-yellow-900/30 rounded-lg flex items-center justify-center">
+              <svg class="w-6 h-6 text-yellow-600 dark:text-yellow-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
               </svg>
             </div>
           </div>
         </div>
 
-        <div class="bg-white rounded-lg shadow-sm p-6">
+        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-6">
           <div class="flex items-center justify-between">
             <div>
-              <p class="text-sm text-gray-600">Refunded</p>
-              <p class="text-2xl font-bold text-green-600 mt-1">{{ statistics.refunded }}</p>
+              <p class="text-sm text-gray-600 dark:text-gray-400">Refunded</p>
+              <p class="text-2xl font-bold text-green-600 dark:text-green-400 mt-1">{{ statistics.refunded }}</p>
             </div>
-            <div class="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
-              <svg class="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <div class="w-12 h-12 bg-green-100 dark:bg-green-900/30 rounded-lg flex items-center justify-center">
+              <svg class="w-6 h-6 text-green-600 dark:text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
               </svg>
             </div>
           </div>
         </div>
 
-        <div class="bg-white rounded-lg shadow-sm p-6">
+        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-6">
           <div class="flex items-center justify-between">
             <div>
-              <p class="text-sm text-gray-600">Total Amount</p>
-              <p class="text-2xl font-bold text-gray-900 mt-1">{{ formatPrice(statistics.total_amount) }}</p>
+              <p class="text-sm text-gray-600 dark:text-gray-400">Total Amount</p>
+              <p class="text-2xl font-bold text-gray-900 dark:text-white mt-1">{{ formatPrice(statistics.total_amount) }}</p>
             </div>
-            <div class="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center">
-              <svg class="w-6 h-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <div class="w-12 h-12 bg-purple-100 dark:bg-purple-900/30 rounded-lg flex items-center justify-center">
+              <svg class="w-6 h-6 text-purple-600 dark:text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
               </svg>
             </div>
@@ -198,7 +198,7 @@ const cancelCreditMemo = (id: number) => {
       </div>
 
       <!-- Search and Filters -->
-      <div class="bg-white rounded-lg shadow-sm p-6">
+      <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-6">
         <div class="flex items-center space-x-4 mb-4">
           <!-- Search -->
           <div class="flex-1">
@@ -207,7 +207,7 @@ const cancelCreditMemo = (id: number) => {
               @input="handleSearch"
               type="text"
               placeholder="Search by credit memo number, order number..."
-              class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             />
           </div>
 
@@ -215,7 +215,7 @@ const cancelCreditMemo = (id: number) => {
           <select
             v-model="filters.status"
             @change="applyFilters"
-            class="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            class="px-4 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
           >
             <option value="">All Statuses</option>
             <option v-for="status in statuses" :key="status.value" :value="status.value">
@@ -226,7 +226,7 @@ const cancelCreditMemo = (id: number) => {
           <!-- Toggle Advanced Filters -->
           <button
             @click="showFilters = !showFilters"
-            class="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 flex items-center space-x-2"
+            class="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300 flex items-center space-x-2"
           >
             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
@@ -237,20 +237,20 @@ const cancelCreditMemo = (id: number) => {
           <!-- Reset -->
           <button
             @click="resetFilters"
-            class="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 text-gray-700"
+            class="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300"
           >
             Reset
           </button>
         </div>
 
         <!-- Advanced Filters -->
-        <div v-if="showFilters" class="grid grid-cols-1 md:grid-cols-4 gap-4 pt-4 border-t border-gray-200">
+        <div v-if="showFilters" class="grid grid-cols-1 md:grid-cols-4 gap-4 pt-4 border-t border-gray-200 dark:border-gray-700">
           <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">Refund Method</label>
+            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Refund Method</label>
             <select
               v-model="filters.refund_method"
               @change="applyFilters"
-              class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             >
               <option :value="undefined">All Methods</option>
               <option value="online">Online</option>
@@ -259,117 +259,117 @@ const cancelCreditMemo = (id: number) => {
           </div>
 
           <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">Date From</label>
+            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Date From</label>
             <input
               v-model="filters.date_from"
               @change="applyFilters"
               type="date"
-              class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             />
           </div>
 
           <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">Date To</label>
+            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Date To</label>
             <input
               v-model="filters.date_to"
               @change="applyFilters"
               type="date"
-              class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             />
           </div>
 
           <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">Min Amount</label>
+            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Min Amount</label>
             <input
               v-model.number="filters.min_amount"
               @change="applyFilters"
               type="number"
               step="0.01"
               placeholder="0.00"
-              class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             />
           </div>
 
           <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">Max Amount</label>
+            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Max Amount</label>
             <input
               v-model.number="filters.max_amount"
               @change="applyFilters"
               type="number"
               step="0.01"
               placeholder="0.00"
-              class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             />
           </div>
         </div>
       </div>
 
       <!-- Credit Memos Table -->
-      <div class="bg-white rounded-lg shadow-sm overflow-hidden">
+      <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm overflow-hidden">
         <div class="overflow-x-auto">
-          <table class="min-w-full divide-y divide-gray-200">
-            <thead class="bg-gray-50">
+          <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+            <thead class="bg-gray-50 dark:bg-gray-700">
               <tr>
                 <th class="px-6 py-3 text-left">
                   <input
                     type="checkbox"
                     @change="toggleSelectAll"
                     :checked="selectedIds.length === creditMemos.data.length && creditMemos.data.length > 0"
-                    class="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                    class="rounded border-gray-300 dark:border-gray-600 text-blue-600 focus:ring-blue-500"
                   />
                 </th>
-                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
                   Credit Memo
                 </th>
-                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
                   Order
                 </th>
-                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
                   Customer
                 </th>
-                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
                   Status
                 </th>
-                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
                   Method
                 </th>
-                <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
                   Amount
                 </th>
-                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
                   Date
                 </th>
-                <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
                   Actions
                 </th>
               </tr>
             </thead>
-            <tbody class="bg-white divide-y divide-gray-200">
+            <tbody class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
               <tr
                 v-for="creditMemo in creditMemos.data"
                 :key="creditMemo.id"
                 @click="viewCreditMemo(creditMemo.id)"
-                class="hover:bg-gray-50 cursor-pointer"
+                class="hover:bg-gray-50 dark:hover:bg-gray-700 cursor-pointer"
               >
                 <td class="px-6 py-4 whitespace-nowrap" @click.stop>
                   <input
                     type="checkbox"
                     v-model="selectedIds"
                     :value="creditMemo.id"
-                    class="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                    class="rounded border-gray-300 dark:border-gray-600 text-blue-600 focus:ring-blue-500"
                   />
                 </td>
                 <td class="px-6 py-4 whitespace-nowrap">
-                  <div class="text-sm font-medium text-blue-600">{{ creditMemo.credit_memo_number }}</div>
+                  <div class="text-sm font-medium text-blue-600 dark:text-blue-400">{{ creditMemo.credit_memo_number }}</div>
                 </td>
                 <td class="px-6 py-4 whitespace-nowrap">
-                  <div class="text-sm text-gray-900">{{ creditMemo.order?.order_number || '-' }}</div>
+                  <div class="text-sm text-gray-900 dark:text-white">{{ creditMemo.order?.order_number || '-' }}</div>
                 </td>
                 <td class="px-6 py-4">
-                  <div class="text-sm text-gray-900">
+                  <div class="text-sm text-gray-900 dark:text-white">
                     {{ creditMemo.order?.user?.name || 'Guest' }}
                   </div>
-                  <div class="text-sm text-gray-500">{{ creditMemo.order?.customer_email }}</div>
+                  <div class="text-sm text-gray-500 dark:text-gray-400">{{ creditMemo.order?.customer_email }}</div>
                 </td>
                 <td class="px-6 py-4 whitespace-nowrap">
                   <span :class="['px-3 py-1 inline-flex text-sm font-semibold rounded-full', getStatusBadge(creditMemo.status)]">
@@ -382,17 +382,17 @@ const cancelCreditMemo = (id: number) => {
                   </span>
                 </td>
                 <td class="px-6 py-4 whitespace-nowrap text-right">
-                  <div class="text-sm font-medium text-gray-900">{{ formatPrice(creditMemo.grand_total) }}</div>
+                  <div class="text-sm font-medium text-gray-900 dark:text-white">{{ formatPrice(creditMemo.grand_total) }}</div>
                 </td>
                 <td class="px-6 py-4 whitespace-nowrap">
-                  <div class="text-sm text-gray-900">{{ formatDate(creditMemo.created_at) }}</div>
+                  <div class="text-sm text-gray-900 dark:text-white">{{ formatDate(creditMemo.created_at) }}</div>
                 </td>
                 <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium" @click.stop>
                   <div class="flex items-center justify-end space-x-2">
                     <button
                       v-if="creditMemo.status === 'pending'"
                       @click="processRefund(creditMemo.id)"
-                      class="text-green-600 hover:text-green-900"
+                      class="text-green-600 hover:text-green-900 dark:text-green-400 dark:hover:text-green-300"
                       title="Process Refund"
                     >
                       <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -401,7 +401,7 @@ const cancelCreditMemo = (id: number) => {
                     </button>
                     <button
                       @click="downloadPdf(creditMemo.id)"
-                      class="text-blue-600 hover:text-blue-900"
+                      class="text-blue-600 hover:text-blue-900 dark:text-blue-400 dark:hover:text-blue-300"
                       title="Download PDF"
                     >
                       <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -410,7 +410,7 @@ const cancelCreditMemo = (id: number) => {
                     </button>
                     <button
                       @click="sendEmail(creditMemo.id)"
-                      class="text-purple-600 hover:text-purple-900"
+                      class="text-purple-600 hover:text-purple-900 dark:text-purple-400 dark:hover:text-purple-300"
                       title="Send Email"
                     >
                       <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -420,7 +420,7 @@ const cancelCreditMemo = (id: number) => {
                     <button
                       v-if="creditMemo.status === 'pending'"
                       @click="cancelCreditMemo(creditMemo.id)"
-                      class="text-red-600 hover:text-red-900"
+                      class="text-red-600 hover:text-red-900 dark:text-red-400 dark:hover:text-red-300"
                       title="Cancel"
                     >
                       <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -434,11 +434,11 @@ const cancelCreditMemo = (id: number) => {
               <!-- Empty State -->
               <tr v-if="creditMemos.data.length === 0">
                 <td colspan="9" class="px-6 py-12 text-center">
-                  <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <svg class="mx-auto h-12 w-12 text-gray-400 dark:text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 14l6-6m-5.5.5h.01m4.99 5h.01M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16l3.5-2 3.5 2 3.5-2 3.5 2z" />
                   </svg>
-                  <h3 class="mt-2 text-sm font-medium text-gray-900">No credit memos</h3>
-                  <p class="mt-1 text-sm text-gray-500">Get started by creating a new credit memo.</p>
+                  <h3 class="mt-2 text-sm font-medium text-gray-900 dark:text-white">No credit memos</h3>
+                  <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">Get started by creating a new credit memo.</p>
                   <div class="mt-6">
                     <button
                       @click="createCreditMemo"
@@ -457,26 +457,26 @@ const cancelCreditMemo = (id: number) => {
         </div>
 
         <!-- Pagination -->
-        <div v-if="creditMemos.total > creditMemos.per_page" class="bg-white px-4 py-3 flex items-center justify-between border-t border-gray-200">
+        <div v-if="creditMemos.total > creditMemos.per_page" class="bg-white dark:bg-gray-800 px-4 py-3 flex items-center justify-between border-t border-gray-200 dark:border-gray-700">
           <div class="flex-1 flex justify-between sm:hidden">
             <button
               v-if="creditMemos.current_page > 1"
               @click="router.get('/admin/sales/credit-memos', { ...filters, page: creditMemos.current_page - 1 })"
-              class="relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50"
+              class="relative inline-flex items-center px-4 py-2 border border-gray-300 dark:border-gray-600 text-sm font-medium rounded-md text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600"
             >
               Previous
             </button>
             <button
               v-if="creditMemos.current_page < creditMemos.last_page"
               @click="router.get('/admin/sales/credit-memos', { ...filters, page: creditMemos.current_page + 1 })"
-              class="ml-3 relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50"
+              class="ml-3 relative inline-flex items-center px-4 py-2 border border-gray-300 dark:border-gray-600 text-sm font-medium rounded-md text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600"
             >
               Next
             </button>
           </div>
           <div class="hidden sm:flex-1 sm:flex sm:items-center sm:justify-between">
             <div>
-              <p class="text-sm text-gray-700">
+              <p class="text-sm text-gray-700 dark:text-gray-300">
                 Showing
                 <span class="font-medium">{{ creditMemos.from }}</span>
                 to
@@ -490,14 +490,14 @@ const cancelCreditMemo = (id: number) => {
               <button
                 v-if="creditMemos.current_page > 1"
                 @click="router.get('/admin/sales/credit-memos', { ...filters, page: creditMemos.current_page - 1 })"
-                class="px-3 py-1 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50"
+                class="px-3 py-1 text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-600"
               >
                 Previous
               </button>
               <button
                 v-if="creditMemos.current_page < creditMemos.last_page"
                 @click="router.get('/admin/sales/credit-memos', { ...filters, page: creditMemos.current_page + 1 })"
-                class="px-3 py-1 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50"
+                class="px-3 py-1 text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-600"
               >
                 Next
               </button>

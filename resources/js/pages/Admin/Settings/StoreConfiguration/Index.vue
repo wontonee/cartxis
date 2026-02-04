@@ -162,24 +162,24 @@ watch(() => form.store_email, (newEmail) => {
 
     <div class="p-6">
       <div class="mb-6">
-        <h1 class="text-2xl font-bold text-gray-900">Store Configuration</h1>
-        <p class="mt-1 text-sm text-gray-500">
+        <h1 class="text-2xl font-bold text-gray-900 dark:text-white">Store Configuration</h1>
+        <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
           Manage store details, contact information, social media links, and policies
         </p>
       </div>
 
       <form @submit.prevent="save" novalidate>
-        <div class="bg-white rounded-lg shadow">
+        <div class="bg-white dark:bg-gray-800 rounded-lg shadow">
           <!-- Tabs Navigation -->
-          <div class="border-b border-gray-200">
+          <div class="border-b border-gray-200 dark:border-gray-700">
             <nav class="-mb-px flex space-x-8 px-6" aria-label="Tabs">
               <button
                 type="button"
                 @click="activeTab = 'details'"
                 :class="[
                   activeTab === 'details'
-                    ? 'border-blue-500 text-blue-600'
-                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300',
+                    ? 'border-blue-500 text-blue-600 dark:text-blue-400'
+                    : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300 dark:hover:border-gray-600',
                   'whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm'
                 ]"
               >
@@ -190,8 +190,8 @@ watch(() => form.store_email, (newEmail) => {
                 @click="activeTab = 'contact'"
                 :class="[
                   activeTab === 'contact'
-                    ? 'border-blue-500 text-blue-600'
-                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300',
+                    ? 'border-blue-500 text-blue-600 dark:text-blue-400'
+                    : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300 dark:hover:border-gray-600',
                   'whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm'
                 ]"
               >
@@ -202,8 +202,8 @@ watch(() => form.store_email, (newEmail) => {
                 @click="activeTab = 'social'"
                 :class="[
                   activeTab === 'social'
-                    ? 'border-blue-500 text-blue-600'
-                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300',
+                    ? 'border-blue-500 text-blue-600 dark:text-blue-400'
+                    : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300 dark:hover:border-gray-600',
                   'whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm'
                 ]"
               >
@@ -214,8 +214,8 @@ watch(() => form.store_email, (newEmail) => {
                 @click="activeTab = 'checkout'"
                 :class="[
                   activeTab === 'checkout'
-                    ? 'border-blue-500 text-blue-600'
-                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300',
+                    ? 'border-blue-500 text-blue-600 dark:text-blue-400'
+                    : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300 dark:hover:border-gray-600',
                   'whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm'
                 ]"
               >
@@ -226,8 +226,8 @@ watch(() => form.store_email, (newEmail) => {
                 @click="activeTab = 'policies'"
                 :class="[
                   activeTab === 'policies'
-                    ? 'border-blue-500 text-blue-600'
-                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300',
+                    ? 'border-blue-500 text-blue-600 dark:text-blue-400'
+                    : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300 dark:hover:border-gray-600',
                   'whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm'
                 ]"
               >
@@ -241,21 +241,21 @@ watch(() => form.store_email, (newEmail) => {
             <div class="space-y-6">
               <div class="grid grid-cols-1 gap-6 sm:grid-cols-2">
                 <div>
-                  <label for="store_name" class="block text-sm font-medium text-gray-700">
+                  <label for="store_name" class="block text-sm font-medium text-gray-700 dark:text-gray-300">
                     Business Name <span class="text-red-500">*</span>
                   </label>
                   <input
                     id="store_name"
                     v-model="form.store_name"
                     type="text"
-                    class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                     required
                   />
                   <p v-if="form.errors.store_name" class="mt-1 text-sm text-red-600">{{ form.errors.store_name }}</p>
                 </div>
 
                 <div>
-                  <label for="business_registration" class="block text-sm font-medium text-gray-700">
+                  <label for="business_registration" class="block text-sm font-medium text-gray-700 dark:text-gray-300">
                     Business Registration Number
                   </label>
                   <input
@@ -270,7 +270,7 @@ watch(() => form.store_email, (newEmail) => {
 
               <div class="grid grid-cols-1 gap-6 sm:grid-cols-2">
                 <div>
-                  <label for="vat_number" class="block text-sm font-medium text-gray-700">
+                  <label for="vat_number" class="block text-sm font-medium text-gray-700 dark:text-gray-300">
                     VAT Number
                   </label>
                   <input
@@ -283,7 +283,7 @@ watch(() => form.store_email, (newEmail) => {
                 </div>
 
                 <div>
-                  <label for="store_license" class="block text-sm font-medium text-gray-700">
+                  <label for="store_license" class="block text-sm font-medium text-gray-700 dark:text-gray-300">
                     License Number
                   </label>
                   <input
@@ -296,13 +296,13 @@ watch(() => form.store_email, (newEmail) => {
                 </div>
 
                 <div>
-                  <label for="store_timezone" class="block text-sm font-medium text-gray-700">
+                  <label for="store_timezone" class="block text-sm font-medium text-gray-700 dark:text-gray-300">
                     Store Timezone <span class="text-red-500">*</span>
                   </label>
                   <select
                     id="store_timezone"
                     v-model="form.store_timezone"
-                    class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                     required
                   >
                     <option value="UTC">UTC</option>
@@ -323,7 +323,7 @@ watch(() => form.store_email, (newEmail) => {
               </div>
 
               <div>
-                <label for="store_description" class="block text-sm font-medium text-gray-700">
+                <label for="store_description" class="block text-sm font-medium text-gray-700 dark:text-gray-300">
                   Business Description
                 </label>
                 <textarea
@@ -343,7 +343,7 @@ watch(() => form.store_email, (newEmail) => {
             <div class="space-y-6">
               <div class="grid grid-cols-1 gap-6 sm:grid-cols-2">
                 <div>
-                  <label for="store_email" class="block text-sm font-medium text-gray-700">
+                  <label for="store_email" class="block text-sm font-medium text-gray-700 dark:text-gray-300">
                     Primary Email <span class="text-red-500">*</span>
                   </label>
                   <input
@@ -357,7 +357,7 @@ watch(() => form.store_email, (newEmail) => {
                 </div>
 
                 <div>
-                  <label for="support_email" class="block text-sm font-medium text-gray-700">
+                  <label for="support_email" class="block text-sm font-medium text-gray-700 dark:text-gray-300">
                     Support Email
                   </label>
                   <input
@@ -372,7 +372,7 @@ watch(() => form.store_email, (newEmail) => {
 
               <div class="grid grid-cols-1 gap-6 sm:grid-cols-3">
                 <div>
-                  <label for="store_phone" class="block text-sm font-medium text-gray-700">
+                  <label for="store_phone" class="block text-sm font-medium text-gray-700 dark:text-gray-300">
                     Phone Number <span class="text-red-500">*</span>
                   </label>
                   <input
@@ -386,7 +386,7 @@ watch(() => form.store_email, (newEmail) => {
                 </div>
 
                 <div>
-                  <label for="store_phone_alt" class="block text-sm font-medium text-gray-700">
+                  <label for="store_phone_alt" class="block text-sm font-medium text-gray-700 dark:text-gray-300">
                     Alternate Phone
                   </label>
                   <input
@@ -399,7 +399,7 @@ watch(() => form.store_email, (newEmail) => {
                 </div>
 
                 <div>
-                  <label for="store_whatsapp" class="block text-sm font-medium text-gray-700">
+                  <label for="store_whatsapp" class="block text-sm font-medium text-gray-700 dark:text-gray-300">
                     WhatsApp Number
                   </label>
                   <input
@@ -412,12 +412,12 @@ watch(() => form.store_email, (newEmail) => {
                 </div>
               </div>
 
-              <div class="border-t border-gray-200 pt-6">
-                <h3 class="text-lg font-medium text-gray-900 mb-4">Store Address</h3>
+              <div class="border-t border-gray-200 dark:border-gray-700 pt-6">
+                <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-4">Store Address</h3>
                 
                 <div class="space-y-6">
                   <div>
-                    <label for="store_address_1" class="block text-sm font-medium text-gray-700">
+                    <label for="store_address_1" class="block text-sm font-medium text-gray-700 dark:text-gray-300">
                       Street Address <span class="text-red-500">*</span>
                     </label>
                     <input
@@ -431,7 +431,7 @@ watch(() => form.store_email, (newEmail) => {
                   </div>
 
                   <div>
-                    <label for="store_address_2" class="block text-sm font-medium text-gray-700">
+                    <label for="store_address_2" class="block text-sm font-medium text-gray-700 dark:text-gray-300">
                       Address Line 2
                     </label>
                     <input
@@ -445,7 +445,7 @@ watch(() => form.store_email, (newEmail) => {
 
                   <div class="grid grid-cols-1 gap-6 sm:grid-cols-3">
                     <div>
-                      <label for="store_city" class="block text-sm font-medium text-gray-700">
+                      <label for="store_city" class="block text-sm font-medium text-gray-700 dark:text-gray-300">
                         City <span class="text-red-500">*</span>
                       </label>
                       <input
@@ -459,7 +459,7 @@ watch(() => form.store_email, (newEmail) => {
                     </div>
 
                     <div>
-                      <label for="store_state" class="block text-sm font-medium text-gray-700">
+                      <label for="store_state" class="block text-sm font-medium text-gray-700 dark:text-gray-300">
                         State/Province <span class="text-red-500">*</span>
                       </label>
                       <input
@@ -473,7 +473,7 @@ watch(() => form.store_email, (newEmail) => {
                     </div>
 
                     <div>
-                      <label for="store_postal_code" class="block text-sm font-medium text-gray-700">
+                      <label for="store_postal_code" class="block text-sm font-medium text-gray-700 dark:text-gray-300">
                         Postal Code <span class="text-red-500">*</span>
                       </label>
                       <input
@@ -488,7 +488,7 @@ watch(() => form.store_email, (newEmail) => {
                   </div>
 
                   <div>
-                    <label for="store_country" class="block text-sm font-medium text-gray-700">
+                    <label for="store_country" class="block text-sm font-medium text-gray-700 dark:text-gray-300">
                       Country <span class="text-red-500">*</span>
                     </label>
                     <select
@@ -705,7 +705,7 @@ watch(() => form.store_email, (newEmail) => {
           <div v-show="activeTab === 'social'" class="p-6">
             <div class="space-y-6">
               <div>
-                <label for="social_facebook" class="block text-sm font-medium text-gray-700">
+                <label for="social_facebook" class="block text-sm font-medium text-gray-700 dark:text-gray-300">
                   Facebook
                 </label>
                 <input
@@ -719,7 +719,7 @@ watch(() => form.store_email, (newEmail) => {
               </div>
 
               <div>
-                <label for="social_instagram" class="block text-sm font-medium text-gray-700">
+                <label for="social_instagram" class="block text-sm font-medium text-gray-700 dark:text-gray-300">
                   Instagram
                 </label>
                 <input
@@ -733,7 +733,7 @@ watch(() => form.store_email, (newEmail) => {
               </div>
 
               <div>
-                <label for="social_twitter" class="block text-sm font-medium text-gray-700">
+                <label for="social_twitter" class="block text-sm font-medium text-gray-700 dark:text-gray-300">
                   Twitter/X
                 </label>
                 <input
@@ -747,7 +747,7 @@ watch(() => form.store_email, (newEmail) => {
               </div>
 
               <div>
-                <label for="social_linkedin" class="block text-sm font-medium text-gray-700">
+                <label for="social_linkedin" class="block text-sm font-medium text-gray-700 dark:text-gray-300">
                   LinkedIn
                 </label>
                 <input
@@ -761,7 +761,7 @@ watch(() => form.store_email, (newEmail) => {
               </div>
 
               <div>
-                <label for="social_youtube" class="block text-sm font-medium text-gray-700">
+                <label for="social_youtube" class="block text-sm font-medium text-gray-700 dark:text-gray-300">
                   YouTube
                 </label>
                 <input
@@ -775,7 +775,7 @@ watch(() => form.store_email, (newEmail) => {
               </div>
 
               <div>
-                <label for="social_tiktok" class="block text-sm font-medium text-gray-700">
+                <label for="social_tiktok" class="block text-sm font-medium text-gray-700 dark:text-gray-300">
                   TikTok
                 </label>
                 <input
@@ -789,7 +789,7 @@ watch(() => form.store_email, (newEmail) => {
               </div>
 
               <div>
-                <label for="social_pinterest" class="block text-sm font-medium text-gray-700">
+                <label for="social_pinterest" class="block text-sm font-medium text-gray-700 dark:text-gray-300">
                   Pinterest
                 </label>
                 <input
@@ -809,8 +809,8 @@ watch(() => form.store_email, (newEmail) => {
           <div v-show="activeTab === 'checkout'" class="p-6">
             <div class="space-y-6">
               <div>
-                <h3 class="text-lg font-medium text-gray-900 mb-4">Checkout Options</h3>
-                <p class="text-sm text-gray-600 mb-6">Configure checkout flow and account requirements for your store</p>
+                <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-4">Checkout Options</h3>
+                <p class="text-sm text-gray-600 dark:text-gray-400 mb-6">Configure checkout flow and account requirements for your store</p>
               </div>
 
               <!-- Allow Guest Checkout -->
@@ -820,14 +820,14 @@ watch(() => form.store_email, (newEmail) => {
                     id="checkout_allow_guest"
                     v-model="form.checkout_allow_guest"
                     type="checkbox"
-                    class="focus:ring-blue-500 h-4 w-4 text-blue-600 border-gray-300 rounded"
+                    class="focus:ring-blue-500 h-4 w-4 text-blue-600 border-gray-300 dark:border-gray-600 dark:bg-gray-700 rounded"
                   />
                 </div>
                 <div class="ml-3">
-                  <label for="checkout_allow_guest" class="font-medium text-gray-700">
+                  <label for="checkout_allow_guest" class="font-medium text-gray-700 dark:text-gray-300">
                     Allow Guest Checkout
                   </label>
-                  <p class="text-sm text-gray-500">
+                  <p class="text-sm text-gray-500 dark:text-gray-400">
                     Allow customers to complete checkout without creating an account. They can optionally create one during checkout.
                   </p>
                 </div>
@@ -841,25 +841,25 @@ watch(() => form.store_email, (newEmail) => {
                     v-model="form.checkout_require_account"
                     type="checkbox"
                     :disabled="!form.checkout_allow_guest"
-                    class="focus:ring-blue-500 h-4 w-4 text-blue-600 border-gray-300 rounded disabled:opacity-50 disabled:cursor-not-allowed"
+                    class="focus:ring-blue-500 h-4 w-4 text-blue-600 border-gray-300 dark:border-gray-600 dark:bg-gray-700 rounded disabled:opacity-50 disabled:cursor-not-allowed"
                   />
                 </div>
                 <div class="ml-3">
-                  <label for="checkout_require_account" class="font-medium text-gray-700" :class="{ 'text-gray-400': !form.checkout_allow_guest }">
+                  <label for="checkout_require_account" class="font-medium text-gray-700 dark:text-gray-300" :class="{ 'text-gray-400 dark:text-gray-600': !form.checkout_allow_guest }">
                     Require Account Creation
                   </label>
-                  <p class="text-sm text-gray-500">
+                  <p class="text-sm text-gray-500 dark:text-gray-400">
                     When enabled, guests must create an account during checkout (cannot proceed without registration).
                   </p>
                 </div>
               </div>
 
               <!-- Info Box -->
-              <div class="bg-blue-50 border-l-4 border-blue-400 p-4 mt-6">
+              <div class="bg-blue-50 dark:bg-blue-900/30 border-l-4 border-blue-400 dark:border-blue-500 p-4 mt-6">
                 <div class="flex">
                   <div class="ml-3">
-                    <h3 class="text-sm font-medium text-blue-800">Configuration Options</h3>
-                    <div class="mt-2 text-sm text-blue-700">
+                    <h3 class="text-sm font-medium text-blue-800 dark:text-blue-200">Configuration Options</h3>
+                    <div class="mt-2 text-sm text-blue-700 dark:text-blue-300">
                       <ul class="list-disc list-inside space-y-1">
                         <li><strong>Both disabled:</strong> Customers must log in or register before checkout (no guest option)</li>
                         <li><strong>Guest allowed only:</strong> Customers can checkout as guests or create an account (optional)</li>
@@ -876,7 +876,7 @@ watch(() => form.store_email, (newEmail) => {
           <div v-show="activeTab === 'policies'" class="p-6">
             <div class="space-y-8">
               <div>
-                <label for="policy_privacy" class="block text-sm font-medium text-gray-700 mb-2">
+                <label for="policy_privacy" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                   Privacy Policy
                 </label>
                 <TiptapEditor
@@ -887,7 +887,7 @@ watch(() => form.store_email, (newEmail) => {
               </div>
 
               <div>
-                <label for="policy_terms" class="block text-sm font-medium text-gray-700 mb-2">
+                <label for="policy_terms" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                   Terms & Conditions
                 </label>
                 <TiptapEditor
@@ -898,7 +898,7 @@ watch(() => form.store_email, (newEmail) => {
               </div>
 
               <div>
-                <label for="policy_return" class="block text-sm font-medium text-gray-700 mb-2">
+                <label for="policy_return" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                   Return Policy
                 </label>
                 <TiptapEditor
@@ -909,7 +909,7 @@ watch(() => form.store_email, (newEmail) => {
               </div>
 
               <div>
-                <label for="policy_shipping" class="block text-sm font-medium text-gray-700 mb-2">
+                <label for="policy_shipping" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                   Shipping Policy
                 </label>
                 <TiptapEditor
@@ -922,7 +922,8 @@ watch(() => form.store_email, (newEmail) => {
           </div>
 
           <!-- Save Button -->
-          <div class="border-t border-gray-200 px-6 py-4 bg-gray-50 flex justify-end rounded-b-lg">
+          <!-- Save Button -->
+          <div class="border-t border-gray-200 dark:border-gray-700 px-6 py-4 bg-gray-50 dark:bg-gray-700/50 flex justify-end rounded-b-lg">
             <button
               type="submit"
               :disabled="form.processing"

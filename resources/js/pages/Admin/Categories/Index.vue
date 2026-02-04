@@ -184,8 +184,8 @@ function changePage(page: number) {
       <!-- Page Header -->
       <div class="flex items-center justify-between">
         <div>
-          <h1 class="text-2xl font-bold text-gray-900">Categories</h1>
-          <p class="mt-1 text-sm text-gray-600">Manage your product categories</p>
+          <h1 class="text-2xl font-bold text-gray-900 dark:text-white">Categories</h1>
+          <p class="mt-1 text-sm text-gray-600 dark:text-gray-400">Manage your product categories</p>
         </div>
         <Link
           :href="categoryRoutes.create().url"
@@ -199,27 +199,27 @@ function changePage(page: number) {
       </div>
 
       <!-- Filters Card -->
-      <div class="bg-white rounded-lg shadow-sm p-4">
+      <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-4">
         <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
           <!-- Search -->
           <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">Search</label>
+            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Search</label>
             <input
               v-model="search"
               @input="performSearch"
               type="text"
               placeholder="Search by name or slug..."
-              class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             />
           </div>
 
           <!-- Status Filter -->
           <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">Status</label>
+            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Status</label>
             <select
               v-model="statusFilter"
               @change="applyFilters"
-              class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             >
               <option value="">All Status</option>
               <option value="enabled">Enabled</option>
@@ -229,11 +229,11 @@ function changePage(page: number) {
 
           <!-- Parent Category Filter -->
           <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">Parent Category</label>
+            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Parent Category</label>
             <select
               v-model="parentFilter"
               @change="applyFilters"
-              class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             >
               <option value="">All Categories</option>
               <option value="null">Root Categories</option>
@@ -248,7 +248,7 @@ function changePage(page: number) {
             <button
               v-if="search || statusFilter || parentFilter"
               @click="clearFilters"
-              class="w-full px-3 py-2 text-sm text-gray-600 hover:text-gray-900 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors"
+              class="w-full px-3 py-2 text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 rounded-lg transition-colors"
             >
               Clear Filters
             </button>
@@ -257,9 +257,9 @@ function changePage(page: number) {
       </div>
 
       <!-- Bulk Actions -->
-      <div v-if="selectedCategories.length > 0" class="bg-blue-50 border border-blue-200 rounded-lg px-4 py-3">
+      <div v-if="selectedCategories.length > 0" class="bg-blue-50 dark:bg-blue-900/30 border border-blue-200 dark:border-blue-800 rounded-lg px-4 py-3">
         <div class="flex items-center justify-between">
-          <span class="text-sm font-medium text-blue-900">
+          <span class="text-sm font-medium text-blue-900 dark:text-blue-200">
             {{ selectedCategories.length }} {{ selectedCategories.length === 1 ? 'category' : 'categories' }} selected
           </span>
           <div class="flex gap-2">
@@ -271,7 +271,7 @@ function changePage(page: number) {
             </button>
             <button
               @click="bulkUpdateStatus('disabled')"
-              class="inline-flex items-center px-3 py-1.5 border border-transparent text-xs font-medium rounded text-white bg-gray-600 hover:bg-gray-700"
+              class="inline-flex items-center px-3 py-1.5 border border-transparent text-xs font-medium rounded text-white bg-gray-600 hover:bg-gray-700 dark:bg-gray-700 dark:hover:bg-gray-600"
             >
               Disable
             </button>
@@ -286,10 +286,10 @@ function changePage(page: number) {
       </div>
 
       <!-- Table -->
-      <div class="bg-white rounded-lg shadow-sm overflow-hidden">
+      <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm overflow-hidden">
         <div class="overflow-x-auto">
-          <table class="min-w-full divide-y divide-gray-200">
-              <thead class="bg-gray-50">
+          <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+              <thead class="bg-gray-50 dark:bg-gray-700">
                 <tr>
                   <th scope="col" class="w-12 px-6 py-3">
                     <input
@@ -297,10 +297,10 @@ function changePage(page: number) {
                       :checked="allSelected"
                       :indeterminate="someSelected"
                       @change="toggleSelectAll"
-                      class="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-600"
+                      class="h-4 w-4 rounded border-gray-300 dark:border-gray-600 text-blue-600 focus:ring-blue-600 dark:bg-gray-700"
                     />
                   </th>
-                  <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer" @click="sortTable('name')">
+                  <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider cursor-pointer" @click="sortTable('name')">
                     <div class="flex items-center gap-1">
                       Name
                       <svg v-if="sortBy === 'name'" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -309,10 +309,10 @@ function changePage(page: number) {
                       </svg>
                     </div>
                   </th>
-                  <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
                     Parent
                   </th>
-                  <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer" @click="sortTable('status')">
+                  <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider cursor-pointer" @click="sortTable('status')">
                     <div class="flex items-center gap-1">
                       Status
                       <svg v-if="sortBy === 'status'" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -321,7 +321,7 @@ function changePage(page: number) {
                       </svg>
                     </div>
                   </th>
-                  <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer" @click="sortTable('sort_order')">
+                  <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider cursor-pointer" @click="sortTable('sort_order')">
                     <div class="flex items-center gap-1">
                       Order
                       <svg v-if="sortBy === 'sort_order'" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -330,22 +330,22 @@ function changePage(page: number) {
                       </svg>
                     </div>
                   </th>
-                  <th scope="col" class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th scope="col" class="px-6 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
                     Show in Menu
                   </th>
-                  <th scope="col" class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th scope="col" class="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
                     Actions
                   </th>
                 </tr>
               </thead>
-              <tbody class="bg-white divide-y divide-gray-200">
-                <tr v-for="category in categories.data" :key="category.id" class="hover:bg-gray-50">
+              <tbody class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
+                <tr v-for="category in categories.data" :key="category.id" class="hover:bg-gray-50 dark:hover:bg-gray-700">
                   <td class="px-6 py-4 whitespace-nowrap">
                     <input
                       type="checkbox"
                       :value="category.id"
                       v-model="selectedCategories"
-                      class="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-600"
+                      class="h-4 w-4 rounded border-gray-300 dark:border-gray-600 text-blue-600 focus:ring-blue-600 dark:bg-gray-700"
                     />
                   </td>
                   <td class="px-6 py-4 whitespace-nowrap">
@@ -354,37 +354,37 @@ function changePage(page: number) {
                         <img class="h-10 w-10 rounded object-cover" :src="`/storage/${category.image}`" :alt="category.name" />
                       </div>
                       <div :class="category.image ? 'ml-4' : ''">
-                        <div class="text-sm font-medium text-gray-900">{{ category.name }}</div>
-                        <div class="text-sm text-gray-500">{{ category.slug }}</div>
+                        <div class="text-sm font-medium text-gray-900 dark:text-white">{{ category.name }}</div>
+                        <div class="text-sm text-gray-500 dark:text-gray-400">{{ category.slug }}</div>
                       </div>
                     </div>
                   </td>
                   <td class="px-6 py-4 whitespace-nowrap">
-                    <span v-if="category.parent" class="text-sm text-gray-900">{{ category.parent.name }}</span>
-                    <span v-else class="text-sm text-gray-500">—</span>
+                    <span v-if="category.parent" class="text-sm text-gray-900 dark:text-white">{{ category.parent.name }}</span>
+                    <span v-else class="text-sm text-gray-500 dark:text-gray-400">—</span>
                   </td>
                   <td class="px-6 py-4 whitespace-nowrap">
                     <span
                       :class="[
                         'inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium',
                         category.status === 'enabled' 
-                          ? 'bg-green-100 text-green-800' 
-                          : 'bg-gray-100 text-gray-800'
+                          ? 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300' 
+                          : 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300'
                       ]"
                     >
                       {{ category.status === 'enabled' ? 'Enabled' : 'Disabled' }}
                     </span>
                   </td>
-                  <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                  <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
                     {{ category.sort_order }}
                   </td>
                   <td class="px-6 py-4 whitespace-nowrap text-center">
-                    <span v-if="category.show_in_menu" class="text-green-600">
+                    <span v-if="category.show_in_menu" class="text-green-600 dark:text-green-400">
                       <svg class="h-5 w-5 inline" fill="currentColor" viewBox="0 0 20 20">
                         <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
                       </svg>
                     </span>
-                    <span v-else class="text-gray-400">
+                    <span v-else class="text-gray-400 dark:text-gray-500">
                       <svg class="h-5 w-5 inline" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
                       </svg>
@@ -394,7 +394,7 @@ function changePage(page: number) {
                     <div class="flex items-center justify-end gap-2">
                       <Link
                         :href="categoryRoutes.edit(category.id).url"
-                        class="text-blue-600 hover:text-blue-900"
+                        class="text-blue-600 hover:text-blue-900 dark:text-blue-400 dark:hover:text-blue-300"
                         title="Edit"
                       >
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -403,7 +403,7 @@ function changePage(page: number) {
                       </Link>
                       <button
                         @click="confirmDelete(category.id)"
-                        class="text-red-600 hover:text-red-900"
+                        class="text-red-600 hover:text-red-900 dark:text-red-400 dark:hover:text-red-300"
                         title="Delete"
                       >
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -414,13 +414,13 @@ function changePage(page: number) {
                   </td>
                 </tr>
                 <tr v-if="categories.data.length === 0">
-                  <td colspan="7" class="px-6 py-12 text-center text-sm text-gray-500">
+                  <td colspan="7" class="px-6 py-12 text-center text-sm text-gray-500 dark:text-gray-400">
                     <div class="flex flex-col items-center">
-                      <svg class="h-12 w-12 text-gray-400 mb-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <svg class="h-12 w-12 text-gray-400 dark:text-gray-500 mb-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z" />
                       </svg>
                       <p class="font-medium">No categories found</p>
-                      <p class="text-gray-400 mt-1">Get started by creating a new category.</p>
+                      <p class="text-gray-400 dark:text-gray-500 mt-1">Get started by creating a new category.</p>
                     </div>
                   </td>
                 </tr>
@@ -429,27 +429,27 @@ function changePage(page: number) {
           </div>
 
           <!-- Pagination -->
-          <div v-if="categories.last_page > 1" class="bg-white px-4 py-3 border-t border-gray-200 sm:px-6">
+          <div v-if="categories.last_page > 1" class="bg-white dark:bg-gray-800 px-4 py-3 border-t border-gray-200 dark:border-gray-700 sm:px-6">
             <div class="flex items-center justify-between">
               <div class="flex-1 flex justify-between sm:hidden">
                 <button
                   @click="changePage(categories.current_page - 1)"
                   :disabled="categories.current_page === 1"
-                  class="relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-50"
+                  class="relative inline-flex items-center px-4 py-2 border border-gray-300 dark:border-gray-600 text-sm font-medium rounded-md text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 disabled:opacity-50"
                 >
                   Previous
                 </button>
                 <button
                   @click="changePage(categories.current_page + 1)"
                   :disabled="categories.current_page === categories.last_page"
-                  class="ml-3 relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-50"
+                  class="ml-3 relative inline-flex items-center px-4 py-2 border border-gray-300 dark:border-gray-600 text-sm font-medium rounded-md text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 disabled:opacity-50"
                 >
                   Next
                 </button>
               </div>
               <div class="hidden sm:flex-1 sm:flex sm:items-center sm:justify-between">
                 <div>
-                  <p class="text-sm text-gray-700">
+                  <p class="text-sm text-gray-700 dark:text-gray-300">
                     Showing
                     <span class="font-medium">{{ categories.from }}</span>
                     to
@@ -464,7 +464,7 @@ function changePage(page: number) {
                     <button
                       @click="changePage(categories.current_page - 1)"
                       :disabled="categories.current_page === 1"
-                      class="relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 disabled:opacity-50"
+                      class="relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-sm font-medium text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-600 disabled:opacity-50"
                     >
                       <span class="sr-only">Previous</span>
                       <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -478,8 +478,8 @@ function changePage(page: number) {
                       :class="[
                         'relative inline-flex items-center px-4 py-2 border text-sm font-medium',
                         page === categories.current_page
-                          ? 'z-10 bg-blue-50 border-blue-500 text-blue-600'
-                          : 'bg-white border-gray-300 text-gray-500 hover:bg-gray-50'
+                          ? 'z-10 bg-blue-50 dark:bg-blue-900/30 border-blue-500 dark:border-blue-500 text-blue-600 dark:text-blue-400'
+                          : 'bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-600'
                       ]"
                     >
                       {{ page }}
@@ -487,7 +487,7 @@ function changePage(page: number) {
                     <button
                       @click="changePage(categories.current_page + 1)"
                       :disabled="categories.current_page === categories.last_page"
-                      class="relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 disabled:opacity-50"
+                      class="relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-sm font-medium text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-600 disabled:opacity-50"
                     >
                       <span class="sr-only">Next</span>
                       <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">

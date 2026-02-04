@@ -7,8 +7,8 @@
             <div class="mb-6">
                 <div class="flex justify-between items-center mb-4">
                     <div>
-                        <h1 class="text-2xl font-semibold text-gray-900">Pages</h1>
-                        <p class="mt-1 text-sm text-gray-600">Manage static content pages for your store</p>
+                        <h1 class="text-2xl font-semibold text-gray-900 dark:text-white">Pages</h1>
+                        <p class="mt-1 text-sm text-gray-600 dark:text-gray-400">Manage static content pages for your store</p>
                     </div>
                     <Link
                         :href="pageRoutes.create().url"
@@ -24,21 +24,21 @@
 
             <!-- Statistics Cards -->
             <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
-                <div class="bg-white rounded-lg shadow p-6">
-                    <div class="text-sm font-medium text-gray-600">Total Pages</div>
-                    <div class="mt-2 text-3xl font-semibold text-gray-900">{{ statistics.total }}</div>
+                <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
+                    <div class="text-sm font-medium text-gray-600 dark:text-gray-400">Total Pages</div>
+                    <div class="mt-2 text-3xl font-semibold text-gray-900 dark:text-white">{{ statistics.total }}</div>
                 </div>
-                <div class="bg-white rounded-lg shadow p-6">
-                    <div class="text-sm font-medium text-gray-600">Published</div>
-                    <div class="mt-2 text-3xl font-semibold text-green-600">{{ statistics.published }}</div>
+                <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
+                    <div class="text-sm font-medium text-gray-600 dark:text-gray-400">Published</div>
+                    <div class="mt-2 text-3xl font-semibold text-green-600 dark:text-green-400">{{ statistics.published }}</div>
                 </div>
-                <div class="bg-white rounded-lg shadow p-6">
-                    <div class="text-sm font-medium text-gray-600">Draft</div>
-                    <div class="mt-2 text-3xl font-semibold text-yellow-600">{{ statistics.draft }}</div>
+                <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
+                    <div class="text-sm font-medium text-gray-600 dark:text-gray-400">Draft</div>
+                    <div class="mt-2 text-3xl font-semibold text-yellow-600 dark:text-yellow-400">{{ statistics.draft }}</div>
                 </div>
-                <div class="bg-white rounded-lg shadow p-6">
-                    <div class="text-sm font-medium text-gray-600">Disabled</div>
-                    <div class="mt-2 text-3xl font-semibold text-gray-600">{{ statistics.disabled }}</div>
+                <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
+                    <div class="text-sm font-medium text-gray-600 dark:text-gray-400">Disabled</div>
+                    <div class="mt-2 text-3xl font-semibold text-gray-600 dark:text-gray-400">{{ statistics.disabled }}</div>
                 </div>
             </div>
 
@@ -98,7 +98,7 @@
                     class="bg-blue-50 dark:bg-blue-900 p-4 border-b border-blue-200 dark:border-blue-700"
                 >
                     <div class="flex items-center justify-between">
-                        <span class="text-sm text-blue-700 dark:text-blue-200">
+                        <span class="text-sm text-blue-700 dark:text-blue-300">
                             {{ selectedPages.length }} page(s) selected
                         </span>
                         <div class="flex gap-2">
@@ -136,7 +136,7 @@
                                         type="checkbox"
                                         :checked="allSelected"
                                         @change="toggleAllPages"
-                                        class="checkbox"
+                                        class="checkbox dark:bg-gray-700 dark:border-gray-600"
                                     />
                                 </th>
                                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase">
@@ -167,7 +167,7 @@
                                         type="checkbox"
                                         :value="page.id"
                                         v-model="selectedPages"
-                                        class="checkbox"
+                                        class="checkbox dark:bg-gray-700 dark:border-gray-600"
                                     />
                                 </td>
                                 <td class="px-6 py-4">
@@ -189,7 +189,7 @@
                                     <div class="text-sm text-gray-600 dark:text-gray-400">
                                         {{ formatDate(page.created_at) }}
                                     </div>
-                                    <div v-if="page.creator" class="text-xs text-gray-500">
+                                    <div v-if="page.creator" class="text-xs text-gray-500 dark:text-gray-500">
                                         by {{ page.creator.name }}
                                     </div>
                                 </td>
@@ -198,7 +198,7 @@
                                         <a
                                             :href="page.url"
                                             target="_blank"
-                                            class="text-blue-600 hover:text-blue-900 cursor-pointer"
+                                            class="text-blue-600 hover:text-blue-900 dark:text-blue-400 dark:hover:text-blue-300 cursor-pointer"
                                             title="Preview Page"
                                         >
                                             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -208,7 +208,7 @@
                                         </a>
                                         <Link
                                             :href="pageRoutes.edit({ page: page.id }).url"
-                                            class="text-indigo-600 hover:text-indigo-900 cursor-pointer"
+                                            class="text-indigo-600 hover:text-indigo-900 dark:text-indigo-400 dark:hover:text-indigo-300 cursor-pointer"
                                             title="Edit Page"
                                         >
                                             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -217,7 +217,7 @@
                                         </Link>
                                         <button
                                             @click="deletePage(page)"
-                                            class="text-red-600 hover:text-red-900 cursor-pointer"
+                                            class="text-red-600 hover:text-red-900 dark:text-red-400 dark:hover:text-red-300 cursor-pointer"
                                             title="Delete Page"
                                         >
                                             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">

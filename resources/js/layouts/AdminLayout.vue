@@ -545,29 +545,29 @@ const toggleSidebar = () => {
       @click.self="closeSearch"
       class="fixed inset-0 z-50 flex items-start justify-center bg-black/40 px-4"
     >
-      <div class="mt-20 w-full max-w-xl overflow-hidden rounded-xl bg-white shadow-xl ring-1 ring-black/10">
-        <div class="flex items-center gap-2 border-b border-gray-200 px-4 py-3">
-          <Search class="h-4 w-4 text-gray-400" />
+      <div class="mt-20 w-full max-w-xl overflow-hidden rounded-xl bg-white dark:bg-gray-800 shadow-xl ring-1 ring-black/10 dark:ring-white/10">
+        <div class="flex items-center gap-2 border-b border-gray-200 dark:border-gray-700 px-4 py-3">
+          <Search class="h-4 w-4 text-gray-400 dark:text-gray-500" />
           <input
             id="admin-search-input"
             v-model="searchQuery"
             type="text"
             placeholder="Search modules, pages, settings..."
-            class="w-full bg-transparent text-sm text-gray-900 placeholder:text-gray-400 focus:outline-none"
+            class="w-full bg-transparent text-sm text-gray-900 dark:text-white placeholder:text-gray-400 dark:placeholder:text-gray-500 focus:outline-none"
           />
           <button
             @click="closeSearch"
-            class="text-xs text-gray-500 hover:text-gray-700"
+            class="text-xs text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
           >
             Esc
           </button>
         </div>
 
         <div class="max-h-80 overflow-y-auto">
-          <div v-if="!searchQuery" class="px-4 py-6 text-sm text-gray-500">
+          <div v-if="!searchQuery" class="px-4 py-6 text-sm text-gray-500 dark:text-gray-400">
             Start typing to search the admin menu.
           </div>
-          <div v-else-if="searchResults.length === 0" class="px-4 py-6 text-sm text-gray-500">
+          <div v-else-if="searchResults.length === 0" class="px-4 py-6 text-sm text-gray-500 dark:text-gray-400">
             No results found.
           </div>
           <div v-else class="py-2">
@@ -576,10 +576,10 @@ const toggleSidebar = () => {
               :key="item.id"
               :href="item.full_url"
               @click="closeSearch"
-              class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+              class="block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
             >
-              <div class="font-medium text-gray-900">{{ item.title }}</div>
-              <div class="text-xs text-gray-500">{{ item.full_url }}</div>
+              <div class="font-medium text-gray-900 dark:text-white">{{ item.title }}</div>
+              <div class="text-xs text-gray-500 dark:text-gray-400">{{ item.full_url }}</div>
             </Link>
           </div>
         </div>

@@ -92,20 +92,20 @@ const save = () => {
     <div class="p-6">
       <!-- Page Header -->
       <div class="mb-6">
-        <h1 class="text-2xl font-bold text-gray-900">General Settings</h1>
-        <p class="mt-1 text-sm text-gray-500">Configure basic site information and SEO settings</p>
+        <h1 class="text-2xl font-bold text-gray-900 dark:text-white">General Settings</h1>
+        <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">Configure basic site information and SEO settings</p>
       </div>
 
       <form @submit.prevent="save">
         <!-- Main Content Card -->
-        <div class="bg-white rounded-lg shadow-sm border border-gray-200">
+        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
           <!-- Tabs -->
-          <div class="border-b border-gray-200">
+          <div class="border-b border-gray-200 dark:border-gray-700">
             <nav class="-mb-px flex space-x-8 px-6">
-              <button type="button" @click="activeTab = 'site'" :class="[activeTab === 'site' ? 'border-blue-500 text-blue-600' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300', 'whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm']">
+              <button type="button" @click="activeTab = 'site'" :class="[activeTab === 'site' ? 'border-blue-500 text-blue-600 dark:text-blue-400' : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300 dark:hover:border-gray-600', 'whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm']">
                 Site Information
               </button>
-              <button type="button" @click="activeTab = 'seo'" :class="[activeTab === 'seo' ? 'border-blue-500 text-blue-600' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300', 'whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm']">
+              <button type="button" @click="activeTab = 'seo'" :class="[activeTab === 'seo' ? 'border-blue-500 text-blue-600 dark:text-blue-400' : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300 dark:hover:border-gray-600', 'whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm']">
                 SEO
               </button>
             </nav>
@@ -113,18 +113,18 @@ const save = () => {
 
           <!-- Site Information Tab -->
           <div v-show="activeTab === 'site'" class="p-6">
-            <h3 class="text-lg font-semibold text-gray-900 mb-6">Site Information</h3>
+            <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-6">Site Information</h3>
 
             <div class="space-y-6">
               <!-- Site Name -->
               <div>
-                <label class="block text-sm font-medium text-gray-700 mb-2">
+                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                   Site Name <span class="text-red-500">*</span>
                 </label>
                 <input
                   v-model="form.site_name"
                   type="text"
-                  class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                   :class="{ 'border-red-500': form.errors.site_name }"
                   placeholder="Your Store Name"
                 />
@@ -133,11 +133,11 @@ const save = () => {
 
               <!-- Site Tagline -->
               <div>
-                <label class="block text-sm font-medium text-gray-700 mb-2">Site Tagline</label>
+                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Site Tagline</label>
                 <input
                   v-model="form.site_tagline"
                   type="text"
-                  class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                   :class="{ 'border-red-500': form.errors.site_tagline }"
                   placeholder="Your store's tagline or motto"
                 />
@@ -146,13 +146,13 @@ const save = () => {
 
               <!-- Admin Email -->
               <div>
-                <label class="block text-sm font-medium text-gray-700 mb-2">
+                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                   Admin Email <span class="text-red-500">*</span>
                 </label>
                 <input
                   v-model="form.admin_email"
                   type="email"
-                  class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                   :class="{ 'border-red-500': form.errors.admin_email }"
                   placeholder="admin@example.com"
                 />
@@ -161,11 +161,11 @@ const save = () => {
 
               <!-- Contact Phone -->
               <div>
-                <label class="block text-sm font-medium text-gray-700 mb-2">Contact Phone</label>
+                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Contact Phone</label>
                 <input
                   v-model="form.contact_phone"
                   type="text"
-                  class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                   :class="{ 'border-red-500': form.errors.contact_phone }"
                   placeholder="+1 (555) 123-4567"
                 />
@@ -174,11 +174,11 @@ const save = () => {
 
               <!-- Contact Address -->
               <div>
-                <label class="block text-sm font-medium text-gray-700 mb-2">Contact Address</label>
+                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Contact Address</label>
                 <textarea
                   v-model="form.contact_address"
                   rows="3"
-                  class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                   :class="{ 'border-red-500': form.errors.contact_address }"
                   placeholder="Your business address"
                 ></textarea>
@@ -187,37 +187,37 @@ const save = () => {
 
               <!-- Site Logo -->
               <div>
-                <label class="block text-sm font-medium text-gray-700 mb-2">Site Logo (Frontend)</label>
+                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Site Logo (Frontend)</label>
                 <div v-if="existingSiteLogo && siteLogoFiles.length === 0" class="mb-4">
-                  <img :src="`/storage/${existingSiteLogo}`" alt="Site logo" class="h-16 object-contain border border-gray-200 rounded" />
-                  <p class="text-xs text-gray-500 mt-1">Current logo</p>
+                  <img :src="`/storage/${existingSiteLogo}`" alt="Site logo" class="h-16 object-contain border border-gray-200 dark:border-gray-600 rounded" />
+                  <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Current logo</p>
                 </div>
                 <ImageUploader v-model="siteLogoFiles" :maxFiles="1" :maxSize="2" accept="image/*" />
-                <p class="mt-1 text-xs text-gray-500">Recommended size: 200x60 pixels. Max 2MB. Displayed on storefront header.</p>
+                <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">Recommended size: 200x60 pixels. Max 2MB. Displayed on storefront header.</p>
                 <p v-if="form.errors.site_logo" class="mt-1 text-sm text-red-600">{{ form.errors.site_logo }}</p>
               </div>
 
               <!-- Admin Logo -->
               <div>
-                <label class="block text-sm font-medium text-gray-700 mb-2">Admin Logo (Dashboard)</label>
+                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Admin Logo (Dashboard)</label>
                 <div v-if="existingAdminLogo && adminLogoFiles.length === 0" class="mb-4">
-                  <img :src="`/storage/${existingAdminLogo}`" alt="Admin logo" class="h-12 object-contain border border-gray-200 rounded" />
-                  <p class="text-xs text-gray-500 mt-1">Current admin logo</p>
+                  <img :src="`/storage/${existingAdminLogo}`" alt="Admin logo" class="h-12 object-contain border border-gray-200 dark:border-gray-600 rounded" />
+                  <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Current admin logo</p>
                 </div>
                 <ImageUploader v-model="adminLogoFiles" :maxFiles="1" :maxSize="2" accept="image/*" />
-                <p class="mt-1 text-xs text-gray-500">Recommended size: 150x40 pixels. Max 2MB. Displayed in admin sidebar.</p>
+                <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">Recommended size: 150x40 pixels. Max 2MB. Displayed in admin sidebar.</p>
                 <p v-if="form.errors.admin_logo" class="mt-1 text-sm text-red-600">{{ form.errors.admin_logo }}</p>
               </div>
 
               <!-- Site Favicon -->
               <div>
-                <label class="block text-sm font-medium text-gray-700 mb-2">Site Favicon</label>
+                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Site Favicon</label>
                 <div v-if="existingSiteFavicon && siteFaviconFiles.length === 0" class="mb-4">
-                  <img :src="`/storage/${existingSiteFavicon}`" alt="Site favicon" class="h-10 w-10 object-contain border border-gray-200 rounded" />
-                  <p class="text-xs text-gray-500 mt-1">Current favicon</p>
+                  <img :src="`/storage/${existingSiteFavicon}`" alt="Site favicon" class="h-10 w-10 object-contain border border-gray-200 dark:border-gray-600 rounded" />
+                  <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Current favicon</p>
                 </div>
                 <ImageUploader v-model="siteFaviconFiles" :maxFiles="1" :maxSize="1" accept="image/*" />
-                <p class="mt-1 text-xs text-gray-500">Recommended size: 32x32 pixels, ICO or PNG format</p>
+                <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">Recommended size: 32x32 pixels, ICO or PNG format</p>
                 <p v-if="form.errors.site_favicon" class="mt-1 text-sm text-red-600">{{ form.errors.site_favicon }}</p>
               </div>
             </div>
@@ -225,97 +225,97 @@ const save = () => {
 
           <!-- SEO Settings Tab -->
           <div v-show="activeTab === 'seo'" class="p-6">
-            <h3 class="text-lg font-semibold text-gray-900 mb-6">Search Engine Optimization</h3>
+            <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-6">Search Engine Optimization</h3>
 
             <div class="space-y-6">
               <!-- Meta Title -->
               <div>
-                <label class="block text-sm font-medium text-gray-700 mb-2">Meta Title</label>
+                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Meta Title</label>
                 <input
                   v-model="form.meta_title"
                   type="text"
-                  class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                   :class="{ 'border-red-500': form.errors.meta_title }"
                   placeholder="Your Store - Best Products Online"
                 />
-                <p class="mt-1 text-xs text-gray-500">Recommended: 50-60 characters</p>
+                <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">Recommended: 50-60 characters</p>
                 <p v-if="form.errors.meta_title" class="mt-1 text-sm text-red-600">{{ form.errors.meta_title }}</p>
               </div>
 
               <!-- Meta Description -->
               <div>
-                <label class="block text-sm font-medium text-gray-700 mb-2">Meta Description</label>
+                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Meta Description</label>
                 <textarea
                   v-model="form.meta_description"
                   rows="3"
-                  class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                   :class="{ 'border-red-500': form.errors.meta_description }"
                   placeholder="Brief description of your store for search engines"
                 ></textarea>
-                <p class="mt-1 text-xs text-gray-500">Recommended: 150-160 characters</p>
+                <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">Recommended: 150-160 characters</p>
                 <p v-if="form.errors.meta_description" class="mt-1 text-sm text-red-600">{{ form.errors.meta_description }}</p>
               </div>
 
               <!-- Meta Keywords -->
               <div>
-                <label class="block text-sm font-medium text-gray-700 mb-2">Meta Keywords</label>
+                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Meta Keywords</label>
                 <input
                   v-model="form.meta_keywords"
                   type="text"
-                  class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                   :class="{ 'border-red-500': form.errors.meta_keywords }"
                   placeholder="ecommerce, online store, products"
                 />
-                <p class="mt-1 text-xs text-gray-500">Comma-separated keywords</p>
+                <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">Comma-separated keywords</p>
                 <p v-if="form.errors.meta_keywords" class="mt-1 text-sm text-red-600">{{ form.errors.meta_keywords }}</p>
               </div>
 
               <!-- Google Analytics ID -->
               <div>
-                <label class="block text-sm font-medium text-gray-700 mb-2">Google Analytics ID</label>
+                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Google Analytics ID</label>
                 <input
                   v-model="form.google_analytics_id"
                   type="text"
-                  class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                   :class="{ 'border-red-500': form.errors.google_analytics_id }"
                   placeholder="G-XXXXXXXXXX or UA-XXXXXXXXX-X"
                 />
-                <p class="mt-1 text-xs text-gray-500">Your Google Analytics tracking ID</p>
+                <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">Your Google Analytics tracking ID</p>
                 <p v-if="form.errors.google_analytics_id" class="mt-1 text-sm text-red-600">{{ form.errors.google_analytics_id }}</p>
               </div>
 
               <!-- Google Tag Manager ID -->
               <div>
-                <label class="block text-sm font-medium text-gray-700 mb-2">Google Tag Manager ID</label>
+                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Google Tag Manager ID</label>
                 <input
                   v-model="form.google_tag_manager_id"
                   type="text"
-                  class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                   :class="{ 'border-red-500': form.errors.google_tag_manager_id }"
                   placeholder="GTM-XXXXXXX"
                 />
-                <p class="mt-1 text-xs text-gray-500">Your Google Tag Manager container ID</p>
+                <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">Your Google Tag Manager container ID</p>
                 <p v-if="form.errors.google_tag_manager_id" class="mt-1 text-sm text-red-600">{{ form.errors.google_tag_manager_id }}</p>
               </div>
 
               <!-- Facebook Pixel ID -->
               <div>
-                <label class="block text-sm font-medium text-gray-700 mb-2">Facebook Pixel ID</label>
+                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Facebook Pixel ID</label>
                 <input
                   v-model="form.facebook_pixel_id"
                   type="text"
-                  class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                   :class="{ 'border-red-500': form.errors.facebook_pixel_id }"
                   placeholder="XXXXXXXXXXXXXXX"
                 />
-                <p class="mt-1 text-xs text-gray-500">Your Facebook Pixel ID for tracking</p>
+                <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">Your Facebook Pixel ID for tracking</p>
                 <p v-if="form.errors.facebook_pixel_id" class="mt-1 text-sm text-red-600">{{ form.errors.facebook_pixel_id }}</p>
               </div>
             </div>
           </div>
 
           <!-- Save Button Section -->
-          <div class="border-t border-gray-200 px-6 py-4 bg-gray-50">
+          <div class="border-t border-gray-200 dark:border-gray-700 px-6 py-4 bg-gray-50 dark:bg-gray-900/50">
             <div class="flex items-center justify-end">
               <button
                 type="submit"

@@ -121,6 +121,7 @@ class PaymentMethodsController extends Controller
             'razorpay' => 'Razorpay',
             'paypal' => 'PayPal',
             'payumoney' => 'PayUMoney',
+            'phonepe' => 'PhonePe',
             default => 'Generic',
         };
     }

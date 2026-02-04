@@ -158,13 +158,13 @@ const getTypeLabel = (type: string) => {
 
 const getTypeColor = (type: string) => {
   const colors: Record<string, string> = {
-    percentage: 'bg-blue-100 text-blue-800',
-    fixed_amount: 'bg-green-100 text-green-800',
-    free_shipping: 'bg-purple-100 text-purple-800',
-    buy_x_get_y: 'bg-orange-100 text-orange-800',
-    fixed_price: 'bg-pink-100 text-pink-800',
+    percentage: 'bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-300',
+    fixed_amount: 'bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-300',
+    free_shipping: 'bg-purple-100 dark:bg-purple-900/30 text-purple-800 dark:text-purple-300',
+    buy_x_get_y: 'bg-orange-100 dark:bg-orange-900/30 text-orange-800 dark:text-orange-300',
+    fixed_price: 'bg-pink-100 dark:bg-pink-900/30 text-pink-800 dark:text-pink-300',
   };
-  return colors[type] || 'bg-gray-100 text-gray-800';
+  return colors[type] || 'bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-300';
 };
 
 const formatDiscount = (coupon: Coupon) => {
@@ -206,8 +206,8 @@ const isExpired = (endDate: string | null) => {
       <!-- Page Header -->
       <div class="flex items-center justify-between">
         <div>
-          <h1 class="text-2xl font-bold text-gray-900">Coupons</h1>
-          <p class="mt-1 text-sm text-gray-600">Manage discount coupons and promotional codes</p>
+          <h1 class="text-2xl font-bold text-gray-900 dark:text-white">Coupons</h1>
+          <p class="mt-1 text-sm text-gray-600 dark:text-gray-400">Manage discount coupons and promotional codes</p>
         </div>
         <button
           @click="createCoupon"
@@ -220,36 +220,36 @@ const isExpired = (endDate: string | null) => {
 
       <!-- Stats Cards -->
       <div class="grid gap-4 md:grid-cols-4">
-        <div class="bg-white rounded-lg shadow-sm p-4">
-          <div class="text-sm font-medium text-gray-600 mb-2">Total Coupons</div>
-          <div class="text-2xl font-bold text-gray-900">{{ stats.total }}</div>
+        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-4">
+          <div class="text-sm font-medium text-gray-600 dark:text-gray-400 mb-2">Total Coupons</div>
+          <div class="text-2xl font-bold text-gray-900 dark:text-white">{{ stats.total }}</div>
         </div>
-        <div class="bg-white rounded-lg shadow-sm p-4">
-          <div class="text-sm font-medium text-gray-600 mb-2">Active</div>
-          <div class="text-2xl font-bold text-green-600">{{ stats.active }}</div>
+        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-4">
+          <div class="text-sm font-medium text-gray-600 dark:text-gray-400 mb-2">Active</div>
+          <div class="text-2xl font-bold text-green-600 dark:text-green-400">{{ stats.active }}</div>
         </div>
-        <div class="bg-white rounded-lg shadow-sm p-4">
-          <div class="text-sm font-medium text-gray-600 mb-2">Used Today</div>
-          <div class="text-2xl font-bold text-gray-900">{{ stats.used_today }}</div>
+        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-4">
+          <div class="text-sm font-medium text-gray-600 dark:text-gray-400 mb-2">Used Today</div>
+          <div class="text-2xl font-bold text-gray-900 dark:text-white">{{ stats.used_today }}</div>
         </div>
-        <div class="bg-white rounded-lg shadow-sm p-4">
-          <div class="text-sm font-medium text-gray-600 mb-2">Total Discounts</div>
-          <div class="text-2xl font-bold text-gray-900">{{ formatPrice(stats.total_discount) }}</div>
+        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-4">
+          <div class="text-sm font-medium text-gray-600 dark:text-gray-400 mb-2">Total Discounts</div>
+          <div class="text-2xl font-bold text-gray-900 dark:text-white">{{ formatPrice(stats.total_discount) }}</div>
         </div>
       </div>
 
       <!-- Filters and Search -->
-      <div class="bg-white rounded-lg shadow-sm p-4">
+      <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-4">
         <div class="grid grid-cols-1 md:grid-cols-6 gap-4">
           <!-- Search -->
           <div class="md:col-span-2">
-            <label class="block text-sm font-medium text-gray-700 mb-1">Search</label>
+            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Search</label>
             <div class="relative">
-              <Search class="absolute left-2.5 top-2.5 h-4 w-4 text-gray-400" />
+              <Search class="absolute left-2.5 top-2.5 h-4 w-4 text-gray-400 dark:text-gray-500" />
               <Input
                 v-model="searchQuery"
                 placeholder="Search coupons..."
-                class="pl-8"
+                class="pl-8 bg-white dark:bg-gray-700 text-gray-900 dark:text-white border-gray-300 dark:border-gray-600"
                 @keyup.enter="applyFilters"
               />
             </div>
@@ -257,11 +257,11 @@ const isExpired = (endDate: string | null) => {
 
           <!-- Status Filter -->
           <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">Status</label>
+            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Status</label>
             <select 
               v-model="statusFilter" 
               @change="applyFilters"
-              class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
             >
               <option value="all">All Status</option>
               <option value="active">Active</option>
@@ -272,11 +272,11 @@ const isExpired = (endDate: string | null) => {
 
           <!-- Type Filter -->
           <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">Type</label>
+            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Type</label>
             <select 
               v-model="typeFilter" 
               @change="applyFilters"
-              class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
             >
               <option value="all">All Types</option>
               <option value="percentage">Percentage</option>
@@ -292,7 +292,7 @@ const isExpired = (endDate: string | null) => {
         <div v-if="searchQuery || statusFilter !== 'all' || typeFilter !== 'all'" class="mt-3 flex justify-end">
           <button
             @click="clearFilters"
-            class="text-sm text-gray-600 hover:text-gray-900"
+            class="text-sm text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-200"
           >
             Clear Filters
           </button>
@@ -300,29 +300,29 @@ const isExpired = (endDate: string | null) => {
       </div>
 
       <!-- Bulk Actions -->
-      <div v-if="selectedCoupons.length > 0" class="bg-blue-50 border border-blue-200 rounded-lg px-4 py-3">
+      <div v-if="selectedCoupons.length > 0" class="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg px-4 py-3">
         <div class="flex items-center justify-between">
-          <span class="text-sm font-medium text-blue-900">
+          <span class="text-sm font-medium text-blue-900 dark:text-blue-200">
             {{ selectedCoupons.length }} {{ selectedCoupons.length === 1 ? 'coupon' : 'coupons' }} selected
           </span>
           <div class="flex gap-2">
             <button
               @click="bulkActivate"
-              class="flex items-center gap-1 px-3 py-1.5 text-sm font-medium text-green-700 bg-white border border-green-300 rounded-lg hover:bg-green-50"
+              class="flex items-center gap-1 px-3 py-1.5 text-sm font-medium text-green-700 bg-white border border-green-300 rounded-lg hover:bg-green-50 dark:bg-gray-800 dark:text-green-400 dark:border-green-600 dark:hover:bg-gray-700"
             >
               <ToggleRight class="h-4 w-4" />
               Activate
             </button>
             <button
               @click="bulkDeactivate"
-              class="flex items-center gap-1 px-3 py-1.5 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50"
+              class="flex items-center gap-1 px-3 py-1.5 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 dark:bg-gray-800 dark:text-gray-300 dark:border-gray-600 dark:hover:bg-gray-700"
             >
               <ToggleLeft class="h-4 w-4" />
               Deactivate
             </button>
             <button
               @click="bulkDelete"
-              class="flex items-center gap-1 px-3 py-1.5 text-sm font-medium text-red-700 bg-white border border-red-300 rounded-lg hover:bg-red-50"
+              class="flex items-center gap-1 px-3 py-1.5 text-sm font-medium text-red-700 bg-white border border-red-300 rounded-lg hover:bg-red-50 dark:bg-gray-800 dark:text-red-400 dark:border-red-600 dark:hover:bg-gray-700"
             >
               <Trash2 class="h-4 w-4" />
               Delete
@@ -332,77 +332,77 @@ const isExpired = (endDate: string | null) => {
       </div>
 
       <!-- Table -->
-      <div class="bg-white shadow overflow-hidden sm:rounded-lg">
+      <div class="bg-white dark:bg-gray-800 shadow overflow-hidden sm:rounded-lg">
         <div class="overflow-x-auto">
-          <div class="rounded-md border">
+          <div class="rounded-md border dark:border-gray-700">
             <table class="w-full caption-bottom text-sm">
-              <thead class="bg-gray-50">
+              <thead class="bg-gray-50 dark:bg-gray-700">
                 <tr>
                   <th scope="col" class="px-6 py-3 text-left">
                     <input
                       type="checkbox"
                       :checked="allSelected"
                       @change="toggleSelectAll"
-                      class="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                      class="h-4 w-4 rounded border-gray-300 dark:border-gray-600 text-blue-600 focus:ring-blue-500 dark:bg-gray-700"
                     />
                   </th>
-                  <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Code</th>
-                  <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
-                  <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Type</th>
-                  <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Discount</th>
-                  <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Usage</th>
-                  <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-                  <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Valid Until</th>
-                  <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                  <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Code</th>
+                  <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Name</th>
+                  <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Type</th>
+                  <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Discount</th>
+                  <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Usage</th>
+                  <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Status</th>
+                  <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Valid Until</th>
+                  <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Actions</th>
                 </tr>
               </thead>
-              <tbody class="bg-white divide-y divide-gray-200">
+              <tbody class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
                 <tr v-if="coupons.data.length === 0">
-                  <td colspan="9" class="px-6 py-12 text-center text-gray-500">
+                  <td colspan="9" class="px-6 py-12 text-center text-gray-500 dark:text-gray-400">
                     No coupons found
                   </td>
                 </tr>
-                <tr v-for="coupon in coupons.data" :key="coupon.id" class="hover:bg-gray-50">
+                <tr v-for="coupon in coupons.data" :key="coupon.id" class="hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
                   <td class="px-6 py-4 whitespace-nowrap">
                     <input
                       type="checkbox"
                       :value="coupon.id"
                       v-model="selectedCoupons"
-                      class="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                      class="h-4 w-4 rounded border-gray-300 dark:border-gray-600 text-blue-600 focus:ring-blue-500 dark:bg-gray-700"
                     />
                   </td>
                   <td class="px-6 py-4 whitespace-nowrap">
                     <div class="flex items-center space-x-2">
-                      <code class="font-mono font-semibold text-sm">{{ coupon.code }}</code>
-                      <span v-if="coupon.is_public" class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-gray-100 text-gray-800">Public</span>
+                      <code class="font-mono font-semibold text-sm text-gray-900 dark:text-white">{{ coupon.code }}</code>
+                      <span v-if="coupon.is_public" class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-300">Public</span>
                     </div>
                   </td>
-                  <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ coupon.name }}</td>
+                  <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white">{{ coupon.name }}</td>
                   <td class="px-6 py-4 whitespace-nowrap">
                     <span :class="['px-2 inline-flex text-xs leading-5 font-semibold rounded-full', getTypeColor(coupon.type)]">
                       {{ getTypeLabel(coupon.type) }}
                     </span>
                   </td>
-                  <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{{ formatDiscount(coupon) }}</td>
-                  <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                  <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-white">{{ formatDiscount(coupon) }}</td>
+                  <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white">
                     <span v-if="coupon.usage_limit_total">
                       {{ coupon.usage_count }} / {{ coupon.usage_limit_total }}
                     </span>
                     <span v-else>{{ coupon.usage_count }}</span>
                   </td>
                   <td class="px-6 py-4 whitespace-nowrap">
-                    <span v-if="isExpired(coupon.end_date)" class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-red-100 text-red-800">Expired</span>
-                    <span v-else-if="coupon.is_active" class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">Active</span>
-                    <span v-else class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-gray-100 text-gray-800">Inactive</span>
+                    <span v-if="isExpired(coupon.end_date)" class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-red-100 dark:bg-red-900/30 text-red-800 dark:text-red-300">Expired</span>
+                    <span v-else-if="coupon.is_active" class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-300">Active</span>
+                    <span v-else class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-300">Inactive</span>
                   </td>
-                  <td class="px-6 py-4 whitespace-nowrap text-sm" :class="{ 'text-red-600': isExpired(coupon.end_date), 'text-gray-500': !isExpired(coupon.end_date) }">
+                  <td class="px-6 py-4 whitespace-nowrap text-sm" :class="{ 'text-red-600 dark:text-red-400': isExpired(coupon.end_date), 'text-gray-500 dark:text-gray-400': !isExpired(coupon.end_date) }">
                     {{ formatDate(coupon.end_date) }}
                   </td>
                   <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                     <div class="flex items-center justify-end gap-2">
                       <Link
                         :href="`/admin/marketing/coupons/${coupon.id}/edit`"
-                        class="text-blue-600 hover:text-blue-900"
+                        class="text-blue-600 hover:text-blue-900 dark:text-blue-400 dark:hover:text-blue-300"
                         title="Edit"
                       >
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -411,7 +411,7 @@ const isExpired = (endDate: string | null) => {
                       </Link>
                       <button
                         @click="deleteCoupon(coupon.id)"
-                        class="text-red-600 hover:text-red-900"
+                        class="text-red-600 hover:text-red-900 dark:text-red-400 dark:hover:text-red-300"
                         title="Delete"
                       >
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -427,7 +427,7 @@ const isExpired = (endDate: string | null) => {
 
           <!-- Pagination -->
           <div v-if="coupons.last_page > 1" class="flex items-center justify-between mt-4">
-            <div class="text-sm text-muted-foreground">
+            <div class="text-sm text-gray-500 dark:text-gray-400">
               Showing {{ ((coupons.current_page - 1) * coupons.per_page) + 1 }} 
               to {{ Math.min(coupons.current_page * coupons.per_page, coupons.total) }} 
               of {{ coupons.total }} coupons
@@ -438,6 +438,7 @@ const isExpired = (endDate: string | null) => {
                 size="sm"
                 :disabled="coupons.current_page === 1"
                 @click="router.get(`/admin/marketing/coupons?page=${coupons.current_page - 1}`)"
+                class="dark:bg-gray-800 dark:text-gray-300 dark:border-gray-700 dark:hover:bg-gray-700"
               >
                 Previous
               </Button>
@@ -446,6 +447,7 @@ const isExpired = (endDate: string | null) => {
                 size="sm"
                 :disabled="coupons.current_page === coupons.last_page"
                 @click="router.get(`/admin/marketing/coupons?page=${coupons.current_page + 1}`)"
+                class="dark:bg-gray-800 dark:text-gray-300 dark:border-gray-700 dark:hover:bg-gray-700"
               >
                 Next
               </Button>

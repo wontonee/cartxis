@@ -61,8 +61,8 @@ const handleConfigure = (method: PaymentMethod) => {
     <div class="p-6">
       <!-- Page Header -->
       <div class="mb-6">
-        <h1 class="text-2xl font-bold text-gray-900">Payment Methods</h1>
-        <p class="mt-1 text-sm text-gray-500">Manage and configure available payment methods for your store</p>
+        <h1 class="text-2xl font-bold text-gray-900 dark:text-white">Payment Methods</h1>
+        <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">Manage and configure available payment methods for your store</p>
       </div>
 
       <!-- Payment Methods Grid -->
@@ -79,14 +79,14 @@ const handleConfigure = (method: PaymentMethod) => {
       </div>
 
       <!-- Empty State -->
-      <div v-else class="text-center py-12 bg-gray-50 rounded-lg">
-        <p class="text-gray-600">No payment methods found.</p>
+      <div v-else class="text-center py-12 bg-gray-50 dark:bg-gray-800 rounded-lg">
+        <p class="text-gray-600 dark:text-gray-400">No payment methods found.</p>
       </div>
 
       <!-- Help Text -->
-      <div class="mt-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
-        <h3 class="font-semibold text-blue-900 mb-2">Payment Methods Management</h3>
-        <ul class="text-sm text-blue-800 space-y-1">
+      <div class="mt-6 p-4 bg-blue-50 dark:bg-blue-900/30 border border-blue-200 dark:border-blue-800 rounded-lg">
+        <h3 class="font-semibold text-blue-900 dark:text-blue-200 mb-2">Payment Methods Management</h3>
+        <ul class="text-sm text-blue-800 dark:text-blue-300 space-y-1">
           <li>• Use the Configure button to set up payment method details</li>
           <li>• Enable/Disable payment methods with the toggle buttons</li>
           <li>• Set a default payment method for customer checkout</li>

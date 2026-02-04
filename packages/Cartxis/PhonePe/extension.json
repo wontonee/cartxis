@@ -1,0 +1,17 @@
+{
+    "code": "cartxis-phonepe",
+    "name": "PhonePe Payment Gateway",
+    "description": "Accept payments via PhonePe - UPI, credit cards, debit cards, net banking, and wallets for Indian customers",
+    "version": "1.0.0",
+    "author": "Cartxis Commerce",
+    "author_url": "https://cartxis-commerce.com",
+    "icon": "smartphone",
+    "type": "extension",
+    "category": "payment-gateway",
+    "requires": {
+        "cartxis/core": "^1.0",
+        "php": "^8.2",
+        "phonepe/pg-php-sdk-v2": "^2.0"
+    },
+    "provider": "Cartxis\\PhonePe\\Providers\\PhonePeServiceProvider"
+}

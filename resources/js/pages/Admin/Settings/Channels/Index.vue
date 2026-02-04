@@ -4,36 +4,36 @@
       <Head title="Channels" />
       <!-- Title -->
       <div class="mb-6">
-        <h1 class="text-3xl font-bold text-gray-900">Channel - Theme Management</h1>
-        <p class="mt-2 text-sm text-gray-600">Manage theme settings for your sales channels</p>
+        <h1 class="text-3xl font-bold text-gray-900 dark:text-white">Channel - Theme Management</h1>
+        <p class="mt-2 text-sm text-gray-600 dark:text-gray-400">Manage theme settings for your sales channels</p>
       </div>
 
       <!-- Channels Table -->
-    <div class="bg-white rounded-lg shadow overflow-hidden">
-      <div v-if="channels.data.length === 0" class="p-6 text-center text-gray-500">
+    <div class="bg-white dark:bg-gray-800 rounded-lg shadow overflow-hidden">
+      <div v-if="channels.data.length === 0" class="p-6 text-center text-gray-500 dark:text-gray-400">
         <p>No channels found.</p>
       </div>
 
       <table v-else class="w-full">
-        <thead class="bg-gray-50 border-b border-gray-300">
+        <thead class="bg-gray-50 dark:bg-gray-700 border-b border-gray-300 dark:border-gray-600">
           <tr>
-            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Channel Name</th>
-            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Current Theme</th>
-            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Select Theme</th>
-            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Default</th>
+            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Channel Name</th>
+            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Current Theme</th>
+            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Select Theme</th>
+            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Status</th>
+            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Default</th>
           </tr>
         </thead>
-        <tbody class="divide-y divide-gray-200">
-          <tr v-for="channel in channels.data" :key="channel.id" class="hover:bg-gray-50">
+        <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
+          <tr v-for="channel in channels.data" :key="channel.id" class="hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
             <td class="px-6 py-4 whitespace-nowrap">
               <div>
-                <p class="text-sm font-medium text-gray-900">{{ channel.name }}</p>
-                <p v-if="channel.description" class="text-xs text-gray-500 truncate max-w-xs">{{ channel.description }}</p>
+                <p class="text-sm font-medium text-gray-900 dark:text-white">{{ channel.name }}</p>
+                <p v-if="channel.description" class="text-xs text-gray-500 dark:text-gray-400 truncate max-w-xs">{{ channel.description }}</p>
               </div>
             </td>
             <td class="px-6 py-4 whitespace-nowrap">
-              <span class="inline-flex items-center px-3 py-1 rounded-md text-sm font-medium bg-blue-50 text-blue-700 border border-blue-200">
+              <span class="inline-flex items-center px-3 py-1 rounded-md text-sm font-medium bg-blue-50 text-blue-700 border border-blue-200 dark:bg-blue-900/30 dark:text-blue-300 dark:border-blue-700">
                 <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01" />
                 </svg>
@@ -44,7 +44,7 @@
               <select 
                 :value="channel.theme_id"
                 @change="updateTheme(channel.id, ($event.target as HTMLSelectElement).value)"
-                class="px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white"
+                class="px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
               >
                 <option value="">Select Theme...</option>
                 <option v-for="theme in availableThemes" :key="theme.id" :value="theme.id">
@@ -57,8 +57,8 @@
                 :class="[
                   'px-3 py-1 rounded-md text-sm font-medium inline-flex items-center',
                   channel.status === 'active' 
-                    ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' 
-                    : 'bg-gray-100 text-gray-700 border border-gray-300'
+                    ? 'bg-emerald-50 text-emerald-700 border border-emerald-200 dark:bg-emerald-900/30 dark:text-emerald-400 dark:border-emerald-800' 
+                    : 'bg-gray-100 text-gray-700 border border-gray-300 dark:bg-gray-700 dark:text-gray-300 dark:border-gray-600'
                 ]"
               >
                 <svg v-if="channel.status === 'active'" class="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
@@ -68,7 +68,7 @@
               </span>
             </td>
             <td class="px-6 py-4 whitespace-nowrap text-center">
-              <span v-if="channel.is_default" class="inline-flex items-center px-3 py-1 rounded-md text-sm font-medium bg-yellow-50 text-yellow-700 border border-yellow-200">
+              <span v-if="channel.is_default" class="inline-flex items-center px-3 py-1 rounded-md text-sm font-medium bg-yellow-50 text-yellow-700 border border-yellow-200 dark:bg-yellow-900/30 dark:text-yellow-400 dark:border-yellow-700">
                 <svg class="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
                   <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
                 </svg>
@@ -82,15 +82,15 @@
     </div>
 
     <!-- Info Box -->
-    <div class="mt-6 bg-blue-50 border border-blue-200 rounded-lg p-4">
+    <div class="mt-6 bg-blue-50 border border-blue-200 dark:bg-blue-900/20 dark:border-blue-800 rounded-lg p-4">
       <div class="flex items-start">
-        <svg class="w-5 h-5 text-blue-600 mt-0.5 mr-3" fill="currentColor" viewBox="0 0 20 20">
+        <svg class="w-5 h-5 text-blue-600 dark:text-blue-400 mt-0.5 mr-3" fill="currentColor" viewBox="0 0 20 20">
           <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd" />
         </svg>
         <div>
-          <h3 class="text-sm font-medium text-blue-900">Theme Management</h3>
-          <p class="mt-1 text-sm text-blue-700">
-            Select a theme from the dropdown to change the appearance of your channel. Themes are located in the <code class="px-2 py-1 bg-blue-100 rounded text-xs">themes/</code> directory.
+          <h3 class="text-sm font-medium text-blue-900 dark:text-blue-300">Theme Management</h3>
+          <p class="mt-1 text-sm text-blue-700 dark:text-blue-400">
+            Select a theme from the dropdown to change the appearance of your channel. Themes are located in the <code class="px-2 py-1 bg-blue-100 dark:bg-blue-900/40 rounded text-xs">themes/</code> directory.
           </p>
         </div>
       </div>

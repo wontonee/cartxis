@@ -19,9 +19,9 @@ const emit = defineEmits<{
 
 const statusBadgeClass = computed(() => {
   if (!props.paymentMethod.is_active) {
-    return 'bg-gray-100 text-gray-800'
+    return 'bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-300'
   }
-  return 'bg-green-100 text-green-800'
+  return 'bg-green-100 dark:bg-green-900/50 text-green-800 dark:text-green-300'
 })
 
 const statusText = computed(() => {
@@ -42,21 +42,21 @@ const displayType = computed(() => {
 </script>
 
 <template>
-  <div class="bg-white rounded-lg shadow-sm border border-gray-200 hover:shadow-md transition-shadow">
+  <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 hover:shadow-md transition-shadow">
     <!-- Header -->
-    <div class="p-4 border-b border-gray-100">
+    <div class="p-4 border-b border-gray-100 dark:border-gray-700">
       <div class="flex items-start justify-between">
         <div class="flex-1">
           <div class="flex items-center gap-2 mb-2">
-            <h3 class="text-lg font-semibold text-gray-900">{{ paymentMethod.name }}</h3>
+            <h3 class="text-lg font-semibold text-gray-900 dark:text-white">{{ paymentMethod.name }}</h3>
             <span :class="['px-2 py-1 text-xs font-medium rounded-full', statusBadgeClass]">
               {{ statusText }}
             </span>
-            <span v-if="defaultBadge" class="px-2 py-1 text-xs font-medium rounded-full bg-blue-100 text-blue-800">
+            <span v-if="defaultBadge" class="px-2 py-1 text-xs font-medium rounded-full bg-blue-100 dark:bg-blue-900/50 text-blue-800 dark:text-blue-300">
               {{ defaultBadge }}
             </span>
           </div>
-          <p class="text-sm text-gray-600">{{ paymentMethod.description }}</p>
+          <p class="text-sm text-gray-600 dark:text-gray-400">{{ paymentMethod.description }}</p>
         </div>
       </div>
     </div>
@@ -66,22 +66,22 @@ const displayType = computed(() => {
       <!-- Details -->
       <div class="space-y-2 text-sm">
         <div class="flex justify-between">
-          <span class="text-gray-600">Type:</span>
-          <span class="font-medium text-gray-900 uppercase">{{ displayType }}</span>
+          <span class="text-gray-600 dark:text-gray-400">Type:</span>
+          <span class="font-medium text-gray-900 dark:text-white uppercase">{{ displayType }}</span>
         </div>
         <div class="flex justify-between">
-          <span class="text-gray-600">Code:</span>
-          <span class="font-mono text-gray-900">{{ paymentMethod.code }}</span>
+          <span class="text-gray-600 dark:text-gray-400">Code:</span>
+          <span class="font-mono text-gray-900 dark:text-white">{{ paymentMethod.code }}</span>
         </div>
         <div v-if="paymentMethod.instructions" class="flex justify-between">
-          <span class="text-gray-600">Instructions:</span>
-          <span class="text-gray-900 truncate">{{ paymentMethod.instructions }}</span>
+          <span class="text-gray-600 dark:text-gray-400">Instructions:</span>
+          <span class="text-gray-900 dark:text-white truncate">{{ paymentMethod.instructions }}</span>
         </div>
       </div>
     </div>
 
     <!-- Footer -->
-    <div class="px-4 py-3 bg-gray-50 border-t border-gray-100 flex gap-2">
+    <div class="px-4 py-3 bg-gray-50 dark:bg-gray-900/50 border-t border-gray-100 dark:border-gray-700 flex gap-2">
       <button
         @click="$emit('configure')"
         :disabled="processing"
@@ -95,8 +95,8 @@ const displayType = computed(() => {
         :class="[
           'flex-1 px-3 py-2 text-sm font-medium rounded-lg transition-colors disabled:opacity-50',
           paymentMethod.is_active
-            ? 'bg-red-100 text-red-700 hover:bg-red-200'
-            : 'bg-green-100 text-green-700 hover:bg-green-200'
+            ? 'bg-red-100 dark:bg-red-900/50 text-red-700 dark:text-red-300 hover:bg-red-200 dark:hover:bg-red-900'
+            : 'bg-green-100 dark:bg-green-900/50 text-green-700 dark:text-green-300 hover:bg-green-200 dark:hover:bg-green-900'
         ]"
       >
         {{ paymentMethod.is_active ? 'Disable' : 'Enable' }}
@@ -105,7 +105,7 @@ const displayType = computed(() => {
         v-if="!paymentMethod.is_default"
         @click="$emit('setDefault')"
         :disabled="processing"
-        class="flex-1 px-3 py-2 bg-gray-200 text-gray-700 text-sm font-medium rounded-lg hover:bg-gray-300 transition-colors disabled:opacity-50"
+        class="flex-1 px-3 py-2 bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 text-sm font-medium rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors disabled:opacity-50"
       >
         Set Default
       </button>

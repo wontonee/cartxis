@@ -262,8 +262,8 @@ function handleDragEnd() {
     <div class="mb-6">
       <div class="flex flex-col md:flex-row md:items-center md:justify-between">
         <div>
-          <h1 class="text-2xl font-bold text-gray-900">Customer Groups</h1>
-          <p class="mt-1 text-sm text-gray-600">Manage customer segmentation and group-based pricing</p>
+          <h1 class="text-2xl font-bold text-gray-900 dark:text-white">Customer Groups</h1>
+          <p class="mt-1 text-sm text-gray-600 dark:text-gray-400">Manage customer segmentation and group-based pricing</p>
         </div>
         <div class="mt-4 md:mt-0">
           <Link
@@ -281,56 +281,56 @@ function handleDragEnd() {
 
     <!-- Statistics Cards -->
     <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
-      <div class="bg-white rounded-lg shadow-sm p-6">
+      <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-6">
         <div class="flex items-center justify-between">
           <div>
-            <p class="text-sm text-gray-600">Total Groups</p>
-            <p class="text-2xl font-bold text-gray-900">{{ statistics.total }}</p>
+            <p class="text-sm text-gray-600 dark:text-gray-400">Total Groups</p>
+            <p class="text-2xl font-bold text-gray-900 dark:text-white">{{ statistics.total }}</p>
           </div>
-          <div class="p-3 bg-blue-100 rounded-lg">
-            <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <div class="p-3 bg-blue-100 dark:bg-blue-900/30 rounded-lg">
+            <svg class="w-6 h-6 text-blue-600 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"/>
             </svg>
           </div>
         </div>
       </div>
 
-      <div class="bg-white rounded-lg shadow-sm p-6">
+      <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-6">
         <div class="flex items-center justify-between">
           <div>
-            <p class="text-sm text-gray-600">Active Groups</p>
-            <p class="text-2xl font-bold text-green-600">{{ statistics.active }}</p>
+            <p class="text-sm text-gray-600 dark:text-gray-400">Active Groups</p>
+            <p class="text-2xl font-bold text-green-600 dark:text-green-400">{{ statistics.active }}</p>
           </div>
-          <div class="p-3 bg-green-100 rounded-lg">
-            <svg class="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <div class="p-3 bg-green-100 dark:bg-green-900/30 rounded-lg">
+            <svg class="w-6 h-6 text-green-600 dark:text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
             </svg>
           </div>
         </div>
       </div>
 
-      <div class="bg-white rounded-lg shadow-sm p-6">
+      <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-6">
         <div class="flex items-center justify-between">
           <div>
-            <p class="text-sm text-gray-600">Inactive Groups</p>
-            <p class="text-2xl font-bold text-red-600">{{ statistics.inactive }}</p>
+            <p class="text-sm text-gray-600 dark:text-gray-400">Inactive Groups</p>
+            <p class="text-2xl font-bold text-red-600 dark:text-red-400">{{ statistics.inactive }}</p>
           </div>
-          <div class="p-3 bg-red-100 rounded-lg">
-            <svg class="w-6 h-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <div class="p-3 bg-red-100 dark:bg-red-900/30 rounded-lg">
+            <svg class="w-6 h-6 text-red-600 dark:text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"/>
             </svg>
           </div>
         </div>
       </div>
 
-      <div class="bg-white rounded-lg shadow-sm p-6">
+      <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-6">
         <div class="flex items-center justify-between">
           <div>
-            <p class="text-sm text-gray-600">With Customers</p>
-            <p class="text-2xl font-bold text-purple-600">{{ statistics.with_customers }}</p>
+            <p class="text-sm text-gray-600 dark:text-gray-400">With Customers</p>
+            <p class="text-2xl font-bold text-purple-600 dark:text-purple-400">{{ statistics.with_customers }}</p>
           </div>
-          <div class="p-3 bg-purple-100 rounded-lg">
-            <svg class="w-6 h-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <div class="p-3 bg-purple-100 dark:bg-purple-900/30 rounded-lg">
+            <svg class="w-6 h-6 text-purple-600 dark:text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"/>
             </svg>
           </div>
@@ -339,27 +339,27 @@ function handleDragEnd() {
     </div>
 
     <!-- Filters and Actions -->
-    <div class="bg-white rounded-lg shadow-sm p-4 mb-6">
+    <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-4 mb-6">
       <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
         <!-- Search -->
         <div class="md:col-span-2">
-          <label class="block text-sm font-medium text-gray-700 mb-1">Search</label>
+          <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Search</label>
           <input
             v-model="search"
             @input="performSearch"
             type="text"
             placeholder="Name, code, description..."
-            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
           />
         </div>
 
         <!-- Status Filter -->
         <div>
-          <label class="block text-sm font-medium text-gray-700 mb-1">Status</label>
+          <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Status</label>
           <select
             v-model="statusFilter"
             @change="applyFilters"
-            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
           >
             <option value="">All Status</option>
             <option value="active">Active</option>
@@ -369,11 +369,11 @@ function handleDragEnd() {
 
         <!-- Per Page -->
         <div>
-          <label class="block text-sm font-medium text-gray-700 mb-1">Per Page</label>
+          <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Per Page</label>
           <select
             v-model="perPage"
             @change="applyFilters"
-            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
           >
             <option :value="15">15</option>
             <option :value="25">25</option>
@@ -386,7 +386,7 @@ function handleDragEnd() {
       <div v-if="hasActiveFilters" class="mt-4">
         <button
           @click="clearFilters"
-          class="text-sm text-blue-600 hover:text-blue-700"
+          class="text-sm text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300"
         >
           Clear all filters
         </button>
@@ -394,9 +394,9 @@ function handleDragEnd() {
     </div>
 
     <!-- Bulk Actions -->
-    <div v-if="selectedGroups.length > 0" class="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
+    <div v-if="selectedGroups.length > 0" class="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4 mb-6">
       <div class="flex items-center justify-between">
-        <span class="text-sm text-blue-800">
+        <span class="text-sm text-blue-800 dark:text-blue-300">
           {{ selectedGroups.length }} group(s) selected
         </span>
         <div class="flex items-center space-x-2">
@@ -423,10 +423,10 @@ function handleDragEnd() {
     </div>
 
     <!-- Groups Table -->
-    <div class="bg-white rounded-lg shadow-sm overflow-hidden">
+    <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm overflow-hidden">
       <div class="overflow-x-auto">
-        <table class="min-w-full divide-y divide-gray-200">
-          <thead class="bg-gray-50">
+        <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+          <thead class="bg-gray-50 dark:bg-gray-700">
             <tr>
               <th class="w-12 px-6 py-3 text-left">
                 <input
@@ -434,33 +434,33 @@ function handleDragEnd() {
                   :checked="allSelected"
                   :indeterminate="someSelected"
                   @change="toggleSelectAll"
-                  class="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                  class="rounded border-gray-300 dark:border-gray-600 text-blue-600 focus:ring-blue-500 dark:bg-gray-700"
                 />
               </th>
-              <th class="w-12 px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th class="w-12 px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
                 Order
               </th>
-              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
                 Group
               </th>
-              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
                 Discount
               </th>
-              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
                 Customers
               </th>
-              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
                 Auto-Assignment
               </th>
-              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
                 Status
               </th>
-              <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
                 Actions
               </th>
             </tr>
           </thead>
-          <tbody class="bg-white divide-y divide-gray-200">
+          <tbody class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
             <tr
               v-for="group in groups.data"
               :key="group.id"
@@ -470,7 +470,7 @@ function handleDragEnd() {
               @drop="handleDrop($event, group)"
               @dragend="handleDragEnd"
               :class="[
-                'hover:bg-gray-50 transition-colors cursor-move',
+                'hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors cursor-move',
                 draggedGroup?.id === group.id ? 'opacity-50' : ''
               ]"
             >
@@ -479,10 +479,10 @@ function handleDragEnd() {
                   type="checkbox"
                   :value="group.id"
                   v-model="selectedGroups"
-                  class="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                  class="rounded border-gray-300 dark:border-gray-600 text-blue-600 focus:ring-blue-500 dark:bg-gray-700"
                 />
               </td>
-              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
                 <div class="flex items-center space-x-2">
                   <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
@@ -500,59 +500,59 @@ function handleDragEnd() {
                   </div>
                   <div>
                     <div class="flex items-center space-x-2">
-                      <span class="text-sm font-medium text-gray-900">{{ group.name }}</span>
+                      <span class="text-sm font-medium text-gray-900 dark:text-white">{{ group.name }}</span>
                       <span
                         v-if="group.is_default"
-                        class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-purple-100 text-purple-800"
+                        class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-purple-100 dark:bg-purple-900/30 text-purple-800 dark:text-purple-300"
                       >
                         Default
                       </span>
                     </div>
-                    <p class="text-sm text-gray-500">{{ group.code }}</p>
-                    <p v-if="group.description" class="text-xs text-gray-400 mt-1 max-w-md truncate">
+                    <p class="text-sm text-gray-500 dark:text-gray-400">{{ group.code }}</p>
+                    <p v-if="group.description" class="text-xs text-gray-400 dark:text-gray-500 mt-1 max-w-md truncate">
                       {{ group.description }}
                     </p>
                   </div>
                 </div>
               </td>
               <td class="px-6 py-4 whitespace-nowrap">
-                <span class="text-sm font-medium text-gray-900">{{ group.discount_percentage }}%</span>
+                <span class="text-sm font-medium text-gray-900 dark:text-white">{{ group.discount_percentage }}%</span>
               </td>
               <td class="px-6 py-4 whitespace-nowrap">
-                <div class="text-sm text-gray-900">
+                <div class="text-sm text-gray-900 dark:text-white">
                   {{ group.customers_count }} total
                 </div>
-                <div class="text-xs text-gray-500">
+                <div class="text-xs text-gray-500 dark:text-gray-400">
                   {{ group.active_customers_count }} active
                 </div>
               </td>
               <td class="px-6 py-4 whitespace-nowrap">
                 <div v-if="group.auto_assignment_rules && Object.keys(group.auto_assignment_rules).length > 0" class="text-xs">
-                  <div v-if="group.auto_assignment_rules.min_orders" class="text-gray-600">
+                  <div v-if="group.auto_assignment_rules.min_orders" class="text-gray-600 dark:text-gray-400">
                     Min Orders: {{ group.auto_assignment_rules.min_orders }}
                   </div>
-                  <div v-if="group.auto_assignment_rules.min_spent" class="text-gray-600">
+                  <div v-if="group.auto_assignment_rules.min_spent" class="text-gray-600 dark:text-gray-400">
                     Min Spent: ${{ group.auto_assignment_rules.min_spent }}
                   </div>
-                  <div v-if="group.auto_assignment_rules.min_aov" class="text-gray-600">
+                  <div v-if="group.auto_assignment_rules.min_aov" class="text-gray-600 dark:text-gray-400">
                     Min AOV: ${{ group.auto_assignment_rules.min_aov }}
                   </div>
                   <button
                     @click="applyAutoAssignment(group.id)"
-                    class="mt-1 text-blue-600 hover:text-blue-700 font-medium"
+                    class="mt-1 text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300 font-medium"
                   >
                     Apply Now
                   </button>
                 </div>
-                <span v-else class="text-xs text-gray-400">Not configured</span>
+                <span v-else class="text-xs text-gray-400 dark:text-gray-500">Not configured</span>
               </td>
               <td class="px-6 py-4 whitespace-nowrap">
                 <span
                   :class="[
                     'inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium',
                     group.status
-                      ? 'bg-green-100 text-green-800'
-                      : 'bg-red-100 text-red-800'
+                      ? 'bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-300'
+                      : 'bg-red-100 dark:bg-red-900/30 text-red-800 dark:text-red-300'
                   ]"
                 >
                   {{ group.status ? 'Active' : 'Inactive' }}
@@ -562,7 +562,7 @@ function handleDragEnd() {
                 <div class="flex items-center justify-end gap-2">
                   <Link
                     :href="`/admin/customers/groups/${group.id}/edit`"
-                    class="text-blue-600 hover:text-blue-900"
+                    class="text-blue-600 hover:text-blue-900 dark:text-blue-400 dark:hover:text-blue-300"
                     title="Edit"
                   >
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -571,7 +571,7 @@ function handleDragEnd() {
                   </Link>
                   <button
                     @click="confirmDelete(group.id)"
-                    class="text-red-600 hover:text-red-900"
+                    class="text-red-600 hover:text-red-900 dark:text-red-400 dark:hover:text-red-300"
                     :disabled="group.is_default"
                     :class="{ 'opacity-50 cursor-not-allowed': group.is_default }"
                     title="Delete"
@@ -589,11 +589,11 @@ function handleDragEnd() {
 
       <!-- Empty State -->
       <div v-if="groups.data.length === 0" class="text-center py-12">
-        <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <svg class="mx-auto h-12 w-12 text-gray-400 dark:text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"/>
         </svg>
-        <h3 class="mt-2 text-sm font-medium text-gray-900">No customer groups</h3>
-        <p class="mt-1 text-sm text-gray-500">Get started by creating a new customer group.</p>
+        <h3 class="mt-2 text-sm font-medium text-gray-900 dark:text-white">No customer groups</h3>
+        <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">Get started by creating a new customer group.</p>
         <div class="mt-6">
           <Link
             :href="'/admin/customers/groups/create'"
@@ -608,7 +608,7 @@ function handleDragEnd() {
       </div>
 
       <!-- Pagination -->
-      <div v-if="groups.data.length > 0" class="px-6 py-4 border-t border-gray-200">
+      <div v-if="groups.data.length > 0" class="px-6 py-4 border-t border-gray-200 dark:border-gray-700">
         <Pagination :data="groups" resource-name="groups" />
       </div>
     </div>
