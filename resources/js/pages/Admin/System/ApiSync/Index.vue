@@ -75,8 +75,8 @@ onUnmounted(() => {
     <div class="p-6 space-y-6">
       <div class="flex items-center justify-between">
         <div>
-          <h1 class="text-2xl font-bold text-gray-900">API Sync</h1>
-          <p class="text-sm text-gray-600">Monitor mobile app API connectivity and sync status.</p>
+          <h1 class="text-2xl font-bold text-gray-900 dark:text-gray-100">API Sync</h1>
+          <p class="text-sm text-gray-600 dark:text-gray-300">Monitor mobile app API connectivity and sync status.</p>
         </div>
         <Button @click="refreshSync" class="gap-2">
           <RefreshCw class="h-4 w-4" />
@@ -85,7 +85,7 @@ onUnmounted(() => {
       </div>
 
       <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <Card>
+        <Card class="bg-white dark:bg-gray-900/70 border-gray-200 dark:border-gray-800">
           <CardHeader>
             <CardTitle class="flex items-center gap-2">
               <Link2 class="h-4 w-4" />
@@ -99,7 +99,7 @@ onUnmounted(() => {
                 <Badge :variant="liveStatus.connected ? 'success' : 'destructive'">
                   {{ liveStatus.connected ? 'Connected' : 'Disconnected' }}
                 </Badge>
-                <span class="text-sm text-gray-500">
+                <span class="text-sm text-gray-500 dark:text-gray-300">
                   Last checked: {{ liveStatus.last_checked_at || 'Never' }}
                 </span>
               </div>
@@ -107,7 +107,7 @@ onUnmounted(() => {
           </CardContent>
         </Card>
 
-        <Card>
+        <Card class="bg-white dark:bg-gray-900/70 border-gray-200 dark:border-gray-800">
           <CardHeader>
             <CardTitle class="flex items-center gap-2">
               <Wifi class="h-4 w-4" />
@@ -121,7 +121,7 @@ onUnmounted(() => {
                 <Badge :variant="liveStatus.sync_enabled ? 'success' : 'secondary'">
                   {{ liveStatus.sync_enabled ? 'Enabled' : 'Disabled' }}
                 </Badge>
-                <span class="text-sm text-gray-500">
+                <span class="text-sm text-gray-500 dark:text-gray-300">
                   Last sync: {{ liveStatus.last_sync_at || 'Never' }}
                 </span>
               </div>
@@ -130,7 +130,7 @@ onUnmounted(() => {
         </Card>
       </div>
 
-      <Card>
+      <Card class="bg-white dark:bg-gray-900/70 border-gray-200 dark:border-gray-800">
         <CardHeader>
           <CardTitle class="flex items-center gap-2">
             <WifiOff class="h-4 w-4" />
@@ -140,10 +140,10 @@ onUnmounted(() => {
         </CardHeader>
         <CardContent class="space-y-3">
           <div class="flex items-center gap-2">
-            <span class="text-sm text-gray-500">Status:</span>
+            <span class="text-sm text-gray-500 dark:text-gray-300">Status:</span>
             <Badge :variant="statusBadge">{{ liveStatus.last_status }}</Badge>
           </div>
-          <div class="text-sm text-gray-700">
+          <div class="text-sm text-gray-700 dark:text-gray-200">
             {{ liveStatus.last_message || 'No sync message available.' }}
           </div>
         </CardContent>

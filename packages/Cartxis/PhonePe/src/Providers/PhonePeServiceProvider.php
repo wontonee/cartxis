@@ -62,6 +62,22 @@ class PhonePeServiceProvider extends ServiceProvider
     }
 
     /**
+     * Extension install hook.
+     */
+    public function install(): void
+    {
+        $this->seedPaymentMethod();
+    }
+
+    /**
+     * Extension activate hook.
+     */
+    public function activate(): void
+    {
+        $this->seedPaymentMethod();
+    }
+
+    /**
      * Determines whether this extension should boot.
      *
      * Backwards-compatible behavior:
@@ -127,37 +143,32 @@ class PhonePeServiceProvider extends ServiceProvider
                 return;
             }
 
-            // Check if PhonePe payment method already exists
-            $exists = PaymentMethod::where('code', 'phonepe')->exists();
-
-            if ($exists) {
-                return;
-            }
-
-            // Create PhonePe payment method
-            PaymentMethod::create([
-                'code' => 'phonepe',
-                'name' => 'PhonePe',
-                'type' => 'phonepe',
-                'description' => 'Pay securely using PhonePe with UPI, credit/debit cards, net banking, and wallets',
-                'instructions' => 'You will be redirected to PhonePe to complete your payment securely.',
-                'is_active' => false,
-                'is_default' => false,
-                'sort_order' => 5,
-                'configuration' => [
-                    'client_id' => config('phonepe.phonepe.client_id', ''),
-                    'client_secret' => '',
-                    'client_version' => config('phonepe.phonepe.client_version', 1),
-                    'callback_username' => config('phonepe.phonepe.callback_username', ''),
-                    'callback_password' => '',
-                    'payment_methods' => [
-                        'upi' => true,
-                        'card' => true,
-                        'netbanking' => true,
-                        'wallet' => true,
+            // Create or update PhonePe payment method
+            PaymentMethod::updateOrCreate(
+                ['code' => 'phonepe'],
+                [
+                    'name' => 'PhonePe',
+                    'type' => 'other',
+                    'description' => 'Pay securely using PhonePe with UPI, credit/debit cards, net banking, and wallets',
+                    'instructions' => 'You will be redirected to PhonePe to complete your payment securely.',
+                    'is_active' => false,
+                    'is_default' => false,
+                    'sort_order' => 5,
+                    'configuration' => [
+                        'client_id' => config('phonepe.phonepe.client_id', ''),
+                        'client_secret' => '',
+                        'client_version' => config('phonepe.phonepe.client_version', 1),
+                        'callback_username' => config('phonepe.phonepe.callback_username', ''),
+                        'callback_password' => '',
+                        'payment_methods' => [
+                            'upi' => true,
+                            'card' => true,
+                            'netbanking' => true,
+                            'wallet' => true,
+                        ],
                     ],
-                ],
-            ]);
+                ]
+            );
         } catch (\Exception $e) {
             // Silently fail during migration when table doesn't exist yet
             // The payment method will be seeded after migrations are complete

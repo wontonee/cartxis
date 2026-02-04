@@ -177,8 +177,8 @@ const formatDateTime = (datetime: string | undefined) => {
             <div class="mb-8">
                 <div class="flex items-center justify-between">
                     <div>
-                        <h1 class="text-2xl md:text-3xl text-gray-800 font-bold">Maintenance Mode</h1>
-                        <p class="text-sm text-gray-600 mt-1">
+                        <h1 class="text-2xl md:text-3xl text-gray-800 dark:text-gray-100 font-bold">Maintenance Mode</h1>
+                        <p class="text-sm text-gray-600 dark:text-gray-300 mt-1">
                             Manage site maintenance and scheduled downtime
                         </p>
                     </div>
@@ -214,7 +214,7 @@ const formatDateTime = (datetime: string | undefined) => {
             </Alert>
 
             <!-- Bypass URL (when enabled) -->
-            <Card v-if="settings.enabled && settings.secret">
+            <Card v-if="settings.enabled && settings.secret" class="bg-white dark:bg-gray-900/70 border-gray-200 dark:border-gray-800">
                 <CardHeader>
                     <CardTitle class="flex items-center">
                         <Shield class="mr-2 h-5 w-5" />
@@ -245,7 +245,7 @@ const formatDateTime = (datetime: string | undefined) => {
 
             <div class="grid gap-6 lg:grid-cols-2">
                 <!-- Maintenance Settings -->
-                <Card>
+                <Card class="bg-white dark:bg-gray-900/70 border-gray-200 dark:border-gray-800">
                     <CardHeader>
                         <CardTitle>Maintenance Settings</CardTitle>
                         <CardDescription>
@@ -315,7 +315,7 @@ const formatDateTime = (datetime: string | undefined) => {
 
                 <!-- Schedule Maintenance -->
                 <div class="space-y-6">
-                    <Card>
+                    <Card class="bg-white dark:bg-gray-900/70 border-gray-200 dark:border-gray-800">
                         <CardHeader>
                             <CardTitle class="flex items-center">
                                 <Clock class="mr-2 h-5 w-5" />
@@ -366,7 +366,7 @@ const formatDateTime = (datetime: string | undefined) => {
                     </Card>
 
                     <!-- Quick Stats -->
-                    <Card>
+                    <Card class="bg-white dark:bg-gray-900/70 border-gray-200 dark:border-gray-800">
                         <CardHeader>
                             <CardTitle>Statistics</CardTitle>
                         </CardHeader>
@@ -379,11 +379,11 @@ const formatDateTime = (datetime: string | undefined) => {
                             </div>
                             <div class="flex justify-between items-center">
                                 <span class="text-sm text-muted-foreground">Total Logs</span>
-                                <span class="font-semibold">{{ logs.length }}</span>
+                                <span class="font-semibold text-gray-900 dark:text-gray-100">{{ logs.length }}</span>
                             </div>
                             <div class="flex justify-between items-center">
                                 <span class="text-sm text-muted-foreground">Allowed IPs</span>
-                                <span class="font-semibold">{{ settings.allowed_ips.length }}</span>
+                                <span class="font-semibold text-gray-900 dark:text-gray-100">{{ settings.allowed_ips.length }}</span>
                             </div>
                         </CardContent>
                     </Card>
@@ -391,7 +391,7 @@ const formatDateTime = (datetime: string | undefined) => {
             </div>
 
             <!-- Maintenance History -->
-            <Card>
+            <Card class="bg-white dark:bg-gray-900/70 border-gray-200 dark:border-gray-800">
                 <CardHeader>
                     <CardTitle>Maintenance History</CardTitle>
                     <CardDescription>
@@ -403,13 +403,13 @@ const formatDateTime = (datetime: string | undefined) => {
                         <div 
                             v-for="log in logs" 
                             :key="log.id"
-                            class="flex items-start gap-4 border-b pb-4 last:border-0"
+                            class="flex items-start gap-4 border-b border-gray-200 dark:border-gray-800 pb-4 last:border-0"
                         >
                             <Badge :variant="getActionBadge(log.action)">
                                 {{ log.action }}
                             </Badge>
                             <div class="flex-1 space-y-1">
-                                <p class="text-sm font-medium">{{ log.reason }}</p>
+                                <p class="text-sm font-medium text-gray-900 dark:text-gray-100">{{ log.reason }}</p>
                                 <div class="flex gap-4 text-xs text-muted-foreground">
                                     <span>By: {{ log.admin_name }}</span>
                                     <span v-if="log.actual_start">

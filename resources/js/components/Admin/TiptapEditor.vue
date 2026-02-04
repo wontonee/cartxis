@@ -240,6 +240,8 @@ watch(() => props.modelValue, (value) => {
 </template>
 
 <style>
+@reference "tailwindcss";
+
 /* TipTap Editor Styles */
 .ProseMirror {
   outline: none;
