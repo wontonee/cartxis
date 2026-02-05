@@ -38,10 +38,11 @@
         "laravel/wayfinder": "^0.1.9",
         "mews/purifier": "^3.4",
         "mpdf/mpdf": "^8.2",
-        "razorpay/razorpay": "^2.9",
-        "stripe/stripe-php": "^18.0",
+        "netresearch/jsonmapper": "^4.4",
         "phonepe/pg-php-sdk-v2": "^2.0",
-        "netresearch/jsonmapper": "^4.4"
+        "razorpay/razorpay": "^2.9",
+        "spatie/laravel-backup": "^9.4",
+        "stripe/stripe-php": "^18.0"
     },
     "require-dev": {
         "fakerphp/faker": "^1.23",

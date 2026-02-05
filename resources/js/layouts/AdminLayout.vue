@@ -4,6 +4,7 @@ import { Link, usePage, router } from '@inertiajs/vue3'
 import admin from '@/routes/admin'
 import Toast from '@/components/Toast.vue'
 import { useMenuIcons } from '@/composables/useMenuIcons'
+import { useAppearance } from '@/composables/useAppearance'
 import {
   Menu,
   ChevronDown,
@@ -14,7 +15,9 @@ import {
   ChevronRight,
   User,
   UserCircle,
-  Settings
+  Settings,
+  Sun,
+  Moon
 } from 'lucide-vue-next'
 
 defineProps<{
@@ -82,6 +85,12 @@ const menuItems = computed(() => {
 // Search
 const searchOpen = ref(false)
 const searchQuery = ref('')
+const prefersDark = ref(false)
+let mediaQueryList: MediaQueryList | null = null
+const handleSystemThemeChange = (event: MediaQueryListEvent) => {
+  prefersDark.value = event.matches
+}
+const { appearance, updateAppearance } = useAppearance()
 const searchResults = computed(() => {
   const query = searchQuery.value.trim().toLowerCase()
   if (!query) return []
@@ -218,11 +227,32 @@ onMounted(() => {
   })
 
   window.addEventListener('keydown', handleSearchKeydown)
+
+  mediaQueryList = window.matchMedia('(prefers-color-scheme: dark)')
+  prefersDark.value = mediaQueryList.matches
+  mediaQueryList.addEventListener('change', handleSystemThemeChange)
 })
 
 onUnmounted(() => {
   window.removeEventListener('keydown', handleSearchKeydown)
+  if (mediaQueryList) {
+    mediaQueryList.removeEventListener('change', handleSystemThemeChange)
+  }
 })
+
+const isDarkMode = computed(() => {
+  if (appearance.value === 'dark') return true
+  if (appearance.value === 'light') return false
+  return prefersDark.value
+})
+
+const toggleAppearance = () => {
+  if (isDarkMode.value) {
+    updateAppearance('light')
+  } else {
+    updateAppearance('dark')
+  }
+}
 
 // Also watch URL changes as backup
 watch(() => page.url, () => {
@@ -439,6 +469,17 @@ const toggleSidebar = () => {
 
             <!-- Right side -->
             <div class="flex items-center space-x-4">
+              <!-- Theme Toggle -->
+              <button
+                @click="toggleAppearance"
+                class="text-gray-500 hover:text-gray-600 dark:text-gray-400 dark:hover:text-gray-300"
+                :aria-label="isDarkMode ? 'Switch to light mode' : 'Switch to dark mode'"
+                :title="isDarkMode ? 'Switch to light mode' : 'Switch to dark mode'"
+              >
+                <Sun v-if="isDarkMode" class="w-5 h-5" />
+                <Moon v-else class="w-5 h-5" />
+              </button>
+
               <!-- Search -->
               <button
                 @click="openSearch"
