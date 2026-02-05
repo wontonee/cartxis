@@ -1,9 +1,24 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue';
-import { router } from '@inertiajs/vue3';
+import { router, Head } from '@inertiajs/vue3';
 import AdminLayout from '@/layouts/AdminLayout.vue';
 import { useCurrency } from '@/composables/useCurrency';
 import { Line, Bar, Doughnut } from 'vue-chartjs';
+import {
+    Users,
+    UserPlus,
+    CreditCard,
+    RefreshCcw,
+    Map,
+    PieChart,
+    TrendingUp,
+    Filter,
+    Download,
+    Search,
+    Calendar,
+    ArrowUpRight,
+    ArrowDownRight
+} from 'lucide-vue-next';
 import {
     Chart as ChartJS,
     CategoryScale,
@@ -211,249 +226,328 @@ const getSegmentColor = (segment: string) => {
 </script>
 
 <template>
-    <AdminLayout>
-        <!-- Header -->
-        <div class="mb-6">
-            <h1 class="text-3xl font-bold text-gray-900 dark:text-white">Customer Reports</h1>
-            <p class="mt-2 text-sm text-gray-600 dark:text-gray-400">
-                Analyze customer behavior, segments, and lifetime value
-            </p>
-        </div>
-
-        <!-- Filters -->
-        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-4 mb-6">
-            <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+    <Head title="Customer Reports" />
+    <AdminLayout title="Customer Reports">
+        <div class="space-y-6">
+            <!-- Page Header -->
+            <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                        Start Date
-                    </label>
-                    <input
-                        type="date"
-                        v-model="startDate"
-                        class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:text-white"
-                    />
+                    <h1 class="text-2xl font-bold text-gray-900">Customer Reports</h1>
+                    <p class="mt-1 text-sm text-gray-500">
+                        Analyze customer behavior, segments, and lifetime value
+                    </p>
                 </div>
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                        End Date
-                    </label>
-                    <input
-                        type="date"
-                        v-model="endDate"
-                        class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:text-white"
-                    />
-                </div>
-                <div class="flex items-end">
+                <div class="flex items-center gap-3">
+                    <button class="inline-flex items-center gap-2 px-4 py-2 bg-white border border-gray-200 rounded-xl text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 shadow-sm transition-all duration-200">
+                        <Download class="w-4 h-4" />
+                        Export Report
+                    </button>
                     <button
                         @click="applyFilters"
-                        class="w-full px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 dark:focus:ring-offset-gray-800"
+                        class="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 border border-transparent rounded-xl text-sm font-medium text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 shadow-sm transition-all duration-200"
                     >
+                        <Filter class="w-4 h-4" />
                         Apply Filters
                     </button>
                 </div>
             </div>
-            <div v-if="hasFilters" class="mt-3 flex justify-end">
-                <button
-                    @click="clearFilters"
-                    class="text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200"
-                >
-                    Clear Filters
-                </button>
-            </div>
-        </div>
 
-        <!-- Statistics Cards -->
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
-            <!-- Total Customers -->
-            <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-6">
-                <div class="flex items-center">
-                    <div class="flex-shrink-0 p-3 bg-blue-100 dark:bg-blue-900 rounded-lg">
-                        <svg class="w-6 h-6 text-blue-600 dark:text-blue-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
-                        </svg>
-                    </div>
-                    <div class="ml-4">
-                        <p class="text-sm font-medium text-gray-600 dark:text-gray-400">Total Customers</p>
-                        <p class="text-2xl font-bold text-gray-900 dark:text-white">{{ formatNumber(statistics.total_customers) }}</p>
-                    </div>
-                </div>
-            </div>
-
-            <!-- New Customers -->
-            <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-6">
-                <div class="flex items-center">
-                    <div class="flex-shrink-0 p-3 bg-green-100 dark:bg-green-900 rounded-lg">
-                        <svg class="w-6 h-6 text-green-600 dark:text-green-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" />
-                        </svg>
-                    </div>
-                    <div class="ml-4">
-                        <p class="text-sm font-medium text-gray-600 dark:text-gray-400">New Customers</p>
-                        <p class="text-2xl font-bold text-gray-900 dark:text-white">{{ formatNumber(statistics.new_customers) }}</p>
+            <!-- Filters Bar -->
+            <div class="bg-white rounded-xl border border-gray-100 shadow-sm p-5">
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
+                    <!-- Date Range -->
+                    <div class="col-span-2 grid grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">
+                                Start Date
+                            </label>
+                            <div class="relative">
+                                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                    <Calendar class="h-5 w-5 text-gray-400" />
+                                </div>
+                                <input
+                                    type="date"
+                                    v-model="startDate"
+                                    class="block w-full pl-10 pr-3 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-sm text-gray-900 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors duration-200"
+                                />
+                            </div>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">
+                                End Date
+                            </label>
+                            <div class="relative">
+                                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                    <Calendar class="h-5 w-5 text-gray-400" />
+                                </div>
+                                <input
+                                    type="date"
+                                    v-model="endDate"
+                                    class="block w-full pl-10 pr-3 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-sm text-gray-900 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors duration-200"
+                                />
+                            </div>
+                        </div>
                     </div>
                 </div>
+                
+                <!-- Active Filters & Clear -->
+                <div v-if="hasFilters" class="mt-4 pt-4 border-t border-gray-100 flex justify-end">
+                    <button
+                        @click="clearFilters"
+                        class="text-sm text-red-600 hover:text-red-700 font-medium flex items-center gap-2"
+                    >
+                        <RefreshCcw class="w-4 h-4" />
+                        Reset Filters
+                    </button>
+                </div>
             </div>
 
-            <!-- Avg Lifetime Value -->
-            <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-6">
-                <div class="flex items-center">
-                    <div class="flex-shrink-0 p-3 bg-purple-100 dark:bg-purple-900 rounded-lg">
-                        <svg class="w-6 h-6 text-purple-600 dark:text-purple-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                        </svg>
+            <!-- Statistics Grid -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                <!-- Total Customers -->
+                <div class="bg-white rounded-xl border border-gray-100 shadow-sm p-6 transition-all duration-200 hover:shadow-md">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-xs font-semibold text-gray-500 uppercase tracking-wider">Total Customers</p>
+                            <p class="mt-2 text-2xl font-bold text-gray-900">{{ formatNumber(statistics.total_customers) }}</p>
+                            <div class="mt-2 flex items-center text-xs text-green-600 bg-green-50 w-fit px-2 py-1 rounded-full">
+                                <ArrowUpRight class="w-3 h-3 mr-1" />
+                                <span class="font-medium">Active Base</span>
+                            </div>
+                        </div>
+                        <div class="p-3 bg-blue-50 rounded-xl border border-blue-100">
+                            <Users class="w-6 h-6 text-blue-600" />
+                        </div>
                     </div>
-                    <div class="ml-4">
-                        <p class="text-sm font-medium text-gray-600 dark:text-gray-400">Avg Lifetime Value</p>
-                        <p class="text-2xl font-bold text-gray-900 dark:text-white">{{ formatCurrency(statistics.avg_lifetime_value) }}</p>
+                </div>
+
+                <!-- New Customers -->
+                <div class="bg-white rounded-xl border border-gray-100 shadow-sm p-6 transition-all duration-200 hover:shadow-md">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-xs font-semibold text-gray-500 uppercase tracking-wider">New Customers</p>
+                            <p class="mt-2 text-2xl font-bold text-gray-900">{{ formatNumber(statistics.new_customers) }}</p>
+                            <div class="mt-2 flex items-center text-xs text-blue-600 bg-blue-50 w-fit px-2 py-1 rounded-full">
+                                <UserPlus class="w-3 h-3 mr-1" />
+                                <span class="font-medium">Recently Joined</span>
+                            </div>
+                        </div>
+                        <div class="p-3 bg-green-50 rounded-xl border border-green-100">
+                            <UserPlus class="w-6 h-6 text-green-600" />
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Avg Lifetime Value -->
+                <div class="bg-white rounded-xl border border-gray-100 shadow-sm p-6 transition-all duration-200 hover:shadow-md">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-xs font-semibold text-gray-500 uppercase tracking-wider">Avg LTV</p>
+                            <p class="mt-2 text-2xl font-bold text-gray-900">{{ formatCurrency(statistics.avg_lifetime_value) }}</p>
+                            <div class="mt-2 flex items-center text-xs text-purple-600 bg-purple-50 w-fit px-2 py-1 rounded-full">
+                                <TrendingUp class="w-3 h-3 mr-1" />
+                                <span class="font-medium">Per Customer</span>
+                            </div>
+                        </div>
+                        <div class="p-3 bg-purple-50 rounded-xl border border-purple-100">
+                            <CreditCard class="w-6 h-6 text-purple-600" />
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Repeat Rate -->
+                <div class="bg-white rounded-xl border border-gray-100 shadow-sm p-6 transition-all duration-200 hover:shadow-md">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-xs font-semibold text-gray-500 uppercase tracking-wider">Repeat Rate</p>
+                            <p class="mt-2 text-2xl font-bold text-gray-900">{{ formatPercentage(statistics.repeat_rate) }}</p>
+                            <div class="mt-2 flex items-center text-xs text-orange-600 bg-orange-50 w-fit px-2 py-1 rounded-full">
+                                <RefreshCcw class="w-3 h-3 mr-1" />
+                                <span class="font-medium">Retention</span>
+                            </div>
+                        </div>
+                        <div class="p-3 bg-orange-50 rounded-xl border border-orange-100">
+                            <RefreshCcw class="w-6 h-6 text-orange-600" />
+                        </div>
                     </div>
                 </div>
             </div>
 
-            <!-- Repeat Rate -->
-            <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-6">
-                <div class="flex items-center">
-                    <div class="flex-shrink-0 p-3 bg-orange-100 dark:bg-orange-900 rounded-lg">
-                        <svg class="w-6 h-6 text-orange-600 dark:text-orange-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-                        </svg>
+            <!-- Charts Grid -->
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <!-- Customer Acquisition Trend -->
+                <div class="bg-white rounded-xl border border-gray-100 shadow-sm p-6">
+                    <div class="flex items-center justify-between mb-6">
+                        <div class="flex items-center gap-3">
+                            <div class="p-2 bg-blue-50 rounded-lg">
+                                <UserPlus class="w-5 h-5 text-blue-600" />
+                            </div>
+                            <div>
+                                <h2 class="text-lg font-bold text-gray-900">Customer Acquisition</h2>
+                                <p class="text-xs text-gray-500">New customer signups over time</p>
+                            </div>
+                        </div>
                     </div>
-                    <div class="ml-4">
-                        <p class="text-sm font-medium text-gray-600 dark:text-gray-400">Repeat Rate</p>
-                        <p class="text-2xl font-bold text-gray-900 dark:text-white">{{ formatPercentage(statistics.repeat_rate) }}</p>
+                    <div class="h-80">
+                        <Line :data="acquisitionChart" :options="lineChartOptions" />
+                    </div>
+                </div>
+
+                <!-- RFM Segmentation -->
+                <div class="bg-white rounded-xl border border-gray-100 shadow-sm p-6">
+                    <div class="flex items-center justify-between mb-6">
+                        <div class="flex items-center gap-3">
+                            <div class="p-2 bg-purple-50 rounded-lg">
+                                <PieChart class="w-5 h-5 text-purple-600" />
+                            </div>
+                            <div>
+                                <h2 class="text-lg font-bold text-gray-900">Customer Segments</h2>
+                                <p class="text-xs text-gray-500">Distribution by customer type</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="h-80">
+                        <Doughnut :data="rfmChart" :options="doughnutChartOptions" />
+                    </div>
+                </div>
+
+                <!-- Geographic Distribution -->
+                <div class="bg-white rounded-xl border border-gray-100 shadow-sm p-6">
+                    <div class="flex items-center justify-between mb-6">
+                        <div class="flex items-center gap-3">
+                            <div class="p-2 bg-green-50 rounded-lg">
+                                <Map class="w-5 h-5 text-green-600" />
+                            </div>
+                            <div>
+                                <h2 class="text-lg font-bold text-gray-900">Revenue by Country</h2>
+                                <p class="text-xs text-gray-500">Sales performance by location</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="h-80">
+                        <Bar :data="geographicChart" :options="barChartOptions" />
+                    </div>
+                </div>
+
+                <!-- Lifetime Value Distribution -->
+                <div class="bg-white rounded-xl border border-gray-100 shadow-sm p-6">
+                    <div class="flex items-center justify-between mb-6">
+                        <div class="flex items-center gap-3">
+                            <div class="p-2 bg-orange-50 rounded-lg">
+                                <CreditCard class="w-5 h-5 text-orange-600" />
+                            </div>
+                            <div>
+                                <h2 class="text-lg font-bold text-gray-900">LTV Distribution</h2>
+                                <p class="text-xs text-gray-500">Customer value analysis</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="h-80">
+                        <Bar :data="ltvChart" :options="barChartOptions" />
                     </div>
                 </div>
             </div>
-        </div>
 
-        <!-- Charts Row 1 -->
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
-            <!-- Customer Acquisition Trend -->
-            <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-6">
-                <h2 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Customer Acquisition Trend</h2>
-                <div class="h-80">
-                    <Line :data="acquisitionChart" :options="lineChartOptions" />
+            <!-- Tables Grid -->
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <!-- Top Customers -->
+                <div class="bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden flex flex-col h-full">
+                    <div class="px-6 py-4 border-b border-gray-100 flex items-center justify-between">
+                        <div class="flex items-center gap-3">
+                            <div class="p-2 bg-yellow-50 rounded-lg">
+                                <TrendingUp class="w-5 h-5 text-yellow-600" />
+                            </div>
+                            <div>
+                                <h2 class="text-lg font-bold text-gray-900">Top Customers</h2>
+                                <p class="text-xs text-gray-500">Highest spending customers by value</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left border-collapse">
+                            <thead>
+                                <tr class="bg-gray-50 border-b border-gray-100">
+                                    <th class="px-6 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Customer</th>
+                                    <th class="px-6 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider text-center">Orders</th>
+                                    <th class="px-6 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider text-right">Total Spent</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-gray-100">
+                                <tr v-for="customer in topCustomers" :key="customer.customer_id" class="hover:bg-gray-50 transition-colors duration-150">
+                                    <td class="px-6 py-4">
+                                        <div class="flex flex-col">
+                                            <span class="text-sm font-medium text-gray-900">{{ customer.customer_name }}</span>
+                                            <span class="text-xs text-gray-500">{{ customer.customer_email }}</span>
+                                        </div>
+                                    </td>
+                                    <td class="px-6 py-4 text-center">
+                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-50 text-blue-700">
+                                            {{ customer.order_count }} orders
+                                        </span>
+                                    </td>
+                                    <td class="px-6 py-4 text-right">
+                                        <span class="font-bold text-gray-900">{{ formatCurrency(customer.total_spent) }}</span>
+                                    </td>
+                                </tr>
+                                <tr v-if="topCustomers.length === 0">
+                                    <td colspan="3" class="px-6 py-8 text-center text-sm text-gray-500">
+                                        No customer data available
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
-            </div>
 
-            <!-- RFM Segmentation -->
-            <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-6">
-                <h2 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Customer Segmentation</h2>
-                <div class="h-80">
-                    <Doughnut :data="rfmChart" :options="doughnutChartOptions" />
-                </div>
-            </div>
-        </div>
-
-        <!-- Charts Row 2 -->
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
-            <!-- Geographic Distribution -->
-            <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-6">
-                <h2 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Revenue by Country</h2>
-                <div class="h-80">
-                    <Bar :data="geographicChart" :options="barChartOptions" />
-                </div>
-            </div>
-
-            <!-- Lifetime Value Distribution -->
-            <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-6">
-                <h2 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Lifetime Value Distribution</h2>
-                <div class="h-80">
-                    <Bar :data="ltvChart" :options="barChartOptions" />
-                </div>
-            </div>
-        </div>
-
-        <!-- Tables Row -->
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <!-- Top Customers -->
-            <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-6">
-                <h2 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Top Customers</h2>
-                <div class="overflow-x-auto">
-                    <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
-                        <thead class="bg-gray-50 dark:bg-gray-900">
-                            <tr>
-                                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                                    Customer
-                                </th>
-                                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                                    Orders
-                                </th>
-                                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                                    Total Spent
-                                </th>
-                            </tr>
-                        </thead>
-                        <tbody class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
-                            <tr v-for="customer in topCustomers" :key="customer.customer_id">
-                                <td class="px-4 py-3 whitespace-nowrap">
-                                    <div class="text-sm font-medium text-gray-900 dark:text-white">
-                                        {{ customer.customer_name }}
-                                    </div>
-                                    <div class="text-sm text-gray-500 dark:text-gray-400">
-                                        {{ customer.customer_email }}
-                                    </div>
-                                </td>
-                                <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-900 dark:text-white">
-                                    {{ customer.order_count }}
-                                </td>
-                                <td class="px-4 py-3 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-white">
-                                    {{ formatCurrency(customer.total_spent) }}
-                                </td>
-                            </tr>
-                            <tr v-if="topCustomers.length === 0">
-                                <td colspan="3" class="px-4 py-8 text-center text-sm text-gray-500 dark:text-gray-400">
-                                    No customer data available
-                                </td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-
-            <!-- Customer Segments -->
-            <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-6">
-                <h2 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Customer Segments (Top 10)</h2>
-                <div class="overflow-x-auto">
-                    <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
-                        <thead class="bg-gray-50 dark:bg-gray-900">
-                            <tr>
-                                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                                    Customer
-                                </th>
-                                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                                    RFM Score
-                                </th>
-                                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                                    Segment
-                                </th>
-                            </tr>
-                        </thead>
-                        <tbody class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
-                            <tr v-for="customer in rfmSegmentation.slice(0, 10)" :key="customer.id">
-                                <td class="px-4 py-3 whitespace-nowrap">
-                                    <div class="text-sm font-medium text-gray-900 dark:text-white">
-                                        {{ customer.name }}
-                                    </div>
-                                    <div class="text-sm text-gray-500 dark:text-gray-400">
-                                        {{ customer.email }}
-                                    </div>
-                                </td>
-                                <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-900 dark:text-white">
-                                    {{ customer.rfm_score }}
-                                </td>
-                                <td class="px-4 py-3 whitespace-nowrap">
-                                    <span :class="getSegmentColor(customer.segment)" class="px-2 py-1 text-xs font-semibold rounded-full">
-                                        {{ customer.segment }}
-                                    </span>
-                                </td>
-                            </tr>
-                            <tr v-if="rfmSegmentation.length === 0">
-                                <td colspan="3" class="px-4 py-8 text-center text-sm text-gray-500 dark:text-gray-400">
-                                    No segmentation data available
-                                </td>
-                            </tr>
-                        </tbody>
-                    </table>
+                <!-- Customer Segments List -->
+                <div class="bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden flex flex-col h-full">
+                    <div class="px-6 py-4 border-b border-gray-100 flex items-center justify-between">
+                        <div class="flex items-center gap-3">
+                            <div class="p-2 bg-indigo-50 rounded-lg">
+                                <Users class="w-5 h-5 text-indigo-600" />
+                            </div>
+                            <div>
+                                <h2 class="text-lg font-bold text-gray-900">Segment Analysis</h2>
+                                <p class="text-xs text-gray-500">Top 10 customers by RFM score</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left border-collapse">
+                            <thead>
+                                <tr class="bg-gray-50 border-b border-gray-100">
+                                    <th class="px-6 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Customer</th>
+                                    <th class="px-6 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider text-center">RFM Score</th>
+                                    <th class="px-6 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider text-right">Segment</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-gray-100">
+                                <tr v-for="customer in rfmSegmentation.slice(0, 10)" :key="customer.id" class="hover:bg-gray-50 transition-colors duration-150">
+                                    <td class="px-6 py-4">
+                                        <div class="flex flex-col">
+                                            <span class="text-sm font-medium text-gray-900">{{ customer.name }}</span>
+                                            <span class="text-xs text-gray-500">{{ customer.email }}</span>
+                                        </div>
+                                    </td>
+                                    <td class="px-6 py-4 text-center">
+                                        <span class="font-mono text-xs">{{ customer.rfm_score }}</span>
+                                    </td>
+                                    <td class="px-6 py-4 text-right">
+                                        <span :class="getSegmentColor(customer.segment)" class="px-2 py-1 text-xs font-semibold rounded-full border border-opacity-20 border-gray-300">
+                                            {{ customer.segment }}
+                                        </span>
+                                    </td>
+                                </tr>
+                                <tr v-if="rfmSegmentation.length === 0">
+                                    <td colspan="3" class="px-6 py-8 text-center text-sm text-gray-500">
+                                        No segmentation data available
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
             </div>
         </div>

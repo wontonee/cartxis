@@ -59,7 +59,7 @@ const handleConfigure = (method: PaymentMethod) => {
   <AdminLayout title="Payment Methods">
     <Head title="Payment Methods" />
 
-    <div class="p-6 max-w-7xl mx-auto">
+    <div class="p-6">
       <!-- Page Header -->
       <div class="mb-8 flex items-start justify-between">
         <div>
@@ -76,7 +76,7 @@ const handleConfigure = (method: PaymentMethod) => {
       </div>
 
       <!-- Payment Methods Grid -->
-      <div v-if="props.paymentMethods.length > 0" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+      <div v-if="props.paymentMethods.length > 0" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 mb-8">
         <PaymentMethodCard
           v-for="method in props.paymentMethods"
           :key="method.id"

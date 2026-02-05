@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref, computed, watch } from 'vue';
-import { Head, router, usePage } from '@inertiajs/vue3';
+import { Head, Link, router, usePage } from '@inertiajs/vue3';
 import AdminLayout from '@/layouts/AdminLayout.vue';
 import ConfirmDeleteModal from '@/components/Admin/ConfirmDeleteModal.vue';
 import FolderTreeItem from '@/components/Admin/Media/FolderTreeItem.vue';
@@ -41,6 +41,8 @@ import {
     ExternalLink,
     Eye,
     Info,
+    Trash2,
+    ArrowUpDown,
 } from 'lucide-vue-next';
 
 interface Props {
@@ -335,14 +337,64 @@ const copyUrlToClipboard = async (url: string) => {
 <template>
     <Head title="Media Library" />
 
-    <AdminLayout title="Media Library">
-        <div class="flex gap-6">
-            <!-- Sidebar - Folder Tree -->
-            <div class="w-64 flex-shrink-0 space-y-4">
-                <!-- All Files -->
-                <div class="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 overflow-hidden">
+    <AdminLayout>
+        <div class="p-6 space-y-6">
+            <!-- Header -->
+            <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                <div>
+                    <h1 class="text-2xl font-bold text-gray-900 dark:text-white tracking-tight">Media Library</h1>
+                    <div class="flex items-center gap-2 mt-1 text-sm text-gray-500">
+                        <Link href="/admin/dashboard" class="hover:text-blue-600 transition-colors">Dashboard</Link>
+                        <ChevronRight :size="14" />
+                        <span class="text-gray-900 dark:text-gray-300 font-medium">Media</span>
+                    </div>
+                </div>
+                <div class="flex items-center gap-3">
+                    <div class="flex items-center gap-1 bg-white dark:bg-gray-800 rounded-lg border border-gray-100 dark:border-gray-700 p-1 shadow-sm">
+                        <button
+                            @click="viewMode = 'grid'"
+                            :class="[
+                                'p-2 rounded-md transition-all',
+                                viewMode === 'grid'
+                                    ? 'bg-blue-50 text-blue-600 dark:bg-blue-900/20 dark:text-blue-400 shadow-sm'
+                                    : 'text-gray-400 hover:text-gray-600 dark:hover:text-gray-300'
+                            ]"
+                            title="Grid view"
+                        >
+                            <Grid3x3 :size="18" />
+                        </button>
+                        <button
+                            @click="viewMode = 'list'"
+                            :class="[
+                                'p-2 rounded-md transition-all',
+                                viewMode === 'list'
+                                    ? 'bg-blue-50 text-blue-600 dark:bg-blue-900/20 dark:text-blue-400 shadow-sm'
+                                    : 'text-gray-400 hover:text-gray-600 dark:hover:text-gray-300'
+                            ]"
+                            title="List view"
+                        >
+                            <List :size="18" />
+                        </button>
+                    </div>
+
                     <button
-                        @click="navigateToFolder(null)"
+                        @click="showUploadModal"
+                        class="flex items-center px-4 py-2.5 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 focus:ring-4 focus:ring-blue-100 transition-all shadow-sm"
+                    >
+                        <Upload :size="16" class="mr-2" />
+                        Upload Files
+                    </button>
+                </div>
+            </div>
+
+            <!-- Main Layout -->
+            <div class="flex flex-col lg:flex-row gap-6">
+                <!-- Sidebar -->
+                <div class="w-full lg:w-64 flex-shrink-0 space-y-6">
+                    <!-- All Files -->
+                    <div class="bg-white dark:bg-gray-800 rounded-xl border border-gray-100 dark:border-gray-700 shadow-sm overflow-hidden">
+                        <button
+                            @click="navigateToFolder(null)"
                         :class="[
                             'w-full flex items-center gap-3 px-4 py-3 text-left transition-colors',
                             form.folder_id === null
@@ -355,18 +407,18 @@ const copyUrlToClipboard = async (url: string) => {
                     </button>
                 </div>
 
-                <!-- Folders -->
-                <div class="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 overflow-hidden">
-                    <div class="flex items-center justify-between px-4 py-3 border-b border-gray-200 dark:border-gray-700">
-                        <h3 class="font-medium text-gray-900 dark:text-white">Folders</h3>
-                        <button
-                            @click="showNewFolderModal = true"
-                            class="p-1 hover:bg-gray-100 dark:hover:bg-gray-700 rounded transition-colors"
-                            title="Create folder"
-                        >
-                            <FolderPlus :size="18" class="text-gray-600 dark:text-gray-400" />
-                        </button>
-                    </div>
+                    <!-- Folders -->
+                    <div class="bg-white dark:bg-gray-800 rounded-xl border border-gray-100 dark:border-gray-700 shadow-sm overflow-hidden">
+                        <div class="flex items-center justify-between px-4 py-3 border-b border-gray-100 dark:border-gray-700 bg-gray-50/50 dark:bg-gray-700/20">
+                            <h3 class="font-medium text-gray-900 dark:text-white">Folders</h3>
+                            <button
+                                @click="showNewFolderModal = true"
+                                class="p-1.5 hover:bg-white dark:hover:bg-gray-600 rounded-lg transition-colors border border-transparent hover:border-gray-200 shadow-sm"
+                                title="Create folder"
+                            >
+                                <FolderPlus :size="16" class="text-gray-600 dark:text-gray-400" />
+                            </button>
+                        </div>
 
                     <div class="p-2">
                         <!-- Folder tree component -->
@@ -391,184 +443,136 @@ const copyUrlToClipboard = async (url: string) => {
 
             <!-- Main Content -->
             <div class="flex-1 space-y-6">
-            <!-- Header -->
-            <div class="flex items-center justify-between">
-                <div>
-                    <h1 class="text-2xl font-semibold text-gray-900 dark:text-white">
-                        Media Library
-                    </h1>
-                    <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
-                        Manage your images, videos, and documents
-                    </p>
-                </div>
-
-                <div class="flex items-center gap-3">
-                    <!-- View mode toggle -->
-                    <div class="flex items-center gap-1 rounded-lg border border-gray-200 dark:border-gray-700 p-1">
-                        <button
-                            @click="viewMode = 'grid'"
-                            :class="[
-                                'p-2 rounded transition-colors',
-                                viewMode === 'grid'
-                                    ? 'bg-blue-50 text-blue-600 dark:bg-blue-900/20 dark:text-blue-400'
-                                    : 'text-gray-400 hover:text-gray-600 dark:hover:text-gray-300'
-                            ]"
-                            title="Grid view"
-                        >
-                            <Grid3x3 :size="18" />
-                        </button>
-                        <button
-                            @click="viewMode = 'list'"
-                            :class="[
-                                'p-2 rounded transition-colors',
-                                viewMode === 'list'
-                                    ? 'bg-blue-50 text-blue-600 dark:bg-blue-900/20 dark:text-blue-400'
-                                    : 'text-gray-400 hover:text-gray-600 dark:hover:text-gray-300'
-                            ]"
-                            title="List view"
-                        >
-                            <List :size="18" />
-                        </button>
-                    </div>
-
-                    <!-- Upload button -->
-                    <button
-                        @click="showUploadModal = true"
-                        type="button"
-                        class="inline-flex items-center px-4 py-2 bg-blue-600 border border-transparent rounded-lg font-semibold text-xs text-white uppercase tracking-widest hover:bg-blue-700 focus:bg-blue-700 active:bg-blue-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 dark:focus:ring-offset-gray-800 transition ease-in-out duration-150"
-                    >
-                        <Upload :size="16" class="mr-2" />
-                        Upload Files
-                    </button>
-                </div>
-            </div>
-
-            <!-- Statistics Cards -->
-            <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
-                <div class="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-5">
-                    <div class="flex items-center justify-between">
-                        <div>
-                            <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Total Files</p>
-                            <p class="mt-1 text-2xl font-semibold text-gray-900 dark:text-white">
-                                {{ statistics.total_files }}
-                            </p>
-                        </div>
-                        <div class="p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
-                            <File :size="24" class="text-blue-600 dark:text-blue-400" />
-                        </div>
-                    </div>
-                </div>
-
-                <div class="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-5">
-                    <div class="flex items-center justify-between">
-                        <div>
-                            <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Images</p>
-                            <p class="mt-1 text-2xl font-semibold text-gray-900 dark:text-white">
-                                {{ statistics.total_images }}
-                            </p>
-                        </div>
-                        <div class="p-3 bg-green-50 dark:bg-green-900/20 rounded-lg">
-                            <FileImage :size="24" class="text-green-600 dark:text-green-400" />
-                        </div>
-                    </div>
-                </div>
-
-                <div class="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-5">
-                    <div class="flex items-center justify-between">
-                        <div>
-                            <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Videos</p>
-                            <p class="mt-1 text-2xl font-semibold text-gray-900 dark:text-white">
-                                {{ statistics.total_videos }}
-                            </p>
-                        </div>
-                        <div class="p-3 bg-purple-50 dark:bg-purple-900/20 rounded-lg">
-                            <FileVideo :size="24" class="text-purple-600 dark:text-purple-400" />
-                        </div>
-                    </div>
-                </div>
-
-                <div class="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-5">
-                    <div class="flex items-center justify-between">
-                        <div>
-                            <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Storage Used</p>
-                            <p class="mt-1 text-2xl font-semibold text-gray-900 dark:text-white">
-                                {{ formatSize(statistics.total_size) }}
-                            </p>
-                        </div>
-                        <div class="p-3 bg-orange-50 dark:bg-orange-900/20 rounded-lg">
-                            <Image :size="24" class="text-orange-600 dark:text-orange-400" />
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Filters and Search -->
-            <div class="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-4">
-                <div class="flex flex-col md:flex-row gap-4">
-                    <!-- Search -->
-                    <div class="flex-1">
-                        <div class="relative">
-                            <Search :size="18" class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
-                            <input
-                                v-model="form.search"
-                                type="text"
-                                placeholder="Search files..."
-                                class="w-full pl-10 pr-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white"
-                            />
+                <!-- Stats Grid -->
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                    <div class="bg-white dark:bg-gray-800 rounded-xl border border-gray-100 dark:border-gray-700 shadow-sm p-5">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Total Files</p>
+                                <p class="mt-2 text-2xl font-bold text-gray-900 dark:text-white">{{ statistics.total_files }}</p>
+                            </div>
+                            <div class="p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-100 dark:border-blue-800">
+                                <File :size="24" class="text-blue-600 dark:text-blue-400" />
+                            </div>
                         </div>
                     </div>
 
-                    <!-- Type filter -->
-                    <div>
-                        <select
-                            v-model="form.type"
-                            class="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white"
-                        >
-                            <option value="all">All Files</option>
-                            <option value="images">Images</option>
-                            <option value="videos">Videos</option>
-                            <option value="documents">Documents</option>
-                        </select>
+                    <div class="bg-white dark:bg-gray-800 rounded-xl border border-gray-100 dark:border-gray-700 shadow-sm p-5">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Images</p>
+                                <p class="mt-2 text-2xl font-bold text-gray-900 dark:text-white">{{ statistics.total_images }}</p>
+                            </div>
+                            <div class="p-3 bg-green-50 dark:bg-green-900/20 rounded-lg border border-green-100 dark:border-green-800">
+                                <FileImage :size="24" class="text-green-600 dark:text-green-400" />
+                            </div>
+                        </div>
                     </div>
 
-                    <!-- Sort -->
-                    <div>
-                        <select
-                            v-model="form.sort_by"
-                            @change="applyFilters"
-                            class="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white"
-                        >
-                            <option value="created_at">Date Added</option>
-                            <option value="original_filename">Name</option>
-                            <option value="size">Size</option>
-                        </select>
-                    </div>
-                </div>
+                    <div class="bg-white dark:bg-gray-800 rounded-xl border border-gray-100 dark:border-gray-700 shadow-sm p-5">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Videos</p>
+                                <p class="mt-2 text-2xl font-bold text-gray-900 dark:text-white">{{ statistics.total_videos }}</p>
+                                </div>
+                                <div class="p-3 bg-purple-50 dark:bg-purple-900/20 rounded-lg border border-purple-100 dark:border-purple-800">
+                                    <FileVideo :size="24" class="text-purple-600 dark:text-purple-400" />
+                                </div>
+                            </div>
+                        </div>
 
-                <!-- Selection toolbar -->
-                <div v-if="selectedFiles.length > 0" class="mt-4 flex items-center justify-between p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-800">
-                    <span class="text-sm font-medium text-blue-900 dark:text-blue-100">
-                        {{ selectedFiles.length }} file(s) selected
-                    </span>
-                    <div class="flex items-center gap-2">
-                        <button
-                            @click="bulkDelete"
-                            class="px-3 py-1.5 text-sm font-medium text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors"
-                        >
-                            Delete Selected
-                        </button>
-                        <button
-                            @click="clearSelection"
-                            class="px-3 py-1.5 text-sm font-medium text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
-                        >
-                            <X :size="16" />
-                        </button>
+                        <div class="bg-white dark:bg-gray-800 rounded-xl border border-gray-100 dark:border-gray-700 shadow-sm p-5">
+                            <div class="flex items-center justify-between">
+                                <div>
+                                    <p class="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Storage</p>
+                                    <p class="mt-2 text-2xl font-bold text-gray-900 dark:text-white">{{ formatSize(statistics.total_size) }}</p>
+                                </div>
+                                <div class="p-3 bg-orange-50 dark:bg-orange-900/20 rounded-lg border border-orange-100 dark:border-orange-800">
+                                    <Image :size="24" class="text-orange-600 dark:text-orange-400" />
+                                </div>
+                            </div>
+                        </div>
                     </div>
-                </div>
-            </div>
 
-            <!-- Media Grid -->
-            <div class="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-6">
+                    <!-- Filter Bar -->
+                    <div class="bg-white dark:bg-gray-800 rounded-xl border border-gray-100 dark:border-gray-700 shadow-sm p-5">
+                        <div class="grid grid-cols-1 md:grid-cols-12 gap-4">
+                            <!-- Search -->
+                            <div class="md:col-span-6">
+                                <label class="block text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-1.5">Search</label>
+                                <div class="relative">
+                                    <Search :size="18" class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+                                    <input
+                                        v-model="form.search"
+                                        type="text"
+                                        placeholder="Search files..."
+                                        class="w-full pl-10 pr-4 py-2.5 bg-gray-50 dark:bg-gray-700/50 border border-gray-200 dark:border-gray-600 rounded-lg text-sm focus:ring-2 focus:ring-blue-100 focus:border-blue-500 transition-colors"
+                                    />
+                                </div>
+                            </div>
+
+                            <!-- Type filter -->
+                            <div class="md:col-span-3">
+                                <label class="block text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-1.5">File Type</label>
+                                <div class="relative">
+                                    <Filter :size="18" class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+                                    <select
+                                        v-model="form.type"
+                                        class="w-full pl-10 pr-4 py-2.5 bg-gray-50 dark:bg-gray-700/50 border border-gray-200 dark:border-gray-600 rounded-lg text-sm focus:ring-2 focus:ring-blue-100 focus:border-blue-500 transition-colors appearance-none"
+                                    >
+                                        <option value="all">All Files</option>
+                                        <option value="images">Images</option>
+                                        <option value="videos">Videos</option>
+                                        <option value="documents">Documents</option>
+                                    </select>
+                                    <ChevronDown :size="16" class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
+                                </div>
+                            </div>
+
+                            <!-- Sort -->
+                            <div class="md:col-span-3">
+                                <label class="block text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-1.5">Sort By</label>
+                                <div class="relative">
+                                    <ArrowUpDown :size="18" class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+                                    <select
+                                        v-model="form.sort_by"
+                                        @change="applyFilters"
+                                        class="w-full pl-10 pr-4 py-2.5 bg-gray-50 dark:bg-gray-700/50 border border-gray-200 dark:border-gray-600 rounded-lg text-sm focus:ring-2 focus:ring-blue-100 focus:border-blue-500 transition-colors appearance-none"
+                                    >
+                                        <option value="created_at">Date Added</option>
+                                        <option value="original_filename">Name</option>
+                                        <option value="size">Size</option>
+                                    </select>
+                                    <ChevronDown :size="16" class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Selection toolbar -->
+                        <div v-if="selectedFiles.length > 0" class="mt-4 flex items-center justify-between p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-100 dark:border-blue-800">
+                            <span class="text-sm font-medium text-blue-900 dark:text-blue-100 flex items-center gap-2">
+                                <div class="w-1.5 h-1.5 rounded-full bg-blue-500"></div>
+                                {{ selectedFiles.length }} file(s) selected
+                            </span>
+                            <div class="flex items-center gap-2">
+                                <button
+                                    @click="bulkDelete"
+                                    class="px-3 py-1.5 text-sm font-medium text-red-600 hover:text-red-700 hover:bg-red-50 rounded-md transition-colors"
+                                >
+                                    Delete Selected
+                                </button>
+                                <button
+                                    @click="clearSelection"
+                                    class="px-3 py-1.5 text-sm font-medium text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-md transition-colors"
+                                >
+                                    Clear
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Content Grid -->
+                    <div class="bg-white dark:bg-gray-800 rounded-xl border border-gray-100 dark:border-gray-700 shadow-sm p-6 min-h-[400px]">
                 <!-- Empty state -->
                 <div v-if="media.data.length === 0" class="text-center py-12">
                     <Image :size="48" class="mx-auto text-gray-300 dark:text-gray-600 mb-4" />
@@ -763,9 +767,9 @@ const copyUrlToClipboard = async (url: string) => {
                     </div>
                 </div>
             </div>
-            </div>
-            <!-- End of Main Content -->
         </div>
+    </div>
+</div>
         <!-- End of flex container -->
         
         <!-- Upload Modal -->

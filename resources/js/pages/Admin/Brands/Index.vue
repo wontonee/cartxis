@@ -6,6 +6,24 @@ import { debounce } from 'lodash';
 import Pagination from '@/components/Admin/Pagination.vue';
 import ConfirmDeleteModal from '@/components/Admin/ConfirmDeleteModal.vue';
 import * as brandRoutes from '@/routes/admin/catalog/brands';
+import { 
+  Plus, 
+  Search, 
+  Filter, 
+  X, 
+  Trash2, 
+  CheckCircle, 
+  XCircle, 
+  Edit, 
+  ArrowUp, 
+  ArrowDown, 
+  AlertCircle,
+  PlusCircle,
+  MinusCircle,
+  ImageIcon,
+  ArrowUpDown,
+  Tag
+} from 'lucide-vue-next';
 
 interface Brand {
   id: number;
@@ -48,9 +66,10 @@ const showDeleteModal = ref(false);
 const deleteBrandId = ref<number | null>(null);
 const deletingBrand = ref<{ id: number; name: string } | null>(null);
 const showBulkDeleteModal = ref(false);
+const expandedRows = ref<number[]>([]);
 
 // Local filter state
-const searchQuery = ref(props.filters.search || '');
+const search = ref(props.filters.search || '');
 const statusFilter = ref(props.filters.status || '');
 const featuredFilter = ref(props.filters.is_featured || '');
 const sortBy = ref(props.filters.sort_by || 'name');
@@ -72,6 +91,15 @@ const performSearch = debounce(() => {
   applyFilters();
 }, 300);
 
+const toggleRow = (id: number) => {
+  const index = expandedRows.value.indexOf(id);
+  if (index === -1) {
+    expandedRows.value.push(id);
+  } else {
+    expandedRows.value.splice(index, 1);
+  }
+};
+
 // Methods
 function toggleSelectAll() {
   if (allSelected.value) {
@@ -83,7 +111,7 @@ function toggleSelectAll() {
 
 function applyFilters() {
   router.get(brandRoutes.index().url, {
-    search: searchQuery.value || undefined,
+    search: search.value || undefined,
     status: statusFilter.value || undefined,
     is_featured: featuredFilter.value || undefined,
     sort_by: sortBy.value,
@@ -196,54 +224,70 @@ function changePage(page: number) {
       </div>
 
       <!-- Filters Card -->
-      <div class="bg-white rounded-lg shadow-sm p-4">
+      <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 p-5">
         <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
           <!-- Search -->
-          <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">Search</label>
-            <input
-              v-model="search"
-              @input="performSearch"
-              type="text"
-              placeholder="Search brands..."
-              class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-            />
+          <div class="relative">
+            <label class="block text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-1.5">Search</label>
+            <div class="relative">
+              <Search class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+              <input
+                v-model="search"
+                @input="performSearch"
+                type="text"
+                placeholder="Search brands..."
+                class="w-full pl-10 pr-4 py-2.5 bg-gray-50 dark:bg-gray-700/50 border border-gray-200 dark:border-gray-600 rounded-lg text-sm text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all placeholder:text-gray-400"
+              />
+            </div>
           </div>
 
           <!-- Status Filter -->
           <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">Status</label>
-            <select
-              v-model="statusFilter"
-              @change="applyFilters"
-              class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-            >
-              <option value="">All Status</option>
-              <option value="1">Active</option>
-              <option value="0">Inactive</option>
-            </select>
+            <label class="block text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-1.5">Status</label>
+            <div class="relative">
+              <Filter class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+              <select
+                v-model="statusFilter"
+                @change="applyFilters"
+                class="w-full pl-10 pr-10 py-2.5 bg-gray-50 dark:bg-gray-700/50 border border-gray-200 dark:border-gray-600 rounded-lg text-sm text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all appearance-none cursor-pointer"
+              >
+                <option value="">All Status</option>
+                <option value="1">Active</option>
+                <option value="0">Inactive</option>
+              </select>
+               <div class="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none">
+                <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+              </div>
+            </div>
           </div>
 
           <!-- Featured Filter -->
           <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">Featured</label>
-            <select
-              v-model="featuredFilter"
-              @change="applyFilters"
-              class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-            >
-              <option value="">All Brands</option>
-              <option value="1">Featured</option>
-              <option value="0">Not Featured</option>
-            </select>
+            <label class="block text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-1.5">Featured</label>
+            <div class="relative">
+              <Filter class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+              <select
+                v-model="featuredFilter"
+                @change="applyFilters"
+                class="w-full pl-10 pr-10 py-2.5 bg-gray-50 dark:bg-gray-700/50 border border-gray-200 dark:border-gray-600 rounded-lg text-sm text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all appearance-none cursor-pointer"
+              >
+                <option value="">All Brands</option>
+                <option value="1">Featured</option>
+                <option value="0">Not Featured</option>
+              </select>
+               <div class="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none">
+                <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+              </div>
+            </div>
           </div>
 
           <!-- Clear Filters -->
-          <div class="flex items-end">
+           <div class="flex items-end">
             <button
               @click="clearFilters"
-              class="w-full px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50"
+              class="w-full py-2.5 text-sm text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-200 font-medium bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 rounded-lg transition-colors flex items-center justify-center gap-2"
             >
+              <X class="w-4 h-4" />
               Clear Filters
             </button>
           </div>
@@ -251,163 +295,214 @@ function changePage(page: number) {
       </div>
 
       <!-- Bulk Actions -->
-      <div v-if="selectedBrands.length > 0" class="bg-blue-50 border border-blue-200 rounded-lg p-4">
-        <div class="flex items-center justify-between">
-          <span class="text-sm font-medium text-blue-900">
-            {{ selectedBrands.length }} brand(s) selected
+      <transition enter-active-class="transition ease-out duration-200" enter-from-class="opacity-0 -translate-y-2" enter-to-class="opacity-100 translate-y-0" leave-active-class="transition ease-in duration-150" leave-from-class="opacity-100 translate-y-0" leave-to-class="opacity-0 -translate-y-2">
+        <div v-if="selectedBrands.length > 0" class="bg-blue-600 rounded-xl shadow-lg p-3 text-white flex items-center justify-between sticky top-4 z-10 px-6">
+          <span class="text-sm font-semibold flex items-center">
+            <CheckCircle class="w-4 h-4 mr-2" />
+            {{ selectedBrands.length }} {{ selectedBrands.length === 1 ? 'brand' : 'brands' }} selected
           </span>
           <div class="flex gap-2">
             <button
               @click="bulkUpdateStatus(true)"
-              class="px-3 py-1.5 text-sm font-medium text-white bg-green-600 rounded hover:bg-green-700"
+              class="px-3 py-1.5 text-xs font-bold text-blue-600 bg-white rounded-lg hover:bg-blue-50 transition-colors uppercase tracking-wide"
             >
               Activate
             </button>
             <button
               @click="bulkUpdateStatus(false)"
-              class="px-3 py-1.5 text-sm font-medium text-white bg-gray-600 rounded hover:bg-gray-700"
+              class="px-3 py-1.5 text-xs font-bold text-blue-600 bg-white rounded-lg hover:bg-blue-50 transition-colors uppercase tracking-wide"
             >
               Deactivate
             </button>
+             <div class="w-px h-6 bg-blue-400 mx-1"></div>
             <button
               @click="confirmBulkDelete"
-              class="px-3 py-1.5 text-sm font-medium text-white bg-red-600 rounded hover:bg-red-700"
+               class="px-3 py-1.5 text-xs font-bold text-white bg-red-500 rounded-lg hover:bg-red-600 transition-colors flex items-center uppercase tracking-wide"
             >
+              <Trash2 class="w-3 h-3 mr-1.5" />
               Delete
             </button>
           </div>
         </div>
-      </div>
+      </transition>
 
       <!-- Table -->
-      <div class="bg-white rounded-lg shadow-sm overflow-hidden">
+      <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 overflow-hidden">
         <div class="overflow-x-auto">
-          <table class="min-w-full divide-y divide-gray-200">
-            <thead class="bg-gray-50">
+          <table class="min-w-full divide-y divide-gray-100 dark:divide-gray-700">
+            <thead class="bg-gray-50/80 dark:bg-gray-700/50">
               <tr>
-                <th scope="col" class="w-12 px-6 py-3">
+                <th scope="col" class="w-12 px-6 py-4">
                   <input
                     type="checkbox"
                     :checked="allSelected"
-                    :indeterminate="someSelected"
+                    :indeterminate.prop="someSelected"
                     @change="toggleSelectAll"
-                    class="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-600"
+                    class="rounded border-gray-300 dark:border-gray-600 text-blue-600 focus:ring-blue-500 bg-white dark:bg-gray-700 w-4 h-4 transition-all"
                   />
                 </th>
-                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer" @click="sortTable('name')">
+                <th
+                  scope="col"
+                  class="px-6 py-4 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider cursor-pointer group hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
+                  @click="sortTable('name')"
+                >
                   <div class="flex items-center gap-1">
                     Name
-                    <svg v-if="sortBy === 'name'" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path v-if="sortOrder === 'asc'" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7" />
-                      <path v-else stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
-                    </svg>
+                    <span v-if="sortBy === 'name'" class="text-blue-600 dark:text-blue-400">
+                       <ArrowUp v-if="sortOrder === 'asc'" class="w-3 h-3" />
+                       <ArrowDown v-else class="w-3 h-3" />
+                    </span>
+                    <ArrowUpDown v-else class="w-3 h-3 opacity-0 group-hover:opacity-50" />
                   </div>
                 </th>
-                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th scope="col" class="hidden md:table-cell px-6 py-4 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">
                   Website
                 </th>
-                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer" @click="sortTable('status')">
-                  <div class="flex items-center gap-1">
+                <th
+                  scope="col"
+                  class="px-6 py-4 text-center text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider cursor-pointer group hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
+                  @click="sortTable('status')"
+                >
+                  <div class="flex items-center justify-center gap-1">
                     Status
-                    <svg v-if="sortBy === 'status'" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path v-if="sortOrder === 'asc'" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7" />
-                      <path v-else stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
-                    </svg>
+                    <span v-if="sortBy === 'status'" class="text-blue-600 dark:text-blue-400">
+                       <ArrowUp v-if="sortOrder === 'asc'" class="w-3 h-3" />
+                       <ArrowDown v-else class="w-3 h-3" />
+                    </span>
+                    <ArrowUpDown v-else class="w-3 h-3 opacity-0 group-hover:opacity-50" />
                   </div>
                 </th>
-                <th scope="col" class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th scope="col" class="hidden sm:table-cell px-6 py-4 text-center text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">
                   Featured
                 </th>
-                <th scope="col" class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+                 <th scope="col" class="hidden lg:table-cell px-6 py-4 text-center text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">
                   Products
                 </th>
-                <th scope="col" class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th scope="col" class="px-6 py-4 text-right text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">
                   Actions
                 </th>
               </tr>
             </thead>
-            <tbody class="bg-white divide-y divide-gray-200">
-              <tr v-for="brand in brands.data" :key="brand.id" class="hover:bg-gray-50">
-                <td class="px-6 py-4 whitespace-nowrap">
-                  <input
-                    type="checkbox"
-                    :value="brand.id"
-                    v-model="selectedBrands"
-                    class="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-600"
-                  />
-                </td>
-                <td class="px-6 py-4 whitespace-nowrap">
+            <tbody class="bg-white dark:bg-gray-800 divide-y divide-gray-100 dark:divide-gray-700">
+              <template v-for="brand in brands.data" :key="brand.id">
+              <tr class="group hover:bg-blue-50/50 dark:hover:bg-blue-900/10 transition-colors">
+                <td class="px-6 py-4 relative">
                   <div class="flex items-center">
-                    <div v-if="brand.logo" class="h-10 w-10 flex-shrink-0">
-                      <img class="h-10 w-10 rounded object-cover" :src="`/storage/${brand.logo}`" :alt="brand.name" />
-                    </div>
-                    <div :class="brand.logo ? 'ml-4' : ''">
-                      <div class="text-sm font-medium text-gray-900">{{ brand.name }}</div>
-                      <div class="text-sm text-gray-500">{{ brand.slug }}</div>
-                    </div>
+                    <button 
+                      @click="toggleRow(brand.id)" 
+                      class="lg:hidden absolute left-2 p-1 text-blue-600 hover:text-blue-800 focus:outline-none"
+                    >
+                      <MinusCircle v-if="expandedRows.includes(brand.id)" class="w-5 h-5 fill-blue-100 dark:fill-blue-900/30" />
+                      <PlusCircle v-else class="w-5 h-5 fill-blue-50 dark:fill-blue-900/20" />
+                    </button>
+                    <input
+                      type="checkbox"
+                      :value="brand.id"
+                      v-model="selectedBrands"
+                      class="rounded border-gray-300 dark:border-gray-600 text-blue-600 focus:ring-blue-500 bg-white dark:bg-gray-700 w-4 h-4 cursor-pointer transition-all ml-4 lg:ml-0"
+                    />
                   </div>
                 </td>
                 <td class="px-6 py-4 whitespace-nowrap">
-                  <a v-if="brand.website" :href="brand.website" target="_blank" class="text-sm text-blue-600 hover:text-blue-800">
-                    <svg class="w-4 h-4 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
-                    </svg>
+                   <div class="flex items-center">
+                    <div class="h-10 w-10 flex-shrink-0">
+                      <img v-if="brand.logo" class="h-10 w-10 rounded-full object-cover border border-gray-100" :src="`/storage/${brand.logo}`" :alt="brand.name" />
+                      <div v-else class="h-10 w-10 rounded-full bg-gray-100 dark:bg-gray-700 flex items-center justify-center text-gray-400">
+                        <ImageIcon class="w-5 h-5" />
+                      </div>
+                    </div>
+                    <div class="ml-4">
+                      <div class="text-sm font-bold text-gray-900 dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">{{ brand.name }}</div>
+                      <div class="text-xs text-gray-500 dark:text-gray-400 font-mono">{{ brand.slug }}</div>
+                    </div>
+                  </div>
+                </td>
+                <td class="hidden md:table-cell px-6 py-4 whitespace-nowrap">
+                  <a v-if="brand.website" :href="brand.website" target="_blank" class="text-sm text-blue-600 hover:text-blue-800 hover:underline flex items-center gap-1">
+                    <ExternalLink class="w-3 h-3" />
                     Visit
                   </a>
-                  <span v-else class="text-sm text-gray-500">—</span>
+                  <span v-else class="text-sm text-gray-400 dark:text-gray-600">-</span>
                 </td>
-                <td class="px-6 py-4 whitespace-nowrap">
+                <td class="px-6 py-4 whitespace-nowrap text-center">
                   <span
                     :class="[
-                      'inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium',
-                      brand.status 
-                        ? 'bg-green-100 text-green-800' 
-                        : 'bg-gray-100 text-gray-800'
+                      'inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium border shadow-sm',
+                      brand.status ? 'bg-green-50 text-green-700 border-green-200 dark:bg-green-900/20 dark:text-green-300 dark:border-green-800' : 'bg-gray-100 text-gray-600 border-gray-200 dark:bg-gray-700 dark:text-gray-300 dark:border-gray-600'
                     ]"
                   >
+                    <CheckCircle v-if="brand.status" class="w-3 h-3 mr-1" />
+                    <XCircle v-else class="w-3 h-3 mr-1" />
                     {{ brand.status ? 'Active' : 'Inactive' }}
                   </span>
                 </td>
-                <td class="px-6 py-4 whitespace-nowrap text-center">
-                  <span v-if="brand.is_featured" class="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium bg-yellow-100 text-yellow-800">
-                    ⭐ Featured
+                <td class="hidden sm:table-cell px-6 py-4 whitespace-nowrap text-center">
+                   <span v-if="brand.is_featured" class="inline-flex items-center justify-center w-6 h-6 rounded-full bg-yellow-50 dark:bg-yellow-900/20 text-yellow-600 dark:text-yellow-400 ring-1 ring-inset ring-yellow-600/20">
+                    <svg class="w-4 h-4 fill-current" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path></svg>
                   </span>
-                  <span v-else class="text-gray-400 text-sm">—</span>
+                  <span v-else class="text-gray-300 dark:text-gray-600">
+                    -
+                  </span>
                 </td>
-                <td class="px-6 py-4 whitespace-nowrap text-center text-sm text-gray-500">
-                  {{ brand.products_count || 0 }}
+                <td class="hidden lg:table-cell px-6 py-4 whitespace-nowrap text-center text-sm text-gray-500 dark:text-gray-400">
+                  <div class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-50 text-blue-700 dark:bg-blue-900/20 dark:text-blue-300">
+                    {{ brand.products_count || 0 }} products
+                  </div>
                 </td>
                 <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                  <div class="flex items-center justify-end gap-2">
+                  <div class="flex items-center justify-end gap-2 opacity-60 group-hover:opacity-100 transition-opacity">
                     <Link
                       :href="brandRoutes.edit(brand.id).url"
-                      class="text-blue-600 hover:text-blue-900"
+                      class="p-2 text-gray-400 hover:text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-lg transition-colors"
                       title="Edit"
                     >
-                      <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                      </svg>
+                      <Edit class="w-4 h-4" />
                     </Link>
                     <button
                       @click="confirmDelete(brand.id)"
-                      class="text-red-600 hover:text-red-900"
+                      class="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors"
                       title="Delete"
                     >
-                      <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                      </svg>
+                      <Trash2 class="w-4 h-4" />
                     </button>
                   </div>
                 </td>
               </tr>
+              <!-- Expanded Mobile Row -->
+              <tr v-if="expandedRows.includes(brand.id)" class="bg-gray-50/50 dark:bg-gray-900/50 lg:hidden">
+                 <td colspan="7" class="px-6 py-4 border-t border-gray-100 dark:border-gray-700">
+                    <div class="grid grid-cols-2 gap-4 text-sm">
+                       <div class="flex flex-col gap-1 col-span-2 sm:col-span-1" v-if="brand.website">
+                          <span class="text-xs text-gray-500 font-medium uppercase tracking-wider">Website</span>
+                          <a :href="brand.website" target="_blank" class="text-blue-600 hover:underline flex items-center gap-1">
+                             <ExternalLink class="w-3 h-3" /> {{ brand.website }}
+                          </a>
+                       </div>
+                       <div class="flex flex-col gap-1 sm:hidden">
+                          <span class="text-xs text-gray-500 font-medium uppercase tracking-wider">Featured</span>
+                           <span v-if="brand.is_featured" class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-yellow-100 text-yellow-800 w-fit">Featured</span>
+                           <span v-else class="text-gray-500">No</span>
+                       </div>
+                        <div class="flex flex-col gap-1 lg:hidden">
+                          <span class="text-xs text-gray-500 font-medium uppercase tracking-wider">Products</span>
+                          <span class="text-gray-700 dark:text-gray-300">{{ brand.products_count || 0 }} products</span>
+                       </div>
+                        <div class="flex flex-col gap-1">
+                          <span class="text-xs text-gray-500 font-medium uppercase tracking-wider">Created</span>
+                          <span class="text-gray-700 dark:text-gray-300">{{ new Date(brand.created_at).toLocaleDateString() }}</span>
+                       </div>
+                    </div>
+                 </td>
+              </tr>
+              </template>
               <tr v-if="brands.data.length === 0">
-                <td colspan="7" class="px-6 py-12 text-center text-sm text-gray-500">
+                <td colspan="7" class="px-6 py-16 text-center text-gray-500 dark:text-gray-400">
                   <div class="flex flex-col items-center">
-                    <svg class="h-12 w-12 text-gray-400 mb-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
-                    </svg>
-                    <p class="font-medium">No brands found</p>
-                    <p class="text-gray-400 mt-1">Get started by creating a new brand.</p>
+                    <div class="w-16 h-16 bg-gray-50 dark:bg-gray-700 rounded-full flex items-center justify-center mb-4 text-gray-400">
+                      <Tag class="w-8 h-8" />
+                    </div>
+                    <p class="text-lg font-semibold text-gray-900 dark:text-white">No brands found</p>
+                    <p class="text-sm text-gray-500 dark:text-gray-400 mt-1 max-w-sm">Get started by creating a new brand.</p>
                   </div>
                 </td>
               </tr>

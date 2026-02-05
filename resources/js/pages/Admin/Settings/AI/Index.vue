@@ -2,6 +2,21 @@
 import { computed, ref } from 'vue'
 import { Head, useForm, usePage } from '@inertiajs/vue3'
 import AdminLayout from '@/layouts/AdminLayout.vue'
+import { 
+  Brain, 
+  Server, 
+  Cpu, 
+  Bot, 
+  Save, 
+  Plus, 
+  Trash2, 
+  Eye, 
+  EyeOff, 
+  Key,
+  Database,
+  Terminal,
+  Settings
+} from 'lucide-vue-next'
 
 interface ProviderConfig {
   name: string
@@ -37,6 +52,7 @@ interface Props {
     ai_enabled?: boolean
     default_provider?: string
     default_agent?: string
+    product_description_agent?: string
     providers?: ProviderConfig[]
     models?: ModelConfig[]
     agents?: AgentConfig[]
@@ -54,17 +70,28 @@ const form = useForm({
   ai_enabled: props.settings.ai_enabled ?? false,
   default_provider: props.settings.default_provider ?? '',
   default_agent: props.settings.default_agent ?? '',
-    product_description_agent: props.settings.product_description_agent ?? '',
+  product_description_agent: props.settings.product_description_agent ?? '',
   providers: (props.settings.providers ?? []) as ProviderConfig[],
   models: (props.settings.models ?? []) as ModelConfig[],
   agents: (props.settings.agents ?? []) as AgentConfig[],
 })
 
-const showApiKeys = ref(false)
+const showApiKeys = ref<Record<number, boolean>>({})
 const activeTab = ref<'access' | 'providers' | 'models' | 'agents'>('access')
 
 const providerOptions = computed(() => form.providers.map((p) => p.name).filter(Boolean))
 const agentOptions = computed(() => form.agents.map((a) => a.name).filter(Boolean))
+
+const tabs = [
+  { id: 'access', name: 'Access & Defaults', icon: Key },
+  { id: 'providers', name: 'Providers', icon: Server },
+  { id: 'models', name: 'Models', icon: Cpu },
+  { id: 'agents', name: 'AI Agents', icon: Bot },
+]
+
+const toggleApiKeyVisibility = (index: number) => {
+  showApiKeys.value[index] = !showApiKeys.value[index]
+}
 
 const getModelsForProvider = (provider: string) => {
   return form.models
@@ -128,272 +155,347 @@ const save = () => {
 </script>
 
 <template>
-  <AdminLayout title="AI Settings">
-    <Head title="AI Settings" />
+  <Head title="AI Settings" />
 
-    <div class="p-6">
-      <div class="mb-6">
-        <h1 class="text-2xl font-bold text-gray-900 dark:text-white">AI Settings</h1>
-        <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">Manage AI providers, models, and agents for the platform.</p>
+  <AdminLayout>
+    <div class="space-y-6">
+      <!-- Header -->
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div>
+          <h2 class="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-gray-900 to-gray-600 dark:from-white dark:to-gray-300">
+            AI Configuration
+          </h2>
+          <p class="mt-1 text-sm text-gray-500 dark:text-gray-400 flex items-center gap-2">
+            <Brain class="w-4 h-4" />
+            Manage AI providers, models, and agents
+          </p>
+        </div>
       </div>
 
-      <form @submit.prevent="save">
-        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
+      <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
+        <form @submit.prevent="save">
+          <!-- Tabs -->
           <div class="border-b border-gray-200 dark:border-gray-700">
-            <nav class="-mb-px flex space-x-8 px-6">
-              <button type="button" @click="activeTab = 'access'" :class="[activeTab === 'access' ? 'border-blue-500 text-blue-600 dark:text-blue-400' : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300 dark:hover:border-gray-600', 'whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm transition-colors']">
-                Access
-              </button>
-              <button type="button" @click="activeTab = 'providers'" :class="[activeTab === 'providers' ? 'border-blue-500 text-blue-600 dark:text-blue-400' : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300 dark:hover:border-gray-600', 'whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm transition-colors']">
-                Providers
-              </button>
-              <button type="button" @click="activeTab = 'models'" :class="[activeTab === 'models' ? 'border-blue-500 text-blue-600 dark:text-blue-400' : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300 dark:hover:border-gray-600', 'whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm transition-colors']">
-                Models
-              </button>
-              <button type="button" @click="activeTab = 'agents'" :class="[activeTab === 'agents' ? 'border-blue-500 text-blue-600 dark:text-blue-400' : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300 dark:hover:border-gray-600', 'whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm transition-colors']">
-                Agents
+            <nav class="flex overflow-x-auto" aria-label="Tabs">
+              <button
+                v-for="tab in tabs"
+                :key="tab.id"
+                type="button"
+                @click="activeTab = tab.id as any"
+                :class="[
+                  'flex items-center gap-2 whitespace-nowrap px-6 py-4 text-sm font-medium border-b-2 transition-colors',
+                  activeTab === tab.id
+                    ? 'border-blue-500 text-blue-600 dark:text-blue-400 bg-blue-50/50 dark:bg-blue-900/10'
+                    : 'border-transparent text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300 hover:border-gray-300 dark:hover:border-gray-600'
+                ]"
+              >
+                <component :is="tab.icon" class="w-4 h-4" />
+                {{ tab.name }}
               </button>
             </nav>
           </div>
 
-          <div class="space-y-8">
-            <div v-show="activeTab === 'access'" class="p-6 space-y-6">
-              <h3 class="text-lg font-semibold text-gray-900 dark:text-white">AI Access</h3>
-              <div class="flex items-center justify-between">
+          <!-- Content -->
+          <div class="p-6">
+            <!-- Access & Defaults Tab -->
+            <div v-show="activeTab === 'access'" class="space-y-8">
+              <div class="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700/30 rounded-xl border border-gray-100 dark:border-gray-700">
                 <div>
-                  <p class="text-sm text-gray-500 dark:text-gray-400">Enable or disable AI features globally.</p>
+                  <h3 class="text-base font-semibold text-gray-900 dark:text-white">AI Features</h3>
+                  <p class="text-sm text-gray-500 dark:text-gray-400">Enable or disable AI capabilities globally across the platform.</p>
                 </div>
-                <label class="inline-flex items-center gap-2 text-sm text-gray-700 dark:text-gray-300">
-                  <input v-model="form.ai_enabled" type="checkbox" class="rounded border-gray-300 dark:border-gray-600 text-blue-600 focus:ring-blue-500 dark:bg-gray-700" />
-                  Enable AI
-                </label>
+                <div class="flex items-center">
+                  <label class="relative inline-flex items-center cursor-pointer">
+                    <input type="checkbox" v-model="form.ai_enabled" class="sr-only peer">
+                    <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600"></div>
+                    <span class="ml-3 text-sm font-medium text-gray-900 dark:text-gray-300">{{ form.ai_enabled ? 'Enabled' : 'Disabled' }}</span>
+                  </label>
+                </div>
               </div>
 
               <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
                   <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Default Provider</label>
-                  <select v-model="form.default_provider" class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
-                    <option value="">Select provider</option>
-                    <option v-for="provider in providerOptions" :key="provider" :value="provider">
-                      {{ provider }}
-                    </option>
-                  </select>
+                  <div class="relative">
+                    <select v-model="form.default_provider" class="w-full pl-10 pr-4 py-2.5 bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-blue-500 dark:text-white appearance-none">
+                      <option value="">Select provider</option>
+                      <option v-for="provider in providerOptions" :key="provider" :value="provider">{{ provider }}</option>
+                    </select>
+                    <Server class="w-4 h-4 text-gray-400 absolute left-3 top-1/2 -translate-y-1/2" />
+                  </div>
                 </div>
 
                 <div>
-                  <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Default AI Agent</label>
-                  <select v-model="form.default_agent" class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
-                    <option value="">Select agent</option>
-                    <option v-for="agent in agentOptions" :key="agent" :value="agent">
-                      {{ agent }}
-                    </option>
-                  </select>
+                  <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Default Generic Agent</label>
+                  <div class="relative">
+                    <select v-model="form.default_agent" class="w-full pl-10 pr-4 py-2.5 bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-blue-500 dark:text-white appearance-none">
+                      <option value="">Select agent</option>
+                      <option v-for="agent in agentOptions" :key="agent" :value="agent">{{ agent }}</option>
+                    </select>
+                    <Bot class="w-4 h-4 text-gray-400 absolute left-3 top-1/2 -translate-y-1/2" />
+                  </div>
                 </div>
 
                 <div>
                   <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Product Description Agent</label>
-                  <select v-model="form.product_description_agent" class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
-                    <option value="">Select agent</option>
-                    <option v-for="agent in agentOptions" :key="agent" :value="agent">
-                      {{ agent }}
-                    </option>
-                  </select>
-                  <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">Used for product description generation.</p>
+                  <div class="relative">
+                    <select v-model="form.product_description_agent" class="w-full pl-10 pr-4 py-2.5 bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-blue-500 dark:text-white appearance-none">
+                      <option value="">Select agent</option>
+                      <option v-for="agent in agentOptions" :key="agent" :value="agent">{{ agent }}</option>
+                    </select>
+                    <Terminal class="w-4 h-4 text-gray-400 absolute left-3 top-1/2 -translate-y-1/2" />
+                  </div>
+                  <p class="mt-1.5 text-xs text-gray-500 dark:text-gray-400">Helper agent for generating product descriptions.</p>
                 </div>
               </div>
             </div>
 
-            <div v-show="activeTab === 'providers'" class="p-6 space-y-6">
-              <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Providers</h3>
+            <!-- Providers Tab -->
+            <div v-show="activeTab === 'providers'" class="space-y-6">
               <div class="flex items-center justify-between">
                 <div>
-                  <p class="text-sm text-gray-500 dark:text-gray-400">Configure Gemini, OpenAI, or custom providers.</p>
+                  <h3 class="text-lg font-semibold text-gray-900 dark:text-white">AI Providers</h3>
+                  <p class="text-sm text-gray-500 dark:text-gray-400">Configure connections to LLM services.</p>
                 </div>
-                <button type="button" class="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg" @click="addProvider">Add Provider</button>
+                <button type="button" @click="addProvider" class="inline-flex items-center px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-sm font-medium transition-colors shadow-sm">
+                  <Plus class="w-4 h-4 mr-2" />
+                  Add Provider
+                </button>
               </div>
 
-              <div v-if="form.providers.length === 0" class="text-sm text-gray-500 dark:text-gray-400">No providers configured.</div>
+              <div v-if="form.providers.length === 0" class="text-center py-12 bg-gray-50 dark:bg-gray-700/30 rounded-xl border border-dashed border-gray-300 dark:border-gray-600">
+                <Server class="w-8 h-8 text-gray-400 mx-auto mb-3" />
+                <h3 class="text-sm font-medium text-gray-900 dark:text-white">No providers configured</h3>
+                <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">Add a provider to get started with AI features.</p>
+              </div>
 
-              <div v-for="(provider, index) in form.providers" :key="index" class="border border-gray-200 dark:border-gray-700 rounded-lg p-4 space-y-4">
-                <div class="flex items-center justify-between">
-                  <h3 class="text-sm font-semibold text-gray-900 dark:text-white">Provider {{ index + 1 }}</h3>
-                  <button type="button" class="text-sm text-red-600 dark:text-red-400" @click="removeProvider(index)">Remove</button>
-                </div>
-
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div>
-                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Provider Name</label>
-                    <input v-model="provider.name" type="text" class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white" placeholder="OpenAI" />
+              <div v-else class="space-y-4">
+                <div v-for="(provider, index) in form.providers" :key="index" class="bg-gray-50 dark:bg-gray-700/20 rounded-xl border border-gray-200 dark:border-gray-700 overflow-hidden">
+                  <div class="p-4 border-b border-gray-200 dark:border-gray-700 flex justify-between items-center bg-gray-100/50 dark:bg-gray-700/40">
+                    <div class="flex items-center gap-2">
+                       <span class="bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300 text-xs font-bold px-2 py-1 rounded-md uppercase">{{ provider.type || 'Custom' }}</span>
+                       <h4 class="font-medium text-gray-900 dark:text-white">{{ provider.name || 'New Provider' }}</h4>
+                    </div>
+                    <button type="button" @click="removeProvider(index)" class="text-red-500 hover:text-red-700 dark:hover:text-red-400 p-1 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors">
+                      <Trash2 class="w-4 h-4" />
+                    </button>
                   </div>
-                  <div>
-                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Provider Type</label>
-                    <select v-model="provider.type" class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
-                      <option value="openai">OpenAI</option>
-                      <option value="gemini">Gemini</option>
-                      <option value="custom">Custom</option>
-                    </select>
-                  </div>
-                  <div>
-                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Base URL</label>
-                    <input v-model="provider.base_url" type="text" class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white" placeholder="https://api.openai.com/v1" />
-                  </div>
-                  <div>
-                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">API Key</label>
-                    <div class="relative">
-                      <input v-model="provider.api_key" :type="showApiKeys ? 'text' : 'password'" class="w-full px-3 py-2 pr-10 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white" placeholder="sk-..." />
-                      <button type="button" class="absolute inset-y-0 right-2 flex items-center text-gray-400 hover:text-gray-600 dark:hover:text-gray-300" @click="showApiKeys = !showApiKeys" :aria-label="showApiKeys ? 'Hide API key' : 'Show API key'">
-                        <svg v-if="!showApiKeys" xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                          <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                          <path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.477 0 8.268 2.943 9.542 7-1.274 4.057-5.065 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                        </svg>
-                        <svg v-else xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                          <path stroke-linecap="round" stroke-linejoin="round" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.477 0-8.268-2.943-9.542-7a9.956 9.956 0 012.042-3.368M6.223 6.223A9.956 9.956 0 0112 5c4.477 0 8.268 2.943 9.542 7a9.956 9.956 0 01-4.118 5.012M3 3l18 18" />
-                        </svg>
-                      </button>
+                  
+                  <div class="p-6 grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                      <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Provider Name <span class="text-red-500">*</span></label>
+                      <input v-model="provider.name" type="text" class="w-full px-4 py-2.5 bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-blue-500 dark:text-white" placeholder="e.g. OpenAI Main" />
+                    </div>
+                    <div>
+                      <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Type <span class="text-red-500">*</span></label>
+                      <select v-model="provider.type" class="w-full px-4 py-2.5 bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-blue-500 dark:text-white">
+                        <option value="openai">OpenAI</option>
+                        <option value="gemini">Gemini</option>
+                        <option value="anthropic">Anthropic</option>
+                        <option value="custom">Custom (OpenAI Compatible)</option>
+                      </select>
+                    </div>
+                    <div class="md:col-span-2">
+                      <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Base URL</label>
+                      <input v-model="provider.base_url" type="text" class="w-full px-4 py-2.5 bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-blue-500 dark:text-white" placeholder="https://api.openai.com/v1" />
+                    </div>
+                    <div class="md:col-span-2">
+                       <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">API Key <span class="text-red-500">*</span></label>
+                       <div class="relative">
+                        <input 
+                          v-model="provider.api_key" 
+                          :type="showApiKeys[index] ? 'text' : 'password'" 
+                          class="w-full px-4 py-2.5 pr-12 bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-blue-500 dark:text-white font-mono text-sm" 
+                          placeholder="sk-..." 
+                        />
+                        <button 
+                          type="button" 
+                          class="absolute inset-y-0 right-0 flex items-center px-4 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300" 
+                          @click="toggleApiKeyVisibility(index)"
+                        >
+                          <component :is="showApiKeys[index] ? EyeOff : Eye" class="w-4 h-4" />
+                        </button>
+                      </div>
+                    </div>
+                    <div>
+                      <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Organization ID</label>
+                      <input v-model="provider.org_id" type="text" class="w-full px-4 py-2.5 bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-blue-500 dark:text-white" placeholder="Optional" />
+                    </div>
+                    <div>
+                      <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Project ID</label>
+                      <input v-model="provider.project_id" type="text" class="w-full px-4 py-2.5 bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-blue-500 dark:text-white" placeholder="Optional" />
+                    </div>
+                    <div class="md:col-span-2 flex items-center pt-2">
+                       <label class="flex items-center gap-3 cursor-pointer">
+                          <input v-model="provider.is_default" type="checkbox" class="w-4 h-4 text-blue-600 border-gray-300 dark:border-gray-600 rounded focus:ring-blue-500 dark:bg-gray-700">
+                          <span class="text-sm font-medium text-gray-900 dark:text-gray-200">Use as primary provider for this type</span>
+                       </label>
                     </div>
                   </div>
-                  <div>
-                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Organization ID</label>
-                    <input v-model="provider.org_id" type="text" class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white" placeholder="Optional" />
-                  </div>
-                  <div>
-                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Project ID</label>
-                    <input v-model="provider.project_id" type="text" class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white" placeholder="Optional" />
-                  </div>
                 </div>
-
-                <label class="inline-flex items-center gap-2 text-sm text-gray-700 dark:text-gray-300">
-                  <input v-model="provider.is_default" type="checkbox" class="rounded border-gray-300 dark:border-gray-600 text-blue-600 focus:ring-blue-500 dark:bg-gray-700" />
-                  Set as default provider
-                </label>
-              </div>
-
-              
-            </div>
-
-            <div v-show="activeTab === 'models'" class="p-6 space-y-6">
-              <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Models</h3>
-              <div class="flex items-center justify-between">
-                <div>
-                  <p class="text-sm text-gray-500 dark:text-gray-400">Add available models for each provider.</p>
-                </div>
-                <button type="button" class="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg" @click="addModel">Add Model</button>
-              </div>
-
-              <div v-if="form.models.length === 0" class="text-sm text-gray-500 dark:text-gray-400">No models configured.</div>
-
-              <div v-for="(model, index) in form.models" :key="index" class="border border-gray-200 dark:border-gray-700 rounded-lg p-4 space-y-4">
-                <div class="flex items-center justify-between">
-                  <h3 class="text-sm font-semibold text-gray-900 dark:text-white">Model {{ index + 1 }}</h3>
-                  <button type="button" class="text-sm text-red-600 dark:text-red-400" @click="removeModel(index)">Remove</button>
-                </div>
-
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div>
-                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Model Name</label>
-                    <input v-model="model.name" type="text" class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white" placeholder="gpt-4o-mini" />
-                  </div>
-                  <div>
-                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Provider</label>
-                    <select v-model="model.provider" class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
-                      <option value="">Select provider</option>
-                      <option v-for="provider in providerOptions" :key="provider" :value="provider">
-                        {{ provider }}
-                      </option>
-                    </select>
-                  </div>
-                  <div>
-                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Mode</label>
-                    <select v-model="model.mode" class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
-                      <option value="text">Text</option>
-                      <option value="vision">Vision</option>
-                      <option value="embedding">Embedding</option>
-                    </select>
-                  </div>
-                  <div>
-                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Max Tokens</label>
-                    <input v-model.number="model.max_tokens" type="number" min="1" class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white" placeholder="4096" />
-                  </div>
-                </div>
-
-                <label class="inline-flex items-center gap-2 text-sm text-gray-700 dark:text-gray-300">
-                  <input v-model="model.is_default" type="checkbox" class="rounded border-gray-300 dark:border-gray-600 text-blue-600 focus:ring-blue-500 dark:bg-gray-700" />
-                  Set as default model for provider
-                </label>
               </div>
             </div>
 
-            <div v-show="activeTab === 'agents'" class="p-6 space-y-6">
-              <h3 class="text-lg font-semibold text-gray-900 dark:text-white">AI Agents</h3>
+            <!-- Models Tab -->
+            <div v-show="activeTab === 'models'" class="space-y-6">
               <div class="flex items-center justify-between">
                 <div>
-                  <p class="text-sm text-gray-500 dark:text-gray-400">Create named agents for different AI tasks.</p>
+                  <h3 class="text-lg font-semibold text-gray-900 dark:text-white">AI Models</h3>
+                  <p class="text-sm text-gray-500 dark:text-gray-400">Map available models to providers.</p>
                 </div>
-                <button type="button" class="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg" @click="addAgent">Add Agent</button>
+                <button type="button" @click="addModel" class="inline-flex items-center px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-sm font-medium transition-colors shadow-sm">
+                  <Plus class="w-4 h-4 mr-2" />
+                  Add Model
+                </button>
               </div>
 
-              <div v-if="form.agents.length === 0" class="text-sm text-gray-500 dark:text-gray-400">No agents configured.</div>
-
-              <div v-for="(agent, index) in form.agents" :key="index" class="border border-gray-200 dark:border-gray-700 rounded-lg p-4 space-y-4">
-                <div class="flex items-center justify-between">
-                  <h3 class="text-sm font-semibold text-gray-900 dark:text-white">Agent {{ index + 1 }}</h3>
-                  <button type="button" class="text-sm text-red-600 dark:text-red-400" @click="removeAgent(index)">Remove</button>
-                </div>
-
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div>
-                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Agent Name</label>
-                    <input v-model="agent.name" type="text" class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white" placeholder="Product Description Agent" />
-                  </div>
-                  <div>
-                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Provider</label>
-                    <select v-model="agent.provider" class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
-                      <option value="">Select provider</option>
-                      <option v-for="provider in providerOptions" :key="provider" :value="provider">
-                        {{ provider }}
-                      </option>
-                    </select>
-                  </div>
-                  <div>
-                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Model</label>
-                    <select v-model="agent.model" class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
-                      <option value="">Select model</option>
-                      <option v-for="modelName in getModelsForProvider(agent.provider)" :key="modelName" :value="modelName">
-                        {{ modelName }}
-                      </option>
-                    </select>
-                  </div>
-                  <div>
-                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Temperature</label>
-                    <input v-model.number="agent.temperature" type="number" step="0.1" min="0" max="2" class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white" />
-                  </div>
-                  <div>
-                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Max Tokens</label>
-                    <input v-model.number="agent.max_tokens" type="number" min="1" class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white" />
-                  </div>
-                </div>
-
-                <div>
-                  <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">System Prompt</label>
-                  <textarea v-model="agent.system_prompt" rows="4" class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white" placeholder="You are a helpful product description assistant..."></textarea>
-                </div>
-
-                <label class="inline-flex items-center gap-2 text-sm text-gray-700 dark:text-gray-300">
-                  <input v-model="agent.is_default" type="checkbox" class="rounded border-gray-300 dark:border-gray-600 text-blue-600 focus:ring-blue-500 dark:bg-gray-700" />
-                  Set as default agent
-                </label>
+              <div v-if="form.models.length === 0" class="text-center py-12 bg-gray-50 dark:bg-gray-700/30 rounded-xl border border-dashed border-gray-300 dark:border-gray-600">
+                <Cpu class="w-8 h-8 text-gray-400 mx-auto mb-3" />
+                <h3 class="text-sm font-medium text-gray-900 dark:text-white">No models configured</h3>
+                <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">Define which models are available for use.</p>
               </div>
+
+              <div v-else class="space-y-4">
+                <div v-for="(model, index) in form.models" :key="index" class="bg-gray-50 dark:bg-gray-700/20 rounded-xl border border-gray-200 dark:border-gray-700 overflow-hidden">
+                   <div class="p-4 border-b border-gray-200 dark:border-gray-700 flex justify-between items-center bg-gray-100/50 dark:bg-gray-700/40">
+                    <div class="flex items-center gap-2">
+                       <span class="bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-300 text-xs font-bold px-2 py-1 rounded-md uppercase">{{ model.mode || 'Text' }}</span>
+                       <h4 class="font-medium text-gray-900 dark:text-white">{{ model.name || 'New Model' }}</h4>
+                       <span v-if="model.provider" class="text-xs text-gray-500 dark:text-gray-400 ml-2">via {{ model.provider }}</span>
+                    </div>
+                    <button type="button" @click="removeModel(index)" class="text-red-500 hover:text-red-700 dark:hover:text-red-400 p-1 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors">
+                      <Trash2 class="w-4 h-4" />
+                    </button>
+                  </div>
+
+                  <div class="p-6 grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                      <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Model ID <span class="text-red-500">*</span></label>
+                      <input v-model="model.name" type="text" class="w-full px-4 py-2.5 bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-blue-500 dark:text-white" placeholder="gpt-4-turbo" />
+                    </div>
+                    <div>
+                      <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Provider <span class="text-red-500">*</span></label>
+                      <select v-model="model.provider" class="w-full px-4 py-2.5 bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-blue-500 dark:text-white">
+                        <option value="">Select provider</option>
+                        <option v-for="provider in providerOptions" :key="provider" :value="provider">{{ provider }}</option>
+                      </select>
+                    </div>
+                    <div>
+                      <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Mode</label>
+                      <select v-model="model.mode" class="w-full px-4 py-2.5 bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-blue-500 dark:text-white">
+                        <option value="text">Text / Chat</option>
+                        <option value="vision">Vision (Image Analysis)</option>
+                        <option value="embedding">Embedding</option>
+                        <option value="image_generation">Image Generation</option>
+                      </select>
+                    </div>
+                    <div>
+                      <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Max Context Tokens</label>
+                      <input v-model.number="model.max_tokens" type="number" min="1" class="w-full px-4 py-2.5 bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-blue-500 dark:text-white" placeholder="128000" />
+                    </div>
+                     <div class="md:col-span-2 flex items-center pt-2">
+                       <label class="flex items-center gap-3 cursor-pointer">
+                          <input v-model="model.is_default" type="checkbox" class="w-4 h-4 text-blue-600 border-gray-300 dark:border-gray-600 rounded focus:ring-blue-500 dark:bg-gray-700">
+                          <span class="text-sm font-medium text-gray-900 dark:text-gray-200">Set as default model for this provider</span>
+                       </label>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Agents Tab -->
+            <div v-show="activeTab === 'agents'" class="space-y-6">
+              <div class="flex items-center justify-between">
+                 <div>
+                  <h3 class="text-lg font-semibold text-gray-900 dark:text-white">AI Agents</h3>
+                  <p class="text-sm text-gray-500 dark:text-gray-400">Configure specialize agents for specific tasks.</p>
+                </div>
+                <button type="button" @click="addAgent" class="inline-flex items-center px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-sm font-medium transition-colors shadow-sm">
+                  <Plus class="w-4 h-4 mr-2" />
+                  Add Agent
+                </button>
+              </div>
+
+              <div v-if="form.agents.length === 0" class="text-center py-12 bg-gray-50 dark:bg-gray-700/30 rounded-xl border border-dashed border-gray-300 dark:border-gray-600">
+                <Bot class="w-8 h-8 text-gray-400 mx-auto mb-3" />
+                <h3 class="text-sm font-medium text-gray-900 dark:text-white">No agents configured</h3>
+                <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">Create agents to handle specific tasks.</p>
+              </div>
+
+               <div v-else class="space-y-4">
+                <div v-for="(agent, index) in form.agents" :key="index" class="bg-gray-50 dark:bg-gray-700/20 rounded-xl border border-gray-200 dark:border-gray-700 overflow-hidden">
+                  <div class="p-4 border-b border-gray-200 dark:border-gray-700 flex justify-between items-center bg-gray-100/50 dark:bg-gray-700/40">
+                    <div class="flex items-center gap-2">
+                       <Bot class="w-4 h-4 text-blue-600 dark:text-blue-400" />
+                       <h4 class="font-medium text-gray-900 dark:text-white">{{ agent.name || 'New Agent' }}</h4>
+                    </div>
+                    <button type="button" @click="removeAgent(index)" class="text-red-500 hover:text-red-700 dark:hover:text-red-400 p-1 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors">
+                      <Trash2 class="w-4 h-4" />
+                    </button>
+                  </div>
+
+                  <div class="p-6 grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                      <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Agent Name <span class="text-red-500">*</span></label>
+                      <input v-model="agent.name" type="text" class="w-full px-4 py-2.5 bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-blue-500 dark:text-white" placeholder="Product Describer" />
+                    </div>
+                     <div>
+                      <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Provider</label>
+                      <select v-model="agent.provider" class="w-full px-4 py-2.5 bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-blue-500 dark:text-white">
+                        <option value="">Select provider</option>
+                        <option v-for="provider in providerOptions" :key="provider" :value="provider">{{ provider }}</option>
+                      </select>
+                    </div>
+                    <div>
+                      <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Model</label>
+                      <select v-model="agent.model" class="w-full px-4 py-2.5 bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-blue-500 dark:text-white">
+                        <option value="">Select model</option>
+                        <option v-for="modelName in getModelsForProvider(agent.provider)" :key="modelName" :value="modelName">{{ modelName }}</option>
+                      </select>
+                    </div>
+                    <div class="grid grid-cols-2 gap-4">
+                      <div>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Temperature</label>
+                        <input v-model.number="agent.temperature" type="number" step="0.1" min="0" max="2" class="w-full px-4 py-2.5 bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-blue-500 dark:text-white" />
+                      </div>
+                      <div>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Max Output</label>
+                        <input v-model.number="agent.max_tokens" type="number" min="1" class="w-full px-4 py-2.5 bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-blue-500 dark:text-white" />
+                      </div>
+                    </div>
+                    <div class="md:col-span-2">
+                       <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">System Prompt</label>
+                       <textarea v-model="agent.system_prompt" rows="4" class="w-full px-4 py-2.5 bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-blue-500 dark:text-white font-mono text-sm" placeholder="You are a helpful assistant..."></textarea>
+                    </div>
+                    <div class="md:col-span-2 flex items-center pt-2">
+                       <label class="flex items-center gap-3 cursor-pointer">
+                          <input v-model="agent.is_default" type="checkbox" class="w-4 h-4 text-blue-600 border-gray-300 dark:border-gray-600 rounded focus:ring-blue-500 dark:bg-gray-700">
+                          <span class="text-sm font-medium text-gray-900 dark:text-gray-200">Set as default general agent</span>
+                       </label>
+                    </div>
+                  </div>
+                </div>
+               </div>
             </div>
           </div>
 
-          <div class="border-t border-gray-200 dark:border-gray-700 px-6 py-4 flex items-center justify-between">
-            <div class="text-sm text-red-600" v-if="errors.general">{{ errors.general }}</div>
-            <button type="submit" class="px-6 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg" :disabled="form.processing">
-              Save Settings
+          <!-- Actions -->
+          <div class="flex items-center justify-between p-6 bg-gray-50 dark:bg-gray-800/50 border-t border-gray-200 dark:border-gray-700">
+             <div class="text-sm text-red-600 dark:text-red-400" v-if="errors.general">{{ errors.general }}</div>
+             <div v-else></div>
+             <button
+              type="submit"
+              :disabled="form.processing"
+              class="inline-flex items-center px-6 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-medium text-sm transition-all shadow-sm disabled:opacity-70 disabled:cursor-not-allowed"
+            >
+              <Save v-if="!form.processing" class="w-4 h-4 mr-2" />
+              <div v-else class="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent mr-2"></div>
+              <span>{{ form.processing ? 'Saving Changes...' : 'Save Settings' }}</span>
             </button>
           </div>
-        </div>
-      </form>
+        </form>
+      </div>
     </div>
   </AdminLayout>
 </template>

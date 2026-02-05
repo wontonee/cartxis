@@ -1,126 +1,178 @@
 <template>
-    <AdminLayout>
+    <AdminLayout title="Pages">
         <Head title="Pages" />
 
-        <div class="p-6">
+        <div class="p-6 space-y-6">
             <!-- Header -->
-            <div class="mb-6">
-                <div class="flex justify-between items-center mb-4">
-                    <div>
-                        <h1 class="text-2xl font-semibold text-gray-900 dark:text-white">Pages</h1>
-                        <p class="mt-1 text-sm text-gray-600 dark:text-gray-400">Manage static content pages for your store</p>
-                    </div>
-                    <Link
-                        :href="pageRoutes.create().url"
-                        class="flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition-colors"
-                    >
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
-                        </svg>
-                        Create Page
-                    </Link>
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                <div>
+                    <h1 class="text-2xl font-bold text-gray-900 dark:text-white">Pages</h1>
+                    <p class="mt-1 text-sm text-gray-600 dark:text-gray-400">Manage static content pages for your store</p>
                 </div>
+                <Link
+                    :href="pageRoutes.create().url"
+                    class="inline-flex items-center px-4 py-2 bg-blue-600 border border-transparent rounded-lg font-semibold text-xs text-white uppercase tracking-widest hover:bg-blue-700 focus:bg-blue-700 active:bg-blue-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition ease-in-out duration-150"
+                >
+                    <PlusCircle class="w-4 h-4 mr-2" />
+                    Create Page
+                </Link>
             </div>
 
             <!-- Statistics Cards -->
-            <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
-                <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
-                    <div class="text-sm font-medium text-gray-600 dark:text-gray-400">Total Pages</div>
-                    <div class="mt-2 text-3xl font-semibold text-gray-900 dark:text-white">{{ statistics.total }}</div>
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 p-5 group hover:border-blue-200 dark:hover:border-blue-800 transition-colors">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Total Pages</p>
+                            <p class="mt-2 text-2xl font-bold text-gray-900 dark:text-white">{{ statistics.total }}</p>
+                        </div>
+                        <div class="p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg group-hover:bg-blue-100 dark:group-hover:bg-blue-900/40 transition-colors">
+                            <FileText class="w-6 h-6 text-blue-600 dark:text-blue-400" />
+                        </div>
+                    </div>
                 </div>
-                <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
-                    <div class="text-sm font-medium text-gray-600 dark:text-gray-400">Published</div>
-                    <div class="mt-2 text-3xl font-semibold text-green-600 dark:text-green-400">{{ statistics.published }}</div>
+                <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 p-5 group hover:border-green-200 dark:hover:border-green-800 transition-colors">
+                     <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Published</p>
+                            <p class="mt-2 text-2xl font-bold text-gray-900 dark:text-white">{{ statistics.published }}</p>
+                        </div>
+                        <div class="p-3 bg-green-50 dark:bg-green-900/20 rounded-lg group-hover:bg-green-100 dark:group-hover:bg-green-900/40 transition-colors">
+                            <CheckCircle class="w-6 h-6 text-green-600 dark:text-green-400" />
+                        </div>
+                     </div>
                 </div>
-                <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
-                    <div class="text-sm font-medium text-gray-600 dark:text-gray-400">Draft</div>
-                    <div class="mt-2 text-3xl font-semibold text-yellow-600 dark:text-yellow-400">{{ statistics.draft }}</div>
+                <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 p-5 group hover:border-yellow-200 dark:hover:border-yellow-800 transition-colors">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Draft</p>
+                            <p class="mt-2 text-2xl font-bold text-gray-900 dark:text-white">{{ statistics.draft }}</p>
+                        </div>
+                         <div class="p-3 bg-yellow-50 dark:bg-yellow-900/20 rounded-lg group-hover:bg-yellow-100 dark:group-hover:bg-yellow-900/40 transition-colors">
+                            <PenTool class="w-6 h-6 text-yellow-600 dark:text-yellow-400" />
+                        </div>
+                    </div>
                 </div>
-                <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
-                    <div class="text-sm font-medium text-gray-600 dark:text-gray-400">Disabled</div>
-                    <div class="mt-2 text-3xl font-semibold text-gray-600 dark:text-gray-400">{{ statistics.disabled }}</div>
+                <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 p-5 group hover:border-gray-200 dark:hover:border-gray-600 transition-colors">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Disabled</p>
+                            <p class="mt-2 text-2xl font-bold text-gray-900 dark:text-white">{{ statistics.disabled }}</p>
+                        </div>
+                        <div class="p-3 bg-gray-50 dark:bg-gray-700 rounded-lg group-hover:bg-gray-100 dark:group-hover:bg-gray-600 transition-colors">
+                             <XCircle class="w-6 h-6 text-gray-600 dark:text-gray-400" />
+                        </div>
+                    </div>
                 </div>
             </div>
 
             <!-- Filters -->
-            <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-4">
-                <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
-                    <div class="md:col-span-2">
-                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                            Search
-                        </label>
-                        <input
-                            v-model="form.search"
-                            type="text"
-                            placeholder="Search by title or URL..."
-                            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:border-gray-600 dark:text-white"
-                            @input="debouncedSearch"
-                        />
+            <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 p-5">
+                <div class="grid grid-cols-1 md:grid-cols-12 gap-4">
+                    <!-- Search -->
+                    <div class="md:col-span-6 lg:col-span-4">
+                        <label class="block text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-1.5">Search</label>
+                         <div class="relative">
+                            <Search class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                            <input
+                                v-model="form.search"
+                                type="text"
+                                placeholder="Search by title or URL..."
+                                class="w-full pl-10 pr-4 py-2.5 bg-gray-50 dark:bg-gray-700/50 border border-gray-200 dark:border-gray-600 rounded-lg text-sm text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all placeholder:text-gray-400"
+                                @input="debouncedSearch"
+                            />
+                        </div>
                     </div>
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                            Status
-                        </label>
-                        <select 
-                            v-model="form.status" 
-                            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:border-gray-600 dark:text-white" 
-                            @change="applyFilters"
-                        >
-                            <option value="">All Status</option>
-                            <option value="published">Published</option>
-                            <option value="draft">Draft</option>
-                            <option value="disabled">Disabled</option>
-                        </select>
+                    
+                    <!-- Status Filter -->
+                    <div class="md:col-span-3 lg:col-span-2">
+                        <label class="block text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-1.5">Status</label>
+                        <div class="relative">
+                            <Filter class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                            <select 
+                                v-model="form.status" 
+                                class="w-full pl-10 pr-8 py-2.5 bg-gray-50 dark:bg-gray-700/50 border border-gray-200 dark:border-gray-600 rounded-lg text-sm text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all appearance-none cursor-pointer"
+                                @change="applyFilters"
+                            >
+                                <option value="">All Status</option>
+                                <option value="published">Published</option>
+                                <option value="draft">Draft</option>
+                                <option value="disabled">Disabled</option>
+                            </select>
+                             <div class="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none">
+                                <ArrowUpDown class="w-3 h-3 text-gray-400" />
+                            </div>
+                        </div>
                     </div>
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                            Sort By
-                        </label>
-                        <select 
-                            v-model="form.sort_by" 
-                            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:border-gray-600 dark:text-white" 
-                            @change="applyFilters"
-                        >
-                            <option value="created_at">Created Date</option>
-                            <option value="updated_at">Updated Date</option>
-                            <option value="title">Title</option>
-                            <option value="status">Status</option>
-                        </select>
+
+                    <!-- Sort Filter -->
+                    <div class="md:col-span-3 lg:col-span-2">
+                         <label class="block text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-1.5">Sort By</label>
+                         <div class="relative">
+                            <ArrowUpDown class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                            <select 
+                                v-model="form.sort_by" 
+                                class="w-full pl-10 pr-8 py-2.5 bg-gray-50 dark:bg-gray-700/50 border border-gray-200 dark:border-gray-600 rounded-lg text-sm text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all appearance-none cursor-pointer"
+                                @change="applyFilters"
+                            >
+                                <option value="created_at">Created Date</option>
+                                <option value="updated_at">Updated Date</option>
+                                <option value="title">Title</option>
+                                <option value="status">Status</option>
+                            </select>
+                            <div class="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none">
+                                <ArrowUpDown class="w-3 h-3 text-gray-400" />
+                            </div>
+                        </div>
                     </div>
+                </div>
+
+                 <!-- Filter Actions -->
+                <div v-if="form.search || form.status" class="mt-4 pt-4 border-t border-gray-200 dark:border-gray-700 flex justify-end">
+                    <button
+                    @click="clearFilters"
+                    class="px-4 py-2 text-sm text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-200 font-medium bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 rounded-lg transition-colors flex items-center gap-2"
+                    >
+                    <X class="w-4 h-4" />
+                    Clear Filters
+                    </button>
                 </div>
             </div>
 
             <!-- Pages Table -->
-            <div class="bg-white dark:bg-gray-800 rounded-lg shadow overflow-hidden">
+            <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 overflow-hidden">
                 <!-- Bulk Actions -->
                 <div
                     v-if="selectedPages.length > 0"
-                    class="bg-blue-50 dark:bg-blue-900 p-4 border-b border-blue-200 dark:border-blue-700"
+                    class="bg-blue-50 dark:bg-blue-900/20 p-4 border-b border-blue-100 dark:border-blue-800"
                 >
                     <div class="flex items-center justify-between">
-                        <span class="text-sm text-blue-700 dark:text-blue-300">
-                            {{ selectedPages.length }} page(s) selected
-                        </span>
+                         <div class="flex items-center">
+                            <CheckCircle class="w-4 h-4 mr-2 text-blue-600 dark:text-blue-400" />
+                            <span class="text-sm font-semibold text-blue-700 dark:text-blue-300">
+                                {{ selectedPages.length }} page(s) selected
+                            </span>
+                        </div>
                         <div class="flex gap-2">
                             <button
                                 @click="bulkAction('enable')"
-                                class="btn-sm btn-success"
+                                class="inline-flex items-center px-3 py-1.5 border border-transparent text-xs font-medium rounded text-green-700 bg-green-100 hover:bg-green-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 dark:bg-green-900/40 dark:text-green-300 dark:hover:bg-green-900/60"
                             >
-                                <Icon name="check" :size="14" class="mr-1" />
+                                <Check class="w-4 h-4 mr-1.5" />
                                 Enable
                             </button>
                             <button
                                 @click="bulkAction('disable')"
-                                class="btn-sm btn-secondary"
+                                class="inline-flex items-center px-3 py-1.5 border border-transparent text-xs font-medium rounded text-orange-700 bg-orange-100 hover:bg-orange-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-orange-500 dark:bg-orange-900/40 dark:text-orange-300 dark:hover:bg-orange-900/60"
                             >
-                                <Icon name="x" :size="14" class="mr-1" />
+                                <XCircle class="w-4 h-4 mr-1.5" />
                                 Disable
                             </button>
                             <button
                                 @click="bulkAction('delete')"
-                                class="btn-sm btn-danger"
+                                class="inline-flex items-center px-3 py-1.5 border border-transparent text-xs font-medium rounded text-red-700 bg-red-100 hover:bg-red-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 dark:bg-red-900/40 dark:text-red-300 dark:hover:bg-red-900/60"
                             >
-                                <Icon name="trash-2" :size="14" class="mr-1" />
+                                <Trash2 class="w-4 h-4 mr-1.5" />
                                 Delete
                             </button>
                         </div>
@@ -129,104 +181,130 @@
 
                 <div class="overflow-x-auto">
                     <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
-                        <thead class="bg-gray-50 dark:bg-gray-800">
+                        <thead class="bg-gray-50 dark:bg-gray-700/50">
                             <tr>
-                                <th class="px-6 py-3 text-left">
+                                <th class="px-6 py-3 text-left w-12">
                                     <input
                                         type="checkbox"
                                         :checked="allSelected"
                                         @change="toggleAllPages"
-                                        class="checkbox dark:bg-gray-700 dark:border-gray-600"
+                                        class="rounded border-gray-300 dark:border-gray-600 text-blue-600 focus:ring-blue-500 bg-white dark:bg-gray-700 w-4 h-4 transition-all"
                                     />
                                 </th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase">
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
                                     Title
                                 </th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase">
+                                <th class="hidden md:table-cell px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
                                     URL Key
                                 </th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase">
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
                                     Status
                                 </th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase">
+                                <th class="hidden lg:table-cell px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
                                     Created
                                 </th>
-                                <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-300 uppercase">
+                                <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
                                     Actions
                                 </th>
                             </tr>
                         </thead>
                         <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
-                            <tr
-                                v-for="page in pages.data"
-                                :key="page.id"
-                                class="hover:bg-gray-50 dark:hover:bg-gray-700"
-                            >
-                                <td class="px-6 py-4">
-                                    <input
-                                        type="checkbox"
-                                        :value="page.id"
-                                        v-model="selectedPages"
-                                        class="checkbox dark:bg-gray-700 dark:border-gray-600"
-                                    />
-                                </td>
-                                <td class="px-6 py-4">
-                                    <div class="text-sm font-medium text-gray-900 dark:text-white">
-                                        {{ page.title }}
-                                    </div>
-                                </td>
-                                <td class="px-6 py-4">
-                                    <div class="text-sm text-gray-600 dark:text-gray-400 font-mono">
-                                        {{ page.url_key }}
-                                    </div>
-                                </td>
-                                <td class="px-6 py-4">
-                                    <span :class="statusClass(page.status)">
-                                        {{ page.status }}
-                                    </span>
-                                </td>
-                                <td class="px-6 py-4">
-                                    <div class="text-sm text-gray-600 dark:text-gray-400">
-                                        {{ formatDate(page.created_at) }}
-                                    </div>
-                                    <div v-if="page.creator" class="text-xs text-gray-500 dark:text-gray-500">
-                                        by {{ page.creator.name }}
-                                    </div>
-                                </td>
-                                <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                                    <div class="flex items-center justify-end gap-2">
-                                        <a
-                                            :href="page.url"
-                                            target="_blank"
-                                            class="text-blue-600 hover:text-blue-900 dark:text-blue-400 dark:hover:text-blue-300 cursor-pointer"
-                                            title="Preview Page"
+                            <template v-for="page in pages.data" :key="page.id">
+                                <tr :class="['group hover:bg-blue-50/50 dark:hover:bg-blue-900/10 transition-colors', {'bg-blue-50 dark:bg-blue-900/10': selectedPages.includes(page.id)}]">
+                                    <td class="px-6 py-4 relative">
+                                        <div class="flex items-center">
+                                            <button
+                                                @click="toggleRow(page.id)"
+                                                class="md:hidden absolute left-2 p-1 text-blue-600 hover:text-blue-800 focus:outline-none"
+                                            >
+                                                <MinusCircle v-if="expandedRows.includes(page.id)" class="w-5 h-5 fill-blue-100 dark:fill-blue-900/30" />
+                                                <PlusCircle v-else class="w-5 h-5 fill-blue-50 dark:fill-blue-900/20" />
+                                            </button>
+                                            <input
+                                                type="checkbox"
+                                                :value="page.id"
+                                                v-model="selectedPages"
+                                                class="rounded border-gray-300 dark:border-gray-600 text-blue-600 focus:ring-blue-500 bg-white dark:bg-gray-700 w-4 h-4 cursor-pointer transition-all ml-4 md:ml-0"
+                                            />
+                                        </div>
+                                    </td>
+                                    <td class="px-6 py-4">
+                                        <div class="flex items-center gap-3">
+                                            <div>
+                                                <div class="text-sm font-medium text-gray-900 dark:text-white">
+                                                    {{ page.title }}
+                                                </div>
+                                                <div class="md:hidden text-xs text-gray-500 mt-1 font-mono">
+                                                    /{{ page.url_key }}
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td class="hidden md:table-cell px-6 py-4">
+                                        <div class="text-sm text-gray-600 dark:text-gray-400 font-mono bg-gray-100 dark:bg-gray-700 px-2 py-1 rounded inline-block">
+                                            /{{ page.url_key }}
+                                        </div>
+                                    </td>
+                                    <td class="px-6 py-4">
+                                        <span 
+                                            class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border shadow-sm"
+                                            :class="statusClass(page.status)"
                                         >
-                                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                                            </svg>
-                                        </a>
-                                        <Link
-                                            :href="pageRoutes.edit({ page: page.id }).url"
-                                            class="text-indigo-600 hover:text-indigo-900 dark:text-indigo-400 dark:hover:text-indigo-300 cursor-pointer"
-                                            title="Edit Page"
-                                        >
-                                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                                            </svg>
-                                        </Link>
-                                        <button
-                                            @click="deletePage(page)"
-                                            class="text-red-600 hover:text-red-900 dark:text-red-400 dark:hover:text-red-300 cursor-pointer"
-                                            title="Delete Page"
-                                        >
-                                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                                            </svg>
-                                        </button>
-                                    </div>
-                                </td>
-                            </tr>
+                                            {{ page.status.charAt(0).toUpperCase() + page.status.slice(1) }}
+                                        </span>
+                                    </td>
+                                    <td class="hidden lg:table-cell px-6 py-4">
+                                        <div class="text-sm text-gray-600 dark:text-gray-400">
+                                            {{ formatDate(page.created_at) }}
+                                        </div>
+                                        <div v-if="page.creator" class="text-xs text-gray-500 dark:text-gray-500 mt-0.5 flex items-center gap-1">
+                                            <User class="w-3 h-3" />
+                                            {{ page.creator.name }}
+                                        </div>
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                                        <div class="flex items-center justify-end gap-2 opacity-60 group-hover:opacity-100 transition-opacity">
+                                            <a
+                                                :href="page.url"
+                                                target="_blank"
+                                                class="p-2 text-gray-400 hover:text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-lg transition-colors"
+                                                title="Preview Page"
+                                            >
+                                                <ExternalLink class="w-4 h-4" />
+                                            </a>
+                                            <Link
+                                                :href="pageRoutes.edit({ page: page.id }).url"
+                                                class="p-2 text-gray-400 hover:text-indigo-600 hover:bg-indigo-50 dark:hover:bg-indigo-900/20 rounded-lg transition-colors"
+                                                title="Edit Page"
+                                            >
+                                                <Edit class="w-4 h-4" />
+                                            </Link>
+                                            <button
+                                                @click="deletePage(page)"
+                                                class="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors"
+                                                title="Delete Page"
+                                            >
+                                                <Trash2 class="w-4 h-4" />
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                                
+                                <!-- Mobile Expanded Row -->
+                                <tr v-if="expandedRows.includes(page.id)" class="bg-gray-50/50 dark:bg-gray-900/50 md:hidden">
+                                     <td colspan="6" class="px-6 py-4 border-t border-gray-100 dark:border-gray-700">
+                                        <div class="grid grid-cols-1 gap-4 text-sm">
+                                            <div>
+                                                <span class="text-xs text-gray-500 font-medium uppercase tracking-wider block mb-1">Created At</span>
+                                                <div class="text-sm text-gray-900 dark:text-white">{{ formatDate(page.created_at) }}</div>
+                                                 <div v-if="page.creator" class="text-xs text-gray-500 mt-1">
+                                                    by {{ page.creator.name }}
+                                                </div>
+                                            </div>
+                                        </div>
+                                     </td>
+                                </tr>
+                            </template>
                         </tbody>
                     </table>
                 </div>
@@ -236,20 +314,20 @@
                     v-if="pages.data.length === 0"
                     class="text-center py-12"
                 >
-                    <svg class="mx-auto h-12 w-12 text-gray-400 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                    </svg>
-                    <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-1">No pages found</h3>
-                    <p class="text-gray-500 dark:text-gray-400 mb-4">Get started by creating your first page.</p>
-                    <Link
-                        :href="pageRoutes.create().url"
-                        class="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
-                    >
-                        <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
-                        </svg>
-                        Create Page
-                    </Link>
+                     <div class="flex flex-col items-center justify-center">
+                        <div class="w-16 h-16 bg-gray-50 dark:bg-gray-700 rounded-full flex items-center justify-center mb-4 text-gray-400">
+                            <FileText class="w-8 h-8" />
+                        </div>
+                        <h3 class="text-lg font-bold text-gray-900 dark:text-white mb-1">No pages found</h3>
+                        <p class="text-sm text-gray-500 dark:text-gray-400 mb-4">Get started by creating your first page.</p>
+                        <Link
+                            :href="pageRoutes.create().url"
+                            class="inline-flex items-center px-4 py-2 bg-blue-600 border border-transparent rounded-lg font-semibold text-xs text-white uppercase tracking-widest hover:bg-blue-700 focus:bg-blue-700 active:bg-blue-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition ease-in-out duration-150"
+                        >
+                            <PlusCircle class="w-4 h-4 mr-2" />
+                            Create Page
+                        </Link>
+                    </div>
                 </div>
 
                 <!-- Pagination -->
@@ -272,6 +350,23 @@ import Pagination from '@/components/Admin/Pagination.vue';
 import type { Page, PaginatedPages, PageStatistics, PageFilters } from '@/types/cms';
 import { debounce } from 'lodash';
 import * as pageRoutes from '@/routes/admin/content/pages';
+import { 
+    PlusCircle, 
+    FileText, 
+    CheckCircle, 
+    PenTool, 
+    XCircle, 
+    Search, 
+    Filter, 
+    ArrowUpDown, 
+    X,
+    ExternalLink,
+    Edit,
+    Trash2,
+    Check,
+    MinusCircle,
+    User
+} from 'lucide-vue-next';
 
 interface Props {
     pages: PaginatedPages;
@@ -289,6 +384,7 @@ const form = ref<PageFilters>({
 });
 
 const selectedPages = ref<number[]>([]);
+const expandedRows = ref<number[]>([]);
 
 const allSelected = computed(() => {
     return (
@@ -302,6 +398,14 @@ const toggleAllPages = () => {
         selectedPages.value = [];
     } else {
         selectedPages.value = props.pages.data.map((page) => page.id);
+    }
+};
+
+const toggleRow = (id: number) => {
+    if (expandedRows.value.includes(id)) {
+        expandedRows.value = expandedRows.value.filter(rowId => rowId !== id);
+    } else {
+        expandedRows.value.push(id);
     }
 };
 
@@ -319,6 +423,12 @@ const applyFilters = () => {
             preserveScroll: true,
         }
     );
+};
+
+const clearFilters = () => {
+    form.value.search = '';
+    form.value.status = '';
+    applyFilters();
 };
 
 const debouncedSearch = debounce(() => {
@@ -357,11 +467,11 @@ const deletePage = (page: Page) => {
 
 const statusClass = (status: string) => {
     const classes = {
-        published: 'badge-success',
-        draft: 'badge-warning',
-        disabled: 'badge-secondary',
+        published: 'bg-green-50 text-green-700 border-green-200 dark:bg-green-900/20 dark:text-green-300 dark:border-green-800',
+        draft: 'bg-yellow-50 text-yellow-700 border-yellow-200 dark:bg-yellow-900/20 dark:text-yellow-300 dark:border-yellow-800',
+        disabled: 'bg-gray-50 text-gray-700 border-gray-200 dark:bg-gray-900/20 dark:text-gray-300 dark:border-gray-800',
     };
-    return classes[status as keyof typeof classes] || 'badge-secondary';
+    return classes[status as keyof typeof classes] || 'bg-gray-50 text-gray-700 border-gray-200 dark:bg-gray-900/20 dark:text-gray-300 dark:border-gray-800';
 };
 
 const formatDate = (date: string) => {

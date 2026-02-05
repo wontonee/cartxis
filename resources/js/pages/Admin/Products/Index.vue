@@ -27,7 +27,9 @@ import {
   ChevronDown,
   ArrowUpDown,
   ArrowUp,
-  ArrowDown
+  ArrowDown,
+  PlusCircle,
+  MinusCircle
 } from 'lucide-vue-next';
 
 interface Product {
@@ -82,6 +84,7 @@ const showDeleteModal = ref(false);
 const deleteProductId = ref<number | null>(null);
 const deletingProduct = ref<{ id: number; name: string } | null>(null);
 const showBulkDeleteModal = ref(false);
+const expandedRows = ref<number[]>([]);
 
 // Quick View
 const showQuickView = ref(false);
@@ -112,6 +115,15 @@ const performSearch = debounce(() => {
 }, 300);
 
 // Methods
+const toggleRow = (id: number) => {
+  const index = expandedRows.value.indexOf(id);
+  if (index === -1) {
+    expandedRows.value.push(id);
+  } else {
+    expandedRows.value.splice(index, 1);
+  }
+};
+
 function toggleSelectAll() {
   if (allSelected.value) {
     selectedProducts.value = [];
@@ -415,7 +427,7 @@ function formatDate(date: string): string {
                 </th>
                 <th
                   @click="sortTable('sku')"
-                  class="px-6 py-4 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider cursor-pointer group hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
+                  class="hidden md:table-cell px-6 py-4 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider cursor-pointer group hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
                 >
                   <div class="flex items-center gap-1">
                     SKU & Type
@@ -428,7 +440,7 @@ function formatDate(date: string): string {
                 </th>
                 <th
                   @click="sortTable('price')"
-                  class="px-6 py-4 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider cursor-pointer group hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
+                  class="hidden md:table-cell px-6 py-4 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider cursor-pointer group hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
                 >
                   <div class="flex items-center gap-1">
                     Price
@@ -441,7 +453,7 @@ function formatDate(date: string): string {
                 </th>
                 <th
                   @click="sortTable('quantity')"
-                  class="px-6 py-4 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider cursor-pointer group hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
+                  class="hidden lg:table-cell px-6 py-4 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider cursor-pointer group hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
                 >
                   <div class="flex items-center gap-1">
                     Stock
@@ -452,7 +464,7 @@ function formatDate(date: string): string {
                     <ArrowUpDown v-else class="w-3 h-3 opacity-0 group-hover:opacity-50" />
                   </div>
                 </th>
-                <th class="px-6 py-4 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                <th class="hidden lg:table-cell px-6 py-4 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">
                   Status
                 </th>
                 <th class="px-6 py-4 text-right text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">
@@ -473,14 +485,24 @@ function formatDate(date: string): string {
                   </div>
                 </td>
               </tr>
-              <tr v-for="product in products.data" :key="product.id" class="group hover:bg-blue-50/50 dark:hover:bg-blue-900/10 transition-colors">
-                <td class="px-6 py-4">
-                  <input
-                    v-model="selectedProducts"
-                    type="checkbox"
-                    :value="product.id"
-                    class="rounded border-gray-300 dark:border-gray-600 text-blue-600 focus:ring-blue-500 bg-white dark:bg-gray-700 w-4 h-4 cursor-pointer transition-all"
-                  />
+              <template v-for="product in products.data" :key="product.id">
+              <tr class="group hover:bg-blue-50/50 dark:hover:bg-blue-900/10 transition-colors">
+                <td class="px-6 py-4 relative">
+                  <div class="flex items-center">
+                    <button 
+                      @click="toggleRow(product.id)" 
+                      class="md:hidden absolute left-2 p-1 text-blue-600 hover:text-blue-800 focus:outline-none"
+                    >
+                      <MinusCircle v-if="expandedRows.includes(product.id)" class="w-5 h-5 fill-blue-100 dark:fill-blue-900/30" />
+                      <PlusCircle v-else class="w-5 h-5 fill-blue-50 dark:fill-blue-900/20" />
+                    </button>
+                    <input
+                      v-model="selectedProducts"
+                      type="checkbox"
+                      :value="product.id"
+                      class="rounded border-gray-300 dark:border-gray-600 text-blue-600 focus:ring-blue-500 bg-white dark:bg-gray-700 w-4 h-4 cursor-pointer transition-all ml-4 md:ml-0"
+                    />
+                  </div>
                 </td>
                 <td class="px-6 py-4">
                   <div v-if="product.main_image" class="relative group/image">
@@ -517,7 +539,7 @@ function formatDate(date: string): string {
                     </div>
                   </div>
                 </td>
-                <td class="px-6 py-4 text-sm align-top pt-5">
+                <td class="hidden md:table-cell px-6 py-4 text-sm align-top pt-5">
                   <div class="flex flex-col gap-1.5">
                     <span class="text-xs font-mono text-gray-500 dark:text-gray-400 bg-gray-50 dark:bg-gray-800 px-1.5 py-0.5 rounded border border-gray-200 dark:border-gray-700 w-fit">{{ product.sku || 'NO-SKU' }}</span>
                     <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium w-fit border shadow-sm" :class="{
@@ -530,14 +552,14 @@ function formatDate(date: string): string {
                     </span>
                   </div>
                 </td>
-                <td class="px-6 py-4 text-sm text-gray-900 dark:text-white align-top pt-5">
+                <td class="hidden md:table-cell px-6 py-4 text-sm text-gray-900 dark:text-white align-top pt-5">
                   <div v-if="product.special_price" class="flex flex-col">
                     <span class="font-bold text-red-600 dark:text-red-400">{{ formatPrice(product.special_price) }}</span>
                     <span class="text-xs text-gray-400 dark:text-gray-500 line-through decoration-gray-400">{{ formatPrice(product.price) }}</span>
                   </div>
                   <span v-else class="font-bold">{{ formatPrice(product.price) }}</span>
                 </td>
-                <td class="px-6 py-4 text-sm align-top pt-5">
+                <td class="hidden lg:table-cell px-6 py-4 text-sm align-top pt-5">
                   <div class="flex flex-col gap-1">
                      <div class="flex items-center text-xs font-medium" :class="{
                       'text-green-600 dark:text-green-400': product.stock_status === 'in_stock',
@@ -556,7 +578,7 @@ function formatDate(date: string): string {
                     </span>
                   </div>
                 </td>
-                <td class="px-6 py-4 align-top pt-5">
+                <td class="hidden lg:table-cell px-6 py-4 align-top pt-5">
                   <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold border shadow-sm" :class="{
                     'bg-green-50 text-green-700 border-green-200 dark:bg-green-900/20 dark:text-green-300 dark:border-green-800': product.status === 'enabled',
                     'bg-gray-100 text-gray-600 border-gray-200 dark:bg-gray-700 dark:text-gray-300 dark:border-gray-600': product.status === 'disabled',
@@ -592,6 +614,49 @@ function formatDate(date: string): string {
                   </div>
                 </td>
               </tr>
+              <!-- Expanded Row for Mobile/Tablet -->
+              <tr v-if="expandedRows.includes(product.id)" class="bg-gray-50/50 dark:bg-gray-900/50 md:hidden">
+                 <td colspan="8" class="px-6 py-4 border-t border-gray-100 dark:border-gray-700">
+                    <div class="grid grid-cols-2 gap-4 text-sm">
+                       <div class="flex flex-col gap-1">
+                          <span class="text-xs text-gray-500 font-medium uppercase tracking-wider">Price</span>
+                          <div v-if="product.special_price">
+                             <span class="font-bold text-red-600">{{ formatPrice(product.special_price) }}</span>
+                             <span class="text-xs line-through text-gray-400 ml-1">{{ formatPrice(product.price) }}</span>
+                          </div>
+                          <span v-else class="font-bold text-gray-900 dark:text-gray-100">{{ formatPrice(product.price) }}</span>
+                       </div>
+                       <div class="flex flex-col gap-1">
+                          <span class="text-xs text-gray-500 font-medium uppercase tracking-wider">Stock</span>
+                          <div class="flex items-center gap-2">
+                             <span class="font-semibold text-gray-900 dark:text-white">{{ product.quantity }} units</span>
+                             <span class="px-1.5 py-0.5 text-[10px] rounded border" :class="{
+                                'bg-green-50 text-green-700 border-green-200': product.stock_status === 'in_stock',
+                                'bg-red-50 text-red-700 border-red-200': product.stock_status === 'out_of_stock',
+                                'bg-yellow-50 text-yellow-700 border-yellow-200': product.stock_status === 'on_backorder'
+                             }">{{ product.stock_status.replace('_', ' ') }}</span>
+                          </div>
+                       </div>
+                       <div class="flex flex-col gap-1">
+                          <span class="text-xs text-gray-500 font-medium uppercase tracking-wider">SKU & Type</span>
+                          <div class="flex flex-col gap-1">
+                             <span class="font-mono text-xs text-gray-600">{{ product.sku || 'N/A' }}</span>
+                             <span class="text-xs px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded w-fit capitalize">{{ product.type }}</span>
+                          </div>
+                       </div>
+                       <div class="flex flex-col gap-1">
+                          <span class="text-xs text-gray-500 font-medium uppercase tracking-wider">Status</span>
+                          <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium w-fit border" :class="{
+                           'bg-green-50 text-green-700 border-green-200': product.status === 'enabled',
+                           'bg-gray-100 text-gray-600 border-gray-200': product.status === 'disabled',
+                          }">
+                             {{ product.status.charAt(0).toUpperCase() + product.status.slice(1) }}
+                          </span>
+                       </div>
+                    </div>
+                 </td>
+              </tr>
+              </template>
             </tbody>
           </table>
         </div>

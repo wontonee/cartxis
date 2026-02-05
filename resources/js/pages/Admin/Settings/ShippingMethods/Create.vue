@@ -1,175 +1,15 @@
-<template>
-  <AdminLayout title="Create Shipping Method">
-    <template #default>
-      <!-- Header -->
-      <div class="mb-8">
-        <div class="flex items-center justify-between">
-          <div>
-            <h1 class="text-3xl font-bold text-gray-900">Create Shipping Method</h1>
-            <p class="text-gray-600 mt-1">Add a new shipping method to your store</p>
-          </div>
-          <Link
-            href="/admin/settings/shipping-methods"
-            class="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
-          >
-            <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
-            </svg>
-            Back to Shipping Methods
-          </Link>
-        </div>
-      </div>
-
-      <!-- Main Form -->
-      <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <!-- Form -->
-        <div class="lg:col-span-2">
-          <div class="bg-white rounded-lg shadow-sm p-8 space-y-6">
-            <form @submit.prevent="submit" class="space-y-6">
-          <!-- Name -->
-          <div>
-            <label class="block text-sm font-medium text-gray-700 mb-2">Method Name</label>
-            <input
-              v-model="form.name"
-              type="text"
-              placeholder="e.g., Standard Shipping"
-              class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-            />
-            <p v-if="errors.name" class="text-red-600 text-sm mt-1">{{ errors.name }}</p>
-          </div>
-
-          <!-- Slug -->
-          <div>
-            <label class="block text-sm font-medium text-gray-700 mb-2">Slug</label>
-            <input
-              v-model="form.slug"
-              type="text"
-              placeholder="e.g., standard-shipping"
-              class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-            />
-            <p class="text-gray-500 text-sm mt-1">URL-friendly identifier</p>
-            <p v-if="errors.slug" class="text-red-600 text-sm mt-1">{{ errors.slug }}</p>
-          </div>
-
-          <!-- Type -->
-          <div>
-            <label class="block text-sm font-medium text-gray-700 mb-2">Shipping Type</label>
-            <select
-              v-model="form.type"
-              class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-            >
-              <option value="flat-rate">Flat Rate (Fixed price)</option>
-              <option value="calculated">Calculated (Weight-based)</option>
-            </select>
-            <p class="text-gray-500 text-sm mt-1">
-              {{ form.type === 'flat-rate' 
-                ? 'Flat rate shipping charges a fixed price regardless of weight' 
-                : 'Calculated shipping charges based on weight and location' }}
-            </p>
-            <p v-if="errors.type" class="text-red-600 text-sm mt-1">{{ errors.type }}</p>
-          </div>
-
-          <!-- Base Cost -->
-          <div>
-            <label class="block text-sm font-medium text-gray-700 mb-2">Base Cost ($)</label>
-            <input
-              v-model="form.base_cost"
-              type="number"
-              step="0.01"
-              min="0"
-              placeholder="0.00"
-              class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-            />
-            <p class="text-gray-500 text-sm mt-1">Starting cost for this shipping method</p>
-            <p v-if="errors.base_cost" class="text-red-600 text-sm mt-1">{{ errors.base_cost }}</p>
-          </div>
-
-          <!-- Cost Per KG -->
-          <div>
-            <label class="block text-sm font-medium text-gray-700 mb-2">Cost per Kilogram ($)</label>
-            <input
-              v-model="form.cost_per_kg"
-              type="number"
-              step="0.0001"
-              min="0"
-              placeholder="0.0000"
-              class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-            />
-            <p class="text-gray-500 text-sm mt-1">Additional cost per kilogram of weight</p>
-            <p v-if="errors.cost_per_kg" class="text-red-600 text-sm mt-1">{{ errors.cost_per_kg }}</p>
-          </div>
-
-          <!-- Description -->
-          <div>
-            <label class="block text-sm font-medium text-gray-700 mb-2">Description</label>
-            <textarea
-              v-model="form.description"
-              placeholder="Describe this shipping method..."
-              rows="4"
-              class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-            ></textarea>
-            <p class="text-gray-500 text-sm mt-1">Optional description for internal use</p>
-            <p v-if="errors.description" class="text-red-600 text-sm mt-1">{{ errors.description }}</p>
-          </div>
-
-          <!-- Default -->
-          <div>
-            <label class="flex items-center gap-3">
-              <input
-                v-model="form.is_default"
-                type="checkbox"
-                class="w-4 h-4 border-gray-300 rounded focus:ring-2 focus:ring-blue-500"
-              />
-              <span class="text-sm font-medium text-gray-700">Set as default shipping method</span>
-            </label>
-          </div>
-
-              <!-- Buttons -->
-              <div class="flex gap-3 pt-6 border-t">
-                <button
-                  type="submit"
-                  :disabled="loading"
-                  class="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-medium disabled:opacity-50"
-                >
-                  {{ loading ? 'Creating...' : 'Create Method' }}
-                </button>
-                <Link
-                  href="/admin/settings/shipping-methods"
-                  class="px-6 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 font-medium"
-                >
-                  Cancel
-                </Link>
-              </div>
-            </form>
-          </div>
-        </div>
-
-        <!-- Sidebar -->
-        <div class="space-y-6">
-          <!-- Info Card -->
-          <div class="bg-white rounded-lg shadow-sm p-6">
-            <h3 class="text-lg font-semibold text-gray-900 mb-4">Information</h3>
-            <div class="space-y-4 text-sm">
-              <div>
-                <h4 class="font-medium text-gray-900 mb-2">Flat Rate vs Calculated</h4>
-                <p class="text-gray-600">Flat Rate charges a fixed price. Calculated pricing is based on weight and location.</p>
-              </div>
-              <div>
-                <h4 class="font-medium text-gray-900 mb-2">Slug</h4>
-                <p class="text-gray-600">URL-friendly identifier used in the system. Use lowercase letters, numbers, and hyphens.</p>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </template>
-  </AdminLayout>
-</template>
-
 <script setup lang="ts">
 import { ref } from 'vue'
-import { Link, router } from '@inertiajs/vue3'
+import { Link, router, Head } from '@inertiajs/vue3'
 import AdminLayout from '@/layouts/AdminLayout.vue'
+import { 
+  Truck, 
+  ChevronLeft, 
+  Save, 
+  Info,
+  Package,
+  Scale
+} from 'lucide-vue-next'
 
 const form = ref({
   name: '',
@@ -192,10 +32,221 @@ const submit = () => {
     onSuccess: () => {
       loading.value = false
     },
-    onError: (errors: Record<string, string>) => {
-      Object.assign(errors.value, errors)
+    onError: (errs: Record<string, string>) => {
+      errors.value = errs
       loading.value = false
     },
   })
 }
 </script>
+
+<template>
+  <Head title="Create Shipping Method" />
+
+  <AdminLayout>
+    <div class="space-y-6">
+      <!-- Header -->
+      <div class="flex items-center justify-between">
+        <div>
+          <h2 class="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-gray-900 to-gray-600 dark:from-white dark:to-gray-300">
+            Create Shipping Method
+          </h2>
+          <p class="mt-1 text-sm text-gray-500 dark:text-gray-400 flex items-center gap-2">
+            <Truck class="w-4 h-4" />
+            Add a new shipping method to your store
+          </p>
+        </div>
+        <Link
+          href="/admin/settings/shipping-methods"
+          class="inline-flex items-center px-4 py-2 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-xl text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors shadow-sm"
+        >
+          <ChevronLeft class="w-4 h-4 mr-2" />
+          Back to List
+        </Link>
+      </div>
+
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <!-- Main Form -->
+        <div class="lg:col-span-2 space-y-6">
+          <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-6">
+            <form @submit.prevent="submit" class="space-y-6">
+              <!-- Name -->
+              <div>
+                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">Method Name</label>
+                <input
+                  v-model="form.name"
+                  type="text"
+                  placeholder="e.g., Standard Shipping"
+                  class="block w-full px-3 py-2.5 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-xl text-sm shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-shadow dark:text-white"
+                />
+                <p v-if="errors.name" class="text-red-600 text-sm mt-1">{{ errors.name }}</p>
+              </div>
+
+              <!-- Slug -->
+              <div>
+                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">Slug</label>
+                <input
+                  v-model="form.slug"
+                  type="text"
+                  placeholder="e.g., standard-shipping"
+                  class="block w-full px-3 py-2.5 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-xl text-sm shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-shadow dark:text-white"
+                />
+                <p class="text-gray-500 dark:text-gray-400 text-xs mt-1">URL-friendly identifier</p>
+                <p v-if="errors.slug" class="text-red-600 text-sm mt-1">{{ errors.slug }}</p>
+              </div>
+
+              <!-- Type -->
+              <div>
+                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">Shipping Type</label>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div class="relative flex items-start p-4 border rounded-xl hover:bg-gray-50 dark:hover:bg-gray-700/50 cursor-pointer transition-colors"
+                    :class="form.type === 'flat-rate' ? 'border-blue-500 ring-1 ring-blue-500 bg-blue-50/50 dark:bg-blue-900/20' : 'border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800'"
+                    @click="form.type = 'flat-rate'"
+                  >
+                    <div class="flex items-center h-5">
+                      <input
+                        v-model="form.type"
+                        value="flat-rate"
+                        type="radio"
+                        class="focus:ring-blue-500 h-4 w-4 text-blue-600 border-gray-300 dark:border-gray-600"
+                      />
+                    </div>
+                    <div class="ml-3">
+                      <label class="font-medium text-gray-900 dark:text-white flex items-center gap-2">
+                        <Package class="w-4 h-4 text-gray-500" />
+                        Flat Rate
+                      </label>
+                      <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Fixed price regardless of weight</p>
+                    </div>
+                  </div>
+
+                  <div class="relative flex items-start p-4 border rounded-xl hover:bg-gray-50 dark:hover:bg-gray-700/50 cursor-pointer transition-colors"
+                    :class="form.type === 'calculated' ? 'border-blue-500 ring-1 ring-blue-500 bg-blue-50/50 dark:bg-blue-900/20' : 'border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800'"
+                    @click="form.type = 'calculated'"
+                  >
+                    <div class="flex items-center h-5">
+                      <input
+                        v-model="form.type"
+                        value="calculated"
+                        type="radio"
+                        class="focus:ring-blue-500 h-4 w-4 text-blue-600 border-gray-300 dark:border-gray-600"
+                      />
+                    </div>
+                    <div class="ml-3">
+                      <label class="font-medium text-gray-900 dark:text-white flex items-center gap-2">
+                        <Scale class="w-4 h-4 text-gray-500" />
+                        Calculated
+                      </label>
+                      <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Based on weight and rules</p>
+                    </div>
+                  </div>
+                </div>
+                <p v-if="errors.type" class="text-red-600 text-sm mt-1">{{ errors.type }}</p>
+              </div>
+
+              <!-- Cost Fields -->
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">Base Cost ($)</label>
+                  <input
+                    v-model="form.base_cost"
+                    type="number"
+                    step="0.01"
+                    min="0"
+                    placeholder="0.00"
+                    class="block w-full px-3 py-2.5 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl text-sm shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-shadow dark:text-white"
+                  />
+                  <p v-if="errors.base_cost" class="text-red-600 text-sm mt-1">{{ errors.base_cost }}</p>
+                </div>
+
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">Cost per Kg ($)</label>
+                  <input
+                    v-model="form.cost_per_kg"
+                    type="number"
+                    step="0.0001"
+                    min="0"
+                    placeholder="0.0000"
+                    class="block w-full px-3 py-2.5 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl text-sm shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-shadow dark:text-white"
+                  />
+                  <p v-if="errors.cost_per_kg" class="text-red-600 text-sm mt-1">{{ errors.cost_per_kg }}</p>
+                </div>
+              </div>
+
+              <!-- Description -->
+              <div>
+                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">Description</label>
+                <textarea
+                  v-model="form.description"
+                  placeholder="Describe this shipping method..."
+                  rows="4"
+                  class="block w-full px-3 py-2.5 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl text-sm shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-shadow dark:text-white"
+                ></textarea>
+                <p v-if="errors.description" class="text-red-600 text-sm mt-1">{{ errors.description }}</p>
+              </div>
+
+              <!-- Default -->
+              <div class="bg-gray-50 dark:bg-gray-700/50 rounded-xl p-4 border border-gray-200 dark:border-gray-700">
+                <label class="flex items-center gap-3 cursor-pointer">
+                  <input
+                    v-model="form.is_default"
+                    type="checkbox"
+                    class="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700"
+                  />
+                  <span class="text-sm font-medium text-gray-700 dark:text-gray-300">Set as default shipping method</span>
+                </label>
+              </div>
+
+              <!-- Actions -->
+              <div class="flex items-center justify-end gap-3 pt-4 border-t border-gray-200 dark:border-gray-700">
+                <Link
+                  href="/admin/settings/shipping-methods"
+                  class="px-4 py-2 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-xl hover:bg-gray-50 dark:hover:bg-gray-700 font-medium text-sm transition-colors"
+                >
+                  Cancel
+                </Link>
+                <button
+                  type="submit"
+                  :disabled="loading"
+                  class="inline-flex items-center px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-sm font-medium transition-colors shadow-sm focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  <Save class="w-4 h-4 mr-2" />
+                  {{ loading ? 'Creating...' : 'Create Method' }}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+
+        <!-- Sidebar -->
+        <div class="space-y-6">
+          <div class="bg-blue-50 dark:bg-blue-900/20 rounded-xl p-4 border border-blue-100 dark:border-blue-800">
+            <div class="flex">
+              <div class="flex-shrink-0">
+                <Info class="h-5 w-5 text-blue-400" aria-hidden="true" />
+              </div>
+              <div class="ml-3">
+                <h3 class="text-sm font-medium text-blue-800 dark:text-blue-300">
+                  Shipping Configuration
+                </h3>
+                <div class="mt-2 text-sm text-blue-700 dark:text-blue-400 space-y-3">
+                  <p>
+                    <span class="font-semibold block mb-1">Flat Rate:</span>
+                    Charges a fixed base cost regardless of the total weight of the order.
+                  </p>
+                  <p>
+                    <span class="font-semibold block mb-1">Calculated:</span>
+                    Combines the Base Cost with the Cost per Kg multiplied by the total weight.
+                  </p>
+                  <p class="text-xs opacity-75">
+                    Example: Base $5 + ($2/kg * 2kg) = $9 Total
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </AdminLayout>
+</template>

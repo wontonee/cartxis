@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
-import { Head, useForm, usePage } from '@inertiajs/vue3'
+import { Head, useForm, usePage, Link } from '@inertiajs/vue3'
 import AdminLayout from '@/layouts/AdminLayout.vue'
 
 interface PaymentMethod {
@@ -64,7 +64,7 @@ const save = () => {
   <AdminLayout title="Payment Methods - PhonePe">
     <Head title="Configure PhonePe" />
 
-    <div class="p-6">
+    <div>
       <!-- Page Header -->
       <div class="mb-6">
         <div class="flex items-center justify-between mb-6">
@@ -72,7 +72,7 @@ const save = () => {
             <h1 class="text-2xl md:text-3xl text-gray-800 dark:text-white font-bold">PhonePe Configuration</h1>
             <p class="text-sm text-gray-600 dark:text-gray-400 mt-1">Configure PhonePe payment gateway settings</p>
           </div>
-          <a 
+          <Link 
             href="/admin/settings/payment-methods"
             class="inline-flex items-center px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
           >
@@ -80,7 +80,7 @@ const save = () => {
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
             </svg>
             Back to Payment Methods
-          </a>
+          </Link>
         </div>
       </div>
 
