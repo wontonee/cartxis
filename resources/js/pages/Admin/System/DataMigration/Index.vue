@@ -121,19 +121,21 @@ const startMigration = async () => {
     <Head title="Data Migration" />
 
     <AdminLayout title="Data Migration">
-        <div class="flex flex-col h-full">
+        <div class="p-6 max-w-7xl mx-auto space-y-6">
             <!-- Header -->
-            <div class="px-6 py-4 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between shadow-sm z-10">
+            <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                 <div>
-                    <h1 class="text-xl font-semibold text-gray-900 dark:text-white flex items-center gap-2">
-                        <ArrowRightLeft class="w-5 h-5 text-blue-600" />
+                    <h1 class="text-2xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
                         Data Migration
                     </h1>
+                    <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
+                        Migrate data from other ecommerce platforms
+                    </p>
                 </div>
             </div>
 
             <!-- Content -->
-            <div class="flex-1 p-6 overflow-auto bg-gray-50 dark:bg-gray-900">
+            <div class="overflow-auto rounded-xl">
                 <div class="space-y-6">
                     <!-- Source Selection -->
                     <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">

@@ -172,46 +172,43 @@ const formatDateTime = (datetime: string | undefined) => {
     <Head title="Maintenance Mode" />
     
     <AdminLayout title="System Maintenance">
-        <div class="flex flex-col h-full">
+        <div class="p-6 max-w-7xl mx-auto space-y-6">
             <!-- Header -->
-            <div class="sticky top-0 z-20 bg-background/80 backdrop-blur-sm border-b border-border p-6">
-                <div class="flex items-center justify-between gap-4">
-                    <div class="flex items-center gap-3">
-                        <div class="p-2 rounded-lg bg-primary/10 text-primary">
-                            <Hammer class="w-6 h-6" />
-                        </div>
-                        <div>
-                            <h1 class="text-xl font-semibold text-foreground">Maintenance Mode</h1>
-                            <p class="text-sm text-muted-foreground">Manage site maintenance and scheduled downtime</p>
-                        </div>
-                    </div>
-                
-                    <div class="flex items-center gap-2">
-                        <Button 
-                            v-if="settings.enabled"
-                            variant="destructive"
-                            @click="disableMaintenance"
-                            :disabled="isSubmitting"
-                        >
-                            <PowerOff class="mr-2 h-4 w-4" />
-                            Disable Maintenance
-                        </Button>
-                        <Button 
-                            v-else
-                            class="bg-blue-600 hover:bg-blue-700 text-white"
-                            @click="enableMaintenance"
-                            :disabled="isSubmitting"
-                        >
-                            <Power class="mr-2 h-4 w-4" />
-                            Enable Maintenance
-                        </Button>
-                    </div>
+            <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                <div>
+                    <h1 class="text-2xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
+                        Maintenance Mode
+                    </h1>
+                    <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
+                        Manage site maintenance and scheduled downtime
+                    </p>
+                </div>
+            
+                <div class="flex items-center gap-2">
+                    <Button 
+                        v-if="settings.enabled"
+                        variant="destructive"
+                        @click="disableMaintenance"
+                        :disabled="isSubmitting"
+                    >
+                        <PowerOff class="mr-2 h-4 w-4" />
+                        Disable Maintenance
+                    </Button>
+                    <Button 
+                        v-else
+                        class="bg-blue-600 hover:bg-blue-700 text-white shadow-sm border-transparent rounded-xl"
+                        @click="enableMaintenance"
+                        :disabled="isSubmitting"
+                    >
+                        <Power class="mr-2 h-4 w-4" />
+                        Enable Maintenance
+                    </Button>
                 </div>
             </div>
 
-            <!-- Scrollable Content -->
-            <div class="flex-1 overflow-auto p-6">
-                <div class="max-w-7xl mx-auto space-y-6">
+            <!-- Content -->
+            <div class="overflow-auto rounded-xl">
+                <div class="space-y-6">
                     <!-- Current Status Alert -->
                     <Alert v-if="settings.enabled" variant="destructive">
                         <AlertTriangle class="h-4 w-4" />

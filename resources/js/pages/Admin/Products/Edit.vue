@@ -546,24 +546,42 @@ const deleteProduct = () => {
 
 <template>
   <Head title="Edit Product" />
+  
   <AdminLayout title="Edit Product">
-    <div class="px-4 sm:px-6 lg:px-8 py-8 w-full max-w-9xl mx-auto">
+    <div class="p-6 max-w-7xl mx-auto space-y-6">
+      
       <!-- Header -->
-      <div class="mb-8">
-        <div class="flex items-center justify-between">
-          <div>
-            <h1 class="text-2xl md:text-3xl text-gray-800 dark:text-white font-bold">Edit Product</h1>
-            <p class="text-sm text-gray-600 dark:text-gray-400 mt-1">Update product information</p>
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div>
+          <h1 class="text-2xl font-bold text-gray-900 dark:text-white">Edit Product</h1>
+          <div class="flex items-center gap-2 mt-1 text-sm text-gray-500 dark:text-gray-400">
+            <Link :href="productRoutes.index().url" class="hover:text-blue-600 transition-colors">Products</Link>
+            <span class="text-gray-300 dark:text-gray-600">/</span>
+            <span>{{ product.name }}</span>
           </div>
+        </div>
+        
+        <div class="flex items-center gap-3">
           <Link 
-            :href="productRoutes.index().url"
-            class="inline-flex items-center px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+            :href="productRoutes.index().url" 
+            class="hidden sm:inline-flex px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-sm font-medium text-gray-700 dark:text-gray-200 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 transition-colors"
           >
-            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
-            </svg>
-            Back to Products
+            Cancel
           </Link>
+          <button 
+            type="button" 
+            @click="showDeleteModal = true"
+            class="px-4 py-2 border border-red-300 dark:border-red-700 rounded-lg text-sm font-medium text-red-700 dark:text-red-400 bg-white dark:bg-gray-800 hover:bg-red-50 dark:hover:bg-red-900/20 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition-colors"
+          >
+            Delete
+          </button>
+          <button 
+            type="button" 
+            @click="submitForm"
+            class="px-4 py-2 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors"
+          >
+            Update Product
+          </button>
         </div>
       </div>
 
@@ -572,15 +590,15 @@ const deleteProduct = () => {
         <!-- Main Column (2/3) -->
         <div class="lg:col-span-2 space-y-6">
           <!-- Tabs Navigation -->
-          <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
-            <nav class="-mb-px flex space-x-8 px-6 border-b border-gray-200 dark:border-gray-700 overflow-x-auto" aria-label="Tabs">
+          <div class="border-b border-gray-200 dark:border-gray-700">
+            <nav class="-mb-px flex space-x-8 overflow-x-auto" aria-label="Tabs">
               <button
                 @click="activeTab = 'general'"
                 :class="[
                   activeTab === 'general'
-                    ? 'border-blue-500 text-blue-600 dark:text-blue-400'
-                    : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300 dark:hover:border-gray-600',
-                  'whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm'
+                   ? 'border-blue-500 text-blue-600 dark:text-blue-400'
+                   : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300 dark:hover:border-gray-600',
+                 'whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm'
                 ]"
               >
                 General
@@ -589,9 +607,9 @@ const deleteProduct = () => {
                 @click="activeTab = 'images'"
                 :class="[
                   activeTab === 'images'
-                    ? 'border-blue-500 text-blue-600 dark:text-blue-400'
-                    : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300 dark:hover:border-gray-600',
-                  'whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm'
+                   ? 'border-blue-500 text-blue-600 dark:text-blue-400'
+                   : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300 dark:hover:border-gray-600',
+                 'whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm'
                 ]"
               >
                 Images
@@ -642,11 +660,10 @@ const deleteProduct = () => {
                 SEO
               </button>
             </nav>
+          </div>
 
-            <!-- Tab Content -->
-            <div class="p-6">
-              <!-- General Tab -->
-              <div v-show="activeTab === 'general'" class="space-y-6">
+          <!-- General Tab -->
+          <div v-show="activeTab === 'general'" class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6 space-y-6">
                 <!-- Product Name -->
                 <div>
                   <label for="name" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
@@ -849,7 +866,7 @@ const deleteProduct = () => {
               </div>
 
               <!-- Images Tab -->
-              <div v-show="activeTab === 'images'" class="space-y-6">
+              <div v-show="activeTab === 'images'" class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6 space-y-6">
                 <!-- Existing Images -->
                 <div v-if="product.images && product.images.length > 0">
                   <h3 class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">Current Images</h3>
@@ -921,7 +938,7 @@ const deleteProduct = () => {
               </div>
 
               <!-- Inventory Tab -->
-              <div v-show="activeTab === 'inventory'">
+              <div v-show="activeTab === 'inventory'" class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6">
                 <InventoryTracker
                   :product-id="product.id"
                   :current-stock="product.quantity"
@@ -934,7 +951,7 @@ const deleteProduct = () => {
                 />
                 
                 <!-- Pricing Section (moved from old inventory tab) -->
-                <div class="mt-6 bg-white dark:bg-gray-800 rounded-lg shadow p-6 space-y-6">
+                <div class="mt-6 space-y-6">
                   <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Pricing</h3>
                   
                   <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -1073,7 +1090,7 @@ const deleteProduct = () => {
               </div>
 
               <!-- Downloadable Files Tab -->
-              <div v-show="activeTab === 'downloads'" v-if="form.type === 'downloadable'" class="space-y-6">
+              <div v-show="activeTab === 'downloads'" v-if="form.type === 'downloadable'" class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6 space-y-6">
                 <div>
                   <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-4">Downloadable Files</h3>
                   
@@ -1108,7 +1125,7 @@ const deleteProduct = () => {
               </div>
 
               <!-- SEO Tab -->
-              <div v-show="activeTab === 'seo'" class="space-y-6">
+              <div v-show="activeTab === 'seo'" class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6 space-y-6">
                 <div>
                   <label for="meta_title" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                     Meta Title
@@ -1153,7 +1170,7 @@ const deleteProduct = () => {
               </div>
 
               <!-- Attributes Tab -->
-              <div v-show="activeTab === 'attributes'" class="space-y-6">
+              <div v-show="activeTab === 'attributes'" class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6 space-y-6">
                 <div class="mb-6">
                   <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Product Attributes</h3>
                   <p class="text-sm text-gray-600 dark:text-gray-400 mt-1">Add and specify product characteristics and specifications</p>
@@ -1323,8 +1340,6 @@ const deleteProduct = () => {
                 </div>
               </div>
             </div>
-          </div>
-        </div>
 
         <!-- Sidebar (1/3) -->
         <div class="space-y-6">
@@ -1384,22 +1399,8 @@ const deleteProduct = () => {
               </label>
             </div>
 
-            <!-- Action Buttons -->
-            <div class="space-y-2">
-              <button
-                @click="submitForm"
-                type="button"
-                class="w-full inline-flex justify-center items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
-              >
-                Update Product
-              </button>
-              <button
-                @click="showDeleteModal = true"
-                type="button"
-                class="w-full inline-flex justify-center items-center px-4 py-2 border border-red-300 dark:border-red-700 rounded-md shadow-sm text-sm font-medium text-red-700 dark:text-red-400 bg-white dark:bg-gray-800 hover:bg-red-50 dark:hover:bg-red-900/20 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
-              >
-                Delete Product
-              </button>
+            <!-- Action Buttons (Moved to Header) -->
+            <div class="hidden space-y-2">
             </div>
           </div>
 

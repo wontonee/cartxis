@@ -160,28 +160,28 @@ const toggleActive = (item: MenuItem) => {
     <Head title="Menu Management" />
 
     <AdminLayout title="Menu Management">
-        <div>
+        <div class="p-6 max-w-7xl mx-auto space-y-6">
             <!-- Header -->
-            <div class="mb-8 flex flex-col md:flex-row md:items-center justify-between gap-4">
+            <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                 <div>
-                   <div class="flex items-center gap-3 mb-2">
-                        <div class="p-2 bg-blue-100 dark:bg-blue-900/30 rounded-lg text-blue-600 dark:text-blue-400">
-                            <Plug class="w-6 h-6" />
-                        </div>
-                        <h1 class="text-2xl font-bold text-gray-900 dark:text-white">Menu Management</h1>
-                    </div>
-                    <p class="text-sm text-gray-500 dark:text-gray-400 max-w-2xl leading-relaxed ml-11">
+                   <h1 class="text-2xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
+                        Menu Management
+                   </h1>
+                   <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
                         Manage and customize your admin sidebar navigation hierarchy.
-                    </p>
+                   </p>
                 </div>
                 <button
                     @click="handleCreate"
-                    class="ml-11 md:ml-0 inline-flex items-center justify-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 dark:focus:ring-offset-gray-900 transition-colors shadow-sm"
+                    class="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 border border-transparent rounded-xl text-sm font-medium text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 shadow-sm transition-all duration-200"
                 >
                     <Plus class="h-4 w-4" />
                     Add Menu Item
                 </button>
             </div>
+
+            <!-- Content -->
+            <div class="overflow-auto rounded-xl">
 
             <!-- Info Card -->
             <div class="rounded-lg border border-blue-200 bg-blue-50 p-4 dark:border-blue-800 dark:bg-blue-900/20 mb-6">
@@ -395,6 +395,7 @@ const toggleActive = (item: MenuItem) => {
                 </div>
             </div>
         </div>
+    </div>
 
         <!-- Form Modal -->
         <MenuFormModal

@@ -46,18 +46,20 @@ const getGroupColor = (group: string) => {
   <Head title="Permissions Management" />
   
   <AdminLayout title="Permissions Management">
-    <div class="flex flex-col h-full">
+    <div class="p-6 max-w-7xl mx-auto space-y-6">
       <!-- Header -->
-      <div class="px-6 py-4 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between shadow-sm z-10">
+      <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 class="text-xl font-semibold text-gray-900 dark:text-white flex items-center gap-2">
-            <Shield class="w-5 h-5 text-blue-600" />
+          <h1 class="text-2xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
             Permissions Management
           </h1>
+          <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
+            Manage system permissions and access controls
+          </p>
         </div>
         <Link
           href="/admin/system/permissions/create"
-          class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg flex items-center gap-2 transition-colors text-sm font-medium shadow-sm"
+          class="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 border border-transparent rounded-xl text-sm font-medium text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 shadow-sm transition-all duration-200"
         >
           <Plus class="w-4 h-4" />
           Add Permission
@@ -65,7 +67,7 @@ const getGroupColor = (group: string) => {
       </div>
 
       <!-- Content -->
-      <div class="flex-1 p-6 overflow-auto bg-gray-50 dark:bg-gray-900">
+      <div class="overflow-auto rounded-xl">
         <!-- Permissions by Group -->
         <div class="space-y-6">
           <div

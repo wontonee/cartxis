@@ -244,26 +244,26 @@ function formatDate(date: string): string {
   <Head title="Products" />
 
   <AdminLayout title="Products">
-    <div class="space-y-6">
+    <div class="space-y-5">
       <!-- Page Header -->
       <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 class="text-2xl font-bold text-gray-900 dark:text-white tracking-tight">Products</h1>
-          <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">Manage your entire product catalog from one place.</p>
+          <h1 class="text-xl font-semibold text-gray-900 dark:text-white tracking-tight">Products</h1>
+          <p class="mt-0.5 text-sm text-gray-500 dark:text-gray-400">Manage your entire product catalog from one place.</p>
         </div>
         <Link
           :href="productRoutes.create().url"
-          class="inline-flex items-center justify-center px-4 py-2.5 text-sm font-semibold text-white bg-blue-600 rounded-xl hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-600 dark:focus:ring-offset-gray-900 transition-all shadow-sm hover:shadow-md"
+          class="inline-flex items-center justify-center px-4 py-2.5 text-sm font-semibold text-white bg-blue-600 rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-600 dark:focus:ring-offset-gray-900 transition-all shadow-sm"
         >
-          <Plus class="w-5 h-5 mr-2" />
+          <Plus class="w-4 h-4 mr-1.5" />
           Add Product
         </Link>
       </div>
 
       <!-- Filters Card -->
-      <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 p-5">
-        <div class="flex items-center gap-2 mb-4 text-gray-900 dark:text-white font-medium">
-          <Filter class="w-4 h-4 text-gray-500" />
+      <div class="bg-white dark:bg-gray-800/80 rounded-xl border border-gray-100 dark:border-gray-700/60 p-5">
+        <div class="flex items-center gap-2 mb-3.5 text-gray-700 dark:text-gray-300 text-sm font-medium">
+          <Filter class="w-3.5 h-3.5 text-gray-400" />
           Filters & Search
         </div>
         
@@ -288,7 +288,7 @@ function formatDate(date: string): string {
               <select
                 v-model="statusFilter"
                 @change="applyFilters"
-                class="appearance-none block w-full pl-3 pr-10 py-2.5 border border-gray-200 dark:border-gray-700 rounded-lg leading-5 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all sm:text-sm cursor-pointer"
+                class="appearance-none block w-full pl-3 pr-10 py-2.5 border border-gray-200 dark:border-gray-700 rounded-lg leading-5 bg-gray-50 dark:bg-gray-900 text-gray-700 dark:text-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all sm:text-sm cursor-pointer"
               >
                 <option value="">All Status</option>
                 <option value="enabled">Enabled</option>
@@ -306,7 +306,7 @@ function formatDate(date: string): string {
               <select
                 v-model="categoryFilter"
                 @change="applyFilters"
-                class="appearance-none block w-full pl-3 pr-10 py-2.5 border border-gray-200 dark:border-gray-700 rounded-lg leading-5 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all sm:text-sm cursor-pointer"
+                class="appearance-none block w-full pl-3 pr-10 py-2.5 border border-gray-200 dark:border-gray-700 rounded-lg leading-5 bg-gray-50 dark:bg-gray-900 text-gray-700 dark:text-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all sm:text-sm cursor-pointer"
               >
                 <option value="">All Categories</option>
                 <option v-for="category in categories" :key="category.id" :value="category.id">
@@ -325,7 +325,7 @@ function formatDate(date: string): string {
               <select
                 v-model="stockStatusFilter"
                 @change="applyFilters"
-                class="appearance-none block w-full pl-3 pr-10 py-2.5 border border-gray-200 dark:border-gray-700 rounded-lg leading-5 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all sm:text-sm cursor-pointer"
+                class="appearance-none block w-full pl-3 pr-10 py-2.5 border border-gray-200 dark:border-gray-700 rounded-lg leading-5 bg-gray-50 dark:bg-gray-900 text-gray-700 dark:text-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all sm:text-sm cursor-pointer"
               >
                 <option value="">All Stock Status</option>
                 <option value="in_stock">In Stock</option>
@@ -364,9 +364,9 @@ function formatDate(date: string): string {
 
       <!-- Bulk Actions -->
       <transition enter-active-class="transition ease-out duration-200" enter-from-class="opacity-0 -translate-y-2" enter-to-class="opacity-100 translate-y-0" leave-active-class="transition ease-in duration-150" leave-from-class="opacity-100 translate-y-0" leave-to-class="opacity-0 -translate-y-2">
-        <div v-if="selectedProducts.length > 0" class="bg-blue-600 rounded-xl shadow-lg p-3 text-white flex items-center justify-between sticky top-4 z-10 px-6">
-          <span class="text-sm font-semibold flex items-center">
-            <CheckCircle class="w-4 h-4 mr-2" />
+        <div v-if="selectedProducts.length > 0" class="bg-blue-600 rounded-xl p-3 text-white flex items-center justify-between sticky top-4 z-10 px-5 shadow-lg shadow-blue-600/20">
+          <span class="text-xs font-semibold flex items-center">
+            <CheckCircle class="w-3.5 h-3.5 mr-1.5" />
             {{ selectedProducts.length }} product{{ selectedProducts.length > 1 ? 's' : '' }} selected
           </span>
           <div class="flex gap-2">
@@ -395,10 +395,10 @@ function formatDate(date: string): string {
       </transition>
 
       <!-- Products Table -->
-      <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 overflow-hidden">
+      <div class="bg-white dark:bg-gray-800/80 rounded-xl border border-gray-100 dark:border-gray-700/60 overflow-hidden">
         <div class="overflow-x-auto">
-          <table class="min-w-full divide-y divide-gray-100 dark:divide-gray-700">
-            <thead class="bg-gray-50/80 dark:bg-gray-700/50">
+          <table class="min-w-full divide-y divide-gray-100 dark:divide-gray-700/60">
+            <thead class="bg-gray-50/80 dark:bg-gray-800/50">
               <tr>
                 <th class="w-12 px-6 py-4">
                   <input
@@ -472,7 +472,7 @@ function formatDate(date: string): string {
                 </th>
               </tr>
             </thead>
-            <tbody class="bg-white dark:bg-gray-800 divide-y divide-gray-100 dark:divide-gray-700">
+            <tbody class="bg-white dark:bg-gray-800/80 divide-y divide-gray-50 dark:divide-gray-700/40">
               <tr v-if="products.data.length === 0">
                 <td colspan="8" class="px-6 py-16 text-center text-gray-500 dark:text-gray-400">
                   <div class="flex flex-col items-center">
@@ -486,7 +486,7 @@ function formatDate(date: string): string {
                 </td>
               </tr>
               <template v-for="product in products.data" :key="product.id">
-              <tr class="group hover:bg-blue-50/50 dark:hover:bg-blue-900/10 transition-colors">
+              <tr class="group hover:bg-gray-50/80 dark:hover:bg-gray-700/20 transition-colors">
                 <td class="px-6 py-4 relative">
                   <div class="flex items-center">
                     <button 
@@ -589,24 +589,24 @@ function formatDate(date: string): string {
                   </span>
                 </td>
                 <td class="px-6 py-4 text-right text-sm font-medium align-middle">
-                  <div class="flex items-center justify-end gap-2  opacity-60 group-hover:opacity-100 transition-opacity">
+                  <div class="flex items-center justify-end gap-1 opacity-50 group-hover:opacity-100 transition-opacity">
                     <button
                       @click="openQuickView(product)"
-                      class="p-2 text-gray-400 hover:text-purple-600 hover:bg-purple-50 dark:hover:bg-purple-900/20 rounded-lg transition-colors"
+                      class="p-1.5 text-gray-400 hover:text-purple-600 hover:bg-purple-50 dark:hover:bg-purple-500/10 rounded-lg transition-colors"
                       title="Quick View"
                     >
                       <Eye class="w-4 h-4" />
                     </button>
                     <Link
                       :href="productRoutes.edit({ product: product.id }).url"
-                      class="p-2 text-gray-400 hover:text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-lg transition-colors"
+                      class="p-1.5 text-gray-400 hover:text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-500/10 rounded-lg transition-colors"
                       title="Edit"
                     >
                       <Edit class="w-4 h-4" />
                     </Link>
                     <button
                       @click="confirmDelete(product.id)"
-                      class="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors"
+                      class="p-1.5 text-gray-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-500/10 rounded-lg transition-colors"
                       title="Delete"
                     >
                       <Trash2 class="w-4 h-4" />

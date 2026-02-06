@@ -99,21 +99,25 @@ const chartBars = computed(() => {
 
   <AdminLayout title="Dashboard">
     <!-- Welcome Banner -->
-    <div class="relative overflow-hidden bg-gradient-to-r from-blue-700 to-indigo-800 rounded-2xl shadow-xl p-8 mb-8 text-white">
-      <div class="absolute top-0 right-0 -mt-10 -mr-10 w-64 h-64 bg-white opacity-10 rounded-full blur-3xl"></div>
-      <div class="absolute bottom-0 left-0 -mb-10 -ml-10 w-64 h-64 bg-blue-400 opacity-10 rounded-full blur-3xl"></div>
+    <div class="relative overflow-hidden bg-gradient-to-br from-blue-600 via-indigo-600 to-violet-700 dark:from-blue-700 dark:via-indigo-800 dark:to-violet-900 rounded-2xl p-8 mb-8 text-white">
+      <!-- Decorative elements -->
+      <div class="absolute top-0 right-0 w-80 h-80 bg-white/5 rounded-full blur-3xl -translate-y-1/3 translate-x-1/4"></div>
+      <div class="absolute bottom-0 left-0 w-60 h-60 bg-indigo-400/10 rounded-full blur-3xl translate-y-1/3 -translate-x-1/4"></div>
+      <div class="absolute top-1/2 left-1/2 w-40 h-40 bg-violet-300/5 rounded-full blur-2xl"></div>
       
       <div class="relative z-10 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
         <div>
-          <h2 class="text-3xl font-bold mb-2">Welcome back, {{ auth?.user?.name || 'Admin' }}! 👋</h2>
-          <p class="text-blue-100 text-lg opacity-90">Here's what's happening with your store today.</p>
+          <h2 class="text-2xl md:text-3xl font-bold mb-1.5 tracking-tight">Welcome back, {{ auth?.user?.name || 'Admin' }}!</h2>
+          <p class="text-blue-100/80 text-sm md:text-base">Here's what's happening with your store today.</p>
         </div>
         <div class="hidden md:block">
-          <div class="flex items-center space-x-2 bg-white/10 backdrop-blur-md border border-white/20 rounded-xl px-4 py-3">
-            <Calendar class="w-5 h-5 text-blue-200" />
+          <div class="flex items-center gap-3 bg-white/10 backdrop-blur-xl border border-white/15 rounded-xl px-4 py-3">
+            <div class="w-9 h-9 bg-white/10 rounded-lg flex items-center justify-center">
+              <Calendar class="w-4 h-4 text-blue-200" />
+            </div>
             <div>
-              <div class="text-xs text-blue-200 font-medium uppercase tracking-wider">Today</div>
-              <div class="text-base font-semibold">{{ new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) }}</div>
+              <div class="text-[10px] text-blue-200/70 font-semibold uppercase tracking-widest">Today</div>
+              <div class="text-sm font-semibold">{{ new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) }}</div>
             </div>
           </div>
         </div>
@@ -121,14 +125,15 @@ const chartBars = computed(() => {
     </div>
 
     <!-- Stats Grid -->
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-5 mb-8">
       <div
         v-for="stat in (props.stats || [])"
         :key="stat.title"
-        class="group bg-white dark:bg-gray-800 rounded-xl shadow-sm hover:shadow-lg transition-all duration-300 p-6 border border-gray-100 dark:border-gray-700 relative overflow-hidden"
+        class="group bg-white dark:bg-gray-800/80 rounded-xl hover:shadow-md transition-all duration-300 p-5 border border-gray-100 dark:border-gray-700/60 relative overflow-hidden"
       >
+        <!-- Subtle background accent -->
         <div 
-          class="absolute top-0 right-0 w-24 h-24 transform translate-x-8 -translate-y-8 rounded-full opacity-5 group-hover:scale-110 transition-transform duration-500"
+          class="absolute -top-6 -right-6 w-20 h-20 rounded-full opacity-[0.04] group-hover:opacity-[0.07] transition-opacity duration-500"
           :class="{
             'bg-blue-500': stat.color === 'blue',
             'bg-green-500': stat.color === 'green',
@@ -137,47 +142,47 @@ const chartBars = computed(() => {
           }"
         ></div>
         
-        <div class="flex items-center justify-between mb-4 relative z-10">
+        <div class="flex items-start justify-between mb-3 relative z-10">
           <div
             :class="[
-              'w-12 h-12 rounded-xl flex items-center justify-center shadow-sm',
-              stat.color === 'blue' && 'bg-blue-50 text-blue-600 dark:bg-blue-900/20 dark:text-blue-400',
-              stat.color === 'green' && 'bg-green-50 text-green-600 dark:bg-green-900/20 dark:text-green-400',
-              stat.color === 'purple' && 'bg-purple-50 text-purple-600 dark:bg-purple-900/20 dark:text-purple-400',
-              stat.color === 'orange' && 'bg-orange-50 text-orange-600 dark:bg-orange-900/20 dark:text-orange-400'
+              'w-10 h-10 rounded-lg flex items-center justify-center',
+              stat.color === 'blue' && 'bg-blue-50 text-blue-600 dark:bg-blue-500/10 dark:text-blue-400',
+              stat.color === 'green' && 'bg-green-50 text-green-600 dark:bg-green-500/10 dark:text-green-400',
+              stat.color === 'purple' && 'bg-purple-50 text-purple-600 dark:bg-purple-500/10 dark:text-purple-400',
+              stat.color === 'orange' && 'bg-orange-50 text-orange-600 dark:bg-orange-500/10 dark:text-orange-400'
             ]"
           >
-            <component :is="iconMap[stat.icon]" class="w-6 h-6" />
+            <component :is="iconMap[stat.icon]" class="w-5 h-5" />
           </div>
           <div
             :class="[
-              'flex items-center text-xs font-bold px-2 py-1 rounded-full',
+              'flex items-center text-[11px] font-semibold px-2 py-0.5 rounded-full',
               stat.trend === 'up' 
-                ? 'bg-green-50 text-green-700 dark:bg-green-900/30 dark:text-green-400' 
-                : 'bg-red-50 text-red-700 dark:bg-red-900/30 dark:text-red-400'
+                ? 'bg-emerald-50 text-emerald-700 dark:bg-emerald-500/10 dark:text-emerald-400' 
+                : 'bg-red-50 text-red-600 dark:bg-red-500/10 dark:text-red-400'
             ]"
           >
-            <component :is="stat.trend === 'up' ? ArrowUpRight : ArrowDownRight" class="w-3 h-3 mr-1" />
+            <component :is="stat.trend === 'up' ? ArrowUpRight : ArrowDownRight" class="w-3 h-3 mr-0.5" />
             {{ stat.change }}
           </div>
         </div>
         <div class="relative z-10">
-          <p class="text-sm font-medium text-gray-500 dark:text-gray-400 mb-1">{{ stat.title }}</p>
-          <p class="text-3xl font-bold text-gray-900 dark:text-white tracking-tight">{{ stat.value }}</p>
+          <p class="text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">{{ stat.title }}</p>
+          <p class="text-2xl font-bold text-gray-900 dark:text-white tracking-tight">{{ stat.value }}</p>
         </div>
       </div>
     </div>
 
     <!-- Sales Chart -->
-    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 p-6 mb-8">
-      <div class="flex items-center justify-between mb-8">
+    <div class="bg-white dark:bg-gray-800/80 rounded-xl border border-gray-100 dark:border-gray-700/60 p-6 mb-8">
+      <div class="flex items-center justify-between mb-6">
         <div>
-          <h3 class="text-xl font-bold text-gray-900 dark:text-white">Sales Overview</h3>
-          <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">Revenue performance over the last 7 days</p>
+          <h3 class="text-base font-semibold text-gray-900 dark:text-white">Sales Overview</h3>
+          <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">Revenue performance over the last 7 days</p>
         </div>
-        <div class="flex items-center space-x-2 bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300 px-3 py-1.5 rounded-lg border border-blue-100 dark:border-blue-800">
-          <Activity class="w-4 h-4" />
-          <span class="text-sm font-semibold">Daily Sales</span>
+        <div class="flex items-center gap-1.5 bg-blue-50 dark:bg-blue-500/10 text-blue-700 dark:text-blue-300 px-2.5 py-1.5 rounded-lg border border-blue-100 dark:border-blue-500/20">
+          <Activity class="w-3.5 h-3.5" />
+          <span class="text-xs font-semibold">Daily Sales</span>
         </div>
       </div>
       
@@ -220,17 +225,17 @@ const chartBars = computed(() => {
     </div>
 
     <!-- Two Column Layout -->
-    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-5 mb-8">
       <!-- Recent Orders - Takes 2 columns -->
-      <div class="lg:col-span-2 bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 flex flex-col">
-        <div class="p-6 border-b border-gray-100 dark:border-gray-700 flex items-center justify-between">
-          <h3 class="text-lg font-bold text-gray-900 dark:text-white">Recent Orders</h3>
+      <div class="lg:col-span-2 bg-white dark:bg-gray-800/80 rounded-xl border border-gray-100 dark:border-gray-700/60 flex flex-col">
+        <div class="px-6 py-4 border-b border-gray-100 dark:border-gray-700/60 flex items-center justify-between">
+          <h3 class="text-sm font-semibold text-gray-900 dark:text-white">Recent Orders</h3>
           <Link 
             href="/admin/sales/orders" 
-            class="group flex items-center text-sm font-semibold text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300 transition-colors"
+            class="group flex items-center text-xs font-semibold text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300 transition-colors"
           >
             View All
-            <ChevronRight class="w-4 h-4 ml-1 transform group-hover:translate-x-1 transition-transform" />
+            <ChevronRight class="w-3.5 h-3.5 ml-0.5 transform group-hover:translate-x-0.5 transition-transform" />
           </Link>
         </div>
         <div class="overflow-x-auto flex-1">
@@ -304,11 +309,11 @@ const chartBars = computed(() => {
       </div>
 
       <!-- Top Products - Takes 1 column -->
-      <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700">
-        <div class="p-6 border-b border-gray-100 dark:border-gray-700">
-          <h3 class="text-lg font-bold text-gray-900 dark:text-white">Top Products</h3>
+      <div class="bg-white dark:bg-gray-800/80 rounded-xl border border-gray-100 dark:border-gray-700/60">
+        <div class="px-6 py-4 border-b border-gray-100 dark:border-gray-700/60">
+          <h3 class="text-sm font-semibold text-gray-900 dark:text-white">Top Products</h3>
         </div>
-        <div class="p-6">
+        <div class="p-5">
           <div v-if="!props.topProducts || props.topProducts.length === 0" class="flex flex-col items-center justify-center py-10 text-gray-500 dark:text-gray-400">
             <Tag class="w-10 h-10 mb-2 opacity-20" />
             <p class="text-sm">No products data available</p>
@@ -363,67 +368,67 @@ const chartBars = computed(() => {
     </div>
 
     <!-- Quick Actions -->
-    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 p-6">
-      <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-6">Quick Actions</h3>
-      <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
+    <div class="bg-white dark:bg-gray-800/80 rounded-xl border border-gray-100 dark:border-gray-700/60 p-6">
+      <h3 class="text-sm font-semibold text-gray-900 dark:text-white mb-5">Quick Actions</h3>
+      <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
         <Link 
           href="/admin/catalog/products/create" 
-          class="flex flex-col items-center justify-center p-4 bg-gradient-to-br from-blue-50 to-blue-100 dark:from-blue-900/30 dark:to-blue-800/20 border border-blue-200 dark:border-blue-800 rounded-xl hover:shadow-md hover:scale-105 transition-all duration-200 group"
+          class="group flex flex-col items-center justify-center p-4 rounded-xl border border-gray-100 dark:border-gray-700/50 hover:border-blue-200 dark:hover:border-blue-500/30 bg-gray-50/50 dark:bg-gray-800/50 hover:bg-blue-50 dark:hover:bg-blue-500/5 transition-all duration-200"
         >
-          <div class="w-12 h-12 bg-blue-500 rounded-full flex items-center justify-center mb-3 group-hover:bg-blue-600 transition-colors">
-            <Plus class="w-6 h-6 text-white" />
+          <div class="w-10 h-10 bg-blue-100 dark:bg-blue-500/10 rounded-lg flex items-center justify-center mb-2.5 text-blue-600 dark:text-blue-400 group-hover:scale-110 transition-transform">
+            <Plus class="w-5 h-5" />
           </div>
-          <span class="text-sm font-medium text-gray-900 dark:text-white">Add Product</span>
+          <span class="text-xs font-medium text-gray-700 dark:text-gray-300">Add Product</span>
         </Link>
 
         <Link 
           href="/admin/sales/orders" 
-          class="flex flex-col items-center justify-center p-4 bg-gradient-to-br from-green-50 to-green-100 dark:from-green-900/30 dark:to-green-800/20 border border-green-200 dark:border-green-800 rounded-xl hover:shadow-md hover:scale-105 transition-all duration-200 group"
+          class="group flex flex-col items-center justify-center p-4 rounded-xl border border-gray-100 dark:border-gray-700/50 hover:border-emerald-200 dark:hover:border-emerald-500/30 bg-gray-50/50 dark:bg-gray-800/50 hover:bg-emerald-50 dark:hover:bg-emerald-500/5 transition-all duration-200"
         >
-          <div class="w-12 h-12 bg-green-500 rounded-full flex items-center justify-center mb-3 group-hover:bg-green-600 transition-colors">
-            <ShoppingCart class="w-6 h-6 text-white" />
+          <div class="w-10 h-10 bg-emerald-100 dark:bg-emerald-500/10 rounded-lg flex items-center justify-center mb-2.5 text-emerald-600 dark:text-emerald-400 group-hover:scale-110 transition-transform">
+            <ShoppingCart class="w-5 h-5" />
           </div>
-          <span class="text-sm font-medium text-gray-900 dark:text-white">View Orders</span>
+          <span class="text-xs font-medium text-gray-700 dark:text-gray-300">View Orders</span>
         </Link>
 
         <Link 
           href="/admin/customers" 
-          class="flex flex-col items-center justify-center p-4 bg-gradient-to-br from-purple-50 to-purple-100 dark:from-purple-900/30 dark:to-purple-800/20 border border-purple-200 dark:border-purple-800 rounded-xl hover:shadow-md hover:scale-105 transition-all duration-200 group"
+          class="group flex flex-col items-center justify-center p-4 rounded-xl border border-gray-100 dark:border-gray-700/50 hover:border-purple-200 dark:hover:border-purple-500/30 bg-gray-50/50 dark:bg-gray-800/50 hover:bg-purple-50 dark:hover:bg-purple-500/5 transition-all duration-200"
         >
-          <div class="w-12 h-12 bg-purple-500 rounded-full flex items-center justify-center mb-3 group-hover:bg-purple-600 transition-colors">
-            <Users class="w-6 h-6 text-white" />
+          <div class="w-10 h-10 bg-purple-100 dark:bg-purple-500/10 rounded-lg flex items-center justify-center mb-2.5 text-purple-600 dark:text-purple-400 group-hover:scale-110 transition-transform">
+            <Users class="w-5 h-5" />
           </div>
-          <span class="text-sm font-medium text-gray-900 dark:text-white">Customers</span>
+          <span class="text-xs font-medium text-gray-700 dark:text-gray-300">Customers</span>
         </Link>
 
         <Link 
           href="/admin/reports/sales" 
-          class="flex flex-col items-center justify-center p-4 bg-gradient-to-br from-orange-50 to-orange-100 dark:from-orange-900/30 dark:to-orange-800/20 border border-orange-200 dark:border-orange-800 rounded-xl hover:shadow-md hover:scale-105 transition-all duration-200 group"
+          class="group flex flex-col items-center justify-center p-4 rounded-xl border border-gray-100 dark:border-gray-700/50 hover:border-orange-200 dark:hover:border-orange-500/30 bg-gray-50/50 dark:bg-gray-800/50 hover:bg-orange-50 dark:hover:bg-orange-500/5 transition-all duration-200"
         >
-          <div class="w-12 h-12 bg-orange-500 rounded-full flex items-center justify-center mb-3 group-hover:bg-orange-600 transition-colors">
-            <BarChart3 class="w-6 h-6 text-white" />
+          <div class="w-10 h-10 bg-orange-100 dark:bg-orange-500/10 rounded-lg flex items-center justify-center mb-2.5 text-orange-600 dark:text-orange-400 group-hover:scale-110 transition-transform">
+            <BarChart3 class="w-5 h-5" />
           </div>
-          <span class="text-sm font-medium text-gray-900 dark:text-white">Sales Report</span>
+          <span class="text-xs font-medium text-gray-700 dark:text-gray-300">Sales Report</span>
         </Link>
 
         <Link 
           href="/admin/marketing/promotions" 
-          class="flex flex-col items-center justify-center p-4 bg-gradient-to-br from-pink-50 to-pink-100 dark:from-pink-900/30 dark:to-pink-800/20 border border-pink-200 dark:border-pink-800 rounded-xl hover:shadow-md hover:scale-105 transition-all duration-200 group"
+          class="group flex flex-col items-center justify-center p-4 rounded-xl border border-gray-100 dark:border-gray-700/50 hover:border-pink-200 dark:hover:border-pink-500/30 bg-gray-50/50 dark:bg-gray-800/50 hover:bg-pink-50 dark:hover:bg-pink-500/5 transition-all duration-200"
         >
-          <div class="w-12 h-12 bg-pink-500 rounded-full flex items-center justify-center mb-3 group-hover:bg-pink-600 transition-colors">
-            <Tag class="w-6 h-6 text-white" />
+          <div class="w-10 h-10 bg-pink-100 dark:bg-pink-500/10 rounded-lg flex items-center justify-center mb-2.5 text-pink-600 dark:text-pink-400 group-hover:scale-110 transition-transform">
+            <Tag class="w-5 h-5" />
           </div>
-          <span class="text-sm font-medium text-gray-900 dark:text-white">Promotions</span>
+          <span class="text-xs font-medium text-gray-700 dark:text-gray-300">Promotions</span>
         </Link>
 
         <Link 
           href="/admin/settings/general" 
-          class="flex flex-col items-center justify-center p-4 bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-700/30 dark:to-gray-600/20 border border-gray-200 dark:border-gray-600 rounded-xl hover:shadow-md hover:scale-105 transition-all duration-200 group"
+          class="group flex flex-col items-center justify-center p-4 rounded-xl border border-gray-100 dark:border-gray-700/50 hover:border-gray-200 dark:hover:border-gray-600 bg-gray-50/50 dark:bg-gray-800/50 hover:bg-gray-100 dark:hover:bg-gray-700/30 transition-all duration-200"
         >
-          <div class="w-12 h-12 bg-gray-500 rounded-full flex items-center justify-center mb-3 group-hover:bg-gray-600 transition-colors">
-            <Settings class="w-6 h-6 text-white" />
+          <div class="w-10 h-10 bg-gray-100 dark:bg-gray-700/50 rounded-lg flex items-center justify-center mb-2.5 text-gray-600 dark:text-gray-400 group-hover:scale-110 transition-transform">
+            <Settings class="w-5 h-5" />
           </div>
-          <span class="text-sm font-medium text-gray-900 dark:text-white">Settings</span>
+          <span class="text-xs font-medium text-gray-700 dark:text-gray-300">Settings</span>
         </Link>
       </div>
     </div>

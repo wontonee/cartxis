@@ -65,19 +65,21 @@ const downloadBackup = (backup: Backup) => {
     <Head title="System Backups" />
 
     <AdminLayout title="System Backups">
-        <div class="flex flex-col h-full">
+        <div class="p-6 max-w-7xl mx-auto space-y-6">
             <!-- Header -->
-            <div class="px-6 py-4 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between shadow-sm z-10">
+            <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                 <div>
-                    <h1 class="text-xl font-semibold text-gray-900 dark:text-white flex items-center gap-2">
-                        <Database class="w-5 h-5 text-blue-600" />
+                     <h1 class="text-2xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
                         System Backups
-                    </h1>
+                     </h1>
+                     <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
+                        Create, download, and manage system backups
+                     </p>
                 </div>
                 <button
                     @click="showCreateModal = true"
                     :disabled="isLoading"
-                    class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg flex items-center gap-2 transition-colors disabled:opacity-50 disabled:cursor-not-allowed text-sm font-medium shadow-sm"
+                    class="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 border border-transparent rounded-xl text-sm font-medium text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 shadow-sm transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                     <Plus v-if="!isLoading" class="w-4 h-4" />
                     <svg v-else class="animate-spin h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
@@ -89,7 +91,7 @@ const downloadBackup = (backup: Backup) => {
             </div>
 
             <!-- Content -->
-            <div class="flex-1 p-6 overflow-auto bg-gray-50 dark:bg-gray-900">
+            <div class="overflow-auto rounded-xl">
                 
                 <!-- Progress Banner -->
                 <div v-if="isLoading" class="mb-6 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4">

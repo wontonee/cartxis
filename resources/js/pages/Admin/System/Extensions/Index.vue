@@ -86,20 +86,22 @@ const confirmUninstall = () => {
   <Head title="Extensions" />
 
   <AdminLayout title="Extensions">
-    <div class="flex flex-col h-full">
+    <div class="p-6 max-w-7xl mx-auto space-y-6">
       <!-- Header -->
-      <div class="px-6 py-4 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between shadow-sm z-10">
+      <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 class="text-xl font-semibold text-gray-900 dark:text-white flex items-center gap-2">
-            <Puzzle class="w-5 h-5 text-blue-600" />
+          <h1 class="text-2xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
             Extensions
           </h1>
+          <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
+            Manage and synchronize system extensions and plugins
+          </p>
         </div>
 
         <button
           @click="sync"
           :disabled="isSyncing"
-          class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg flex items-center gap-2 transition-colors disabled:opacity-50 disabled:cursor-not-allowed text-sm font-medium shadow-sm"
+          class="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 border border-transparent rounded-xl text-sm font-medium text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 shadow-sm transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
         >
           <RefreshCcw class="w-4 h-4" :class="isSyncing ? 'animate-spin' : ''" />
           Sync Extensions
@@ -107,10 +109,10 @@ const confirmUninstall = () => {
       </div>
 
       <!-- Content -->
-      <div class="flex-1 p-6 overflow-auto bg-gray-50 dark:bg-gray-900">
+      <div class="overflow-auto rounded-xl">
         
         <!-- Info Banner -->
-        <div class="mb-6 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4 flex items-start gap-3">
+        <div class="mb-6 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-xl p-4 flex items-start gap-3">
              <div class="p-2 bg-blue-100 dark:bg-blue-800 rounded-full shrink-0">
                  <Box class="w-5 h-5 text-blue-600 dark:text-blue-400" />
              </div>

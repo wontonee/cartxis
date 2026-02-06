@@ -265,7 +265,15 @@ const toggleMenu = (itemId: number) => {
   if (openMenus.value.has(itemId)) {
     openMenus.value.delete(itemId)
   } else {
+    // Accordion: close all other menus before opening this one
+    openMenus.value.clear()
     openMenus.value.add(itemId)
+    // Keep parent with active child open too
+    menuItems.value.forEach((mi: any) => {
+      if (mi.id !== itemId && hasActiveChild(mi)) {
+        openMenus.value.add(mi.id)
+      }
+    })
   }
   // Persist menu state to localStorage after toggle
   saveMenuState()
@@ -292,62 +300,77 @@ const toggleSidebar = () => {
 </script>
 
 <template>
-  <div class="min-h-screen bg-gray-100 dark:bg-gray-900">
+  <div class="min-h-screen bg-gray-50 dark:bg-gray-900">
     <!-- Sidebar -->
     <aside
       :class="[
-        'fixed inset-y-0 left-0 z-50 bg-gray-900 transform transition-all duration-200 ease-in-out',
+        'fixed inset-y-0 left-0 z-50 transform transition-all duration-200 ease-in-out',
+        'bg-gradient-to-b from-slate-900 via-slate-900 to-slate-950 dark:from-slate-950 dark:via-slate-950 dark:to-black',
+        'border-r border-slate-800/50',
         sidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0',
-        sidebarCollapsed ? 'w-20' : 'w-64'
+        sidebarCollapsed ? 'w-[72px]' : 'w-[260px]'
       ]"
     >
       <!-- Logo -->
-      <div class="flex items-center justify-between h-16 px-6 border-b border-gray-800">
-        <Link :href="admin.dashboard.url()" class="flex items-center space-x-3">
+      <div class="flex items-center justify-between h-16 border-b border-white/[0.06]" :class="sidebarCollapsed ? 'px-3' : 'px-5'">
+        <Link :href="admin.dashboard.url()" class="flex items-center gap-3 min-w-0">
           <template v-if="adminConfig?.logo && !sidebarCollapsed">
             <img :src="`/storage/${adminConfig.logo}`" :alt="adminConfig?.site_name || 'Admin'" class="h-8 object-contain" />
           </template>
           <template v-else>
-            <div class="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center flex-shrink-0">
-              <span class="text-white font-bold text-xl">{{ adminConfig?.site_name?.charAt(0) || 'C' }}</span>
+            <div class="w-9 h-9 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-xl flex items-center justify-center flex-shrink-0 shadow-lg shadow-blue-500/20">
+              <span class="text-white font-bold text-lg">{{ adminConfig?.site_name?.charAt(0) || 'C' }}</span>
             </div>
-            <span v-if="!sidebarCollapsed" class="text-white font-semibold text-lg transition-opacity duration-200">{{ adminConfig?.site_name || 'Cartxis' }}</span>
+            <span v-if="!sidebarCollapsed" class="text-white font-semibold text-lg truncate transition-opacity duration-200">{{ adminConfig?.site_name || 'Cartxis' }}</span>
           </template>
         </Link>
         
         <!-- Desktop Toggle Button -->
         <button
           @click="toggleSidebar"
-          class="hidden lg:flex items-center justify-center w-8 h-8 text-gray-400 hover:text-white hover:bg-gray-800 rounded-lg transition-colors"
+          class="hidden lg:flex items-center justify-center w-7 h-7 rounded-lg text-slate-500 hover:text-white hover:bg-white/[0.06] transition-all"
+          :class="sidebarCollapsed && 'mx-auto'"
         >
-          <ChevronLeft v-if="!sidebarCollapsed" class="w-5 h-5" />
-          <ChevronRight v-if="sidebarCollapsed" class="w-5 h-5" />
+          <ChevronLeft v-if="!sidebarCollapsed" class="w-4 h-4" />
+          <ChevronRight v-if="sidebarCollapsed" class="w-4 h-4" />
         </button>
       </div>
 
       <!-- Navigation -->
       <nav class="flex-1 h-[calc(100vh-4rem)] overflow-visible">
-        <div class="px-4 py-6 space-y-1 overflow-y-auto h-full">
+        <div class="py-4 overflow-y-auto h-full custom-scrollbar" :class="sidebarCollapsed ? 'px-2' : 'px-3'">
+
+        <!-- Section label -->
+        <div v-if="!sidebarCollapsed" class="px-3 mb-3">
+          <span class="text-[10px] font-semibold uppercase tracking-widest text-slate-500">Navigation</span>
+        </div>
+
         <!-- Dynamic Menu Items -->
+        <div class="space-y-0.5">
         <template v-for="item in menuItems" :key="item.id">
           <!-- Parent Menu without children (Direct Link) -->
           <Link
             v-if="!item.children || item.children.length === 0"
             :href="item.full_url || '#'"
             :class="[
-              'flex items-center px-4 py-3 text-gray-300 rounded-lg hover:bg-gray-800 hover:text-white transition-colors',
-              { 'bg-blue-600 text-white': isActive(item) },
-              sidebarCollapsed && 'justify-center'
+              'group relative flex items-center gap-3 rounded-lg transition-all duration-150',
+              sidebarCollapsed ? 'justify-center p-2.5 mx-auto' : 'px-3 py-2.5',
+              isActive(item)
+                ? 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-md shadow-blue-500/20'
+                : 'text-slate-400 hover:text-white hover:bg-white/[0.06]'
             ]"
             :title="sidebarCollapsed ? item.title : ''"
           >
             <component 
               :is="getIcon(item.icon)" 
               v-if="item.icon"
-              class="w-5 h-5 flex-shrink-0" 
-              :class="{ 'mr-3': !sidebarCollapsed }" 
+              class="flex-shrink-0 transition-colors"
+              :class="[
+                sidebarCollapsed ? 'w-5 h-5' : 'w-[18px] h-[18px]',
+                isActive(item) ? 'text-white' : 'text-slate-500 group-hover:text-slate-300'
+              ]" 
             />
-            <span v-if="!sidebarCollapsed">{{ item.title }}</span>
+            <span v-if="!sidebarCollapsed" class="text-[13px] font-medium">{{ item.title }}</span>
           </Link>
 
           <!-- Parent Menu with children (Expandable) -->
@@ -361,97 +384,123 @@ const toggleSidebar = () => {
             <button
               @click="!sidebarCollapsed && toggleMenu(item.id)"
               :class="[
-                'w-full flex items-center px-4 py-3 text-gray-300 rounded-lg hover:bg-gray-800 hover:text-white transition-colors',
-                sidebarCollapsed && 'justify-center'
+                'group w-full flex items-center gap-3 rounded-lg transition-all duration-150',
+                sidebarCollapsed ? 'justify-center p-2.5' : 'px-3 py-2.5',
+                (isMenuOpen(item.id) || hasActiveChild(item))
+                  ? 'text-white bg-white/[0.06]'
+                  : 'text-slate-400 hover:text-white hover:bg-white/[0.06]'
               ]"
               :title="sidebarCollapsed ? item.title : ''"
             >
               <component 
                 :is="getIcon(item.icon)" 
                 v-if="item.icon"
-                class="w-5 h-5 flex-shrink-0" 
-                :class="{ 'mr-3': !sidebarCollapsed }" 
+                class="flex-shrink-0 transition-colors"
+                :class="[
+                  sidebarCollapsed ? 'w-5 h-5' : 'w-[18px] h-[18px]',
+                  (isMenuOpen(item.id) || hasActiveChild(item)) ? 'text-blue-400' : 'text-slate-500 group-hover:text-slate-300'
+                ]" 
               />
-              <span v-if="!sidebarCollapsed" class="flex-1 text-left">{{ item.title }}</span>
+              <span v-if="!sidebarCollapsed" class="flex-1 text-left text-[13px] font-medium">{{ item.title }}</span>
               <ChevronDown 
                 v-if="!sidebarCollapsed" 
-                :class="['w-4 h-4 transition-transform', isMenuOpen(item.id) && 'rotate-180']" 
+                :class="[
+                  'w-3.5 h-3.5 text-slate-500 transition-transform duration-200',
+                  isMenuOpen(item.id) && 'rotate-180 text-slate-400'
+                ]" 
               />
             </button>
             
             <!-- Child Menu Items (expanded when sidebar is open) -->
-            <div v-if="!sidebarCollapsed" v-show="isMenuOpen(item.id)" class="ml-4 mt-1 space-y-1">
-              <Link 
-                v-for="child in item.children" 
-                :key="child.id"
-                :href="child.full_url || '#'" 
-                :class="[
-                  'flex items-center px-4 py-2 rounded-lg transition-colors cursor-pointer',
-                  isActive(child)
-                    ? 'bg-blue-600 text-white' 
-                    : 'text-gray-400 hover:text-white hover:bg-gray-800'
-                ]"
-              >
-                <component 
-                  :is="getIcon(child.icon)" 
-                  v-if="child.icon"
-                  class="w-4 h-4 mr-3" 
-                />
-                <span class="text-sm">{{ child.title }}</span>
-              </Link>
-            </div>
-
-            <!-- Hover Popover for collapsed sidebar -->
-            <Teleport to="body">
-              <Transition
-                enter-active-class="transition ease-out duration-100"
-                enter-from-class="transform opacity-0 scale-95"
-                enter-to-class="transform opacity-100 scale-100"
-                leave-active-class="transition ease-in duration-75"
-                leave-from-class="transform opacity-100 scale-100"
-                leave-to-class="transform opacity-0 scale-95"
-              >
-                <div 
-                  v-if="sidebarCollapsed && hoveredMenuId === item.id"
-                  class="fixed left-20 w-56 bg-gray-800 rounded-lg shadow-xl border border-gray-700 py-2 z-[60]"
-                  :style="{ top: `${popoverPosition.top}px` }"
-                  @mouseenter="hoveredMenuId = item.id"
-                  @mouseleave="hoveredMenuId = null"
-                >
-                  <div class="px-3 py-2 border-b border-gray-700">
-                    <p class="text-sm font-medium text-white">{{ item.title }}</p>
-                  </div>
+            <Transition
+              enter-active-class="transition-all duration-200 ease-out"
+              enter-from-class="max-h-0 opacity-0"
+              enter-to-class="max-h-[500px] opacity-100"
+              leave-active-class="transition-all duration-150 ease-in"
+              leave-from-class="max-h-[500px] opacity-100"
+              leave-to-class="max-h-0 opacity-0"
+            >
+              <div v-if="!sidebarCollapsed" v-show="isMenuOpen(item.id)" class="overflow-hidden">
+                <div class="ml-[15px] mt-1 mb-1 pl-3 border-l border-slate-800 space-y-0.5">
                   <Link 
                     v-for="child in item.children" 
                     :key="child.id"
                     :href="child.full_url || '#'" 
                     :class="[
-                      'flex items-center px-4 py-2 text-sm transition-colors cursor-pointer',
+                      'group/child flex items-center gap-2.5 px-3 py-2 rounded-lg transition-all duration-150 cursor-pointer',
                       isActive(child)
-                        ? 'bg-blue-600 text-white' 
-                        : 'text-gray-300 hover:text-white hover:bg-gray-700'
+                        ? 'bg-blue-500/10 text-blue-400' 
+                        : 'text-slate-500 hover:text-slate-200 hover:bg-white/[0.04]'
                     ]"
                   >
                     <component 
                       :is="getIcon(child.icon)" 
                       v-if="child.icon"
-                      class="w-4 h-4 mr-3" 
+                      :class="[
+                        'w-3.5 h-3.5 transition-colors',
+                        isActive(child) ? 'text-blue-400' : 'text-slate-600 group-hover/child:text-slate-400'
+                      ]" 
                     />
-                    <span>{{ child.title }}</span>
+                    <span class="text-[13px]">{{ child.title }}</span>
                   </Link>
+                </div>
+              </div>
+            </Transition>
+
+            <!-- Hover Popover for collapsed sidebar -->
+            <Teleport to="body">
+              <Transition
+                enter-active-class="transition ease-out duration-100"
+                enter-from-class="transform opacity-0 translate-x-1"
+                enter-to-class="transform opacity-100 translate-x-0"
+                leave-active-class="transition ease-in duration-75"
+                leave-from-class="transform opacity-100 translate-x-0"
+                leave-to-class="transform opacity-0 translate-x-1"
+              >
+                <div 
+                  v-if="sidebarCollapsed && hoveredMenuId === item.id"
+                  class="fixed left-[76px] w-52 bg-slate-900 rounded-xl shadow-xl shadow-black/30 border border-white/[0.08] py-1.5 z-[60]"
+                  :style="{ top: `${popoverPosition.top}px` }"
+                  @mouseenter="hoveredMenuId = item.id"
+                  @mouseleave="hoveredMenuId = null"
+                >
+                  <div class="px-3.5 py-2 border-b border-white/[0.06]">
+                    <p class="text-xs font-semibold text-white">{{ item.title }}</p>
+                  </div>
+                  <div class="py-1">
+                    <Link 
+                      v-for="child in item.children" 
+                      :key="child.id"
+                      :href="child.full_url || '#'" 
+                      :class="[
+                        'flex items-center gap-2.5 px-3.5 py-2 text-[13px] transition-colors cursor-pointer mx-1.5 rounded-lg',
+                        isActive(child)
+                          ? 'bg-blue-500/10 text-blue-400' 
+                          : 'text-slate-400 hover:text-white hover:bg-white/[0.06]'
+                      ]"
+                    >
+                      <component 
+                        :is="getIcon(child.icon)" 
+                        v-if="child.icon"
+                        class="w-3.5 h-3.5" 
+                      />
+                      <span>{{ child.title }}</span>
+                    </Link>
+                  </div>
                 </div>
               </Transition>
             </Teleport>
           </div>
         </template>
         </div>
+        </div>
       </nav>
     </aside>
 
     <!-- Main Content -->
-    <div :class="['transition-all duration-200', sidebarCollapsed ? 'lg:pl-20' : 'lg:pl-64']">
+    <div :class="['transition-all duration-200', sidebarCollapsed ? 'lg:pl-[72px]' : 'lg:pl-[260px]']">  
       <!-- Header -->
-      <header class="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 sticky top-0 z-40">
+      <header class="bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-800 sticky top-0 z-40">
         <div class="px-4 sm:px-6 lg:px-8">
           <div class="flex items-center justify-between h-16">
             <!-- Mobile menu button -->

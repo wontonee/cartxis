@@ -161,21 +161,18 @@ onUnmounted(() => {
 <template>
     <Head title="Cache Management" />
     <AdminLayout title="Cache Management">
-        <div>
+        <div class="p-6 max-w-7xl mx-auto space-y-6">
             <!-- Page Header -->
-            <div class="mb-8 flex flex-col md:flex-row md:items-center justify-between gap-4">
+            <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                 <div>
-                    <div class="flex items-center gap-3 mb-2">
-                        <div class="p-2 bg-blue-100 dark:bg-blue-900/30 rounded-lg text-blue-600 dark:text-blue-400">
-                            <Database class="w-6 h-6" />
-                        </div>
-                        <h1 class="text-2xl font-bold text-gray-900 dark:text-white">Cache Management</h1>
-                    </div>
-                    <p class="text-sm text-gray-500 dark:text-gray-400 max-w-2xl leading-relaxed ml-11">
+                    <h1 class="text-2xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
+                        Cache Management
+                    </h1>
+                    <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
                         Manage and monitor application cache performance and storage.
                     </p>
                 </div>
-                <div class="flex items-center gap-3 ml-11 md:ml-0">
+                <div class="flex items-center gap-3">
                         <label class="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400">
                             <input
                                 v-model="autoRefresh"
@@ -187,7 +184,7 @@ onUnmounted(() => {
                         <button
                             @click="fetchStatistics"
                             :disabled="isLoading"
-                            class="inline-flex items-center px-4 py-2 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
+                            class="inline-flex items-center px-4 py-2 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-xl shadow-sm text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200"
                         >
                             <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
@@ -196,6 +193,9 @@ onUnmounted(() => {
                         </button>
                     </div>
             </div>
+
+            <!-- Content -->
+            <div class="overflow-auto rounded-xl">
 
             <!-- Statistics Cards -->
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
@@ -326,5 +326,6 @@ onUnmounted(() => {
             </div>
             <!-- End Cache Types -->
         </div>
+    </div>
     </AdminLayout>
 </template>

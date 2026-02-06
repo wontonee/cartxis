@@ -198,28 +198,44 @@ const saveDraft = () => {
   <Head title="Create Product" />
   
   <AdminLayout title="Create Product">
-    <div class="px-4 sm:px-6 lg:px-8 py-8 w-full max-w-9xl mx-auto">
+    <div class="p-6 max-w-7xl mx-auto space-y-6">
+      
       <!-- Header -->
-      <div class="mb-8">
-        <div class="flex items-center justify-between">
-          <div>
-            <h1 class="text-2xl md:text-3xl text-gray-800 dark:text-white font-bold">Create Product</h1>
-            <p class="text-sm text-gray-600 dark:text-gray-400 mt-1">Add a new product to your catalog</p>
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div>
+          <h1 class="text-2xl font-bold text-gray-900 dark:text-white">Create Product</h1>
+          <div class="flex items-center gap-2 mt-1 text-sm text-gray-500 dark:text-gray-400">
+            <Link :href="productRoutes.index().url" class="hover:text-blue-600 transition-colors">Products</Link>
+            <span class="text-gray-300 dark:text-gray-600">/</span>
+            <span>New Product</span>
           </div>
+        </div>
+        
+        <div class="flex items-center gap-3">
           <Link 
             :href="productRoutes.index().url" 
-            class="inline-flex items-center px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+            class="hidden sm:inline-flex px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-sm font-medium text-gray-700 dark:text-gray-200 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 transition-colors"
           >
-            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
-            </svg>
-            Back to Products
+            Cancel
           </Link>
+          <button 
+            type="button" 
+            @click="saveDraft"
+            class="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-sm font-medium text-gray-700 dark:text-gray-200 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 transition-colors"
+          >
+            Save Draft
+          </button>
+          <button 
+            type="button" 
+            @click="submit"
+            class="px-4 py-2 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors"
+          >
+            Create Product
+          </button>
         </div>
       </div>
 
-      <form @submit.prevent="submit">
-        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <form @submit.prevent="submit" class="grid grid-cols-1 lg:grid-cols-3 gap-6">
           <!-- Main Content (2/3 width) -->
           <div class="lg:col-span-2 space-y-6">
             <!-- Tabs -->
@@ -727,20 +743,7 @@ const saveDraft = () => {
                 </div>
               </div>
 
-              <div class="border-t border-gray-200 dark:border-gray-700 mt-6 pt-6 space-y-3">
-                <button type="submit" class="w-full inline-flex justify-center items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
-                  <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
-                  </svg>
-                  Publish Product
-                </button>
-                <button type="button" @click="saveDraft" class="w-full inline-flex justify-center items-center px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
-                  <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4" />
-                  </svg>
-                  Save as Draft
-                </button>
-              </div>
+              <!-- Buttons moved to Header -->
             </div>
 
             <!-- Categories Card -->
@@ -766,7 +769,6 @@ const saveDraft = () => {
               </div>
             </div>
           </div>
-        </div>
       </form>
     </div>
   </AdminLayout>
