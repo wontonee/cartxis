@@ -83,10 +83,10 @@ const providerOptions = computed(() => form.providers.map((p) => p.name).filter(
 const agentOptions = computed(() => form.agents.map((a) => a.name).filter(Boolean))
 
 const tabs = [
-  { id: 'access', name: 'Access & Defaults', icon: Key },
   { id: 'providers', name: 'Providers', icon: Server },
   { id: 'models', name: 'Models', icon: Cpu },
   { id: 'agents', name: 'AI Agents', icon: Bot },
+  { id: 'access', name: 'Access & Defaults', icon: Key },
 ]
 
 const toggleApiKeyVisibility = (index: number) => {
@@ -147,9 +147,56 @@ const removeAgent = (index: number) => {
   form.agents.splice(index, 1)
 }
 
+const showToast = (message: string, type: 'success' | 'error' | 'warning' | 'info' = 'success') => {
+  window.dispatchEvent(new CustomEvent('show-toast', {
+    detail: { message, type },
+  }))
+}
+
 const save = () => {
-  form.post('/admin/settings/ai', {
+  const section = activeTab.value
+  if (section === 'agents') {
+    form.agents = form.agents.map((agent) => {
+      const fallbackProvider = form.default_provider || providerOptions.value[0] || ''
+      const provider = agent.provider || fallbackProvider
+      const model = agent.model || (provider ? getModelsForProvider(provider)[0] || '' : '')
+      return {
+        ...agent,
+        provider,
+        model,
+      }
+    })
+  }
+
+  const payload = (() => {
+    switch (section) {
+      case 'providers':
+        return { providers: form.providers }
+      case 'models':
+        return { models: form.models }
+      case 'agents':
+        return { agents: form.agents }
+      case 'access':
+        return {
+          ai_enabled: form.ai_enabled,
+          default_provider: form.default_provider,
+          default_agent: form.default_agent,
+          product_description_agent: form.product_description_agent,
+        }
+      default:
+        return {}
+    }
+  })()
+
+  form.transform(() => payload).post('/admin/settings/ai', {
     preserveScroll: true,
+    onSuccess: () => {
+      showToast('AI settings saved successfully.', 'success')
+    },
+    onError: () => {
+      const firstError = Object.values(form.errors || {})[0]
+      showToast(firstError || 'Failed to save AI settings. Please try again.', 'error')
+    },
   })
 }
 </script>
