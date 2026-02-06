@@ -1,193 +1,211 @@
 <template>
-  <AdminLayout title="Shipping Methods">
-    <template #default>
-      <Head title="Shipping Methods" />
+  <Head title="Shipping Methods" />
+
+  <AdminLayout>
+    <div class="space-y-6">
       <!-- Header -->
-      <div class="mb-8 flex items-center justify-between">
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 class="text-3xl font-bold text-gray-900">Shipping Methods</h1>
-          <p class="text-gray-600 mt-1">Manage your shipping rates and methods</p>
+          <h2 class="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-gray-900 to-gray-600 dark:from-white dark:to-gray-300">
+            Shipping Methods
+          </h2>
+          <p class="mt-1 text-sm text-gray-500 dark:text-gray-400 flex items-center gap-2">
+            <Truck class="w-4 h-4" />
+            Manage your shipping rates and delivery options
+          </p>
         </div>
         <Link
           href="/admin/settings/shipping-methods/create"
-          class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-medium flex items-center gap-2"
+          class="inline-flex items-center px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-sm font-medium transition-colors shadow-sm focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
         >
-          <Plus :size="20" />
+          <Plus class="w-4 h-4 mr-2" />
           Add Shipping Method
         </Link>
       </div>
 
       <!-- Filters & Search -->
-      <div class="bg-white rounded-lg shadow-sm p-4 mb-6">
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <!-- Search -->
-          <div>
-            <label class="block text-sm font-medium text-gray-700 mb-2">Search</label>
-            <input
-              v-model="search"
-              type="text"
-              placeholder="Search by name..."
-              class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-            />
-          </div>
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <!-- Search -->
+        <div class="relative">
+          <Search class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+          <input
+            v-model="search"
+            type="text"
+            placeholder="Search details..."
+            class="w-full pl-9 pr-4 py-2.5 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-shadow"
+          />
+        </div>
 
-          <!-- Type Filter -->
-          <div>
-            <label class="block text-sm font-medium text-gray-700 mb-2">Type</label>
-            <select
-              v-model="typeFilter"
-              class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-            >
-              <option value="">All Types</option>
-              <option value="flat-rate">Flat Rate</option>
-              <option value="calculated">Calculated</option>
-            </select>
-          </div>
+        <!-- Type Filter -->
+        <div class="relative">
+          <Filter class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+          <select
+            v-model="typeFilter"
+            class="w-full pl-9 pr-4 py-2.5 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-shadow appearance-none"
+          >
+            <option value="">All Types</option>
+            <option value="flat-rate">Flat Rate</option>
+            <option value="calculated">Calculated</option>
+          </select>
+        </div>
 
-          <!-- Status Filter -->
-          <div>
-            <label class="block text-sm font-medium text-gray-700 mb-2">Status</label>
-            <select
-              v-model="statusFilter"
-              class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-            >
-              <option value="">All Status</option>
-              <option value="active">Active</option>
-              <option value="inactive">Inactive</option>
-            </select>
+        <!-- Status Filter -->
+        <div class="relative">
+          <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+            <div class="h-1.5 w-1.5 rounded-full" :class="statusFilter === 'active' ? 'bg-green-500' : (statusFilter === 'inactive' ? 'bg-red-500' : 'bg-gray-400')"></div>
           </div>
+          <select
+            v-model="statusFilter"
+            class="w-full pl-9 pr-4 py-2.5 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-shadow appearance-none"
+          >
+            <option value="">All Statuses</option>
+            <option value="active">Active</option>
+            <option value="inactive">Inactive</option>
+          </select>
         </div>
       </div>
 
       <!-- Methods Table -->
-      <div class="bg-white rounded-lg shadow-sm overflow-hidden">
-        <table class="w-full">
-          <thead class="bg-gray-50 border-b border-gray-200">
-            <tr>
-              <th class="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">Name</th>
-              <th class="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">Type</th>
-              <th class="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">Base Cost</th>
-              <th class="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">Cost/kg</th>
-              <th class="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">Rates</th>
-              <th class="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">Status</th>
-              <th class="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">Default</th>
-              <th class="px-6 py-3 text-right text-xs font-medium text-gray-700 uppercase tracking-wider">Actions</th>
-            </tr>
-          </thead>
-          <tbody class="divide-y divide-gray-200">
-            <tr v-for="method in filteredMethods" :key="method.id" class="hover:bg-gray-50">
-              <!-- Name -->
-              <td class="px-6 py-4">
-                <div class="font-medium text-gray-900">{{ method.name }}</div>
-                <div v-if="method.description" class="text-sm text-gray-500">{{ method.description }}</div>
-              </td>
-
-              <!-- Type -->
-              <td class="px-6 py-4">
-                <span
-                  :class="[
-                    'px-3 py-1 rounded-full text-sm font-medium',
-                    method.type === 'flat-rate'
-                      ? 'bg-blue-50 text-blue-700'
-                      : 'bg-purple-50 text-purple-700'
-                  ]"
-                >
-                  {{ method.type === 'flat-rate' ? 'Flat Rate' : 'Calculated' }}
-                </span>
-              </td>
-
-              <!-- Base Cost -->
-              <td class="px-6 py-4 text-gray-900">
-                ${{ parseFloat(method.base_cost).toFixed(2) }}
-              </td>
-
-              <!-- Cost per KG -->
-              <td class="px-6 py-4 text-gray-900">
-                ${{ parseFloat(method.cost_per_kg).toFixed(4) }}/kg
-              </td>
-
-              <!-- Rates Count -->
-              <td class="px-6 py-4">
-                <span v-if="method.rates && method.rates.length > 0" class="text-gray-900">
-                  {{ method.rates.length }} rates
-                </span>
-                <span v-else class="text-gray-500">-</span>
-              </td>
-
-              <!-- Status Toggle -->
-              <td class="px-6 py-4">
-                <button
-                  @click="toggleStatus(method)"
-                  :class="[
-                    'px-3 py-1 rounded-md text-sm font-medium transition-colors',
-                    method.status === 'active'
-                      ? 'bg-emerald-50 text-emerald-700 hover:bg-emerald-100'
-                      : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                  ]"
-                >
-                  {{ method.status === 'active' ? 'Active' : 'Inactive' }}
-                </button>
-              </td>
-
-              <!-- Default Indicator -->
-              <td class="px-6 py-4">
-                <button
-                  v-if="!method.is_default"
-                  @click="setDefault(method)"
-                  title="Set as default"
-                  class="text-gray-400 hover:text-yellow-500 transition-colors"
-                >
-                  <Star :size="20" />
-                </button>
-                <div v-else class="text-yellow-500">
-                  <Star :size="20" fill="currentColor" />
-                </div>
-              </td>
-
-              <!-- Actions -->
-              <td class="px-6 py-4 text-right">
-                <div class="flex justify-end gap-2">
-                  <Link
-                    :href="`/admin/settings/shipping-methods/${method.id}/edit`"
-                    class="text-blue-600 hover:text-blue-900"
-                    title="Edit"
+      <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
+        <div class="overflow-x-auto">
+          <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+            <thead class="bg-gray-50 dark:bg-gray-700/50">
+              <tr>
+                <th scope="col" class="px-6 py-4 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                  Method Details
+                </th>
+                <th scope="col" class="px-6 py-4 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                  Type
+                </th>
+                <th scope="col" class="px-6 py-4 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                  Rates
+                </th>
+                <th scope="col" class="px-6 py-4 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                  Status
+                </th>
+                <th scope="col" class="px-6 py-4 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                  Default
+                </th>
+                <th scope="col" class="px-6 py-4 text-right text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                  Actions
+                </th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-gray-200 dark:divide-gray-700 bg-white dark:bg-gray-800">
+              <tr v-for="method in filteredMethods" :key="method.id" class="hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
+                <td class="px-6 py-4 whitespace-nowrap">
+                  <div class="flex items-start">
+                    <div class="flex-shrink-0 h-10 w-10 bg-blue-100 dark:bg-blue-900/30 rounded-lg flex items-center justify-center text-blue-600 dark:text-blue-400">
+                      <component :is="method.type === 'flat-rate' ? Package : Scale" class="w-5 h-5" />
+                    </div>
+                    <div class="ml-4">
+                      <div class="text-sm font-medium text-gray-900 dark:text-white">{{ method.name }}</div>
+                      <div class="text-sm text-gray-500 dark:text-gray-400">{{ method.description || 'No description' }}</div>
+                    </div>
+                  </div>
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap">
+                  <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300 capitalize">
+                    {{ method.type.replace('-', ' ') }}
+                  </span>
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap">
+                  <div class="text-sm text-gray-900 dark:text-white font-medium">
+                    ${{ Number(method.base_cost).toFixed(2) }}
+                    <span class="text-gray-400 mx-1">+</span>
+                    ${{ Number(method.cost_per_kg).toFixed(2) }}<span class="text-gray-500 text-xs">/kg</span>
+                  </div>
+                  <div class="text-xs text-gray-500 mt-0.5">
+                    {{ method.rates?.length || 0 }} defined tiers
+                  </div>
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap">
+                  <button
+                    @click="toggleStatus(method)"
+                    class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium capitalize transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                    :class="method.status === 'active' 
+                      ? 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400 hover:bg-green-200 dark:hover:bg-green-900/50' 
+                      : 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400 hover:bg-red-200 dark:hover:bg-red-900/50'"
                   >
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                    </svg>
-                  </Link>
+                    <span class="w-1.5 h-1.5 rounded-full mr-1.5"
+                      :class="method.status === 'active' ? 'bg-green-500' : 'bg-red-500'"></span>
+                    {{ method.status }}
+                  </button>
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap">
                   <button
                     v-if="!method.is_default"
-                    @click="deleteMethod(method)"
-                    class="text-red-600 hover:text-red-900"
-                    title="Delete"
+                    @click="setDefault(method)"
+                    title="Set as default"
+                    class="text-gray-400 hover:text-yellow-500 dark:hover:text-yellow-400 transition-colors"
                   >
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                    </svg>
+                    <Star class="w-5 h-5" />
                   </button>
-                </div>
-              </td>
-            </tr>
-          </tbody>
-        </table>
+                  <div v-else class="text-yellow-500 dark:text-yellow-400" title="Default Method">
+                    <Star class="w-5 h-5 fill-current" />
+                  </div>
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                  <div class="flex justify-end gap-3">
+                    <Link
+                      :href="`/admin/settings/shipping-methods/${method.id}/edit`"
+                      class="text-indigo-600 hover:text-indigo-900 dark:text-indigo-400 dark:hover:text-indigo-300 transition-colors"
+                    >
+                      <Pencil class="w-4 h-4" />
+                    </Link>
+                    <button
+                      v-if="!method.is_default"
+                      @click="deleteMethod(method)"
+                      class="text-red-600 hover:text-red-900 dark:text-red-400 dark:hover:text-red-300 transition-colors"
+                    >
+                      <Trash2 class="w-4 h-4" />
+                    </button>
+                  </div>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
 
         <!-- Empty State -->
-        <div v-if="filteredMethods.length === 0" class="px-6 py-12 text-center">
-          <Truck class="mx-auto text-gray-400 mb-4" :size="48" />
-          <p class="text-gray-600 font-medium">No shipping methods found</p>
-          <p class="text-gray-500 text-sm mt-1">Create your first shipping method to get started</p>
+        <div v-if="filteredMethods.length === 0" class="px-6 py-12 text-center bg-gray-50 dark:bg-gray-800/50">
+          <div class="inline-flex items-center justify-center w-16 h-16 rounded-full bg-gray-100 dark:bg-gray-700 mb-4 text-gray-400">
+            <Truck class="w-8 h-8" />
+          </div>
+          <h3 class="text-lg font-medium text-gray-900 dark:text-white">No shipping methods found</h3>
+          <p class="mt-2 text-sm text-gray-500 dark:text-gray-400 max-w-sm mx-auto">
+            Get started by creating your first shipping method for your store.
+          </p>
+          <div class="mt-6">
+            <Link
+              href="/admin/settings/shipping-methods/create"
+              class="inline-flex items-center px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-sm font-medium transition-colors shadow-sm"
+            >
+              <Plus class="w-4 h-4 mr-2" />
+              Create Method
+            </Link>
+          </div>
         </div>
       </div>
-    </template>
+    </div>
   </AdminLayout>
 </template>
 
 <script setup lang="ts">
 import { ref, computed } from 'vue'
-import { Link, usePage, Head } from '@inertiajs/vue3'
+import { Link, Head } from '@inertiajs/vue3'
 import AdminLayout from '@/layouts/AdminLayout.vue'
-import { Plus, Star, Truck } from 'lucide-vue-next'
+import { 
+  Plus, 
+  Star, 
+  Truck, 
+  Pencil, 
+  Trash2, 
+  Search, 
+  Filter,
+  Package,
+  Scale
+} from 'lucide-vue-next'
 import axios from 'axios'
 
 interface ShippingMethod {
@@ -205,8 +223,13 @@ interface ShippingMethod {
   updated_at: string
 }
 
-const page = usePage()
-const methods = ref<ShippingMethod[]>(page.props.methods?.data || [])
+const props = defineProps<{
+  methods: {
+    data: ShippingMethod[]
+  }
+}>()
+
+const methods = ref<ShippingMethod[]>(props.methods?.data || [])
 
 const search = ref('')
 const typeFilter = ref('')

@@ -60,6 +60,7 @@ class HandleInertiaRequests extends Middleware
         if (app()->runningInConsole()) {
             return array_merge(parent::share($request), [
                 'name' => config('app.name'),
+                'appVersion' => config('app.version'),
                 'quote' => ['message' => trim($message), 'author' => trim($author)],
                 'auth' => [
                     'user' => null,
@@ -105,6 +106,7 @@ class HandleInertiaRequests extends Middleware
 
         return array_merge(parent::share($request), [
             'name' => config('app.name'),
+            'appVersion' => config('app.version'),
             'quote' => ['message' => trim($message), 'author' => trim($author)],
             'auth' => [
                 'user' => $request->user(),
@@ -143,13 +145,8 @@ class HandleInertiaRequests extends Middleware
                 ...\Illuminate\Support\Facades\Route::current()->originalParameters(),
                 'location' => $request->url(),
             ],
-            // Currency configuration
-            'currency' => function () use ($request) {
-                // Only load currency for frontend routes
-                if ($request->is('admin/*') || $request->is('admin')) {
-                    return null;
-                }
-                
+            // Currency configuration (shared for admin and frontend)
+            'currency' => function () {
                 try {
                     $currency = Currency::getDefault();
                     return $currency ? [

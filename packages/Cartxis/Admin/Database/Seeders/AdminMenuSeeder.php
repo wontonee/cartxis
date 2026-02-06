@@ -496,6 +496,16 @@ class AdminMenuSeeder extends Seeder
                 'location' => 'admin',
                 'active' => true,
             ],
+            [
+                'key' => 'system-backups',
+                'title' => 'Backups',
+                'icon' => 'save',
+                'route' => 'admin.system.backups.index',
+                'parent_id' => $systemId,
+                'order' => 8,
+                'location' => 'admin',
+                'active' => true,
+            ],
         ];
 
         // Insert child menus

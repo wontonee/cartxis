@@ -42,6 +42,7 @@ import {
   LineChart,
   FileText as DocumentText,
   RefreshCw,
+  Save,
 } from 'lucide-vue-next'
 
 export interface IconMap {
@@ -93,6 +94,7 @@ export function useMenuIcons() {
     'chart-line': LineChart,
     'document-text': DocumentText,
     'refresh-cw': RefreshCw,
+    'save': Save,
   }
 
   const getIcon = (iconName: string): Component | null => {

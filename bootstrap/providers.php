@@ -13,6 +13,7 @@ return [
     Cartxis\Settings\Providers\SettingsServiceProvider::class,
     Cartxis\Stripe\Providers\StripeServiceProvider::class,
     Cartxis\Razorpay\Providers\RazorpayServiceProvider::class,
+    Cartxis\PhonePe\Providers\PhonePeServiceProvider::class,
     Cartxis\Sales\Providers\SalesServiceProvider::class,
     Cartxis\Customer\Providers\CustomerServiceProvider::class,
     Cartxis\Setup\Providers\SetupServiceProvider::class,  // Must be before CMS to prevent catch-all route conflict

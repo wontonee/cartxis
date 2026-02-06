@@ -73,11 +73,13 @@ interface Product {
   meta_title: string | null;
   meta_description: string | null;
   meta_keywords: string | null;
+  tax_class_id?: number | null;
   categories: Array<{ id: number; name: string }>;
   main_image_id: number | null;
   images: Array<{
     id: number;
     path: string;
+    url: string; // Added url property
     thumbnail_path: string;
     alt_text: string | null;
     position: number;
@@ -134,7 +136,7 @@ const { getSymbol } = useCurrency();
 const currencySymbol = computed(() => props.currency?.symbol || getSymbol());
 
 // Active tab
-const activeTab = ref<'general' | 'images' | 'attributes' | 'inventory' | 'seo'>('general');
+const activeTab = ref<'general' | 'images' | 'attributes' | 'inventory' | 'seo' | 'downloads'>('general');
 
 // Images for upload
 const images = ref<File[]>([]);
@@ -544,24 +546,42 @@ const deleteProduct = () => {
 
 <template>
   <Head title="Edit Product" />
+  
   <AdminLayout title="Edit Product">
-    <div class="px-4 sm:px-6 lg:px-8 py-8 w-full max-w-9xl mx-auto">
+    <div class="p-6 max-w-7xl mx-auto space-y-6">
+      
       <!-- Header -->
-      <div class="mb-8">
-        <div class="flex items-center justify-between">
-          <div>
-            <h1 class="text-2xl md:text-3xl text-gray-800 font-bold">Edit Product</h1>
-            <p class="text-sm text-gray-600 mt-1">Update product information</p>
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div>
+          <h1 class="text-2xl font-bold text-gray-900 dark:text-white">Edit Product</h1>
+          <div class="flex items-center gap-2 mt-1 text-sm text-gray-500 dark:text-gray-400">
+            <Link :href="productRoutes.index().url" class="hover:text-blue-600 transition-colors">Products</Link>
+            <span class="text-gray-300 dark:text-gray-600">/</span>
+            <span>{{ product.name }}</span>
           </div>
+        </div>
+        
+        <div class="flex items-center gap-3">
           <Link 
-            :href="productRoutes.index().url"
-            class="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+            :href="productRoutes.index().url" 
+            class="hidden sm:inline-flex px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-sm font-medium text-gray-700 dark:text-gray-200 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 transition-colors"
           >
-            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
-            </svg>
-            Back to Products
+            Cancel
           </Link>
+          <button 
+            type="button" 
+            @click="showDeleteModal = true"
+            class="px-4 py-2 border border-red-300 dark:border-red-700 rounded-lg text-sm font-medium text-red-700 dark:text-red-400 bg-white dark:bg-gray-800 hover:bg-red-50 dark:hover:bg-red-900/20 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition-colors"
+          >
+            Delete
+          </button>
+          <button 
+            type="button" 
+            @click="submitForm"
+            class="px-4 py-2 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors"
+          >
+            Update Product
+          </button>
         </div>
       </div>
 
@@ -570,15 +590,15 @@ const deleteProduct = () => {
         <!-- Main Column (2/3) -->
         <div class="lg:col-span-2 space-y-6">
           <!-- Tabs Navigation -->
-          <div class="bg-white rounded-lg shadow-sm border border-gray-200">
-            <nav class="-mb-px flex space-x-8 px-6 border-b border-gray-200" aria-label="Tabs">
+          <div class="border-b border-gray-200 dark:border-gray-700">
+            <nav class="-mb-px flex space-x-8 overflow-x-auto" aria-label="Tabs">
               <button
                 @click="activeTab = 'general'"
                 :class="[
                   activeTab === 'general'
-                    ? 'border-blue-500 text-blue-600'
-                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300',
-                  'whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm'
+                   ? 'border-blue-500 text-blue-600 dark:text-blue-400'
+                   : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300 dark:hover:border-gray-600',
+                 'whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm'
                 ]"
               >
                 General
@@ -587,9 +607,9 @@ const deleteProduct = () => {
                 @click="activeTab = 'images'"
                 :class="[
                   activeTab === 'images'
-                    ? 'border-blue-500 text-blue-600'
-                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300',
-                  'whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm'
+                   ? 'border-blue-500 text-blue-600 dark:text-blue-400'
+                   : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300 dark:hover:border-gray-600',
+                 'whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm'
                 ]"
               >
                 Images
@@ -598,8 +618,8 @@ const deleteProduct = () => {
                 @click="activeTab = 'attributes'"
                 :class="[
                   activeTab === 'attributes'
-                    ? 'border-blue-500 text-blue-600'
-                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300',
+                    ? 'border-blue-500 text-blue-600 dark:text-blue-400'
+                    : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300 dark:hover:border-gray-600',
                   'whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm'
                 ]"
               >
@@ -609,8 +629,8 @@ const deleteProduct = () => {
                 @click="activeTab = 'inventory'"
                 :class="[
                   activeTab === 'inventory'
-                    ? 'border-blue-500 text-blue-600'
-                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300',
+                    ? 'border-blue-500 text-blue-600 dark:text-blue-400'
+                    : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300 dark:hover:border-gray-600',
                   'whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm'
                 ]"
               >
@@ -621,8 +641,8 @@ const deleteProduct = () => {
                 @click="activeTab = 'downloads'"
                 :class="[
                   activeTab === 'downloads'
-                    ? 'border-blue-500 text-blue-600'
-                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300',
+                    ? 'border-blue-500 text-blue-600 dark:text-blue-400'
+                    : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300 dark:hover:border-gray-600',
                   'whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm'
                 ]"
               >
@@ -632,22 +652,21 @@ const deleteProduct = () => {
                 @click="activeTab = 'seo'"
                 :class="[
                   activeTab === 'seo'
-                    ? 'border-blue-500 text-blue-600'
-                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300',
+                    ? 'border-blue-500 text-blue-600 dark:text-blue-400'
+                    : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300 dark:hover:border-gray-600',
                   'whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm'
                 ]"
               >
                 SEO
               </button>
             </nav>
+          </div>
 
-            <!-- Tab Content -->
-            <div class="p-6">
-              <!-- General Tab -->
-              <div v-show="activeTab === 'general'" class="space-y-6">
+          <!-- General Tab -->
+          <div v-show="activeTab === 'general'" class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6 space-y-6">
                 <!-- Product Name -->
                 <div>
-                  <label for="name" class="block text-sm font-medium text-gray-700 mb-1">
+                  <label for="name" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                     Product Name <span class="text-red-500">*</span>
                   </label>
                   <input
@@ -655,7 +674,7 @@ const deleteProduct = () => {
                     v-model="form.name"
                     @input="generateSlug"
                     type="text"
-                    class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white rounded-md shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                     :class="{ 'border-red-500': errors?.name }"
                     placeholder="Enter product name"
                   />
@@ -664,31 +683,31 @@ const deleteProduct = () => {
 
                 <!-- Slug -->
                 <div>
-                  <label for="slug" class="block text-sm font-medium text-gray-700 mb-1">
+                  <label for="slug" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                     Slug <span class="text-red-500">*</span>
                   </label>
                   <input
                     id="slug"
                     v-model="form.slug"
                     type="text"
-                    class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white rounded-md shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                     :class="{ 'border-red-500': errors?.slug }"
                     placeholder="auto-generated-from-name"
                   />
                   <p v-if="errors?.slug" class="mt-1 text-sm text-red-600">{{ errors.slug }}</p>
-                  <p class="mt-1 text-xs text-gray-500">Auto-generated from product name</p>
+                  <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">Auto-generated from product name</p>
                 </div>
 
                 <!-- SKU -->
                 <div>
-                  <label for="sku" class="block text-sm font-medium text-gray-700 mb-1">
+                  <label for="sku" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                     SKU <span class="text-red-500">*</span>
                   </label>
                   <input
                     id="sku"
                     v-model="form.sku"
                     type="text"
-                    class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white rounded-md shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                     :class="{ 'border-red-500': errors?.sku }"
                     placeholder="Enter SKU"
                   />
@@ -697,13 +716,13 @@ const deleteProduct = () => {
 
                 <!-- Product Type -->
                 <div>
-                  <label for="type" class="block text-sm font-medium text-gray-700 mb-1">
+                  <label for="type" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                     Product Type <span class="text-red-500">*</span>
                   </label>
                   <select
                     id="type"
                     v-model="form.type"
-                    class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white rounded-md shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                     :class="{ 'border-red-500': errors?.type }"
                   >
                     <option value="simple">Simple Product</option>
@@ -711,7 +730,7 @@ const deleteProduct = () => {
                     <option value="virtual">Virtual Product (No Shipping)</option>
                     <option value="downloadable">Downloadable Product (Digital)</option>
                   </select>
-                  <p class="mt-1 text-xs text-gray-500">
+                  <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">
                     <span v-if="form.type === 'simple'">Physical product with no variants</span>
                     <span v-else-if="form.type === 'configurable'">Product with options like size, color, etc.</span>
                     <span v-else-if="form.type === 'virtual'">Non-physical product (no shipping required)</span>
@@ -722,26 +741,26 @@ const deleteProduct = () => {
 
                 <!-- Brand -->
                 <div>
-                  <label for="brand" class="block text-sm font-medium text-gray-700 mb-1">Brand</label>
+                  <label for="brand" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Brand</label>
                   <select
                     id="brand"
                     v-model="form.brand_id"
-                    class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white rounded-md shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                   >
                     <option :value="null">Select Brand</option>
                     <option v-for="brand in brands" :key="brand.id" :value="brand.id">
                       {{ brand.name }}
                     </option>
                   </select>
-                  <p class="mt-1 text-xs text-gray-500">Associate this product with a brand</p>
+                  <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">Associate this product with a brand</p>
                 </div>
 
                 <!-- AI Description Generator -->
-                <div v-if="aiEnabled" class="border border-gray-200 rounded-lg bg-gray-50 p-4 space-y-4">
+                <div v-if="aiEnabled" class="border border-gray-200 dark:border-gray-700 rounded-lg bg-gray-50 dark:bg-gray-800/50 p-4 space-y-4">
                   <div class="flex items-center justify-between">
                     <div>
-                      <h3 class="text-sm font-semibold text-gray-900">AI Product Description</h3>
-                      <p class="text-xs text-gray-500">Generate SEO-optimized descriptions from product data.</p>
+                      <h3 class="text-sm font-semibold text-gray-900 dark:text-white">AI Product Description</h3>
+                      <p class="text-xs text-gray-500 dark:text-gray-400">Generate SEO-optimized descriptions from product data.</p>
                     </div>
                     <button
                       type="button"
@@ -755,8 +774,8 @@ const deleteProduct = () => {
 
                   <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
-                      <label class="block text-xs font-medium text-gray-700 mb-1">Tone</label>
-                      <select v-model="aiTone" class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm">
+                      <label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">Tone</label>
+                      <select v-model="aiTone" class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white rounded-md text-sm">
                         <option value="professional">Professional</option>
                         <option value="casual">Casual</option>
                         <option value="luxury">Luxury</option>
@@ -764,8 +783,8 @@ const deleteProduct = () => {
                       </select>
                     </div>
                     <div>
-                      <label class="block text-xs font-medium text-gray-700 mb-1">Language</label>
-                      <select v-model="aiLanguage" class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm">
+                      <label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">Language</label>
+                      <select v-model="aiLanguage" class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white rounded-md text-sm">
                         <option value="en">English</option>
                         <option value="es">Spanish</option>
                         <option value="fr">French</option>
@@ -774,8 +793,8 @@ const deleteProduct = () => {
                       </select>
                     </div>
                     <div>
-                      <label class="block text-xs font-medium text-gray-700 mb-1">AI Agent</label>
-                      <select v-model="aiAgent" class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm">
+                      <label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">AI Agent</label>
+                      <select v-model="aiAgent" class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white rounded-md text-sm">
                         <option value="">Select agent</option>
                         <option v-for="agent in aiAgentOptions" :key="agent" :value="agent">
                           {{ agent }}
@@ -783,46 +802,46 @@ const deleteProduct = () => {
                       </select>
                     </div>
                     <div>
-                      <label class="block text-xs font-medium text-gray-700 mb-1">Target Audience</label>
-                      <input v-model="aiTargetAudience" type="text" class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm" placeholder="e.g., gym enthusiasts" />
+                      <label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">Target Audience</label>
+                      <input v-model="aiTargetAudience" type="text" class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white rounded-md text-sm" placeholder="e.g., gym enthusiasts" />
                     </div>
                     <div>
-                      <label class="block text-xs font-medium text-gray-700 mb-1">Key Features (comma separated)</label>
-                      <input v-model="aiKeyFeatures" type="text" class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm" placeholder="Active noise cancellation, 30-hour battery" />
+                      <label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">Key Features (comma separated)</label>
+                      <input v-model="aiKeyFeatures" type="text" class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white rounded-md text-sm" placeholder="Active noise cancellation, 30-hour battery" />
                     </div>
                   </div>
 
                   <p v-if="aiError" class="text-xs text-red-600">{{ aiError }}</p>
 
-                  <div v-if="aiResult" class="border-t border-gray-200 pt-4 space-y-3">
+                  <div v-if="aiResult" class="border-t border-gray-200 dark:border-gray-700 pt-4 space-y-3">
                     <div>
-                      <label class="block text-xs font-medium text-gray-700 mb-1">Short Description</label>
-                      <p class="text-sm text-gray-700 bg-white border border-gray-200 rounded-md p-3" v-text="aiResult.short_description"></p>
+                      <label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">Short Description</label>
+                      <p class="text-sm text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-md p-3" v-text="aiResult.short_description"></p>
                     </div>
                     <div>
-                      <label class="block text-xs font-medium text-gray-700 mb-1">Long Description</label>
-                      <p class="text-sm text-gray-700 bg-white border border-gray-200 rounded-md p-3 whitespace-pre-line" v-text="aiResult.long_description"></p>
+                      <label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">Long Description</label>
+                      <p class="text-sm text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-md p-3 whitespace-pre-line" v-text="aiResult.long_description"></p>
                     </div>
                     <div>
-                      <label class="block text-xs font-medium text-gray-700 mb-1">Meta Description</label>
-                      <p class="text-sm text-gray-700 bg-white border border-gray-200 rounded-md p-3" v-text="aiResult.meta_description"></p>
+                      <label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">Meta Description</label>
+                      <p class="text-sm text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-md p-3" v-text="aiResult.meta_description"></p>
                     </div>
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                       <div>
-                        <label class="block text-xs font-medium text-gray-700 mb-1">Bullet Points</label>
-                        <ul class="text-sm text-gray-700 bg-white border border-gray-200 rounded-md p-3 list-disc pl-5" v-if="Array.isArray(aiResult.bullet_points)">
+                        <label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">Bullet Points</label>
+                        <ul class="text-sm text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-md p-3 list-disc pl-5" v-if="Array.isArray(aiResult.bullet_points)">
                           <li v-for="(item, idx) in aiResult.bullet_points" :key="idx">{{ item }}</li>
                         </ul>
                       </div>
                       <div>
-                        <label class="block text-xs font-medium text-gray-700 mb-1">Keywords</label>
-                        <div class="text-sm text-gray-700 bg-white border border-gray-200 rounded-md p-3">
+                        <label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">Keywords</label>
+                        <div class="text-sm text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-md p-3">
                           {{ Array.isArray(aiResult.keywords) ? aiResult.keywords.join(', ') : '' }}
                         </div>
                       </div>
                     </div>
                     <div class="flex justify-end">
-                      <button type="button" class="px-3 py-2 text-xs font-medium text-blue-600 border border-blue-200 rounded-md" @click="applyAiDescription">
+                      <button type="button" class="px-3 py-2 text-xs font-medium text-blue-600 dark:text-blue-400 border border-blue-200 dark:border-blue-700 rounded-md hover:bg-blue-50 dark:hover:bg-blue-900/20" @click="applyAiDescription">
                         Apply to Product Fields
                       </button>
                     </div>
@@ -831,7 +850,7 @@ const deleteProduct = () => {
 
                 <!-- Short Description -->
                 <div>
-                  <label for="short_description" class="block text-sm font-medium text-gray-700 mb-1">
+                  <label for="short_description" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                     Short Description
                   </label>
                   <TiptapEditor v-model="form.short_description" placeholder="Brief product description" />
@@ -839,7 +858,7 @@ const deleteProduct = () => {
 
                 <!-- Description -->
                 <div>
-                  <label for="description" class="block text-sm font-medium text-gray-700 mb-1">
+                  <label for="description" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                     Description
                   </label>
                   <TiptapEditor v-model="form.description" placeholder="Detailed product description with formatting..." />
@@ -847,10 +866,10 @@ const deleteProduct = () => {
               </div>
 
               <!-- Images Tab -->
-              <div v-show="activeTab === 'images'" class="space-y-6">
+              <div v-show="activeTab === 'images'" class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6 space-y-6">
                 <!-- Existing Images -->
                 <div v-if="product.images && product.images.length > 0">
-                  <h3 class="text-sm font-medium text-gray-700 mb-3">Current Images</h3>
+                  <h3 class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">Current Images</h3>
                   <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 mb-6">
                     <div
                       v-for="image in product.images"
@@ -858,7 +877,7 @@ const deleteProduct = () => {
                       class="space-y-2"
                     >
                       <!-- Image Container -->
-                      <div class="aspect-square rounded-lg overflow-hidden bg-gray-100 border-2 border-gray-200"
+                      <div class="aspect-square rounded-lg overflow-hidden bg-gray-100 dark:bg-gray-700 border-2 border-gray-200 dark:border-gray-600"
                            :class="{ 'border-blue-500': product.main_image_id === image.id }">
                         <div class="w-full h-full group relative">
                           <img
@@ -900,7 +919,7 @@ const deleteProduct = () => {
 
                 <!-- Upload New Images -->
                 <div>
-                  <h3 class="text-sm font-medium text-gray-700 mb-3">Upload New Images</h3>
+                  <h3 class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">Upload New Images</h3>
                   <ImageUploader v-model="images" :maxFiles="10" :maxSize="5" accept="image/*" />
                   <button
                     v-if="images.length > 0"
@@ -919,7 +938,7 @@ const deleteProduct = () => {
               </div>
 
               <!-- Inventory Tab -->
-              <div v-show="activeTab === 'inventory'">
+              <div v-show="activeTab === 'inventory'" class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6">
                 <InventoryTracker
                   :product-id="product.id"
                   :current-stock="product.quantity"
@@ -932,22 +951,22 @@ const deleteProduct = () => {
                 />
                 
                 <!-- Pricing Section (moved from old inventory tab) -->
-                <div class="mt-6 bg-white rounded-lg shadow p-6 space-y-6">
-                  <h3 class="text-lg font-semibold text-gray-900">Pricing</h3>
+                <div class="mt-6 space-y-6">
+                  <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Pricing</h3>
                   
                   <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div>
-                      <label for="price" class="block text-sm font-medium text-gray-700 mb-1">
+                      <label for="price" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                         Price <span class="text-red-500">*</span>
                       </label>
                       <div class="relative">
-                        <span class="absolute inset-y-0 left-0 pl-3 flex items-center text-gray-500">{{ currencySymbol }}</span>
+                        <span class="absolute inset-y-0 left-0 pl-3 flex items-center text-gray-500 dark:text-gray-400">{{ currencySymbol }}</span>
                         <input
                           id="price"
                           v-model="form.price"
                           type="number"
                           step="0.01"
-                          class="w-full pl-7 pr-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                          class="w-full pl-7 pr-3 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white rounded-md shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                           :class="{ 'border-red-500': errors?.price }"
                         />
                       </div>
@@ -955,90 +974,90 @@ const deleteProduct = () => {
                     </div>
 
                     <div>
-                      <label for="cost" class="block text-sm font-medium text-gray-700 mb-1">
+                      <label for="cost" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                         Cost
                       </label>
                       <div class="relative">
-                        <span class="absolute inset-y-0 left-0 pl-3 flex items-center text-gray-500">{{ currencySymbol }}</span>
+                        <span class="absolute inset-y-0 left-0 pl-3 flex items-center text-gray-500 dark:text-gray-400">{{ currencySymbol }}</span>
                         <input
                           id="cost"
                           v-model="form.cost"
                           type="number"
                           step="0.01"
-                          class="w-full pl-7 pr-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                          class="w-full pl-7 pr-3 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white rounded-md shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                         />
                       </div>
                     </div>
 
                     <div>
-                      <label for="tax_class_id" class="block text-sm font-medium text-gray-700 mb-1">
+                      <label for="tax_class_id" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                         Tax Class
                       </label>
                       <select
                         id="tax_class_id"
                         v-model="form.tax_class_id"
-                        class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                        class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white rounded-md shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                       >
                         <option :value="null">No Tax</option>
                         <option v-for="taxClass in props.taxClasses" :key="taxClass.id" :value="taxClass.id">
                           {{ taxClass.name }}
                         </option>
                       </select>
-                      <p class="mt-1 text-xs text-gray-500">Select applicable tax class for this product</p>
+                      <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">Select applicable tax class for this product</p>
                     </div>
                   </div>
 
                   <!-- Special Pricing -->
-                  <div class="border-t border-gray-200 pt-6">
-                    <h4 class="text-sm font-medium text-gray-900 mb-4">Special Pricing</h4>
+                  <div class="border-t border-gray-200 dark:border-gray-700 pt-6">
+                    <h4 class="text-sm font-medium text-gray-900 dark:text-white mb-4">Special Pricing</h4>
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
                       <div>
-                        <label for="special_price" class="block text-sm font-medium text-gray-700 mb-1">
+                        <label for="special_price" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                           Special Price
                         </label>
                         <div class="relative">
-                          <span class="absolute inset-y-0 left-0 pl-3 flex items-center text-gray-500">{{ currencySymbol }}</span>
+                          <span class="absolute inset-y-0 left-0 pl-3 flex items-center text-gray-500 dark:text-gray-400">{{ currencySymbol }}</span>
                           <input
                             id="special_price"
                             v-model="form.special_price"
                             type="number"
                             step="0.01"
-                            class="w-full pl-7 pr-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                            class="w-full pl-7 pr-3 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white rounded-md shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                           />
                         </div>
                       </div>
 
                       <div>
-                        <label for="special_price_from" class="block text-sm font-medium text-gray-700 mb-1">
+                        <label for="special_price_from" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                           From Date
                         </label>
                         <input
                           id="special_price_from"
                           v-model="form.special_price_from"
                           type="date"
-                          class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                          class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white rounded-md shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                         />
                       </div>
 
                       <div>
-                        <label for="special_price_to" class="block text-sm font-medium text-gray-700 mb-1">
+                        <label for="special_price_to" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                           To Date
                         </label>
                         <input
                           id="special_price_to"
                           v-model="form.special_price_to"
                           type="date"
-                          class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                          class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white rounded-md shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                         />
                       </div>
                     </div>
                   </div>
 
                   <!-- Weight - Only for physical products -->
-                  <div v-if="form.type === 'simple' || form.type === 'configurable'" class="border-t border-gray-200 pt-6">
-                    <h4 class="text-sm font-medium text-gray-900 mb-4">Physical Attributes</h4>
+                  <div v-if="form.type === 'simple' || form.type === 'configurable'" class="border-t border-gray-200 dark:border-gray-700 pt-6">
+                    <h4 class="text-sm font-medium text-gray-900 dark:text-white mb-4">Physical Attributes</h4>
                     <div>
-                      <label for="weight" class="block text-sm font-medium text-gray-700 mb-1">
+                      <label for="weight" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                         Weight (kg)
                       </label>
                       <input
@@ -1046,21 +1065,21 @@ const deleteProduct = () => {
                         v-model="form.weight"
                         type="number"
                         step="0.01"
-                        class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                        class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white rounded-md shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                       />
                     </div>
                   </div>
 
                   <!-- Digital Product Notice -->
-                  <div v-if="form.type === 'virtual' || form.type === 'downloadable'" class="border-t border-gray-200 pt-6">
-                    <div class="bg-blue-50 border border-blue-200 rounded-md p-4">
+                  <div v-if="form.type === 'virtual' || form.type === 'downloadable'" class="border-t border-gray-200 dark:border-gray-700 pt-6">
+                    <div class="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-md p-4">
                       <div class="flex">
                         <svg class="h-5 w-5 text-blue-400 mr-3 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                         </svg>
                         <div>
-                          <p class="text-sm text-blue-800 font-medium">{{ form.type === 'virtual' ? 'Virtual Product' : 'Downloadable Product' }}</p>
-                          <p class="text-sm text-blue-700 mt-1">
+                          <p class="text-sm text-blue-800 dark:text-blue-300 font-medium">{{ form.type === 'virtual' ? 'Virtual Product' : 'Downloadable Product' }}</p>
+                          <p class="text-sm text-blue-700 dark:text-blue-400 mt-1">
                             {{ form.type === 'virtual' ? 'This product does not require shipping.' : 'This product will be available for download after purchase.' }}
                           </p>
                         </div>
@@ -1071,32 +1090,32 @@ const deleteProduct = () => {
               </div>
 
               <!-- Downloadable Files Tab -->
-              <div v-show="activeTab === 'downloads'" v-if="form.type === 'downloadable'" class="space-y-6">
+              <div v-show="activeTab === 'downloads'" v-if="form.type === 'downloadable'" class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6 space-y-6">
                 <div>
-                  <h3 class="text-lg font-medium text-gray-900 mb-4">Downloadable Files</h3>
+                  <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-4">Downloadable Files</h3>
                   
-                  <div class="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center hover:border-blue-400 transition-colors">
-                    <svg class="mx-auto h-12 w-12 text-gray-400" stroke="currentColor" fill="none" viewBox="0 0 48 48">
+                  <div class="border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg p-8 text-center hover:border-blue-400 dark:hover:border-blue-500 transition-colors">
+                    <svg class="mx-auto h-12 w-12 text-gray-400 dark:text-gray-500" stroke="currentColor" fill="none" viewBox="0 0 48 48">
                       <path d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
                     </svg>
-                    <p class="mt-4 text-sm text-gray-600">
-                      <label for="file-upload-edit" class="relative cursor-pointer rounded-md font-medium text-blue-600 hover:text-blue-500">
+                    <p class="mt-4 text-sm text-gray-600 dark:text-gray-400">
+                      <label for="file-upload-edit" class="relative cursor-pointer rounded-md font-medium text-blue-600 dark:text-blue-400 hover:text-blue-500">
                         <span>Upload files</span>
                         <input id="file-upload-edit" name="file-upload" type="file" class="sr-only" multiple />
                       </label>
                       or drag and drop
                     </p>
-                    <p class="text-xs text-gray-500 mt-1">Any file type up to 50MB</p>
+                    <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Any file type up to 50MB</p>
                   </div>
 
-                  <div class="mt-6 bg-yellow-50 border border-yellow-200 rounded-md p-4">
+                  <div class="mt-6 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-700/50 rounded-md p-4">
                     <div class="flex">
                       <svg class="h-5 w-5 text-yellow-400 mr-3 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
                       </svg>
                       <div>
-                        <p class="text-sm text-yellow-800 font-medium">File Management Coming Soon</p>
-                        <p class="text-sm text-yellow-700 mt-1">
+                        <p class="text-sm text-yellow-800 dark:text-yellow-300 font-medium">File Management Coming Soon</p>
+                        <p class="text-sm text-yellow-700 dark:text-yellow-400 mt-1">
                           Downloadable file upload and management will be available in the next update.
                         </p>
                       </div>
@@ -1106,65 +1125,65 @@ const deleteProduct = () => {
               </div>
 
               <!-- SEO Tab -->
-              <div v-show="activeTab === 'seo'" class="space-y-6">
+              <div v-show="activeTab === 'seo'" class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6 space-y-6">
                 <div>
-                  <label for="meta_title" class="block text-sm font-medium text-gray-700 mb-1">
+                  <label for="meta_title" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                     Meta Title
                   </label>
                   <input
                     id="meta_title"
                     v-model="form.meta_title"
                     type="text"
-                    class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white rounded-md shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                     placeholder="SEO title for search engines"
                   />
-                  <p class="mt-1 text-xs text-gray-500">Recommended: 50-60 characters</p>
+                  <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">Recommended: 50-60 characters</p>
                 </div>
 
                 <div>
-                  <label for="meta_description" class="block text-sm font-medium text-gray-700 mb-1">
+                  <label for="meta_description" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                     Meta Description
                   </label>
                   <textarea
                     id="meta_description"
                     v-model="form.meta_description"
                     rows="3"
-                    class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white rounded-md shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                     placeholder="SEO description for search engines"
                   />
-                  <p class="mt-1 text-xs text-gray-500">Recommended: 150-160 characters</p>
+                  <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">Recommended: 150-160 characters</p>
                 </div>
 
                 <div>
-                  <label for="meta_keywords" class="block text-sm font-medium text-gray-700 mb-1">
+                  <label for="meta_keywords" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                     Meta Keywords
                   </label>
                   <input
                     id="meta_keywords"
                     v-model="form.meta_keywords"
                     type="text"
-                    class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white rounded-md shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                     placeholder="keyword1, keyword2, keyword3"
                   />
-                  <p class="mt-1 text-xs text-gray-500">Separate keywords with commas</p>
+                  <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">Separate keywords with commas</p>
                 </div>
               </div>
 
               <!-- Attributes Tab -->
-              <div v-show="activeTab === 'attributes'" class="space-y-6">
+              <div v-show="activeTab === 'attributes'" class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6 space-y-6">
                 <div class="mb-6">
-                  <h3 class="text-lg font-semibold text-gray-900">Product Attributes</h3>
-                  <p class="text-sm text-gray-600 mt-1">Add and specify product characteristics and specifications</p>
+                  <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Product Attributes</h3>
+                  <p class="text-sm text-gray-600 dark:text-gray-400 mt-1">Add and specify product characteristics and specifications</p>
                 </div>
                 
                 <!-- Attribute Selector -->
                 <div class="mb-6">
-                  <label class="block text-sm font-medium text-gray-700 mb-2">
+                  <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                     Add Attribute
                   </label>
                   <select 
-                    @change="(e) => { addAttribute(Number(e.target.value)); e.target.value = ''; }"
-                    class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    @change="(e) => { addAttribute(Number((e.target as HTMLSelectElement).value)); (e.target as HTMLSelectElement).value = ''; }"
+                    class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                   >
                     <option value="">Select an attribute to add...</option>
                     <option 
@@ -1176,16 +1195,16 @@ const deleteProduct = () => {
                       <template v-if="attribute.is_required"> (Required)</template>
                     </option>
                   </select>
-                  <p class="mt-1 text-xs text-gray-500">Choose attributes that apply to this product</p>
+                  <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">Choose attributes that apply to this product</p>
                 </div>
 
                 <!-- No Attributes Selected State -->
-                <div v-if="selectedAttributeIds.length === 0" class="text-center py-12 bg-gray-50 rounded-lg border-2 border-dashed border-gray-300">
-                  <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <div v-if="selectedAttributeIds.length === 0" class="text-center py-12 bg-gray-50 dark:bg-gray-700/50 rounded-lg border-2 border-dashed border-gray-300 dark:border-gray-600">
+                  <svg class="mx-auto h-12 w-12 text-gray-400 dark:text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
                   </svg>
-                  <p class="mt-2 text-sm font-medium text-gray-900">No attributes added yet</p>
-                  <p class="text-xs text-gray-500">Select attributes from the dropdown above to add product specifications</p>
+                  <p class="mt-2 text-sm font-medium text-gray-900 dark:text-white">No attributes added yet</p>
+                  <p class="text-xs text-gray-500 dark:text-gray-400">Select attributes from the dropdown above to add product specifications</p>
                 </div>
 
                 <!-- Selected Attributes -->
@@ -1193,30 +1212,30 @@ const deleteProduct = () => {
                   <div 
                     v-for="attribute in getSelectedAttributes" 
                     :key="attribute.id" 
-                    class="border border-gray-200 rounded-lg p-4 hover:border-blue-300 transition-colors bg-white"
+                    class="border border-gray-200 dark:border-gray-700 rounded-lg p-4 hover:border-blue-300 dark:hover:border-blue-500 transition-colors bg-white dark:bg-gray-800"
                   >
                     <!-- Attribute Header -->
                     <div class="flex items-start justify-between mb-3">
                       <div>
-                        <label class="block text-sm font-medium text-gray-900">
+                        <label class="block text-sm font-medium text-gray-900 dark:text-white">
                           {{ attribute.name }}
                           <span v-if="attribute.is_required" class="text-red-500 ml-1">*</span>
                         </label>
                         <div class="flex items-center gap-2 mt-1">
-                          <span v-if="attribute.is_configurable" class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-purple-100 text-purple-800">
+                          <span v-if="attribute.is_configurable" class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-purple-100 dark:bg-purple-900 text-purple-800 dark:text-purple-200">
                             Configurable
                           </span>
-                          <span v-if="attribute.is_filterable" class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-blue-100 text-blue-800">
+                          <span v-if="attribute.is_filterable" class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200">
                             Filterable
                           </span>
-                          <span class="text-xs text-gray-500">{{ attribute.type }}</span>
+                          <span class="text-xs text-gray-500 dark:text-gray-400">{{ attribute.type }}</span>
                         </div>
                       </div>
                       <button
                         v-if="!attribute.is_required"
                         type="button"
                         @click="removeAttribute(attribute.id)"
-                        class="text-gray-400 hover:text-red-600 transition-colors"
+                        class="text-gray-400 hover:text-red-600 dark:hover:text-red-400 transition-colors"
                         title="Remove attribute"
                       >
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -1232,7 +1251,7 @@ const deleteProduct = () => {
                         v-if="attribute.type === 'text'"
                         v-model="attributeValues[attribute.code]"
                         type="text"
-                        class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                        class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                         :placeholder="`Enter ${attribute.name.toLowerCase()}`"
                       />
 
@@ -1241,7 +1260,7 @@ const deleteProduct = () => {
                         v-if="attribute.type === 'textarea'"
                         v-model="attributeValues[attribute.code]"
                         rows="3"
-                        class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                        class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                         :placeholder="`Enter ${attribute.name.toLowerCase()}`"
                       />
 
@@ -1249,7 +1268,7 @@ const deleteProduct = () => {
                       <select
                         v-if="attribute.type === 'select'"
                         v-model="attributeValues[attribute.code]"
-                        class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                        class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                       >
                         <option value="">Select {{ attribute.name }}</option>
                         <option v-for="option in attribute.options" :key="option.id" :value="option.value">
@@ -1262,20 +1281,20 @@ const deleteProduct = () => {
                         <label 
                           v-for="option in attribute.options" 
                           :key="option.id" 
-                          class="flex items-center p-3 border border-gray-200 rounded-md hover:bg-blue-50 cursor-pointer transition-colors"
-                          :class="{ 'bg-blue-50 border-blue-300': attributeValues[attribute.code]?.includes(option.value) }"
+                          class="flex items-center p-3 border border-gray-200 dark:border-gray-700 rounded-md hover:bg-blue-50 dark:hover:bg-blue-900/20 cursor-pointer transition-colors"
+                          :class="{ 'bg-blue-50 dark:bg-blue-900/30 border-blue-300 dark:border-blue-600': attributeValues[attribute.code]?.includes(option.value) }"
                         >
                           <input
                             :id="`${attribute.code}-${option.id}`"
                             type="checkbox"
                             :value="option.value"
                             v-model="attributeValues[attribute.code]"
-                            class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                            class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700"
                           />
-                          <span class="ml-3 text-sm text-gray-700 flex items-center">
+                          <span class="ml-3 text-sm text-gray-700 dark:text-gray-300 flex items-center">
                             <span 
                               v-if="option.swatch_value" 
-                              class="w-5 h-5 rounded-full mr-2 border border-gray-300" 
+                              class="w-5 h-5 rounded-full mr-2 border border-gray-300 dark:border-gray-600" 
                               :style="{ backgroundColor: option.swatch_value }"
                             ></span>
                             {{ option.label }}
@@ -1284,14 +1303,14 @@ const deleteProduct = () => {
                       </div>
 
                       <!-- Boolean -->
-                      <div v-if="attribute.type === 'boolean'" class="flex items-center p-3 bg-gray-50 rounded-md">
+                      <div v-if="attribute.type === 'boolean'" class="flex items-center p-3 bg-gray-50 dark:bg-gray-700/50 rounded-md border border-gray-200 dark:border-gray-700">
                         <input
                           :id="attribute.code"
                           type="checkbox"
                           v-model="attributeValues[attribute.code]"
-                          class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                          class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700"
                         />
-                        <label :for="attribute.code" class="ml-3 text-sm text-gray-700">
+                        <label :for="attribute.code" class="ml-3 text-sm text-gray-700 dark:text-gray-300">
                           Enable {{ attribute.name }}
                         </label>
                       </div>
@@ -1301,18 +1320,18 @@ const deleteProduct = () => {
                         v-if="attribute.type === 'date'"
                         v-model="attributeValues[attribute.code]"
                         type="date"
-                        class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                        class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                       />
 
                       <!-- Price -->
                       <div v-if="attribute.type === 'price'" class="relative">
-                        <span class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500">{{ currencySymbol }}</span>
+                        <span class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 dark:text-gray-400">{{ currencySymbol }}</span>
                         <input
                           v-model="attributeValues[attribute.code]"
                           type="number"
                           step="0.01"
                           min="0"
-                          class="w-full pl-8 pr-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                          class="w-full pl-8 pr-3 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                           :placeholder="`Enter ${attribute.name.toLowerCase()}`"
                         />
                       </div>
@@ -1321,24 +1340,22 @@ const deleteProduct = () => {
                 </div>
               </div>
             </div>
-          </div>
-        </div>
 
         <!-- Sidebar (1/3) -->
         <div class="space-y-6">
           <!-- Publish Card -->
-          <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-            <h3 class="text-sm font-semibold text-gray-900 mb-4">Publish</h3>
+          <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6">
+            <h3 class="text-sm font-semibold text-gray-900 dark:text-white mb-4">Publish</h3>
             
             <!-- Status -->
             <div class="mb-4">
-              <label for="status" class="block text-sm font-medium text-gray-700 mb-2">
+              <label for="status" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                 Status
               </label>
               <select
                 id="status"
                 v-model="form.status"
-                class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white rounded-md shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
               >
                 <option value="enabled">Enabled</option>
                 <option value="disabled">Disabled</option>
@@ -1347,13 +1364,13 @@ const deleteProduct = () => {
 
             <!-- Visibility -->
             <div class="mb-4">
-              <label for="visibility" class="block text-sm font-medium text-gray-700 mb-2">
+              <label for="visibility" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                 Visibility
               </label>
               <select
                 id="visibility"
                 v-model="form.visibility"
-                class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white rounded-md shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
               >
                 <option value="both">Catalog and Search</option>
                 <option value="catalog">Catalog Only</option>
@@ -1368,42 +1385,28 @@ const deleteProduct = () => {
                 <input
                   v-model="form.featured"
                   type="checkbox"
-                  class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                  class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700"
                 />
-                <span class="ml-2 text-sm text-gray-700">Featured Product</span>
+                <span class="ml-2 text-sm text-gray-700 dark:text-gray-300">Featured Product</span>
               </label>
               <label class="flex items-center">
                 <input
                   v-model="form.new"
                   type="checkbox"
-                  class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                  class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700"
                 />
-                <span class="ml-2 text-sm text-gray-700">Mark as New</span>
+                <span class="ml-2 text-sm text-gray-700 dark:text-gray-300">Mark as New</span>
               </label>
             </div>
 
-            <!-- Action Buttons -->
-            <div class="space-y-2">
-              <button
-                @click="submitForm"
-                type="button"
-                class="w-full inline-flex justify-center items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
-              >
-                Update Product
-              </button>
-              <button
-                @click="showDeleteModal = true"
-                type="button"
-                class="w-full inline-flex justify-center items-center px-4 py-2 border border-red-300 rounded-md shadow-sm text-sm font-medium text-red-700 bg-white hover:bg-red-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
-              >
-                Delete Product
-              </button>
+            <!-- Action Buttons (Moved to Header) -->
+            <div class="hidden space-y-2">
             </div>
           </div>
 
           <!-- Categories Card -->
-          <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-            <h3 class="text-sm font-semibold text-gray-900 mb-4">Categories</h3>
+          <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6">
+            <h3 class="text-sm font-semibold text-gray-900 dark:text-white mb-4">Categories</h3>
             <div class="space-y-2 max-h-64 overflow-y-auto">
               <label
                 v-for="category in flatCategories"
@@ -1415,9 +1418,9 @@ const deleteProduct = () => {
                   :value="category.id"
                   :checked="form.category_ids.includes(category.id)"
                   @change="toggleCategory(category.id)"
-                  class="mt-0.5 h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                  class="mt-0.5 h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700"
                 />
-                <span class="ml-2 text-sm text-gray-700">{{ category.name }}</span>
+                <span class="ml-2 text-sm text-gray-700 dark:text-gray-300">{{ category.name }}</span>
               </label>
             </div>
             <p v-if="errors?.category_ids" class="mt-2 text-sm text-red-600">{{ errors.category_ids }}</p>
@@ -1447,27 +1450,27 @@ const deleteProduct = () => {
       <div class="fixed inset-0 z-50 w-screen overflow-y-auto">
         <div class="flex min-h-full items-end justify-center p-4 text-center sm:items-center sm:p-0">
           <div
-            class="relative transform overflow-hidden rounded-lg bg-white text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-lg"
+            class="relative transform overflow-hidden rounded-lg bg-white dark:bg-gray-800 text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-lg"
             @click.stop
           >
-            <div class="bg-white px-4 pb-4 pt-5 sm:p-6 sm:pb-4">
+            <div class="bg-white dark:bg-gray-800 px-4 pb-4 pt-5 sm:p-6 sm:pb-4">
               <div class="sm:flex sm:items-start">
-                <div class="mx-auto flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-full bg-red-100 sm:mx-0 sm:h-10 sm:w-10">
-                  <svg class="h-6 w-6 text-red-600" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                <div class="mx-auto flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-full bg-red-100 dark:bg-red-900 sm:mx-0 sm:h-10 sm:w-10">
+                  <svg class="h-6 w-6 text-red-600 dark:text-red-400" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z" />
                   </svg>
                 </div>
                 <div class="mt-3 text-center sm:ml-4 sm:mt-0 sm:text-left">
-                  <h3 class="text-base font-semibold leading-6 text-gray-900">Delete Image</h3>
+                  <h3 class="text-base font-semibold leading-6 text-gray-900 dark:text-white">Delete Image</h3>
                   <div class="mt-2">
-                    <p class="text-sm text-gray-500">
+                    <p class="text-sm text-gray-500 dark:text-gray-400">
                       Are you sure you want to delete this image? This action cannot be undone.
                     </p>
                   </div>
                 </div>
               </div>
             </div>
-            <div class="bg-gray-50 px-4 py-3 sm:flex sm:flex-row-reverse sm:px-6">
+            <div class="bg-gray-50 dark:bg-gray-700/50 px-4 py-3 sm:flex sm:flex-row-reverse sm:px-6">
               <button
                 @click="deleteImage"
                 :disabled="isDeletingImage"
@@ -1480,7 +1483,7 @@ const deleteProduct = () => {
               <button
                 @click="showDeleteImageModal = false"
                 type="button"
-                class="cursor-pointer mt-3 inline-flex w-full justify-center rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50 sm:mt-0 sm:w-auto"
+                class="cursor-pointer mt-3 inline-flex w-full justify-center rounded-md bg-white dark:bg-gray-700 px-3 py-2 text-sm font-semibold text-gray-900 dark:text-white shadow-sm ring-1 ring-inset ring-gray-300 dark:ring-gray-600 hover:bg-gray-50 dark:hover:bg-gray-600 sm:mt-0 sm:w-auto"
               >
                 Cancel
               </button>

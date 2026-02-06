@@ -155,11 +155,11 @@ const formatDate = (date: string) => {
 </script>
 
 <template>
-  <div class="bg-white rounded-lg shadow">
+  <div class="bg-white dark:bg-gray-800 rounded-lg shadow">
     <!-- Inventory Overview -->
-    <div class="p-6 border-b border-gray-200">
+    <div class="p-6 border-b border-gray-200 dark:border-gray-700">
       <div class="flex items-center justify-between mb-6">
-        <h3 class="text-lg font-semibold text-gray-900">Inventory Management</h3>
+        <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Inventory Management</h3>
         <button
           @click="openAdjustmentForm"
           class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors cursor-pointer"
@@ -171,14 +171,14 @@ const formatDate = (date: string) => {
       <!-- Stock Summary Cards -->
       <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
         <!-- Current Stock -->
-        <div class="bg-gray-50 rounded-lg p-4">
+        <div class="bg-gray-50 dark:bg-gray-700/50 rounded-lg p-4">
           <div class="flex items-center justify-between">
             <div>
-              <p class="text-sm text-gray-600 mb-1">Current Stock</p>
-              <p class="text-2xl font-bold text-gray-900">{{ currentStock }}</p>
+              <p class="text-sm text-gray-600 dark:text-gray-400 mb-1">Current Stock</p>
+              <p class="text-2xl font-bold text-gray-900 dark:text-white">{{ currentStock }}</p>
             </div>
-            <div class="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center">
-              <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <div class="w-12 h-12 bg-blue-100 dark:bg-blue-900/30 rounded-full flex items-center justify-center">
+              <svg class="w-6 h-6 text-blue-600 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
               </svg>
             </div>
@@ -191,53 +191,53 @@ const formatDate = (date: string) => {
         </div>
 
         <!-- Low Stock Threshold -->
-        <div class="bg-gray-50 rounded-lg p-4">
+        <div class="bg-gray-50 dark:bg-gray-700/50 rounded-lg p-4">
           <div class="flex items-center justify-between">
             <div>
-              <p class="text-sm text-gray-600 mb-1">Low Stock Alert</p>
-              <p class="text-2xl font-bold text-gray-900">{{ notifyStockQty }}</p>
+              <p class="text-sm text-gray-600 dark:text-gray-400 mb-1">Low Stock Alert</p>
+              <p class="text-2xl font-bold text-gray-900 dark:text-white">{{ notifyStockQty }}</p>
             </div>
-            <div class="w-12 h-12 bg-yellow-100 rounded-full flex items-center justify-center">
-              <svg class="w-6 h-6 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <div class="w-12 h-12 bg-yellow-100 dark:bg-yellow-900/30 rounded-full flex items-center justify-center">
+              <svg class="w-6 h-6 text-yellow-600 dark:text-yellow-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
               </svg>
             </div>
           </div>
-          <p class="text-xs text-gray-500 mt-2">Alert when stock falls below this level</p>
+          <p class="text-xs text-gray-500 dark:text-gray-400 mt-2">Alert when stock falls below this level</p>
         </div>
 
         <!-- Minimum Quantity -->
-        <div class="bg-gray-50 rounded-lg p-4">
+        <div class="bg-gray-50 dark:bg-gray-700/50 rounded-lg p-4">
           <div class="flex items-center justify-between">
             <div>
-              <p class="text-sm text-gray-600 mb-1">Min Quantity</p>
-              <p class="text-2xl font-bold text-gray-900">{{ minQuantity }}</p>
+              <p class="text-sm text-gray-600 dark:text-gray-400 mb-1">Min Quantity</p>
+              <p class="text-2xl font-bold text-gray-900 dark:text-white">{{ minQuantity }}</p>
             </div>
-            <div class="w-12 h-12 bg-purple-100 rounded-full flex items-center justify-center">
-              <svg class="w-6 h-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <div class="w-12 h-12 bg-purple-100 dark:bg-purple-900/30 rounded-full flex items-center justify-center">
+              <svg class="w-6 h-6 text-purple-600 dark:text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 17h8m0 0V9m0 8l-8-8-4 4-6-6" />
               </svg>
             </div>
           </div>
-          <p class="text-xs text-gray-500 mt-2">Minimum purchase quantity</p>
+          <p class="text-xs text-gray-500 dark:text-gray-400 mt-2">Minimum purchase quantity</p>
         </div>
 
         <!-- Stock Status -->
-        <div class="bg-gray-50 rounded-lg p-4">
+        <div class="bg-gray-50 dark:bg-gray-700/50 rounded-lg p-4">
           <div class="flex items-center justify-between">
             <div>
-              <p class="text-sm text-gray-600 mb-1">Management</p>
-              <p class="text-lg font-semibold text-gray-900">
+              <p class="text-sm text-gray-600 dark:text-gray-400 mb-1">Management</p>
+              <p class="text-lg font-semibold text-gray-900 dark:text-white">
                 {{ manageStock ? 'Enabled' : 'Disabled' }}
               </p>
             </div>
-            <div :class="`w-12 h-12 rounded-full flex items-center justify-center ${manageStock ? 'bg-green-100' : 'bg-gray-200'}`">
-              <svg class="w-6 h-6" :class="manageStock ? 'text-green-600' : 'text-gray-500'" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <div :class="`w-12 h-12 rounded-full flex items-center justify-center ${manageStock ? 'bg-green-100 dark:bg-green-900/30' : 'bg-gray-200 dark:bg-gray-600'}`">
+              <svg class="w-6 h-6" :class="manageStock ? 'text-green-600 dark:text-green-400' : 'text-gray-500 dark:text-gray-400'" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
               </svg>
             </div>
           </div>
-          <p class="text-xs text-gray-500 mt-2">
+          <p class="text-xs text-gray-500 dark:text-gray-400 mt-2">
             {{ manageStock ? 'Stock tracking active' : 'No stock tracking' }}
           </p>
         </div>
@@ -245,58 +245,58 @@ const formatDate = (date: string) => {
     </div>
 
     <!-- Warehouses (if multi-warehouse enabled) -->
-    <div v-if="warehouses.length > 0" class="p-6 border-b border-gray-200">
-      <h4 class="text-sm font-semibold text-gray-900 mb-4">Stock by Warehouse</h4>
+    <div v-if="warehouses.length > 0" class="p-6 border-b border-gray-200 dark:border-gray-700">
+      <h4 class="text-sm font-semibold text-gray-900 dark:text-white mb-4">Stock by Warehouse</h4>
       <div class="space-y-3">
         <div
           v-for="warehouse in warehouses"
           :key="warehouse.id"
-          class="flex items-center justify-between p-3 bg-gray-50 rounded-lg"
+          class="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg"
         >
           <div class="flex items-center gap-3">
-            <div class="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
-              <span class="text-sm font-semibold text-blue-600">{{ warehouse.code }}</span>
+            <div class="w-10 h-10 bg-blue-100 dark:bg-blue-900/30 rounded-lg flex items-center justify-center">
+              <span class="text-sm font-semibold text-blue-600 dark:text-blue-400">{{ warehouse.code }}</span>
             </div>
             <div>
-              <p class="text-sm font-medium text-gray-900">{{ warehouse.name }}</p>
-              <p class="text-xs text-gray-500">Code: {{ warehouse.code }}</p>
+              <p class="text-sm font-medium text-gray-900 dark:text-white">{{ warehouse.name }}</p>
+              <p class="text-xs text-gray-500 dark:text-gray-400">Code: {{ warehouse.code }}</p>
             </div>
           </div>
           <div class="text-right">
-            <p class="text-lg font-semibold text-gray-900">{{ warehouse.quantity }}</p>
-            <p class="text-xs text-gray-500">units</p>
+            <p class="text-lg font-semibold text-gray-900 dark:text-white">{{ warehouse.quantity }}</p>
+            <p class="text-xs text-gray-500 dark:text-gray-400">units</p>
           </div>
         </div>
         
-        <div class="flex items-center justify-between p-3 bg-blue-50 rounded-lg border-2 border-blue-200">
-          <p class="text-sm font-semibold text-blue-900">Total Stock</p>
-          <p class="text-lg font-bold text-blue-900">{{ totalWarehouseStock }} units</p>
+        <div class="flex items-center justify-between p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg border-2 border-blue-200 dark:border-blue-800">
+          <p class="text-sm font-semibold text-blue-900 dark:text-blue-300">Total Stock</p>
+          <p class="text-lg font-bold text-blue-900 dark:text-blue-300">{{ totalWarehouseStock }} units</p>
         </div>
       </div>
     </div>
 
     <!-- Adjustment History -->
     <div class="p-6">
-      <h4 class="text-sm font-semibold text-gray-900 mb-4">Stock Adjustment History</h4>
+      <h4 class="text-sm font-semibold text-gray-900 dark:text-white mb-4">Stock Adjustment History</h4>
       
       <div v-if="adjustmentHistory.length > 0" class="space-y-3 max-h-96 overflow-y-auto">
         <div
           v-for="adjustment in adjustmentHistory"
           :key="adjustment.id"
-          class="flex items-start gap-4 p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors"
+          class="flex items-start gap-4 p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
         >
           <div class="flex-shrink-0">
             <div :class="`w-10 h-10 rounded-full flex items-center justify-center ${
-              adjustment.type === 'addition' ? 'bg-green-100' : 
-              adjustment.type === 'subtraction' ? 'bg-red-100' : 'bg-blue-100'
+              adjustment.type === 'addition' ? 'bg-green-100 dark:bg-green-900/30' : 
+              adjustment.type === 'subtraction' ? 'bg-red-100 dark:bg-red-900/30' : 'bg-blue-100 dark:bg-blue-900/30'
             }`">
-              <svg v-if="adjustment.type === 'addition'" class="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg v-if="adjustment.type === 'addition'" class="w-5 h-5 text-green-600 dark:text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
               </svg>
-              <svg v-else-if="adjustment.type === 'subtraction'" class="w-5 h-5 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg v-else-if="adjustment.type === 'subtraction'" class="w-5 h-5 text-red-600 dark:text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 12H6" />
               </svg>
-              <svg v-else class="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg v-else class="w-5 h-5 text-blue-600 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
               </svg>
             </div>
@@ -305,48 +305,53 @@ const formatDate = (date: string) => {
           <div class="flex-1 min-w-0">
             <div class="flex items-start justify-between">
               <div>
-                <p :class="`text-sm font-medium ${getAdjustmentTypeColor(adjustment.type)}`">
+                <p :class="`text-sm font-medium ${
+                  adjustment.type === 'addition' ? 'text-green-600 dark:text-green-400' :
+                  adjustment.type === 'subtraction' ? 'text-red-600 dark:text-red-400' :
+                  'text-blue-600 dark:text-blue-400'
+                }`">
                   {{ getAdjustmentTypeLabel(adjustment.type) }}
                 </p>
-                <p class="text-sm text-gray-900 font-semibold">
+                <p class="text-sm text-gray-900 dark:text-white font-semibold">
                   {{ adjustment.type === 'addition' ? '+' : adjustment.type === 'subtraction' ? '-' : '' }}{{ adjustment.quantity }} units
                 </p>
               </div>
-              <span class="text-xs text-gray-500">
+              <span class="text-xs text-gray-500 dark:text-gray-400">
                 {{ adjustment.created_at ? formatDate(adjustment.created_at) : 'Just now' }}
               </span>
             </div>
             
-            <p class="text-sm text-gray-700 mt-1">{{ adjustment.reason }}</p>
-            <p v-if="adjustment.notes" class="text-xs text-gray-500 mt-1">{{ adjustment.notes }}</p>
-            <p v-if="adjustment.user" class="text-xs text-gray-500 mt-1">By: {{ adjustment.user.name }}</p>
+            <p class="text-sm text-gray-700 dark:text-gray-300 mt-1">{{ adjustment.reason }}</p>
+            <p v-if="adjustment.notes" class="text-xs text-gray-500 dark:text-gray-400 mt-1">{{ adjustment.notes }}</p>
+            <p v-if="adjustment.user" class="text-xs text-gray-500 dark:text-gray-400 mt-1">By: {{ adjustment.user.name }}</p>
           </div>
         </div>
       </div>
 
-      <div v-else class="text-center py-8 bg-gray-50 rounded-lg">
-        <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <div v-else class="text-center py-8 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+        <svg class="mx-auto h-12 w-12 text-gray-400 dark:text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
         </svg>
-        <p class="mt-2 text-sm text-gray-600">No stock adjustments recorded yet</p>
+        <p class="mt-2 text-sm text-gray-600 dark:text-gray-400">No stock adjustments recorded yet</p>
       </div>
     </div>
 
     <!-- Stock Adjustment Modal -->
     <div
       v-if="showAdjustmentForm"
-      class="fixed inset-0 bg-gray-500/75 dark:bg-gray-900/75 flex items-center justify-center z-50"
+      class="fixed inset-0 bg-gray-500/75 dark:bg-gray-900/75 flex items-center justify-center z-50 transform transition-all"
+      @click.self="showAdjustmentForm = false"
     >
-      <div class="bg-white rounded-lg shadow-xl max-w-md w-full mx-4">
+      <div class="bg-white dark:bg-gray-800 rounded-lg shadow-xl max-w-md w-full mx-4">
         <div class="p-6">
-          <h3 class="text-lg font-semibold text-gray-900 mb-4">Adjust Inventory</h3>
+          <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Adjust Inventory</h3>
           
           <div class="space-y-4">
             <div>
-              <label class="block text-sm font-medium text-gray-700 mb-1">Adjustment Type</label>
+              <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Adjustment Type</label>
               <select
                 v-model="newAdjustment.type"
-                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               >
                 <option value="addition">Add Stock</option>
                 <option value="subtraction">Remove Stock</option>
@@ -355,37 +360,37 @@ const formatDate = (date: string) => {
             </div>
 
             <div>
-              <label class="block text-sm font-medium text-gray-700 mb-1">
+              <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                 {{ newAdjustment.type === 'correction' ? 'New Stock Level' : 'Quantity' }}
               </label>
               <input
                 v-model.number="newAdjustment.quantity"
                 type="number"
                 min="0"
-                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               />
-              <p v-if="newAdjustment.type !== 'correction'" class="text-xs text-gray-500 mt-1">
+              <p v-if="newAdjustment.type !== 'correction'" class="text-xs text-gray-500 dark:text-gray-400 mt-1">
                 Current stock: {{ currentStock }} units
               </p>
             </div>
 
             <div>
-              <label class="block text-sm font-medium text-gray-700 mb-1">Reason *</label>
+              <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Reason *</label>
               <input
                 v-model="newAdjustment.reason"
                 type="text"
                 placeholder="e.g., New shipment, Damaged goods, Stock count"
-                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               />
             </div>
 
             <div>
-              <label class="block text-sm font-medium text-gray-700 mb-1">Notes (Optional)</label>
+              <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Notes (Optional)</label>
               <textarea
                 v-model="newAdjustment.notes"
                 rows="3"
                 placeholder="Additional details..."
-                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               ></textarea>
             </div>
           </div>
@@ -401,7 +406,7 @@ const formatDate = (date: string) => {
             <button
               @click="showAdjustmentForm = false"
               :disabled="isSubmitting"
-              class="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors cursor-pointer"
+              class="px-4 py-2 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors cursor-pointer"
             >
               Cancel
             </button>

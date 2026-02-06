@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue'
 import { Head, router } from '@inertiajs/vue3'
-import { Plus, GripVertical, Trash2, Eye, EyeOff } from 'lucide-vue-next'
+import { Plus, GripVertical, Trash2, Eye, EyeOff, Plug, Edit } from 'lucide-vue-next'
 import AdminLayout from '@/layouts/AdminLayout.vue'
 import * as menuRoutes from '@/routes/admin/system/menus/index'
 import MenuFormModal from '@/components/Admin/System/Menu/MenuFormModal.vue'
@@ -162,48 +162,55 @@ const toggleActive = (item: MenuItem) => {
     <AdminLayout title="Menu Management">
         <div class="space-y-6">
             <!-- Header -->
-            <div class="flex items-center justify-between">
+            <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                 <div>
-                    <h1 class="text-2xl font-bold text-gray-900 dark:text-white">Menu Management</h1>
-                    <p class="mt-1 text-sm text-gray-600 dark:text-gray-400">System → Menu Management</p>
+                   <h1 class="text-2xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
+                        Menu Management
+                   </h1>
+                   <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
+                        Manage and customize your admin sidebar navigation hierarchy.
+                   </p>
                 </div>
                 <button
                     @click="handleCreate"
-                    class="inline-flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 dark:focus:ring-offset-gray-900"
+                    class="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 border border-transparent rounded-xl text-sm font-medium text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 shadow-sm transition-all duration-200"
                 >
                     <Plus class="h-4 w-4" />
                     Add Menu Item
                 </button>
             </div>
 
+            <!-- Content -->
+            <div class="overflow-auto rounded-xl">
+
             <!-- Info Card -->
-            <div class="rounded-lg border border-blue-200 bg-blue-50 p-4 dark:border-blue-800 dark:bg-blue-900/20">
-                <p class="text-sm text-blue-800 dark:text-blue-200">
-                    <strong>Admin Menu:</strong> Manage your admin sidebar navigation. Drag and drop to reorder items.
-                    Parent items will automatically expand when they have children.
+            <div class="rounded-lg border border-blue-200 bg-blue-50 p-4 dark:border-blue-800 dark:bg-blue-900/20 mb-6">
+                <p class="text-sm text-blue-800 dark:text-blue-200 flex items-start gap-2">
+                    <span class="mt-0.5">•</span>
+                    <span><strong>Admin Menu Structure:</strong> Drag and drop items to reorder the sidebar navigation. Parent items act as collapsible sections when they contain child menu links.</span>
                 </p>
             </div>
 
             <!-- Menu Tree -->
-            <div class="overflow-hidden rounded-lg border border-gray-200 bg-white shadow dark:border-gray-700 dark:bg-gray-800">
+            <div class="overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm dark:border-gray-700 dark:bg-gray-800">
                 <div class="overflow-x-auto">
                     <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
-                        <thead class="bg-gray-50 dark:bg-gray-900">
+                        <thead class="bg-gray-50/50 dark:bg-gray-900/50">
                             <tr>
-                                <th class="w-10 px-6 py-3"></th>
-                                <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-400">
+                                <th class="w-12 px-6 py-4"></th>
+                                <th class="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">
                                     Title
                                 </th>
-                                <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-400">
+                                <th class="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">
                                     Icon
                                 </th>
-                                <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-400">
+                                <th class="hidden sm:table-cell px-6 py-4 text-left text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">
                                     Route / URL
                                 </th>
-                                <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-400">
+                                <th class="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">
                                     Status
                                 </th>
-                                <th class="px-6 py-3 text-right text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-400">
+                                <th class="px-6 py-4 text-right text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">
                                     Actions
                                 </th>
                             </tr>
@@ -218,38 +225,45 @@ const toggleActive = (item: MenuItem) => {
                                     @drop="handleDrop($event, item)"
                                     @dragend="handleDragEnd"
                                     :class="[
-                                        'hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors',
-                                        draggedItem?.id === item.id ? 'opacity-50' : '',
+                                        'group hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors',
+                                        draggedItem?.id === item.id ? 'opacity-50 bg-gray-50 dark:bg-gray-700' : '',
                                         dragOverItem?.id === item.id ? 'border-t-2 border-blue-500' : ''
                                     ]"
                                 >
                                     <!-- Drag Handle -->
-                                    <td class="px-6 py-4">
-                                        <div class="cursor-move">
-                                            <GripVertical class="h-5 w-5 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200" />
+                                    <td class="px-6 py-4 pl-4 sm:pl-6 text-center">
+                                        <div class="cursor-move text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 p-1 rounded hover:bg-gray-100 dark:hover:bg-gray-700 inline-block transition-colors">
+                                            <GripVertical class="h-4 w-4" />
                                         </div>
                                     </td>
 
                                     <!-- Title -->
                                     <td class="px-6 py-4">
-                                        <div class="flex items-center gap-2">
+                                        <div class="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-3">
                                             <span class="font-medium text-gray-900 dark:text-white">{{ item.title }}</span>
-                                            <span v-if="getChildren(item.id).length > 0" class="rounded-full bg-gray-100 px-2 py-0.5 text-xs text-gray-600 dark:bg-gray-700 dark:text-gray-300">
+                                            <span v-if="getChildren(item.id).length > 0" class="inline-flex w-fit rounded-full bg-blue-50 px-2 py-0.5 text-xs font-medium text-blue-700 dark:bg-blue-900/30 dark:text-blue-300">
                                                 {{ getChildren(item.id).length }} children
+                                            </span>
+                                            <!-- Mobile-only URL view -->
+                                            <span v-if="item.route || item.url" class="sm:hidden text-xs text-gray-500 font-mono truncate max-w-[150px]">
+                                                {{ item.route ? `route: ${item.route}` : item.url }}
                                             </span>
                                         </div>
                                     </td>
 
                                     <!-- Icon -->
                                     <td class="px-6 py-4">
-                                        <span v-if="item.icon" class="text-sm text-gray-600 dark:text-gray-300">{{ item.icon }}</span>
+                                        <div v-if="item.icon" class="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-300 bg-gray-100 dark:bg-gray-700 py-1 px-2 rounded w-fit font-mono text-xs">
+                                            <Plug class="w-3 h-3" />
+                                            {{ item.icon }}
+                                        </div>
                                         <span v-else class="text-sm text-gray-400">—</span>
                                     </td>
 
                                     <!-- Route / URL -->
-                                    <td class="px-6 py-4">
-                                        <span v-if="item.route" class="text-sm text-gray-600 dark:text-gray-300">{{ item.route }}</span>
-                                        <span v-else-if="item.url" class="text-sm text-gray-600 dark:text-gray-300">{{ item.url }}</span>
+                                    <td class="hidden sm:table-cell px-6 py-4">
+                                        <span v-if="item.route" class="font-mono text-xs text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/20 px-2 py-0.5 rounded">{{ item.route }}</span>
+                                        <span v-else-if="item.url" class="font-mono text-xs text-gray-600 dark:text-gray-400">{{ item.url }}</span>
                                         <span v-else class="text-sm text-gray-400">#</span>
                                     </td>
 
@@ -272,22 +286,20 @@ const toggleActive = (item: MenuItem) => {
 
                                     <!-- Actions -->
                                     <td class="px-6 py-4 text-right">
-                                        <div class="flex items-center justify-end gap-2">
+                                        <div class="flex items-center justify-end gap-2 opacity-60 group-hover:opacity-100 transition-opacity">
                                             <button
                                                 @click="handleEdit(item)"
-                                                class="rounded-lg p-2 text-blue-600 hover:bg-blue-50 dark:text-blue-400 dark:hover:bg-blue-900/20"
+                                                class="p-2 text-gray-400 hover:text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-lg transition-colors"
                                                 title="Edit"
                                             >
-                                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                                                </svg>
+                                                <Edit class="w-4 h-4" />
                                             </button>
                                             <button
                                                 @click="handleDelete(item)"
-                                                class="rounded-lg p-2 text-red-600 hover:bg-red-50 dark:text-red-400 dark:hover:bg-red-900/20"
+                                                class="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors"
                                                 title="Delete"
                                             >
-                                                <Trash2 class="h-4 w-4" />
+                                                <Trash2 class="w-4 h-4" />
                                             </button>
                                         </div>
                                     </td>
@@ -304,29 +316,38 @@ const toggleActive = (item: MenuItem) => {
                                     @drop="handleDrop($event, child)"
                                     @dragend="handleDragEnd"
                                     :class="[
-                                        'bg-gray-50 hover:bg-gray-100 dark:bg-gray-900/50 dark:hover:bg-gray-700/50 transition-colors',
+                                        'group bg-gray-50/50 hover:bg-gray-100 dark:bg-gray-900/30 dark:hover:bg-gray-800 transition-colors',
                                         draggedItem?.id === child.id ? 'opacity-50' : '',
                                         dragOverItem?.id === child.id ? 'border-t-2 border-blue-500' : ''
                                     ]"
                                 >
-                                    <td class="px-6 py-4">
-                                        <div class="ml-8 cursor-move">
-                                            <GripVertical class="h-4 w-4 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200" />
+                                    <td class="px-6 py-4 pl-8 sm:pl-12 text-center border-l-2 border-transparent">
+                                        <div class="cursor-move text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 inline-block p-1 rounded hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors">
+                                            <GripVertical class="h-4 w-4" />
                                         </div>
                                     </td>
                                     <td class="px-6 py-4">
-                                        <div class="ml-8 flex items-center gap-2">
-                                            <span class="text-sm text-gray-400">└─</span>
-                                            <span class="text-sm font-medium text-gray-700 dark:text-gray-300">{{ child.title }}</span>
+                                        <div class="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-2">
+                                            <div class="flex items-center gap-2">
+                                                <span class="text-gray-300 dark:text-gray-600 sm:inline hidden">SUB</span>
+                                                <span class="text-sm font-medium text-gray-700 dark:text-gray-300">{{ child.title }}</span>
+                                            </div>
+                                            <!-- Mobile-only URL view -->
+                                            <span v-if="child.route || child.url" class="sm:hidden text-xs text-gray-500 font-mono truncate max-w-[150px]">
+                                                {{ child.route ? `route: ${child.route}` : child.url }}
+                                            </span>
                                         </div>
                                     </td>
                                     <td class="px-6 py-4">
-                                        <span v-if="child.icon" class="text-sm text-gray-600 dark:text-gray-300">{{ child.icon }}</span>
+                                        <div v-if="child.icon" class="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-300 bg-white dark:bg-gray-700/50 border border-gray-100 dark:border-gray-600 py-0.5 px-2 rounded w-fit font-mono text-xs scale-90 origin-left">
+                                            <Plug class="w-3 h-3" />
+                                            {{ child.icon }}
+                                        </div>
                                         <span v-else class="text-sm text-gray-400">—</span>
                                     </td>
-                                    <td class="px-6 py-4">
-                                        <span v-if="child.route" class="text-sm text-gray-600 dark:text-gray-300">{{ child.route }}</span>
-                                        <span v-else-if="child.url" class="text-sm text-gray-600 dark:text-gray-300">{{ child.url }}</span>
+                                    <td class="hidden sm:table-cell px-6 py-4">
+                                        <span v-if="child.route" class="font-mono text-xs text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/20 px-2 py-0.5 rounded">{{ child.route }}</span>
+                                        <span v-else-if="child.url" class="font-mono text-xs text-gray-600 dark:text-gray-400">{{ child.url }}</span>
                                         <span v-else class="text-sm text-gray-400">#</span>
                                     </td>
                                     <td class="px-6 py-4">
@@ -345,22 +366,20 @@ const toggleActive = (item: MenuItem) => {
                                         </button>
                                     </td>
                                     <td class="px-6 py-4 text-right">
-                                        <div class="flex items-center justify-end gap-2">
+                                        <div class="flex items-center justify-end gap-2 opacity-60 group-hover:opacity-100 transition-opacity">
                                             <button
                                                 @click="handleEdit(child)"
-                                                class="rounded-lg p-2 text-blue-600 hover:bg-blue-50 dark:text-blue-400 dark:hover:bg-blue-900/20"
+                                                class="p-2 text-gray-400 hover:text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-lg transition-colors"
                                                 title="Edit"
                                             >
-                                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                                                </svg>
+                                                <Edit class="w-4 h-4" />
                                             </button>
                                             <button
                                                 @click="handleDelete(child)"
-                                                class="rounded-lg p-2 text-red-600 hover:bg-red-50 dark:text-red-400 dark:hover:bg-red-900/20"
+                                                class="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors"
                                                 title="Delete"
                                             >
-                                                <Trash2 class="h-4 w-4" />
+                                                <Trash2 class="w-4 h-4" />
                                             </button>
                                         </div>
                                     </td>
@@ -376,6 +395,7 @@ const toggleActive = (item: MenuItem) => {
                 </div>
             </div>
         </div>
+    </div>
 
         <!-- Form Modal -->
         <MenuFormModal

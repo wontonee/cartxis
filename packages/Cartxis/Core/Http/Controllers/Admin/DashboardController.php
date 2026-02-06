@@ -60,6 +60,12 @@ class DashboardController extends Controller
             ? round((($totalRevenue - $previousRevenue) / $previousRevenue) * 100, 1)
             : 0;
 
+        $totalPaidRevenue = $this->getTotalPaidRevenue();
+        $previousPaidRevenue = $this->getPreviousPaidRevenue();
+        $paidRevenueChange = $previousPaidRevenue > 0
+            ? round((($totalPaidRevenue - $previousPaidRevenue) / $previousPaidRevenue) * 100, 1)
+            : 0;
+
         $totalOrders = $this->getTotalOrders();
         $previousOrders = $this->getPreviousOrders();
         $ordersChange = $previousOrders > 0 
@@ -80,12 +86,20 @@ class DashboardController extends Controller
 
         return [
             [
-                'title' => 'Total Revenue',
+                'title' => 'Completed Revenue',
                 'value' => $this->formatCurrency($totalRevenue),
                 'change' => ($revenueChange >= 0 ? '+' : '') . $revenueChange . '%',
                 'trend' => $revenueChange >= 0 ? 'up' : 'down',
                 'icon' => 'DollarSign',
                 'color' => 'blue'
+            ],
+            [
+                'title' => 'Paid Revenue',
+                'value' => $this->formatCurrency($totalPaidRevenue),
+                'change' => ($paidRevenueChange >= 0 ? '+' : '') . $paidRevenueChange . '%',
+                'trend' => $paidRevenueChange >= 0 ? 'up' : 'down',
+                'icon' => 'CreditCard',
+                'color' => 'green'
             ],
             [
                 'title' => 'Orders',
@@ -323,7 +337,7 @@ class DashboardController extends Controller
     {
         try {
             return (float) DB::table('orders')
-                ->whereIn('status', ['completed', 'processing'])
+                ->where('status', 'completed')
                 ->sum('total');
         } catch (\Exception $e) {
             return 0.0;
@@ -334,7 +348,30 @@ class DashboardController extends Controller
     {
         try {
             return (float) DB::table('orders')
-                ->whereIn('status', ['completed', 'processing'])
+                ->where('status', 'completed')
+                ->where('created_at', '<', now()->subMonth())
+                ->sum('total');
+        } catch (\Exception $e) {
+            return 0.0;
+        }
+    }
+
+    private function getTotalPaidRevenue(): float
+    {
+        try {
+            return (float) DB::table('orders')
+                ->where('payment_status', 'paid')
+                ->sum('total');
+        } catch (\Exception $e) {
+            return 0.0;
+        }
+    }
+
+    private function getPreviousPaidRevenue(): float
+    {
+        try {
+            return (float) DB::table('orders')
+                ->where('payment_status', 'paid')
                 ->where('created_at', '<', now()->subMonth())
                 ->sum('total');
         } catch (\Exception $e) {

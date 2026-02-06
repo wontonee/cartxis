@@ -4,6 +4,11 @@ import { router, Link, Head } from '@inertiajs/vue3';
 import AdminLayout from '@/layouts/AdminLayout.vue';
 import * as reviewRoutes from '@/routes/admin/catalog/reviews';
 import Pagination from '@/components/Admin/Pagination.vue';
+import { 
+    Search, Filter, X, CheckCircle, Trash2, Edit, Eye, 
+    Star, MessageSquare, PlusCircle, MinusCircle, 
+    ArrowUp, ArrowDown, ArrowUpDown, ThumbsUp, ThumbsDown 
+} from 'lucide-vue-next';
 
 interface Review {
     id: number;
@@ -11,6 +16,7 @@ interface Review {
         id: number;
         name: string;
         slug: string;
+        featured_image?: string;
     };
     reviewer: string;
     rating: number;
@@ -60,10 +66,23 @@ const selectedRating = ref(props.filters.rating || '');
 const selectedProduct = ref(props.filters.product_id || '');
 const isLoading = ref(false);
 const showBulkDeleteModal = ref(false);
+const expandedRows = ref<number[]>([]);
 
 const selectAll = computed(() => {
     return props.reviews.data.length > 0 && selectedReviews.value.length === props.reviews.data.length;
 });
+
+const someSelected = computed(() => {
+  return selectedReviews.value.length > 0 && selectedReviews.value.length < props.reviews.data.length;
+});
+
+function toggleRow(id: number) {
+  if (expandedRows.value.includes(id)) {
+    expandedRows.value = expandedRows.value.filter(rowId => rowId !== id);
+  } else {
+    expandedRows.value.push(id);
+  }
+}
 
 function toggleSelectAll() {
     if (selectAll.value) {
@@ -161,278 +180,373 @@ function confirmBulkDelete() {
     
     <AdminLayout title="Product Reviews">
         <div class="p-6 space-y-6">
+            <!-- Page Header -->
+            <div class="flex items-center justify-between">
+                <div>
+                    <h1 class="text-2xl font-bold text-gray-900 dark:text-white">Product Reviews</h1>
+                    <p class="mt-1 text-sm text-gray-600 dark:text-gray-400">Manage customer reviews and ratings</p>
+                </div>
+            </div>
+
             <!-- Stats Cards -->
             <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                 <!-- Total Reviews -->
-                <div class="bg-white rounded-lg shadow-sm p-6">
+                <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 p-6">
                     <div class="flex items-center justify-between">
                         <div>
-                            <p class="text-sm font-medium text-gray-600">Total Reviews</p>
-                            <p class="text-3xl font-bold text-gray-900 mt-1">{{ stats.total }}</p>
+                            <p class="text-sm font-medium text-gray-600 dark:text-gray-400">Total Reviews</p>
+                            <p class="text-3xl font-bold text-gray-900 dark:text-white mt-1">{{ stats.total }}</p>
                         </div>
-                        <div class="p-3 bg-blue-100 rounded-lg">
-                            <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 8h10M7 12h4m1 8l-4-4H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-3l-4 4z" />
-                            </svg>
+                        <div class="p-3 bg-blue-50 dark:bg-blue-900/20 rounded-xl">
+                            <MessageSquare class="w-6 h-6 text-blue-600 dark:text-blue-400" />
                         </div>
                     </div>
                 </div>
 
                 <!-- Pending -->
-                <div class="bg-white rounded-lg shadow-sm p-6">
+                <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 p-6">
                     <div class="flex items-center justify-between">
                         <div>
-                            <p class="text-sm font-medium text-gray-600">Pending</p>
-                            <p class="text-3xl font-bold text-yellow-600 mt-1">{{ stats.pending }}</p>
+                            <p class="text-sm font-medium text-gray-600 dark:text-gray-400">Pending</p>
+                            <p class="text-3xl font-bold text-yellow-600 dark:text-yellow-400 mt-1">{{ stats.pending }}</p>
                         </div>
-                        <div class="p-3 bg-yellow-100 rounded-lg">
-                            <svg class="w-6 h-6 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                            </svg>
+                        <div class="p-3 bg-yellow-50 dark:bg-yellow-900/20 rounded-xl">
+                            <Eye class="w-6 h-6 text-yellow-600 dark:text-yellow-400" />
                         </div>
                     </div>
                 </div>
 
                 <!-- Approved -->
-                <div class="bg-white rounded-lg shadow-sm p-6">
+                <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 p-6">
                     <div class="flex items-center justify-between">
                         <div>
-                            <p class="text-sm font-medium text-gray-600">Approved</p>
-                            <p class="text-3xl font-bold text-green-600 mt-1">{{ stats.approved }}</p>
+                            <p class="text-sm font-medium text-gray-600 dark:text-gray-400">Approved</p>
+                            <p class="text-3xl font-bold text-green-600 dark:text-green-400 mt-1">{{ stats.approved }}</p>
                         </div>
-                        <div class="p-3 bg-green-100 rounded-lg">
-                            <svg class="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                            </svg>
+                        <div class="p-3 bg-green-50 dark:bg-green-900/20 rounded-xl">
+                            <ThumbsUp class="w-6 h-6 text-green-600 dark:text-green-400" />
                         </div>
                     </div>
                 </div>
 
                 <!-- Rejected -->
-                <div class="bg-white rounded-lg shadow-sm p-6">
+                <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 p-6">
                     <div class="flex items-center justify-between">
                         <div>
-                            <p class="text-sm font-medium text-gray-600">Rejected</p>
-                            <p class="text-3xl font-bold text-red-600 mt-1">{{ stats.rejected }}</p>
+                            <p class="text-sm font-medium text-gray-600 dark:text-gray-400">Rejected</p>
+                            <p class="text-3xl font-bold text-red-600 dark:text-red-400 mt-1">{{ stats.rejected }}</p>
                         </div>
-                        <div class="p-3 bg-red-100 rounded-lg">
-                            <svg class="w-6 h-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                            </svg>
+                        <div class="p-3 bg-red-50 dark:bg-red-900/20 rounded-xl">
+                            <ThumbsDown class="w-6 h-6 text-red-600 dark:text-red-400" />
                         </div>
                     </div>
                 </div>
             </div>
 
             <!-- Filters Card -->
-            <div class="bg-white rounded-lg shadow-sm p-4">
-                <div class="grid grid-cols-1 md:grid-cols-5 gap-4">
+             <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 p-5">
+                <div class="grid grid-cols-1 md:grid-cols-4 lg:grid-cols-5 gap-4">
                     <!-- Search -->
                     <div class="md:col-span-2">
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Search</label>
-                        <input
-                            v-model="search"
-                            @keyup.enter="applyFilters"
-                            type="text"
-                            placeholder="Search by title, comment, product..."
-                            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                        />
+                         <label class="block text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-1.5">Search</label>
+                        <div class="relative">
+                            <Search class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                            <input
+                                v-model="search"
+                                @keyup.enter="applyFilters"
+                                type="text"
+                                placeholder="Search reviews..."
+                                class="w-full pl-10 pr-4 py-2.5 bg-gray-50 dark:bg-gray-700/50 border border-gray-200 dark:border-gray-600 rounded-lg text-sm text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all placeholder:text-gray-400"
+                            />
+                        </div>
                     </div>
 
                     <!-- Status Filter -->
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Status</label>
-                        <select
-                            v-model="selectedStatus"
-                            @change="applyFilters"
-                            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                        >
-                            <option value="">All Status</option>
-                            <option value="pending">Pending</option>
-                            <option value="approved">Approved</option>
-                            <option value="rejected">Rejected</option>
-                        </select>
+                        <label class="block text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-1.5">Status</label>
+                        <div class="relative">
+                            <Filter class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                            <select
+                                v-model="selectedStatus"
+                                @change="applyFilters"
+                                class="w-full pl-10 pr-10 py-2.5 bg-gray-50 dark:bg-gray-700/50 border border-gray-200 dark:border-gray-600 rounded-lg text-sm text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all appearance-none cursor-pointer"
+                            >
+                                <option value="">All Status</option>
+                                <option value="pending">Pending</option>
+                                <option value="approved">Approved</option>
+                                <option value="rejected">Rejected</option>
+                            </select>
+                             <div class="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none">
+                                <ArrowUpDown class="w-3 h-3 text-gray-400" />
+                            </div>
+                        </div>
                     </div>
 
                     <!-- Rating Filter -->
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Rating</label>
-                        <select
-                            v-model="selectedRating"
-                            @change="applyFilters"
-                            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                        >
-                            <option value="">All Ratings</option>
-                            <option value="5">5 Stars</option>
-                            <option value="4">4 Stars</option>
-                            <option value="3">3 Stars</option>
-                            <option value="2">2 Stars</option>
-                            <option value="1">1 Star</option>
-                        </select>
+                        <label class="block text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-1.5">Rating</label>
+                         <div class="relative">
+                            <Star class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                            <select
+                                v-model="selectedRating"
+                                @change="applyFilters"
+                                class="w-full pl-10 pr-10 py-2.5 bg-gray-50 dark:bg-gray-700/50 border border-gray-200 dark:border-gray-600 rounded-lg text-sm text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all appearance-none cursor-pointer"
+                            >
+                                <option value="">All Ratings</option>
+                                <option value="5">5 Stars</option>
+                                <option value="4">4 Stars</option>
+                                <option value="3">3 Stars</option>
+                                <option value="2">2 Stars</option>
+                                <option value="1">1 Star</option>
+                            </select>
+                            <div class="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none">
+                                <ArrowUpDown class="w-3 h-3 text-gray-400" />
+                            </div>
+                        </div>
                     </div>
 
                     <!-- Product Filter -->
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Product</label>
-                        <select
-                            v-model="selectedProduct"
-                            @change="applyFilters"
-                            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                        >
-                            <option value="">All Products</option>
-                            <option v-for="product in products" :key="product.id" :value="product.id">
-                                {{ product.name }}
-                            </option>
-                        </select>
+                        <label class="block text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-1.5">Product</label>
+                        <div class="relative">
+                            <Filter class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                            <select
+                                v-model="selectedProduct"
+                                @change="applyFilters"
+                                class="w-full pl-10 pr-10 py-2.5 bg-gray-50 dark:bg-gray-700/50 border border-gray-200 dark:border-gray-600 rounded-lg text-sm text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all appearance-none cursor-pointer"
+                            >
+                                <option value="">All Products</option>
+                                <option v-for="product in products" :key="product.id" :value="product.id">
+                                    {{ product.name }}
+                                </option>
+                            </select>
+                             <div class="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none">
+                                <ArrowUpDown class="w-3 h-3 text-gray-400" />
+                            </div>
+                        </div>
                     </div>
                 </div>
 
                 <!-- Clear Filters Button -->
-                <div v-if="search || selectedStatus || selectedRating || selectedProduct" class="mt-4">
+                <div v-if="search || selectedStatus || selectedRating || selectedProduct" class="mt-4 pt-4 border-t border-gray-100 dark:border-gray-700 flex justify-end">
                     <button
                         @click="clearFilters"
-                        class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50"
+                         class="px-4 py-2 text-sm text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-200 font-medium bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 rounded-lg transition-colors flex items-center gap-2"
                     >
+                        <X class="w-4 h-4" />
                         Clear Filters
                     </button>
                 </div>
             </div>
 
-            <!-- Bulk Actions -->
-            <div v-if="selectedReviews.length > 0" class="bg-blue-50 border border-blue-200 rounded-lg p-4">
-                <div class="flex items-center justify-between">
-                    <span class="text-sm font-medium text-blue-900">
-                        {{ selectedReviews.length }} review(s) selected
+             <!-- Bulk Actions -->
+            <transition enter-active-class="transition ease-out duration-200" enter-from-class="opacity-0 -translate-y-2" enter-to-class="opacity-100 translate-y-0" leave-active-class="transition ease-in duration-150" leave-from-class="opacity-100 translate-y-0" leave-to-class="opacity-0 -translate-y-2">
+                <div v-if="selectedReviews.length > 0" class="bg-blue-600 rounded-xl shadow-lg p-3 text-white flex items-center justify-between sticky top-4 z-10 px-6">
+                    <span class="text-sm font-semibold flex items-center">
+                        <CheckCircle class="w-4 h-4 mr-2" />
+                        {{ selectedReviews.length }} {{ selectedReviews.length === 1 ? 'review' : 'reviews' }} selected
                     </span>
                     <div class="flex gap-2">
                         <button
                             @click="bulkApprove"
                             :disabled="isLoading"
-                            class="px-3 py-1.5 text-sm font-medium text-white bg-green-600 rounded-lg hover:bg-green-700 disabled:opacity-50"
+                            class="px-3 py-1.5 text-xs font-bold text-green-600 bg-white rounded-lg hover:bg-green-50 transition-colors uppercase tracking-wide disabled:opacity-50"
                         >
                             Approve
                         </button>
                         <button
                             @click="bulkReject"
                             :disabled="isLoading"
-                            class="px-3 py-1.5 text-sm font-medium text-white bg-yellow-600 rounded-lg hover:bg-yellow-700 disabled:opacity-50"
+                            class="px-3 py-1.5 text-xs font-bold text-yellow-600 bg-white rounded-lg hover:bg-yellow-50 transition-colors uppercase tracking-wide disabled:opacity-50"
                         >
                             Reject
                         </button>
+                        <div class="w-px h-6 bg-blue-400 mx-1"></div>
                         <button
                             @click="bulkDelete"
                             :disabled="isLoading"
-                            class="px-3 py-1.5 text-sm font-medium text-white bg-red-600 rounded-lg hover:bg-red-700 disabled:opacity-50"
+                            class="px-3 py-1.5 text-xs font-bold text-white bg-red-500 rounded-lg hover:bg-red-600 transition-colors flex items-center uppercase tracking-wide disabled:opacity-50"
                         >
+                            <Trash2 class="w-3 h-3 mr-1.5" />
                             Delete
                         </button>
                     </div>
                 </div>
-            </div>
+            </transition>
 
             <!-- Reviews Table -->
-            <div class="bg-white rounded-lg shadow-sm overflow-hidden">
+            <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 overflow-hidden">
                 <div class="overflow-x-auto">
-                    <table class="min-w-full divide-y divide-gray-200">
-                        <thead class="bg-gray-50">
+                    <table class="min-w-full divide-y divide-gray-100 dark:divide-gray-700">
+                        <thead class="bg-gray-50/80 dark:bg-gray-700/50">
                             <tr>
-                                <th class="w-12 px-6 py-3">
+                                <th scope="col" class="w-12 px-6 py-4">
                                     <input
                                         type="checkbox"
                                         :checked="selectAll"
+                                        :indeterminate.prop="someSelected"
                                         @change="toggleSelectAll"
-                                        class="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                                        class="rounded border-gray-300 dark:border-gray-600 text-blue-600 focus:ring-blue-500 bg-white dark:bg-gray-700 w-4 h-4 transition-all"
                                     />
                                 </th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Product</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Reviewer</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Rating</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Review</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                                <th scope="col" class="px-6 py-4 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Product</th>
+                                <th scope="col" class="hidden md:table-cell px-6 py-4 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Reviewer</th>
+                                <th scope="col" class="hidden sm:table-cell px-6 py-4 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Rating</th>
+                                <th scope="col" class="hidden lg:table-cell px-6 py-4 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Review</th>
+                                <th scope="col" class="px-6 py-4 text-center text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Status</th>
+                                <th scope="col" class="hidden xl:table-cell px-6 py-4 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Date</th>
+                                <th scope="col" class="px-6 py-4 text-right text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Actions</th>
                             </tr>
                         </thead>
-                        <tbody class="bg-white divide-y divide-gray-200">
-                            <tr v-for="review in reviews.data" :key="review.id" class="hover:bg-gray-50">
-                                <td class="px-6 py-4 whitespace-nowrap">
-                                    <input
-                                        type="checkbox"
-                                        :value="review.id"
-                                        v-model="selectedReviews"
-                                        class="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
-                                    />
-                                </td>
-                                <td class="px-6 py-4">
-                                    <div class="text-sm font-medium text-gray-900">{{ review.product.name }}</div>
-                                </td>
-                                <td class="px-6 py-4">
+                        <tbody class="bg-white dark:bg-gray-800 divide-y divide-gray-100 dark:divide-gray-700">
+                            <template v-for="review in reviews.data" :key="review.id">
+                            <tr class="group hover:bg-blue-50/50 dark:hover:bg-blue-900/10 transition-colors">
+                                <td class="px-6 py-4 relative">
                                     <div class="flex items-center">
-                                        <div class="flex-shrink-0 h-8 w-8 bg-gray-200 rounded-full flex items-center justify-center">
-                                            <svg class="w-4 h-4 text-gray-500" fill="currentColor" viewBox="0 0 20 20">
-                                                <path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd" />
-                                            </svg>
+                                         <button 
+                                            @click="toggleRow(review.id)" 
+                                            class="xl:hidden absolute left-2 p-1 text-blue-600 hover:text-blue-800 focus:outline-none"
+                                        >
+                                            <MinusCircle v-if="expandedRows.includes(review.id)" class="w-5 h-5 fill-blue-100 dark:fill-blue-900/30" />
+                                            <PlusCircle v-else class="w-5 h-5 fill-blue-50 dark:fill-blue-900/20" />
+                                        </button>
+                                        <input
+                                            type="checkbox"
+                                            :value="review.id"
+                                            v-model="selectedReviews"
+                                            class="rounded border-gray-300 dark:border-gray-600 text-blue-600 focus:ring-blue-500 bg-white dark:bg-gray-700 w-4 h-4 cursor-pointer transition-all ml-4 xl:ml-0"
+                                        />
+                                    </div>
+                                </td>
+                                <td class="px-6 py-4">
+                                     <div class="flex items-center gap-3">
+                                        <div class="h-10 w-10 flex-shrink-0 bg-gray-100 dark:bg-gray-700 rounded-lg overflow-hidden border border-gray-200 dark:border-gray-600 flex items-center justify-center">
+                                            <img v-if="review.product.featured_image" :src="`/storage/${review.product.featured_image}`" :alt="review.product.name" class="w-full h-full object-cover" />
+                                            <div v-else class="text-xs font-semibold text-gray-400 text-center p-1 leading-tight">{{ review.product.name.substring(0, 2).toUpperCase() }}</div>
+                                        </div>
+                                        <div>
+                                            <div class="text-sm font-bold text-gray-900 dark:text-white line-clamp-1 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">{{ review.product.name }}</div>
+                                            <div class="text-xs text-gray-500 dark:text-gray-400 font-mono">{{ review.product.slug }}</div>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td class="hidden md:table-cell px-6 py-4">
+                                    <div class="flex items-center">
+                                        <div class="flex-shrink-0 h-8 w-8 bg-gray-100 dark:bg-gray-700 rounded-full flex items-center justify-center border border-gray-200 dark:border-gray-600">
+                                            <span class="text-xs font-bold text-gray-500 dark:text-gray-400">{{ review.reviewer.charAt(0).toUpperCase() }}</span>
                                         </div>
                                         <div class="ml-3">
-                                            <div class="text-sm font-medium text-gray-900">{{ review.reviewer }}</div>
+                                            <div class="text-sm font-medium text-gray-900 dark:text-white">{{ review.reviewer }}</div>
                                         </div>
                                     </div>
                                 </td>
-                                <td class="px-6 py-4 whitespace-nowrap">
-                                    <div class="flex items-center">
-                                        <template v-for="star in 5" :key="star">
-                                            <svg
-                                                :class="star <= review.rating ? 'text-yellow-400' : 'text-gray-300'"
-                                                class="w-5 h-5"
-                                                fill="currentColor"
-                                                viewBox="0 0 20 20"
-                                            >
-                                                <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-                                            </svg>
-                                        </template>
+                                <td class="hidden sm:table-cell px-6 py-4 whitespace-nowrap">
+                                    <div class="flex items-center bg-yellow-50 dark:bg-yellow-900/10 px-2 py-1 rounded-lg w-fit">
+                                         <span class="text-sm font-bold text-yellow-700 dark:text-yellow-500 mr-1.5">{{ review.rating }}.0</span>
+                                        <div class="flex">
+                                            <template v-for="star in 5" :key="star">
+                                                <Star
+                                                    :class="star <= review.rating ? 'text-yellow-400 fill-current' : 'text-gray-300 dark:text-gray-600'"
+                                                    class="w-3.5 h-3.5"
+                                                />
+                                            </template>
+                                        </div>
                                     </div>
                                 </td>
-                                <td class="px-6 py-4">
-                                    <div class="text-sm font-medium text-gray-900 mb-1">{{ review.title }}</div>
-                                    <div class="text-sm text-gray-500 line-clamp-2">{{ review.comment }}</div>
-                                    <div v-if="review.admin_reply" class="mt-2 flex items-center text-xs text-green-600">
-                                        <svg class="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
-                                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
-                                        </svg>
-                                        Admin replied
+                                <td class="hidden lg:table-cell px-6 py-4">
+                                    <div class="max-w-xs">
+                                        <div class="text-sm font-semibold text-gray-900 dark:text-white mb-1 line-clamp-1">{{ review.title }}</div>
+                                        <div class="text-xs text-gray-500 dark:text-gray-400 line-clamp-2 leading-relaxed">{{ review.comment }}</div>
+                                        <div v-if="review.admin_reply" class="mt-2 flex items-center text-xs text-green-600 dark:text-green-400 font-medium bg-green-50 dark:bg-green-900/10 w-fit px-2 py-1 rounded">
+                                            <MessageSquare class="w-3 h-3 mr-1.5" />
+                                            Admin replied
+                                        </div>
                                     </div>
                                 </td>
-                                <td class="px-6 py-4 whitespace-nowrap">
+                                <td class="px-6 py-4 whitespace-nowrap text-center">
                                     <span
                                         :class="{
-                                            'bg-green-100 text-green-800': review.status === 'approved',
-                                            'bg-yellow-100 text-yellow-800': review.status === 'pending',
-                                            'bg-red-100 text-red-800': review.status === 'rejected'
+                                            'bg-green-50 text-green-700 border-green-200 dark:bg-green-900/20 dark:text-green-300 dark:border-green-800': review.status === 'approved',
+                                            'bg-yellow-50 text-yellow-700 border-yellow-200 dark:bg-yellow-900/20 dark:text-yellow-300 dark:border-yellow-800': review.status === 'pending',
+                                            'bg-red-50 text-red-700 border-red-200 dark:bg-red-900/20 dark:text-red-300 dark:border-red-800': review.status === 'rejected'
                                         }"
-                                        class="px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full"
+                                        class="px-2.5 py-1 inline-flex text-xs leading-5 font-semibold rounded-full border shadow-sm"
                                     >
-                                        {{ review.status }}
+                                        <template v-if="review.status === 'approved'"><CheckCircle class="w-3 h-3 mr-1" /> Approved</template>
+                                        <template v-else-if="review.status === 'pending'"><Eye class="w-3 h-3 mr-1" /> Pending</template>
+                                        <template v-else><X class="w-3 h-3 mr-1" /> Rejected</template>
                                     </span>
                                 </td>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                    {{ review.created_at }}
+                                <td class="hidden xl:table-cell px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400 font-mono">
+                                    {{ new Date(review.created_at).toLocaleDateString() }}
                                 </td>
-                                <td class="px-6 py-4 text-right text-sm font-medium">
-                                    <Link
-                                        :href="reviewRoutes.show({ review: review.id }).url"
-                                        class="text-blue-600 hover:text-blue-900"
-                                        title="View Details"
-                                    >
-                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                                        </svg>
-                                    </Link>
+                                <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                                    <div class="flex items-center justify-end gap-2 opacity-60 group-hover:opacity-100 transition-opacity">
+                                        <Link
+                                            :href="reviewRoutes.show({ review: review.id }).url"
+                                            class="p-2 text-gray-400 hover:text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-lg transition-colors"
+                                            title="View Details"
+                                        >
+                                            <Eye class="w-4 h-4" />
+                                        </Link>
+                                    </div>
                                 </td>
                             </tr>
+                            <!-- Expanded Mobile Row -->
+                            <tr v-if="expandedRows.includes(review.id)" class="bg-gray-50/50 dark:bg-gray-900/50 xl:hidden">
+                                <td colspan="8" class="px-6 py-4 border-t border-gray-100 dark:border-gray-700">
+                                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 text-sm">
+                                        <div class="md:hidden flex flex-col gap-1">
+                                             <span class="text-xs text-gray-500 font-medium uppercase tracking-wider">Reviewer</span>
+                                             <div class="flex items-center">
+                                                <div class="flex-shrink-0 h-6 w-6 bg-gray-100 dark:bg-gray-700 rounded-full flex items-center justify-center border border-gray-200 dark:border-gray-600 mr-2">
+                                                    <span class="text-xs font-bold text-gray-500 dark:text-gray-400">{{ review.reviewer.charAt(0).toUpperCase() }}</span>
+                                                </div>
+                                                <span class="text-gray-900 dark:text-white">{{ review.reviewer }}</span>
+                                            </div>
+                                        </div>
+                                        <div class="sm:hidden flex flex-col gap-1">
+                                             <span class="text-xs text-gray-500 font-medium uppercase tracking-wider">Rating</span>
+                                             <div class="flex items-center">
+                                                <span class="text-sm font-bold text-gray-900 dark:text-white mr-2">{{ review.rating }}/5</span>
+                                                <div class="flex">
+                                                    <template v-for="star in 5" :key="star">
+                                                        <Star
+                                                            :class="star <= review.rating ? 'text-yellow-400 fill-current' : 'text-gray-300 dark:text-gray-600'"
+                                                            class="w-3.5 h-3.5"
+                                                        />
+                                                    </template>
+                                                </div>
+                                            </div>
+                                        </div>
+                                         <div class="lg:hidden flex flex-col gap-2 col-span-1 md:col-span-2">
+                                            <span class="text-xs text-gray-500 font-medium uppercase tracking-wider">Review Content</span>
+                                             <div class="bg-white dark:bg-gray-800 p-3 rounded-lg border border-gray-100 dark:border-gray-700">
+                                                <div class="font-bold text-gray-900 dark:text-white mb-1">{{ review.title }}</div>
+                                                <div class="text-gray-600 dark:text-gray-400 italic">"{{ review.comment }}"</div>
+                                                <div v-if="review.admin_reply" class="mt-3 pl-3 border-l-2 border-green-500">
+                                                    <div class="text-xs text-green-600 font-semibold mb-0.5">Admin Response</div>
+                                                    <div class="text-sm text-gray-600 dark:text-gray-400">{{ review.admin_reply }}</div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="xl:hidden flex flex-col gap-1">
+                                            <span class="text-xs text-gray-500 font-medium uppercase tracking-wider">Date</span>
+                                            <span class="text-gray-700 dark:text-gray-300 font-mono">{{ new Date(review.created_at).toLocaleString() }}</span>
+                                        </div>
+                                    </div>
+                                </td>
+                            </tr>
+                            </template>
                             <tr v-if="reviews.data.length === 0">
-                                <td colspan="8" class="px-6 py-12 text-center text-sm text-gray-500">
-                                    No reviews found
+                                <td colspan="8" class="px-6 py-16 text-center text-gray-500 dark:text-gray-400">
+                                    <div class="flex flex-col items-center">
+                                        <div class="w-16 h-16 bg-gray-50 dark:bg-gray-700 rounded-full flex items-center justify-center mb-4 text-gray-400">
+                                            <MessageSquare class="w-8 h-8" />
+                                        </div>
+                                        <p class="text-lg font-semibold text-gray-900 dark:text-white">No reviews found</p>
+                                        <p class="text-sm text-gray-500 dark:text-gray-400 mt-1 max-w-sm">Try adjusting your search or filters.</p>
+                                    </div>
                                 </td>
                             </tr>
                         </tbody>

@@ -47,6 +47,43 @@ class TransactionService
     }
 
     /**
+     * Create a completed payment transaction if one does not already exist.
+     */
+    public function createPaymentIfMissing(Order $order, array $data): ?Transaction
+    {
+        $gateway = $data['gateway'] ?? null;
+        $gatewayTransactionId = $data['gateway_transaction_id'] ?? null;
+
+        $query = Transaction::where('order_id', $order->id)
+            ->where('type', 'payment');
+
+        if ($gateway) {
+            $query->where('gateway', $gateway);
+        }
+
+        if ($gatewayTransactionId) {
+            $query->where('gateway_transaction_id', $gatewayTransactionId);
+        }
+
+        if ($query->exists()) {
+            return null;
+        }
+
+        $payload = array_merge([
+            'payment_method' => $data['payment_method'] ?? ($gateway ?: 'manual'),
+            'gateway' => $gateway ?: 'manual',
+            'amount' => $data['amount'] ?? $order->total,
+            'status' => $data['status'] ?? 'completed',
+            'notes' => $data['notes'] ?? 'Payment completed',
+            'response_data' => $data['response_data'] ?? null,
+            'gateway_transaction_id' => $gatewayTransactionId,
+            'invoice_id' => $data['invoice_id'] ?? null,
+        ], $data);
+
+        return $this->createPayment($order, $payload);
+    }
+
+    /**
      * Create a refund transaction.
      */
     public function createRefund(Order $order, array $data): Transaction

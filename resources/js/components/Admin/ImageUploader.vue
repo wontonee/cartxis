@@ -188,8 +188,8 @@ const remainingSlots = computed(() => props.maxFiles - props.modelValue.length);
       :class="[
         'border-2 border-dashed rounded-lg p-8 text-center cursor-pointer transition-colors',
         isDragging
-          ? 'border-blue-500 bg-blue-50'
-          : 'border-gray-300 hover:border-gray-400 bg-white'
+          ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20'
+          : 'border-gray-300 dark:border-gray-600 hover:border-gray-400 dark:hover:border-gray-500 bg-white dark:bg-gray-700'
       ]"
     >
       <input
@@ -204,7 +204,7 @@ const remainingSlots = computed(() => props.maxFiles - props.modelValue.length);
       <!-- Upload Icon -->
       <div class="mx-auto w-16 h-16 mb-4">
         <svg
-          class="w-full h-full text-gray-400"
+          class="w-full h-full text-gray-400 dark:text-gray-500"
           fill="none"
           stroke="currentColor"
           viewBox="0 0 24 24"
@@ -220,16 +220,16 @@ const remainingSlots = computed(() => props.maxFiles - props.modelValue.length);
 
       <!-- Instructions -->
       <div class="space-y-2">
-        <p class="text-lg font-medium text-gray-700">
-          <span class="text-blue-600">Click to upload</span> or drag and drop
+        <p class="text-lg font-medium text-gray-700 dark:text-gray-200">
+          <span class="text-blue-600 dark:text-blue-400">Click to upload</span> or drag and drop
         </p>
-        <p class="text-sm text-gray-500">
+        <p class="text-sm text-gray-500 dark:text-gray-400">
           PNG, JPG, GIF up to {{ maxSize }}MB
         </p>
-        <p v-if="remainingSlots > 0" class="text-xs text-gray-400">
+        <p v-if="remainingSlots > 0" class="text-xs text-gray-400 dark:text-gray-500">
           {{ remainingSlots }} of {{ maxFiles }} slots available
         </p>
-        <p v-else class="text-xs text-red-500">
+        <p v-else class="text-xs text-red-500 dark:text-red-400">
           Maximum files reached
         </p>
       </div>
@@ -243,7 +243,7 @@ const remainingSlots = computed(() => props.maxFiles - props.modelValue.length);
         class="space-y-2"
       >
         <!-- Image Preview -->
-        <div class="aspect-square rounded-lg overflow-hidden bg-gray-100 border border-gray-200">
+        <div class="aspect-square rounded-lg overflow-hidden bg-gray-100 dark:bg-gray-700 border border-gray-200 dark:border-gray-600">
           <div class="w-full h-full group relative">
             <img
               :src="preview.url"
@@ -273,12 +273,12 @@ const remainingSlots = computed(() => props.maxFiles - props.modelValue.length);
         </div>
 
         <!-- File Name -->
-        <p class="text-xs text-gray-600 truncate" :title="preview.file.name">
+        <p class="text-xs text-gray-600 dark:text-gray-400 truncate" :title="preview.file.name">
           {{ preview.file.name }}
         </p>
 
         <!-- File Size -->
-        <p class="text-xs text-gray-400">
+        <p class="text-xs text-gray-400 dark:text-gray-500">
           {{ (preview.file.size / 1024).toFixed(1) }} KB
         </p>
       </div>
@@ -286,10 +286,10 @@ const remainingSlots = computed(() => props.maxFiles - props.modelValue.length);
 
     <!-- Empty State -->
     <div v-else class="text-center py-8">
-      <svg class="mx-auto w-12 h-12 text-gray-300 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <svg class="mx-auto w-12 h-12 text-gray-300 dark:text-gray-600 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
       </svg>
-      <p class="text-sm text-gray-500">No images uploaded yet</p>
+      <p class="text-sm text-gray-500 dark:text-gray-400">No images uploaded yet</p>
     </div>
   </div>
 </template>

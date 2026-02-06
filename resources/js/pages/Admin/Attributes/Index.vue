@@ -4,6 +4,23 @@ import AdminLayout from '@/layouts/AdminLayout.vue';
 import { ref, computed } from 'vue';
 import { debounce } from 'lodash';
 import * as attributeRoutes from '@/routes/admin/catalog/attributes';
+import {
+  Plus,
+  Search,
+  Filter,
+  X,
+  Trash2,
+  CheckCircle,
+  XCircle,
+  Edit,
+  ArrowUp,
+  ArrowDown,
+  AlertCircle,
+  PlusCircle,
+  MinusCircle,
+  List,
+  ArrowUpDown
+} from 'lucide-vue-next';
 
 interface Attribute {
   id: number;
@@ -52,6 +69,7 @@ const selectedAttributes = ref<number[]>([]);
 const showDeleteModal = ref(false);
 const attributeToDelete = ref<number | null>(null);
 const showBulkDeleteModal = ref(false);
+const expandedRows = ref<number[]>([]);
 
 // Select all checkbox
 const selectAll = computed({
@@ -60,6 +78,16 @@ const selectAll = computed({
     selectedAttributes.value = value ? props.attributes.data.map(attr => attr.id) : [];
   }
 });
+
+// Row expansion
+const toggleRow = (id: number) => {
+  const index = expandedRows.value.indexOf(id);
+  if (index === -1) {
+    expandedRows.value.push(id);
+  } else {
+    expandedRows.value.splice(index, 1);
+  }
+};
 
 // Debounced search
 const performSearch = debounce(() => {
@@ -190,37 +218,46 @@ const getTypeBadgeColor = (type: string): string => {
       </div>
 
       <!-- Filters Card -->
-      <div class="bg-white rounded-lg shadow-sm p-4">
+      <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 p-5">
         <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
           <!-- Search -->
-          <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">Search</label>
-            <input
-              v-model="search"
-              @input="performSearch"
-              type="text"
-              placeholder="Search by name or code..."
-              class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-            />
+          <div class="relative">
+            <label class="block text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-1.5">Search</label>
+            <div class="relative">
+              <Search class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+              <input
+                v-model="search"
+                @input="performSearch"
+                type="text"
+                placeholder="Search by name or code..."
+                class="w-full pl-10 pr-4 py-2.5 bg-gray-50 dark:bg-gray-700/50 border border-gray-200 dark:border-gray-600 rounded-lg text-sm text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all placeholder:text-gray-400"
+              />
+            </div>
           </div>
 
           <!-- Type Filter -->
           <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">Type</label>
-            <select
-              v-model="typeFilter"
-              @change="applyFilters"
-              class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-            >
-              <option value="">All Types</option>
-              <option value="text">Text</option>
-              <option value="textarea">Textarea</option>
-              <option value="select">Select</option>
-              <option value="multiselect">Multi-select</option>
-              <option value="boolean">Boolean</option>
-              <option value="date">Date</option>
-              <option value="price">Price</option>
-            </select>
+            <label class="block text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-1.5">Type</label>
+            <div class="relative">
+              <Filter class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+              <select
+                v-model="typeFilter"
+                @change="applyFilters"
+                class="w-full pl-10 pr-10 py-2.5 bg-gray-50 dark:bg-gray-700/50 border border-gray-200 dark:border-gray-600 rounded-lg text-sm text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all appearance-none cursor-pointer"
+              >
+                <option value="">All Types</option>
+                <option value="text">Text</option>
+                <option value="textarea">Textarea</option>
+                <option value="select">Select</option>
+                <option value="multiselect">Multi-select</option>
+                <option value="boolean">Boolean</option>
+                <option value="date">Date</option>
+                <option value="price">Price</option>
+              </select>
+              <div class="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none">
+                <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+              </div>
+            </div>
           </div>
 
           <!-- Clear Filters Button -->
@@ -228,8 +265,9 @@ const getTypeBadgeColor = (type: string): string => {
             <button
               v-if="search || typeFilter"
               @click="clearFilters"
-              class="w-full px-3 py-2 text-sm text-gray-600 hover:text-gray-900 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors"
+              class="w-full py-2.5 text-sm text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-200 font-medium bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 rounded-lg transition-colors flex items-center justify-center gap-2"
             >
+              <X class="w-4 h-4" />
               Clear Filters
             </button>
           </div>
@@ -237,160 +275,202 @@ const getTypeBadgeColor = (type: string): string => {
       </div>
 
       <!-- Bulk Actions -->
-      <div v-if="selectedAttributes.length > 0" class="bg-blue-50 border border-blue-200 rounded-lg px-4 py-3">
-        <div class="flex items-center justify-between">
-          <span class="text-sm font-medium text-blue-900">
+      <transition enter-active-class="transition ease-out duration-200" enter-from-class="opacity-0 -translate-y-2" enter-to-class="opacity-100 translate-y-0" leave-active-class="transition ease-in duration-150" leave-from-class="opacity-100 translate-y-0" leave-to-class="opacity-0 -translate-y-2">
+        <div v-if="selectedAttributes.length > 0" class="bg-blue-600 rounded-xl shadow-lg p-3 text-white flex items-center justify-between sticky top-4 z-10 px-6">
+          <span class="text-sm font-semibold flex items-center">
+            <CheckCircle class="w-4 h-4 mr-2" />
             {{ selectedAttributes.length }} {{ selectedAttributes.length === 1 ? 'attribute' : 'attributes' }} selected
           </span>
           <div class="flex gap-2">
             <button
               @click="confirmBulkDelete"
-              class="inline-flex items-center px-3 py-1.5 border border-transparent text-xs font-medium rounded text-white bg-red-600 hover:bg-red-700"
+              class="px-3 py-1.5 text-xs font-bold text-white bg-red-500 rounded-lg hover:bg-red-600 transition-colors flex items-center uppercase tracking-wide"
             >
+              <Trash2 class="w-3 h-3 mr-1.5" />
               Delete Selected
             </button>
           </div>
         </div>
-      </div>
+      </transition>
 
       <!-- Table -->
-      <div class="bg-white shadow overflow-hidden sm:rounded-lg">
+      <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 overflow-hidden">
         <div class="overflow-x-auto">
-          <table class="min-w-full divide-y divide-gray-200">
-          <thead class="bg-gray-50">
+          <table class="min-w-full divide-y divide-gray-100 dark:divide-gray-700">
+          <thead class="bg-gray-50/80 dark:bg-gray-700/50">
             <tr>
-              <th scope="col" class="px-6 py-3 text-left">
+              <th scope="col" class="w-12 px-6 py-4">
                 <input
                   type="checkbox"
                   v-model="selectAll"
-                  class="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                  class="rounded border-gray-300 dark:border-gray-600 text-blue-600 focus:ring-blue-500 bg-white dark:bg-gray-700 w-4 h-4 transition-all"
                 />
               </th>
-              <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer" @click="sortTable('name')">
-                Name
-                <span v-if="sortBy === 'name'" class="ml-1">
-                  {{ sortOrder === 'asc' ? '↑' : '↓' }}
-                </span>
+              <th
+                scope="col"
+                class="px-6 py-4 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider cursor-pointer group hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
+                @click="sortTable('name')"
+              >
+                <div class="flex items-center gap-1">
+                  Name
+                  <span v-if="sortBy === 'name'" class="text-blue-600 dark:text-blue-400">
+                     <ArrowUp v-if="sortOrder === 'asc'" class="w-3 h-3" />
+                     <ArrowDown v-else class="w-3 h-3" />
+                  </span>
+                  <ArrowUpDown v-else class="w-3 h-3 opacity-0 group-hover:opacity-50" />
+                </div>
               </th>
-              <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer" @click="sortTable('code')">
-                Code
-                <span v-if="sortBy === 'code'" class="ml-1">
-                  {{ sortOrder === 'asc' ? '↑' : '↓' }}
-                </span>
+              <th
+                scope="col"
+                class="hidden md:table-cell px-6 py-4 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider cursor-pointer group hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
+                @click="sortTable('code')"
+              >
+                <div class="flex items-center gap-1">
+                  Code
+                  <span v-if="sortBy === 'code'" class="text-blue-600 dark:text-blue-400">
+                     <ArrowUp v-if="sortOrder === 'asc'" class="w-3 h-3" />
+                     <ArrowDown v-else class="w-3 h-3" />
+                  </span>
+                  <ArrowUpDown v-else class="w-3 h-3 opacity-0 group-hover:opacity-50" />
+                </div>
               </th>
-              <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th scope="col" class="px-6 py-4 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">
                 Type
               </th>
-              <th scope="col" class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th scope="col" class="hidden lg:table-cell px-6 py-4 text-center text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">
                 Options
               </th>
-              <th scope="col" class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th scope="col" class="hidden lg:table-cell px-6 py-4 text-center text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">
                 Required
               </th>
-              <th scope="col" class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th scope="col" class="hidden xl:table-cell px-6 py-4 text-center text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">
                 Filterable
               </th>
-              <th scope="col" class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th scope="col" class="hidden xl:table-cell px-6 py-4 text-center text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">
                 Configurable
               </th>
-              <th scope="col" class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th scope="col" class="px-6 py-4 text-right text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">
                 Actions
               </th>
             </tr>
           </thead>
-          <tbody class="bg-white divide-y divide-gray-200">
-            <tr v-for="attribute in attributes.data" :key="attribute.id" class="hover:bg-gray-50">
-              <td class="px-6 py-4 whitespace-nowrap">
-                <input
-                  type="checkbox"
-                  :value="attribute.id"
-                  v-model="selectedAttributes"
-                  class="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
-                />
+          <tbody class="bg-white dark:bg-gray-800 divide-y divide-gray-100 dark:divide-gray-700">
+            <template v-for="attribute in attributes.data" :key="attribute.id">
+            <tr class="group hover:bg-blue-50/50 dark:hover:bg-blue-900/10 transition-colors">
+              <td class="px-6 py-4 relative">
+                <div class="flex items-center">
+                  <button 
+                    @click="toggleRow(attribute.id)" 
+                    class="lg:hidden absolute left-2 p-1 text-blue-600 hover:text-blue-800 focus:outline-none"
+                  >
+                    <MinusCircle v-if="expandedRows.includes(attribute.id)" class="w-5 h-5 fill-blue-100 dark:fill-blue-900/30" />
+                    <PlusCircle v-else class="w-5 h-5 fill-blue-50 dark:fill-blue-900/20" />
+                  </button>
+                  <input
+                    type="checkbox"
+                    :value="attribute.id"
+                    v-model="selectedAttributes"
+                    class="rounded border-gray-300 dark:border-gray-600 text-blue-600 focus:ring-blue-500 bg-white dark:bg-gray-700 w-4 h-4 cursor-pointer transition-all ml-4 lg:ml-0"
+                  />
+                </div>
               </td>
               <td class="px-6 py-4 whitespace-nowrap">
-                <div class="text-sm font-medium text-gray-900">{{ attribute.name }}</div>
+                <div class="text-sm font-bold text-gray-900 dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">{{ attribute.name }}</div>
               </td>
-              <td class="px-6 py-4 whitespace-nowrap">
-                <code class="text-xs bg-gray-100 px-2 py-1 rounded text-gray-800">{{ attribute.code }}</code>
+              <td class="hidden md:table-cell px-6 py-4 whitespace-nowrap">
+                <code class="text-xs bg-gray-100 dark:bg-gray-700/50 px-2 py-1 rounded text-gray-600 dark:text-gray-400 border border-gray-200 dark:border-gray-600 font-mono">{{ attribute.code }}</code>
               </td>
               <td class="px-6 py-4 whitespace-nowrap">
                 <span
-                  :class="['inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium', getTypeBadgeColor(attribute.type)]"
+                  :class="['inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium border shadow-sm', getTypeBadgeColor(attribute.type)]"
                 >
                   {{ getTypeLabel(attribute.type) }}
                 </span>
               </td>
-              <td class="px-6 py-4 whitespace-nowrap text-center text-sm text-gray-500">
-                {{ attribute.options_count }}
+              <td class="hidden lg:table-cell px-6 py-4 whitespace-nowrap text-center text-sm text-gray-500 dark:text-gray-400">
+                <span v-if="['select', 'multiselect'].includes(attribute.type)" class="inline-flex items-center px-2 py-0.5 rounded bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-xs font-mono">
+                  {{ attribute.options_count }}
+                </span>
+                <span v-else class="text-gray-300 dark:text-gray-600">-</span>
               </td>
-              <td class="px-6 py-4 whitespace-nowrap text-center">
-                <span v-if="attribute.is_required" class="text-green-600">
-                  <svg class="h-5 w-5 inline" fill="currentColor" viewBox="0 0 20 20">
-                    <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
-                  </svg>
+              <td class="hidden lg:table-cell px-6 py-4 whitespace-nowrap text-center">
+                <span v-if="attribute.is_required" class="text-green-600 dark:text-green-400 inline-flex items-center justify-center p-1 bg-green-50 dark:bg-green-900/20 rounded-full">
+                  <CheckCircle class="w-4 h-4" />
                 </span>
-                <span v-else class="text-gray-400">
-                  <svg class="h-5 w-5 inline" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-                  </svg>
-                </span>
-              </td>
-              <td class="px-6 py-4 whitespace-nowrap text-center">
-                <span v-if="attribute.is_filterable" class="text-green-600">
-                  <svg class="h-5 w-5 inline" fill="currentColor" viewBox="0 0 20 20">
-                    <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
-                  </svg>
-                </span>
-                <span v-else class="text-gray-400">
-                  <svg class="h-5 w-5 inline" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-                  </svg>
+                <span v-else class="text-gray-300 dark:text-gray-600">
+                   <MinusCircle class="w-4 h-4" />
                 </span>
               </td>
-              <td class="px-6 py-4 whitespace-nowrap text-center">
-                <span v-if="attribute.is_configurable" class="text-green-600">
-                  <svg class="h-5 w-5 inline" fill="currentColor" viewBox="0 0 20 20">
-                    <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
-                  </svg>
+              <td class="hidden xl:table-cell px-6 py-4 whitespace-nowrap text-center">
+                <span v-if="attribute.is_filterable" class="text-green-600 dark:text-green-400 inline-flex items-center justify-center p-1 bg-green-50 dark:bg-green-900/20 rounded-full">
+                   <CheckCircle class="w-4 h-4" />
                 </span>
-                <span v-else class="text-gray-400">
-                  <svg class="h-5 w-5 inline" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-                  </svg>
+                <span v-else class="text-gray-300 dark:text-gray-600">
+                   <MinusCircle class="w-4 h-4" />
+                </span>
+              </td>
+              <td class="hidden xl:table-cell px-6 py-4 whitespace-nowrap text-center">
+                <span v-if="attribute.is_configurable" class="text-green-600 dark:text-green-400 inline-flex items-center justify-center p-1 bg-green-50 dark:bg-green-900/20 rounded-full">
+                   <CheckCircle class="w-4 h-4" />
+                </span>
+                <span v-else class="text-gray-300 dark:text-gray-600">
+                   <MinusCircle class="w-4 h-4" />
                 </span>
               </td>
               <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                <div class="flex items-center justify-end gap-2">
+                <div class="flex items-center justify-end gap-2 opacity-60 group-hover:opacity-100 transition-opacity">
                   <Link
                     :href="attributeRoutes.edit(attribute.id).url"
-                    class="text-blue-600 hover:text-blue-900"
+                    class="p-2 text-gray-400 hover:text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-lg transition-colors"
                     title="Edit"
                   >
-                    <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                    </svg>
+                    <Edit class="w-4 h-4" />
                   </Link>
                   <button
                     @click="confirmDelete(attribute.id)"
-                    class="text-red-600 hover:text-red-900"
+                    class="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors"
                     title="Delete"
                   >
-                    <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                    </svg>
+                    <Trash2 class="w-4 h-4" />
                   </button>
                 </div>
               </td>
             </tr>
+            <!-- Expanded Mobile Row -->
+            <tr v-if="expandedRows.includes(attribute.id)" class="bg-gray-50/50 dark:bg-gray-900/50 lg:hidden">
+               <td colspan="9" class="px-6 py-4 border-t border-gray-100 dark:border-gray-700">
+                  <div class="grid grid-cols-2 gap-4 text-sm">
+                     <div class="flex flex-col gap-1 md:hidden">
+                        <span class="text-xs text-gray-500 font-medium uppercase tracking-wider">Code</span>
+                         <code class="text-xs bg-gray-100 dark:bg-gray-700/50 px-2 py-1 rounded text-gray-600 dark:text-gray-400 border border-gray-200 dark:border-gray-600 font-mono w-fit">{{ attribute.code }}</code>
+                     </div>
+                     <div class="flex flex-col gap-1">
+                        <span class="text-xs text-gray-500 font-medium uppercase tracking-wider">Options</span>
+                        <span v-if="['select', 'multiselect'].includes(attribute.type)" class="text-gray-900 dark:text-gray-100 font-medium">
+                           {{ attribute.options_count }} options
+                        </span>
+                        <span v-else class="text-gray-400 italic">N/A</span>
+                     </div>
+                     <div class="flex flex-col gap-1">
+                        <span class="text-xs text-gray-500 font-medium uppercase tracking-wider">Settings</span>
+                        <div class="flex flex-wrap gap-2">
+                           <span v-if="attribute.is_required" class="inline-flex items-center text-[10px] text-green-700 bg-green-50 border border-green-100 px-1.5 py-0.5 rounded">Required</span>
+                           <span v-if="attribute.is_filterable" class="inline-flex items-center text-[10px] text-blue-700 bg-blue-50 border border-blue-100 px-1.5 py-0.5 rounded">Filterable</span>
+                           <span v-if="attribute.is_configurable" class="inline-flex items-center text-[10px] text-purple-700 bg-purple-50 border border-purple-100 px-1.5 py-0.5 rounded">Configurable</span>
+                        </div>
+                     </div>
+                  </div>
+               </td>
+            </tr>
+            </template>
             <tr v-if="attributes.data.length === 0">
-              <td colspan="9" class="px-6 py-12 text-center text-gray-500">
+              <td colspan="9" class="px-6 py-16 text-center text-gray-500 dark:text-gray-400">
                 <div class="flex flex-col items-center">
-                  <svg class="h-12 w-12 text-gray-400 mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4" />
-                  </svg>
-                  <p class="text-lg font-medium">No attributes found</p>
-                  <p class="mt-1 text-sm">Get started by creating your first attribute.</p>
+                  <div class="w-16 h-16 bg-gray-50 dark:bg-gray-700 rounded-full flex items-center justify-center mb-4 text-gray-400">
+                    <List class="w-8 h-8" />
+                  </div>
+                  <p class="text-lg font-semibold text-gray-900 dark:text-white">No attributes found</p>
+                  <p class="text-sm text-gray-500 dark:text-gray-400 mt-1 max-w-sm">Get started by creating your first attribute.</p>
                 </div>
               </td>
             </tr>

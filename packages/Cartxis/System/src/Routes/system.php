@@ -7,7 +7,9 @@ use Cartxis\System\Http\Controllers\Admin\MenuController;
 use Cartxis\System\Http\Controllers\Admin\ExtensionsController;
 use Cartxis\System\Http\Controllers\Admin\PermissionController;
 use Cartxis\System\Http\Controllers\Admin\DataMigrationController;
+
 use Cartxis\System\Http\Controllers\Admin\ApiSyncController;
+use Cartxis\System\Http\Controllers\BackupController;
 
 Route::middleware(['web', 'auth:admin'])
     ->prefix('admin/system')
@@ -20,6 +22,14 @@ Route::middleware(['web', 'auth:admin'])
             Route::post('/migrate', [DataMigrationController::class, 'migrate'])->name('migrate');
             Route::get('/status', [DataMigrationController::class, 'status'])->name('status');
             Route::post('/test-connection', [DataMigrationController::class, 'testConnection'])->name('test-connection');
+        });
+
+        // Backup Management Routes
+        Route::prefix('backups')->name('backups.')->group(function () {
+            Route::get('/', [BackupController::class, 'index'])->name('index');
+            Route::post('/create', [BackupController::class, 'create'])->name('create');
+            Route::get('/download', [BackupController::class, 'download'])->name('download'); // using get for download link cleanliness or post if stricter
+            Route::delete('/delete', [BackupController::class, 'destroy'])->name('destroy');
         });
         
         // Cache Management Routes

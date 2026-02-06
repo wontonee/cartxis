@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
 use Cartxis\Core\Services\PaymentGatewayManager;
 use Cartxis\Shop\Models\Order;
+use Cartxis\Sales\Services\InvoiceService;
 use Cartxis\Sales\Services\TransactionService;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\DB;
@@ -15,6 +16,7 @@ class PayUMoneyController extends Controller
 {
     public function __construct(
         protected PaymentGatewayManager $gatewayManager,
+        protected InvoiceService $invoiceService,
         protected TransactionService $transactionService
     ) {}
 
@@ -50,7 +52,9 @@ class PayUMoneyController extends Controller
             if ($result['success']) {
                 // Create transaction
                 DB::transaction(function () use ($order, $result) {
-                    $this->transactionService->createPayment($order, [
+                    $invoice = $this->invoiceService->createFromOrderIfMissing($order);
+
+                    $this->transactionService->createPaymentIfMissing($order, [
                         'payment_method' => 'payumoney',
                         'gateway' => 'payumoney',
                         'gateway_transaction_id' => $result['transaction_id'],
@@ -58,6 +62,7 @@ class PayUMoneyController extends Controller
                         'status' => 'completed',
                         'response_data' => $result['response_data'] ?? null,
                         'notes' => 'Payment completed via PayUMoney',
+                        'invoice_id' => $invoice?->id,
                     ]);
 
                     // Update order status

@@ -5,6 +5,24 @@ import Pagination from '@/components/Admin/Pagination.vue';
 import ConfirmDeleteModal from '@/components/Admin/ConfirmDeleteModal.vue';
 import { ref, computed } from 'vue';
 import { debounce } from 'lodash';
+import {
+  Users,
+  UserCheck,
+  UserX,
+  PlusCircle,
+  Search,
+  Filter,
+  Trash2,
+  Edit,
+  CheckCircle,
+  X,
+  ArrowUpDown,
+  Tag,
+  Layers,
+  GripVertical,
+  ChevronLeft,
+  ChevronRight
+} from 'lucide-vue-next';
 
 interface Customer {
   id: number;
@@ -47,6 +65,8 @@ interface Props {
     total: number;
     from: number;
     to: number;
+    prev_page_url: string | null;
+    next_page_url: string | null;
   };
   statistics: {
     total: number;
@@ -255,363 +275,405 @@ function handleDragEnd() {
 </script>
 
 <template>
-  <AdminLayout>
-    <Head title="Customer Groups" />
+  <Head title="Customer Groups" />
 
-    <!-- Page Header -->
-    <div class="mb-6">
-      <div class="flex flex-col md:flex-row md:items-center md:justify-between">
+  <AdminLayout title="Customer Groups">
+    <div class="p-6 space-y-6">
+      <!-- Header -->
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 class="text-2xl font-bold text-gray-900">Customer Groups</h1>
-          <p class="mt-1 text-sm text-gray-600">Manage customer segmentation and group-based pricing</p>
+          <h1 class="text-2xl font-bold text-gray-900 dark:text-white">Customer Groups</h1>
+          <p class="mt-1 text-sm text-gray-600 dark:text-gray-400">Manage customer segmentation and group-based pricing</p>
         </div>
-        <div class="mt-4 md:mt-0">
-          <Link
-            :href="'/admin/customers/groups/create'"
-            class="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
-          >
-            <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
-            </svg>
-            New Group
-          </Link>
-        </div>
-      </div>
-    </div>
-
-    <!-- Statistics Cards -->
-    <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
-      <div class="bg-white rounded-lg shadow-sm p-6">
-        <div class="flex items-center justify-between">
-          <div>
-            <p class="text-sm text-gray-600">Total Groups</p>
-            <p class="text-2xl font-bold text-gray-900">{{ statistics.total }}</p>
-          </div>
-          <div class="p-3 bg-blue-100 rounded-lg">
-            <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"/>
-            </svg>
-          </div>
-        </div>
-      </div>
-
-      <div class="bg-white rounded-lg shadow-sm p-6">
-        <div class="flex items-center justify-between">
-          <div>
-            <p class="text-sm text-gray-600">Active Groups</p>
-            <p class="text-2xl font-bold text-green-600">{{ statistics.active }}</p>
-          </div>
-          <div class="p-3 bg-green-100 rounded-lg">
-            <svg class="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
-            </svg>
-          </div>
-        </div>
-      </div>
-
-      <div class="bg-white rounded-lg shadow-sm p-6">
-        <div class="flex items-center justify-between">
-          <div>
-            <p class="text-sm text-gray-600">Inactive Groups</p>
-            <p class="text-2xl font-bold text-red-600">{{ statistics.inactive }}</p>
-          </div>
-          <div class="p-3 bg-red-100 rounded-lg">
-            <svg class="w-6 h-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"/>
-            </svg>
-          </div>
-        </div>
-      </div>
-
-      <div class="bg-white rounded-lg shadow-sm p-6">
-        <div class="flex items-center justify-between">
-          <div>
-            <p class="text-sm text-gray-600">With Customers</p>
-            <p class="text-2xl font-bold text-purple-600">{{ statistics.with_customers }}</p>
-          </div>
-          <div class="p-3 bg-purple-100 rounded-lg">
-            <svg class="w-6 h-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"/>
-            </svg>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Filters and Actions -->
-    <div class="bg-white rounded-lg shadow-sm p-4 mb-6">
-      <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <!-- Search -->
-        <div class="md:col-span-2">
-          <label class="block text-sm font-medium text-gray-700 mb-1">Search</label>
-          <input
-            v-model="search"
-            @input="performSearch"
-            type="text"
-            placeholder="Name, code, description..."
-            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-          />
-        </div>
-
-        <!-- Status Filter -->
-        <div>
-          <label class="block text-sm font-medium text-gray-700 mb-1">Status</label>
-          <select
-            v-model="statusFilter"
-            @change="applyFilters"
-            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-          >
-            <option value="">All Status</option>
-            <option value="active">Active</option>
-            <option value="inactive">Inactive</option>
-          </select>
-        </div>
-
-        <!-- Per Page -->
-        <div>
-          <label class="block text-sm font-medium text-gray-700 mb-1">Per Page</label>
-          <select
-            v-model="perPage"
-            @change="applyFilters"
-            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-          >
-            <option :value="15">15</option>
-            <option :value="25">25</option>
-            <option :value="50">50</option>
-            <option :value="100">100</option>
-          </select>
-        </div>
-      </div>
-
-      <div v-if="hasActiveFilters" class="mt-4">
-        <button
-          @click="clearFilters"
-          class="text-sm text-blue-600 hover:text-blue-700"
+        <Link
+          :href="'/admin/customers/groups/create'"
+          class="inline-flex items-center px-4 py-2 bg-blue-600 border border-transparent rounded-lg font-semibold text-xs text-white uppercase tracking-widest hover:bg-blue-700 focus:bg-blue-700 active:bg-blue-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition ease-in-out duration-150"
         >
-          Clear all filters
-        </button>
+          <PlusCircle class="w-4 h-4 mr-2" />
+          New Group
+        </Link>
       </div>
-    </div>
 
-    <!-- Bulk Actions -->
-    <div v-if="selectedGroups.length > 0" class="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
-      <div class="flex items-center justify-between">
-        <span class="text-sm text-blue-800">
-          {{ selectedGroups.length }} group(s) selected
-        </span>
-        <div class="flex items-center space-x-2">
-          <button
-            @click="bulkUpdateStatus(true)"
-            class="px-3 py-1.5 bg-green-600 text-white text-sm rounded hover:bg-green-700 transition-colors"
+      <!-- Statistics Cards -->
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 p-5 group hover:border-blue-200 dark:hover:border-blue-800 transition-colors">
+          <div class="flex items-center justify-between">
+            <div>
+              <p class="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Total Groups</p>
+              <p class="text-2xl font-bold text-gray-900 dark:text-white mt-1">{{ statistics.total }}</p>
+            </div>
+            <div class="p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg group-hover:bg-blue-100 dark:group-hover:bg-blue-900/40 transition-colors">
+              <Layers class="w-6 h-6 text-blue-600 dark:text-blue-400" />
+            </div>
+          </div>
+        </div>
+
+        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 p-5 group hover:border-green-200 dark:hover:border-green-800 transition-colors">
+          <div class="flex items-center justify-between">
+            <div>
+              <p class="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Active</p>
+              <p class="text-2xl font-bold text-gray-900 dark:text-white mt-1">{{ statistics.active }}</p>
+            </div>
+            <div class="p-3 bg-green-50 dark:bg-green-900/20 rounded-lg">
+              <CheckCircle class="w-6 h-6 text-green-600 dark:text-green-400" />
+            </div>
+          </div>
+        </div>
+
+        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 p-5 group hover:border-red-200 dark:hover:border-red-800 transition-colors">
+          <div class="flex items-center justify-between">
+            <div>
+              <p class="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Inactive</p>
+              <p class="text-2xl font-bold text-gray-900 dark:text-white mt-1">{{ statistics.inactive }}</p>
+            </div>
+            <div class="p-3 bg-red-50 dark:bg-red-900/20 rounded-lg">
+              <X class="w-6 h-6 text-red-600 dark:text-red-400" />
+            </div>
+          </div>
+        </div>
+
+        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 p-5 group hover:border-purple-200 dark:hover:border-purple-800 transition-colors">
+          <div class="flex items-center justify-between">
+            <div>
+              <p class="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">With Customers</p>
+              <p class="text-2xl font-bold text-gray-900 dark:text-white mt-1">{{ statistics.with_customers }}</p>
+            </div>
+            <div class="p-3 bg-purple-50 dark:bg-purple-900/20 rounded-lg">
+              <Users class="w-6 h-6 text-purple-600 dark:text-purple-400" />
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Filters Card -->
+      <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 p-5">
+        <div class="grid grid-cols-1 md:grid-cols-4 lg:grid-cols-6 gap-4">
+          <!-- Search -->
+          <div class="md:col-span-2">
+            <label class="block text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-1.5">Search</label>
+            <div class="relative">
+              <Search class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+              <input
+                v-model="search"
+                @input="applyFilters"
+                type="text"
+                placeholder="Name, code, description..."
+                class="w-full pl-10 pr-4 py-2.5 bg-gray-50 dark:bg-gray-700/50 border border-gray-200 dark:border-gray-600 rounded-lg text-sm text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all placeholder:text-gray-400"
+              />
+            </div>
+          </div>
+
+          <!-- Status Filter -->
+          <div>
+            <label class="block text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-1.5">Status</label>
+            <div class="relative">
+              <Filter class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+              <select
+                v-model="statusFilter"
+                @change="applyFilters"
+                class="w-full pl-10 pr-8 py-2.5 bg-gray-50 dark:bg-gray-700/50 border border-gray-200 dark:border-gray-600 rounded-lg text-sm text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all appearance-none cursor-pointer"
+              >
+                <option value="">All Status</option>
+                <option value="active">Active</option>
+                <option value="inactive">Inactive</option>
+              </select>
+               <div class="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none">
+                <ArrowUpDown class="w-3 h-3 text-gray-400" />
+              </div>
+            </div>
+          </div>
+          
+           <!-- Per Page -->
+          <div>
+            <label class="block text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-1.5">Per Page</label>
+             <div class="relative">
+              <Layers class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+              <select
+                v-model="perPage"
+                @change="applyFilters"
+                class="w-full pl-10 pr-8 py-2.5 bg-gray-50 dark:bg-gray-700/50 border border-gray-200 dark:border-gray-600 rounded-lg text-sm text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all appearance-none cursor-pointer"
+              >
+                <option :value="15">15</option>
+                <option :value="25">25</option>
+                <option :value="50">50</option>
+                <option :value="100">100</option>
+              </select>
+               <div class="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none">
+                <ArrowUpDown class="w-3 h-3 text-gray-400" />
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div v-if="hasActiveFilters" class="mt-4 pt-4 border-t border-gray-200 dark:border-gray-700">
+           <button
+            @click="clearFilters"
+             class="px-4 py-2 text-sm text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-200 font-medium bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 rounded-lg transition-colors flex items-center gap-2"
           >
-            Activate
-          </button>
-          <button
-            @click="bulkUpdateStatus(false)"
-            class="px-3 py-1.5 bg-yellow-600 text-white text-sm rounded hover:bg-yellow-700 transition-colors"
-          >
-            Deactivate
-          </button>
-          <button
-            @click="confirmBulkDelete"
-            class="px-3 py-1.5 bg-red-600 text-white text-sm rounded hover:bg-red-700 transition-colors"
-          >
-            Delete
+            <X class="w-4 h-4" />
+            Clear Filters
           </button>
         </div>
       </div>
-    </div>
 
-    <!-- Groups Table -->
-    <div class="bg-white rounded-lg shadow-sm overflow-hidden">
-      <div class="overflow-x-auto">
-        <table class="min-w-full divide-y divide-gray-200">
-          <thead class="bg-gray-50">
-            <tr>
-              <th class="w-12 px-6 py-3 text-left">
-                <input
-                  type="checkbox"
-                  :checked="allSelected"
-                  :indeterminate="someSelected"
-                  @change="toggleSelectAll"
-                  class="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
-                />
-              </th>
-              <th class="w-12 px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Order
-              </th>
-              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Group
-              </th>
-              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Discount
-              </th>
-              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Customers
-              </th>
-              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Auto-Assignment
-              </th>
-              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Status
-              </th>
-              <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Actions
-              </th>
-            </tr>
-          </thead>
-          <tbody class="bg-white divide-y divide-gray-200">
-            <tr
-              v-for="group in groups.data"
-              :key="group.id"
-              draggable="true"
-              @dragstart="handleDragStart($event, group)"
-              @dragover="handleDragOver"
-              @drop="handleDrop($event, group)"
-              @dragend="handleDragEnd"
-              :class="[
-                'hover:bg-gray-50 transition-colors cursor-move',
-                draggedGroup?.id === group.id ? 'opacity-50' : ''
-              ]"
+      <!-- Bulk Actions -->
+       <transition enter-active-class="transition ease-out duration-200" enter-from-class="opacity-0 -translate-y-2" enter-to-class="opacity-100 translate-y-0" leave-active-class="transition ease-in duration-150" leave-from-class="opacity-100 translate-y-0" leave-to-class="opacity-0 -translate-y-2">
+        <div v-if="selectedGroups.length > 0" class="bg-blue-600 rounded-xl shadow-lg p-3 text-white flex items-center justify-between sticky top-4 z-10 px-6 mb-6">
+          <div class="flex items-center">
+             <CheckCircle class="w-4 h-4 mr-2" />
+            <span class="text-sm font-semibold">
+              {{ selectedGroups.length }} group(s) selected
+            </span>
+          </div>
+          <div class="flex gap-2">
+            <button
+              @click="bulkUpdateStatus(true)"
+              class="px-3 py-1.5 text-xs font-semibold bg-white/20 hover:bg-white/30 rounded-lg transition-colors"
             >
-              <td class="px-6 py-4 whitespace-nowrap">
-                <input
-                  type="checkbox"
-                  :value="group.id"
-                  v-model="selectedGroups"
-                  class="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
-                />
-              </td>
-              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                <div class="flex items-center space-x-2">
-                  <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
-                  </svg>
-                  <span>{{ group.order }}</span>
-                </div>
-              </td>
-              <td class="px-6 py-4">
-                <div class="flex items-center space-x-3">
-                  <div
-                    class="w-10 h-10 rounded-lg flex items-center justify-center text-white font-semibold"
-                    :style="{ backgroundColor: group.color }"
-                  >
-                    {{ group.name.charAt(0).toUpperCase() }}
-                  </div>
-                  <div>
-                    <div class="flex items-center space-x-2">
-                      <span class="text-sm font-medium text-gray-900">{{ group.name }}</span>
-                      <span
-                        v-if="group.is_default"
-                        class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-purple-100 text-purple-800"
-                      >
-                        Default
-                      </span>
-                    </div>
-                    <p class="text-sm text-gray-500">{{ group.code }}</p>
-                    <p v-if="group.description" class="text-xs text-gray-400 mt-1 max-w-md truncate">
-                      {{ group.description }}
-                    </p>
-                  </div>
-                </div>
-              </td>
-              <td class="px-6 py-4 whitespace-nowrap">
-                <span class="text-sm font-medium text-gray-900">{{ group.discount_percentage }}%</span>
-              </td>
-              <td class="px-6 py-4 whitespace-nowrap">
-                <div class="text-sm text-gray-900">
-                  {{ group.customers_count }} total
-                </div>
-                <div class="text-xs text-gray-500">
-                  {{ group.active_customers_count }} active
-                </div>
-              </td>
-              <td class="px-6 py-4 whitespace-nowrap">
-                <div v-if="group.auto_assignment_rules && Object.keys(group.auto_assignment_rules).length > 0" class="text-xs">
-                  <div v-if="group.auto_assignment_rules.min_orders" class="text-gray-600">
-                    Min Orders: {{ group.auto_assignment_rules.min_orders }}
-                  </div>
-                  <div v-if="group.auto_assignment_rules.min_spent" class="text-gray-600">
-                    Min Spent: ${{ group.auto_assignment_rules.min_spent }}
-                  </div>
-                  <div v-if="group.auto_assignment_rules.min_aov" class="text-gray-600">
-                    Min AOV: ${{ group.auto_assignment_rules.min_aov }}
-                  </div>
-                  <button
-                    @click="applyAutoAssignment(group.id)"
-                    class="mt-1 text-blue-600 hover:text-blue-700 font-medium"
-                  >
-                    Apply Now
-                  </button>
-                </div>
-                <span v-else class="text-xs text-gray-400">Not configured</span>
-              </td>
-              <td class="px-6 py-4 whitespace-nowrap">
-                <span
-                  :class="[
-                    'inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium',
-                    group.status
-                      ? 'bg-green-100 text-green-800'
-                      : 'bg-red-100 text-red-800'
-                  ]"
-                >
-                  {{ group.status ? 'Active' : 'Inactive' }}
-                </span>
-              </td>
-              <td class="px-6 py-4 text-right text-sm font-medium">
-                <div class="flex items-center justify-end gap-2">
-                  <Link
-                    :href="`/admin/customers/groups/${group.id}/edit`"
-                    class="text-blue-600 hover:text-blue-900"
-                    title="Edit"
-                  >
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
-                    </svg>
-                  </Link>
-                  <button
-                    @click="confirmDelete(group.id)"
-                    class="text-red-600 hover:text-red-900"
-                    :disabled="group.is_default"
-                    :class="{ 'opacity-50 cursor-not-allowed': group.is_default }"
-                    title="Delete"
-                  >
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
-                    </svg>
-                  </button>
-                </div>
-              </td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
+              Activate
+            </button>
+            <button
+              @click="bulkUpdateStatus(false)"
+              class="px-3 py-1.5 text-xs font-semibold bg-white/20 hover:bg-white/30 rounded-lg transition-colors"
+            >
+              Deactivate
+            </button>
+            <button
+              @click="confirmBulkDelete"
+              class="px-3 py-1.5 text-xs font-semibold bg-white/20 hover:bg-white/30 rounded-lg transition-colors flex items-center"
+            >
+              <Trash2 class="w-3 h-3 mr-1.5" />
+              Delete
+            </button>
+          </div>
+        </div>
+      </transition>
 
-      <!-- Empty State -->
-      <div v-if="groups.data.length === 0" class="text-center py-12">
-        <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"/>
-        </svg>
-        <h3 class="mt-2 text-sm font-medium text-gray-900">No customer groups</h3>
-        <p class="mt-1 text-sm text-gray-500">Get started by creating a new customer group.</p>
-        <div class="mt-6">
-          <Link
-            :href="'/admin/customers/groups/create'"
-            class="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
-          >
-            <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
-            </svg>
-            New Group
-          </Link>
+      <!-- Groups Table -->
+      <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 overflow-hidden">
+        <div class="overflow-x-auto">
+          <table class="min-w-full divide-y divide-gray-100 dark:divide-gray-700">
+            <thead class="bg-gray-50/80 dark:bg-gray-700/50">
+              <tr>
+                <th class="w-12 px-6 py-4">
+                  <input
+                    type="checkbox"
+                    :checked="allSelected"
+                    :indeterminate="someSelected"
+                    @change="toggleSelectAll"
+                     class="rounded border-gray-300 dark:border-gray-600 text-blue-600 focus:ring-blue-500 bg-white dark:bg-gray-700 w-4 h-4 transition-all"
+                  />
+                </th>
+                <th class="w-12 px-6 py-4 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                  Order
+                </th>
+                <th class="px-6 py-4 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                  Group
+                </th>
+                <th class="hidden sm:table-cell px-6 py-4 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                  Discount
+                </th>
+                <th class="hidden md:table-cell px-6 py-4 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                  Customers
+                </th>
+                <th class="hidden lg:table-cell px-6 py-4 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                  Auto-Assignment
+                </th>
+                <th class="px-6 py-4 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                  Status
+                </th>
+                <th class="px-6 py-4 text-right text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                  Actions
+                </th>
+              </tr>
+            </thead>
+            <tbody class="bg-white dark:bg-gray-800 divide-y divide-gray-100 dark:divide-gray-700">
+              <!-- Empty State -->
+              <tr v-if="groups.data.length === 0">
+                <td colspan="8" class="px-6 py-16 text-center text-gray-500 dark:text-gray-400">
+                    <div class="flex flex-col items-center justify-center">
+                        <div class="w-16 h-16 bg-gray-50 dark:bg-gray-700 rounded-full flex items-center justify-center mb-4 text-gray-400">
+                            <Layers class="w-8 h-8" />
+                        </div>
+                        <h3 class="text-lg font-bold text-gray-900 dark:text-white mb-1">No customer groups found</h3>
+                         <p class="text-sm text-gray-500 dark:text-gray-400 mb-4 max-w-sm">Get started by creating a new customer group.</p>
+                        <Link
+                            :href="'/admin/customers/groups/create'"
+                            class="inline-flex items-center px-4 py-2 bg-blue-600 border border-transparent rounded-lg font-semibold text-xs text-white uppercase tracking-widest hover:bg-blue-700 focus:bg-blue-700 active:bg-blue-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition ease-in-out duration-150"
+                        >
+                            <PlusCircle class="w-4 h-4 mr-2" />
+                            New Group
+                        </Link>
+                    </div>
+                </td>
+              </tr>
+              
+              <template v-for="group in groups.data" :key="group.id">
+              <tr
+                draggable="true"
+                @dragstart="handleDragStart($event, group)"
+                @dragover="handleDragOver"
+                @drop="handleDrop($event, group)"
+                @dragend="handleDragEnd"
+                :class="[
+                  'group hover:bg-blue-50/50 dark:hover:bg-blue-900/10 transition-colors',
+                  draggedGroup?.id === group.id ? 'opacity-50' : ''
+                ]"
+              >
+                <td class="px-6 py-4">
+                  <input
+                    type="checkbox"
+                    :value="group.id"
+                    v-model="selectedGroups"
+                    class="rounded border-gray-300 dark:border-gray-600 text-blue-600 focus:ring-blue-500 bg-white dark:bg-gray-700 w-4 h-4 cursor-pointer transition-all"
+                  />
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
+                  <div class="flex items-center space-x-2 cursor-move">
+                    <GripVertical class="w-4 h-4 text-gray-400" />
+                    <span>{{ group.order }}</span>
+                  </div>
+                </td>
+                <td class="px-6 py-4">
+                  <div class="flex items-center space-x-3">
+                    <div
+                      class="w-10 h-10 rounded-lg flex items-center justify-center text-white font-bold shadow-sm"
+                      :style="{ backgroundColor: group.color }"
+                    >
+                      {{ group.name.charAt(0).toUpperCase() }}
+                    </div>
+                    <div>
+                      <div class="flex items-center space-x-2">
+                        <span class="text-sm font-bold text-gray-900 dark:text-white">{{ group.name }}</span>
+                         <span
+                          v-if="group.is_default"
+                          class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-medium bg-purple-100 dark:bg-purple-900/30 text-purple-800 dark:text-purple-300 border border-purple-200 dark:border-purple-800"
+                        >
+                          Default
+                        </span>
+                      </div>
+                      <div class="text-xs text-gray-500 dark:text-gray-400 flex items-center gap-1 mt-0.5">
+                          <Tag class="w-3 h-3" />
+                          {{ group.code }}
+                      </div>
+                       <p v-if="group.description" class="text-xs text-gray-400 dark:text-gray-500 mt-1 max-w-xs truncate hidden sm:block">
+                        {{ group.description }}
+                      </p>
+                    </div>
+                  </div>
+                </td>
+                <td class="hidden sm:table-cell px-6 py-4 whitespace-nowrap">
+                  <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300">
+                      {{ group.discount_percentage }}%
+                  </span>
+                </td>
+                <td class="hidden md:table-cell px-6 py-4 whitespace-nowrap">
+                  <div class="text-sm font-medium text-gray-900 dark:text-white">
+                    {{ group.customers_count }} total
+                  </div>
+                  <div class="text-xs text-gray-500 dark:text-gray-400">
+                    {{ group.active_customers_count }} active
+                  </div>
+                </td>
+                <td class="hidden lg:table-cell px-6 py-4 whitespace-nowrap">
+                  <div v-if="group.auto_assignment_rules && Object.keys(group.auto_assignment_rules).length > 0" class="text-xs space-y-1">
+                    <div v-if="group.auto_assignment_rules.min_orders" class="text-gray-600 dark:text-gray-400">
+                      Min Orders: <span class="font-medium text-gray-900 dark:text-white">{{ group.auto_assignment_rules.min_orders }}</span>
+                    </div>
+                    <div v-if="group.auto_assignment_rules.min_spent" class="text-gray-600 dark:text-gray-400">
+                      Min Spent: <span class="font-medium text-gray-900 dark:text-white">${{ group.auto_assignment_rules.min_spent }}</span>
+                    </div>
+                    <div v-if="group.auto_assignment_rules.min_aov" class="text-gray-600 dark:text-gray-400">
+                      Min AOV: <span class="font-medium text-gray-900 dark:text-white">${{ group.auto_assignment_rules.min_aov }}</span>
+                    </div>
+                    <button
+                      @click="applyAutoAssignment(group.id)"
+                      class="text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300 font-medium hover:underline"
+                    >
+                      Apply Now
+                    </button>
+                  </div>
+                  <span v-else class="text-xs text-gray-400 dark:text-gray-500 italic">Not configured</span>
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap">
+                  <span
+                    :class="[
+                      'inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border shadow-sm',
+                      group.status
+                        ? 'bg-green-50 text-green-700 border-green-200 dark:bg-green-900/20 dark:text-green-300 dark:border-green-800' 
+                        : 'bg-red-50 text-red-700 border-red-200 dark:bg-red-900/20 dark:text-red-300 dark:border-red-800'
+                    ]"
+                  >
+                    {{ group.status ? 'Active' : 'Inactive' }}
+                  </span>
+                </td>
+                <td class="px-6 py-4 text-right text-sm font-medium">
+                  <div class="flex items-center justify-end gap-2 opacity-60 group-hover:opacity-100 transition-opacity">
+                    <Link
+                      :href="`/admin/customers/groups/${group.id}/edit`"
+                     class="p-2 text-gray-400 hover:text-indigo-600 hover:bg-indigo-50 dark:hover:bg-indigo-900/20 rounded-lg transition-colors"
+                      title="Edit"
+                    >
+                      <Edit class="w-4 h-4" />
+                    </Link>
+                    <button
+                      @click="confirmDelete(group.id)"
+                       class="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors"
+                      :disabled="group.is_default"
+                      :class="{ 'opacity-50 cursor-not-allowed': group.is_default }"
+                      title="Delete"
+                    >
+                      <Trash2 class="w-4 h-4" />
+                    </button>
+                  </div>
+                </td>
+              </tr>
+              </template>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Pagination -->
+        <div class="bg-gray-50/50 dark:bg-gray-700/50 border-t border-gray-100 dark:border-gray-700 px-6 py-4 flex items-center justify-between">
+           <div class="text-xs text-gray-500 dark:text-gray-400">
+            Showing <span class="font-medium">{{ groups.from || 0 }}</span> to <span class="font-medium">{{ groups.to || 0 }}</span> of <span class="font-medium">{{ groups.total }}</span> results
+          </div>
+          <div class="flex gap-2">
+            <Link
+              v-if="groups.prev_page_url"
+              :href="groups.prev_page_url"
+               class="px-3 py-1.5 text-xs font-medium text-gray-600 dark:text-gray-300 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors flex items-center gap-1"
+            >
+              <ChevronLeft class="w-3 h-3" />
+              Previous
+            </Link>
+             <button
+              v-else
+              disabled
+               class="px-3 py-1.5 text-xs font-medium text-gray-400 dark:text-gray-600 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-600 rounded-lg cursor-not-allowed flex items-center gap-1 opacity-50"
+            >
+              <ChevronLeft class="w-3 h-3" />
+              Previous
+            </button>
+            <Link
+              v-if="groups.next_page_url"
+              :href="groups.next_page_url"
+               class="px-3 py-1.5 text-xs font-medium text-gray-600 dark:text-gray-300 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors flex items-center gap-1"
+            >
+              Next
+              <ChevronRight class="w-3 h-3" />
+            </Link>
+             <button
+              v-else
+              disabled
+              class="px-3 py-1.5 text-xs font-medium text-gray-400 dark:text-gray-600 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-600 rounded-lg cursor-not-allowed flex items-center gap-1 opacity-50"
+            >
+              Next
+              <ChevronRight class="w-3 h-3" />
+            </button>
+          </div>
         </div>
       </div>
-
-      <!-- Pagination -->
-      <div v-if="groups.data.length > 0" class="px-6 py-4 border-t border-gray-200">
-        <Pagination :data="groups" resource-name="groups" />
-      </div>
-    </div>
 
     <!-- Delete Modal -->
     <ConfirmDeleteModal
@@ -639,38 +701,36 @@ function handleDragEnd() {
         aria-modal="true"
       >
         <div class="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
-          <div class="fixed inset-0 bg-gray-500/75 dark:bg-gray-900/75 transition-opacity -z-10" @click="showAutoAssignModal = false"></div>
-          <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
-          <div class="relative inline-block align-bottom bg-white rounded-lg px-4 pt-5 pb-4 text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full sm:p-6">
+          <div class="fixed inset-0 bg-gray-900/50 backdrop-blur-sm transition-opacity" @click="showAutoAssignModal = false"></div>
+          
+          <div class="relative inline-block align-bottom bg-white dark:bg-gray-800 rounded-xl px-4 pt-5 pb-4 text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full sm:p-6">
             <div class="sm:flex sm:items-start">
-              <div class="mx-auto flex-shrink-0 flex items-center justify-center h-12 w-12 rounded-full bg-blue-100 sm:mx-0 sm:h-10 sm:w-10">
-                <svg class="h-6 w-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                </svg>
+              <div class="mx-auto flex-shrink-0 flex items-center justify-center h-12 w-12 rounded-full bg-blue-100 dark:bg-blue-900/30 sm:mx-0 sm:h-10 sm:w-10">
+                <Users class="h-6 w-6 text-blue-600 dark:text-blue-400" />
               </div>
               <div class="mt-3 text-center sm:mt-0 sm:ml-4 sm:text-left">
-                <h3 class="text-lg leading-6 font-medium text-gray-900" id="modal-title">
+                <h3 class="text-lg leading-6 font-medium text-gray-900 dark:text-white" id="modal-title">
                   Apply Auto-Assignment Rules
                 </h3>
                 <div class="mt-2">
-                  <p class="text-sm text-gray-500">
-                    This will assign customers matching the auto-assignment rules to this group. Continue?
+                  <p class="text-sm text-gray-500 dark:text-gray-400">
+                    This will assign customers matching the auto-assignment rules to this group. This operation might take a while depending on the number of customers.
                   </p>
                 </div>
               </div>
             </div>
-            <div class="mt-5 sm:mt-4 sm:flex sm:flex-row-reverse">
+            <div class="mt-5 sm:mt-4 sm:flex sm:flex-row-reverse gap-3">
               <button
                 type="button"
                 @click="confirmAutoAssignment"
-                class="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-blue-600 text-base font-medium text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 sm:ml-3 sm:w-auto sm:text-sm"
+                class="w-full inline-flex justify-center rounded-lg border border-transparent shadow-sm px-4 py-2 bg-blue-600 text-base font-medium text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 sm:w-auto sm:text-sm"
               >
                 Continue
               </button>
               <button
                 type="button"
                 @click="showAutoAssignModal = false"
-                class="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 sm:mt-0 sm:w-auto sm:text-sm"
+                class="mt-3 w-full inline-flex justify-center rounded-lg border border-gray-300 dark:border-gray-600 shadow-sm px-4 py-2 bg-white dark:bg-gray-700 text-base font-medium text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 sm:mt-0 sm:w-auto sm:text-sm"
               >
                 Cancel
               </button>
@@ -679,5 +739,6 @@ function handleDragEnd() {
         </div>
       </div>
     </Teleport>
+    </div>
   </AdminLayout>
 </template>

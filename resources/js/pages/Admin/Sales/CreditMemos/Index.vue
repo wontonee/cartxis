@@ -1,10 +1,37 @@
 <script setup lang="ts">
-import { Head, router } from '@inertiajs/vue3';
+import { Head, router, Link } from '@inertiajs/vue3';
 import AdminLayout from '@/layouts/AdminLayout.vue';
-import { ref } from 'vue';
+import { ref, computed, watch } from 'vue';
 import { debounce } from 'lodash';
 import { useCurrency } from '@/composables/useCurrency';
 import type { CreditMemo, CreditMemoFilters, CreditMemoStatistics, PaginatedResponse, StatusOption } from '@/types/sales';
+import {
+  Search,
+  Filter,
+  Download,
+  Calendar,
+  ArrowUpDown,
+  ArrowUp,
+  ArrowDown,
+  ChevronLeft,
+  ChevronRight,
+  Eye,
+  CheckCircle,
+  X,
+  FileText,
+  User,
+  PlusCircle,
+  MinusCircle,
+  CreditCard,
+  DollarSign,
+  AlertCircle,
+  CheckSquare,
+  Clock,
+  Printer,
+  Mail,
+  RefreshCw,
+  Ban
+} from 'lucide-vue-next';
 
 interface Props {
   creditMemos: PaginatedResponse<CreditMemo>;
@@ -16,73 +43,91 @@ interface Props {
 const props = defineProps<Props>();
 const { formatPrice } = useCurrency();
 
-const filters = ref<CreditMemoFilters>({
-  search: props.filters.search || '',
-  status: props.filters.status || '',
-  refund_method: props.filters.refund_method || undefined,
-  date_from: props.filters.date_from || '',
-  date_to: props.filters.date_to || '',
-  min_amount: props.filters.min_amount,
-  max_amount: props.filters.max_amount,
-});
+const search = ref(props.filters.search || '');
+const statusFilter = ref(props.filters.status || '');
+const refundMethodFilter = ref(props.filters.refund_method || '');
+const dateFrom = ref(props.filters.date_from || '');
+const dateTo = ref(props.filters.date_to || '');
+const minAmount = ref(props.filters.min_amount || '');
+const maxAmount = ref(props.filters.max_amount || '');
+const sortBy = ref('created_at'); // Assuming default sort, update if props.filters has it
+const sortOrder = ref('desc');
 
+// Bulk actions state
+const selectAll = ref(false);
 const selectedIds = ref<number[]>([]);
-const showFilters = ref(false);
+const expandedRows = ref<number[]>([]);
 
-// Debounced search
-const handleSearch = debounce(() => {
+const performSearch = debounce(() => {
   applyFilters();
 }, 300);
 
 const applyFilters = () => {
-  router.get('/admin/sales/credit-memos', filters.value, {
+  router.get('/admin/sales/credit-memos', {
+    search: search.value,
+    status: statusFilter.value,
+    refund_method: refundMethodFilter.value || undefined,
+    date_from: dateFrom.value,
+    date_to: dateTo.value,
+    min_amount: minAmount.value || undefined,
+    max_amount: maxAmount.value || undefined,
+    // Add sorting params if backend supports it
+  }, {
     preserveState: true,
     preserveScroll: true,
   });
 };
 
-const resetFilters = () => {
-  filters.value = {
-    search: '',
-    status: '',
-    refund_method: undefined,
-    date_from: '',
-    date_to: '',
-    min_amount: undefined,
-    max_amount: undefined,
-  };
+const clearFilters = () => {
+  search.value = '';
+  statusFilter.value = '';
+  refundMethodFilter.value = '';
+  dateFrom.value = '';
+  dateTo.value = '';
+  minAmount.value = '';
+  maxAmount.value = '';
   applyFilters();
 };
 
-const viewCreditMemo = (id: number) => {
-  router.visit(`/admin/sales/credit-memos/${id}`);
+const sortTable = (field: string) => {
+  // If your backend supports sorting, implement this
+  console.log('Sort by', field);
 };
 
-const createCreditMemo = () => {
-  router.visit('/admin/sales/orders');
-};
-
-const toggleSelectAll = () => {
-  if (selectedIds.value.length === props.creditMemos.data.length) {
-    selectedIds.value = [];
+const toggleRow = (id: number) => {
+  const index = expandedRows.value.indexOf(id);
+  if (index === -1) {
+    expandedRows.value.push(id);
   } else {
-    selectedIds.value = props.creditMemos.data.map(cm => cm.id);
+    expandedRows.value.splice(index, 1);
   }
 };
 
+const someSelected = computed(() => {
+  return selectedIds.value.length > 0 && selectedIds.value.length < props.creditMemos.data.length;
+});
+
+watch(selectAll, (value) => {
+  if (value) {
+    selectedIds.value = props.creditMemos.data.map(cm => cm.id);
+  } else {
+    selectedIds.value = [];
+  }
+});
+
 const getStatusBadge = (status: string) => {
   const badges: Record<string, string> = {
-    pending: 'bg-yellow-100 text-yellow-800',
-    refunded: 'bg-green-100 text-green-800',
-    cancelled: 'bg-red-100 text-red-800',
+    pending: 'bg-yellow-50 text-yellow-700 border-yellow-200 dark:bg-yellow-900/20 dark:text-yellow-300 dark:border-yellow-800',
+    refunded: 'bg-green-50 text-green-700 border-green-200 dark:bg-green-900/20 dark:text-green-300 dark:border-green-800',
+    cancelled: 'bg-red-50 text-red-700 border-red-200 dark:bg-red-900/20 dark:text-red-300 dark:border-red-800',
   };
-  return badges[status] || 'bg-gray-100 text-gray-800';
+  return badges[status] || 'bg-gray-50 text-gray-700 border-gray-200 dark:bg-gray-700 dark:text-gray-300 dark:border-gray-600';
 };
 
 const getRefundMethodBadge = (method: string) => {
   return method === 'online' 
-    ? 'bg-blue-100 text-blue-800' 
-    : 'bg-purple-100 text-purple-800';
+    ? 'bg-blue-50 text-blue-700 border-blue-200 dark:bg-blue-900/20 dark:text-blue-300 dark:border-blue-800' 
+    : 'bg-purple-50 text-purple-700 border-purple-200 dark:bg-purple-900/20 dark:text-purple-300 dark:border-purple-800';
 };
 
 const formatDate = (date: string) => {
@@ -117,338 +162,364 @@ const cancelCreditMemo = (id: number) => {
 </script>
 
 <template>
-  <Head title="Credit Memos - Sales" />
+  <Head title="Credit Memos" />
 
-  <AdminLayout>
-    <div class="space-y-6">
-      <!-- Header -->
-      <div class="flex justify-between items-center">
+  <AdminLayout title="Credit Memos">
+    <div class="p-6 space-y-6">
+      <!-- Page Header -->
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 class="text-2xl font-bold text-gray-900">Credit Memos</h1>
-          <p class="text-gray-600 mt-1">Manage refunds and credit memos</p>
+          <h1 class="text-2xl font-bold text-gray-900 dark:text-white">Credit Memos</h1>
+          <p class="mt-1 text-sm text-gray-600 dark:text-gray-400">Manage refunds and credit memos</p>
         </div>
-        <button
-          @click="createCreditMemo"
-          class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 flex items-center space-x-2"
+        <Link
+          href="/admin/sales/orders"
+          class="inline-flex items-center px-4 py-2 bg-blue-600 border border-transparent rounded-lg font-semibold text-xs text-white uppercase tracking-widest hover:bg-blue-700 focus:bg-blue-700 active:bg-blue-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition ease-in-out duration-150"
         >
-          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
-          </svg>
-          <span>Create Credit Memo</span>
-        </button>
+          <PlusCircle class="w-4 h-4 mr-2" />
+          Create Credit Memo
+        </Link>
       </div>
 
-      <!-- Statistics Cards -->
-      <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
-        <div class="bg-white rounded-lg shadow-sm p-6">
+     <!-- Statistics Cards -->
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 p-5 group hover:border-blue-200 dark:hover:border-blue-800 transition-colors">
           <div class="flex items-center justify-between">
             <div>
-              <p class="text-sm text-gray-600">Total</p>
-              <p class="text-2xl font-bold text-gray-900 mt-1">{{ statistics.total }}</p>
+              <p class="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Total</p>
+              <p class="text-2xl font-bold text-gray-900 dark:text-white mt-1">{{ statistics.total }}</p>
             </div>
-            <div class="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
-              <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 14l6-6m-5.5.5h.01m4.99 5h.01M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16l3.5-2 3.5 2 3.5-2 3.5 2z" />
-              </svg>
+            <div class="p-3 bg-gray-50 dark:bg-gray-700 rounded-lg group-hover:bg-blue-50 dark:group-hover:bg-blue-900/20 transition-colors">
+              <FileText class="w-6 h-6 text-gray-500 dark:text-gray-400 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors" />
             </div>
           </div>
         </div>
 
-        <div class="bg-white rounded-lg shadow-sm p-6">
+        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 p-5 group hover:border-yellow-200 dark:hover:border-yellow-800 transition-colors">
           <div class="flex items-center justify-between">
             <div>
-              <p class="text-sm text-gray-600">Pending</p>
-              <p class="text-2xl font-bold text-yellow-600 mt-1">{{ statistics.pending }}</p>
+              <p class="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Pending</p>
+              <p class="text-2xl font-bold text-gray-900 dark:text-white mt-1">{{ statistics.pending }}</p>
             </div>
-            <div class="w-12 h-12 bg-yellow-100 rounded-lg flex items-center justify-center">
-              <svg class="w-6 h-6 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-              </svg>
+            <div class="p-3 bg-yellow-50 dark:bg-yellow-900/20 rounded-lg">
+              <Clock class="w-6 h-6 text-yellow-600 dark:text-yellow-400" />
             </div>
           </div>
         </div>
 
-        <div class="bg-white rounded-lg shadow-sm p-6">
+        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 p-5 group hover:border-green-200 dark:hover:border-green-800 transition-colors">
           <div class="flex items-center justify-between">
             <div>
-              <p class="text-sm text-gray-600">Refunded</p>
-              <p class="text-2xl font-bold text-green-600 mt-1">{{ statistics.refunded }}</p>
+              <p class="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Refunded</p>
+              <p class="text-2xl font-bold text-gray-900 dark:text-white mt-1">{{ statistics.refunded }}</p>
             </div>
-            <div class="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
-              <svg class="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-              </svg>
+            <div class="p-3 bg-green-50 dark:bg-green-900/20 rounded-lg">
+              <CheckSquare class="w-6 h-6 text-green-600 dark:text-green-400" />
             </div>
           </div>
         </div>
 
-        <div class="bg-white rounded-lg shadow-sm p-6">
+        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 p-5 group hover:border-purple-200 dark:hover:border-purple-800 transition-colors">
           <div class="flex items-center justify-between">
             <div>
-              <p class="text-sm text-gray-600">Total Amount</p>
-              <p class="text-2xl font-bold text-gray-900 mt-1">{{ formatPrice(statistics.total_amount) }}</p>
+              <p class="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Total Amount</p>
+              <p class="text-2xl font-bold text-gray-900 dark:text-white mt-1">{{ formatPrice(statistics.total_amount) }}</p>
             </div>
-            <div class="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center">
-              <svg class="w-6 h-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-              </svg>
+            <div class="p-3 bg-purple-50 dark:bg-purple-900/20 rounded-lg">
+              <DollarSign class="w-6 h-6 text-purple-600 dark:text-purple-400" />
             </div>
           </div>
         </div>
       </div>
 
-      <!-- Search and Filters -->
-      <div class="bg-white rounded-lg shadow-sm p-6">
-        <div class="flex items-center space-x-4 mb-4">
+       <!-- Filters Card -->
+      <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 p-5">
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
           <!-- Search -->
-          <div class="flex-1">
-            <input
-              v-model="filters.search"
-              @input="handleSearch"
-              type="text"
-              placeholder="Search by credit memo number, order number..."
-              class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-            />
+          <div class="lg:col-span-1">
+            <label class="block text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-1.5">Search</label>
+            <div class="relative">
+              <Search class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+              <input
+                v-model="search"
+                @input="performSearch"
+                type="text"
+                placeholder="Credit Memo #, Order #..."
+                class="w-full pl-10 pr-4 py-2.5 bg-gray-50 dark:bg-gray-700/50 border border-gray-200 dark:border-gray-600 rounded-lg text-sm text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all placeholder:text-gray-400"
+              />
+            </div>
           </div>
 
           <!-- Status Filter -->
-          <select
-            v-model="filters.status"
-            @change="applyFilters"
-            class="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-          >
-            <option value="">All Statuses</option>
-            <option v-for="status in statuses" :key="status.value" :value="status.value">
-              {{ status.label }}
-            </option>
-          </select>
+          <div>
+             <label class="block text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-1.5">Status</label>
+            <div class="relative">
+              <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                <Filter class="h-4 w-4 text-gray-400" />
+              </div>
+              <select
+                v-model="statusFilter"
+                @change="applyFilters"
+                class="w-full pl-10 pr-10 py-2.5 bg-gray-50 dark:bg-gray-700/50 border border-gray-200 dark:border-gray-600 rounded-lg text-sm text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all appearance-none cursor-pointer"
+              >
+                <option value="">All Statuses</option>
+                <option v-for="status in statuses" :key="status.value" :value="status.value">
+                  {{ status.label }}
+                </option>
+              </select>
+               <div class="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none">
+                <ArrowUpDown class="w-3 h-3 text-gray-400" />
+              </div>
+            </div>
+          </div>
 
-          <!-- Toggle Advanced Filters -->
-          <button
-            @click="showFilters = !showFilters"
-            class="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 flex items-center space-x-2"
-          >
-            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
-            </svg>
-            <span>Filters</span>
-          </button>
+          <!-- Refund Method -->
+          <div>
+             <label class="block text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-1.5">Refund Method</label>
+            <div class="relative">
+              <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                <CreditCard class="h-4 w-4 text-gray-400" />
+              </div>
+              <select
+                v-model="refundMethodFilter"
+                @change="applyFilters"
+                class="w-full pl-10 pr-10 py-2.5 bg-gray-50 dark:bg-gray-700/50 border border-gray-200 dark:border-gray-600 rounded-lg text-sm text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all appearance-none cursor-pointer"
+              >
+                <option value="">All Methods</option>
+                <option value="online">Online</option>
+                <option value="offline">Offline</option>
+              </select>
+               <div class="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none">
+                <ArrowUpDown class="w-3 h-3 text-gray-400" />
+              </div>
+            </div>
+          </div>
 
-          <!-- Reset -->
-          <button
-            @click="resetFilters"
-            class="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 text-gray-700"
-          >
-            Reset
-          </button>
+          <!-- Date From -->
+          <div>
+            <label class="block text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-1.5">From Date</label>
+            <div class="relative">
+              <Calendar class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+              <input
+                v-model="dateFrom"
+                @change="applyFilters"
+                type="date"
+                class="w-full pl-10 pr-4 py-2.5 bg-gray-50 dark:bg-gray-700/50 border border-gray-200 dark:border-gray-600 rounded-lg text-sm text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all"
+              />
+            </div>
+          </div>
         </div>
-
-        <!-- Advanced Filters -->
-        <div v-if="showFilters" class="grid grid-cols-1 md:grid-cols-4 gap-4 pt-4 border-t border-gray-200">
-          <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">Refund Method</label>
-            <select
-              v-model="filters.refund_method"
-              @change="applyFilters"
-              class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-            >
-              <option :value="undefined">All Methods</option>
-              <option value="online">Online</option>
-              <option value="offline">Offline</option>
-            </select>
-          </div>
-
-          <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">Date From</label>
-            <input
-              v-model="filters.date_from"
-              @change="applyFilters"
-              type="date"
-              class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-            />
-          </div>
-
-          <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">Date To</label>
-            <input
-              v-model="filters.date_to"
-              @change="applyFilters"
-              type="date"
-              class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-            />
-          </div>
-
-          <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">Min Amount</label>
-            <input
-              v-model.number="filters.min_amount"
-              @change="applyFilters"
-              type="number"
-              step="0.01"
-              placeholder="0.00"
-              class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-            />
-          </div>
-
-          <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">Max Amount</label>
-            <input
-              v-model.number="filters.max_amount"
-              @change="applyFilters"
-              type="number"
-              step="0.01"
-              placeholder="0.00"
-              class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-            />
-          </div>
+        
+        <!-- Advanced / clear filters -->
+         <div v-if="search || statusFilter || refundMethodFilter || dateFrom || dateTo || minAmount || maxAmount" class="mt-4 pt-4 border-t border-gray-100 dark:border-gray-700 flex justify-end">
+          <button
+            @click="clearFilters"
+             class="px-4 py-2 text-sm text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-200 font-medium bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 rounded-lg transition-colors flex items-center gap-2"
+          >
+            <X class="w-4 h-4" />
+            Clear Filters
+          </button>
         </div>
       </div>
 
+       <!-- Bulk Actions -->
+      <transition enter-active-class="transition ease-out duration-200" enter-from-class="opacity-0 -translate-y-2" enter-to-class="opacity-100 translate-y-0" leave-active-class="transition ease-in duration-150" leave-from-class="opacity-100 translate-y-0" leave-to-class="opacity-0 -translate-y-2">
+        <div v-if="selectedIds.length > 0" class="bg-blue-600 rounded-xl shadow-lg p-3 text-white flex items-center justify-between sticky top-4 z-10 px-6">
+          <span class="text-sm font-semibold flex items-center">
+            <CheckCircle class="w-4 h-4 mr-2" />
+             {{ selectedIds.length }} selected
+          </span>
+          <div class="flex gap-2">
+            <!-- Add bulk actions here -->
+          </div>
+        </div>
+      </transition>
+
       <!-- Credit Memos Table -->
-      <div class="bg-white rounded-lg shadow-sm overflow-hidden">
+      <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 overflow-hidden">
         <div class="overflow-x-auto">
-          <table class="min-w-full divide-y divide-gray-200">
-            <thead class="bg-gray-50">
+          <table class="min-w-full divide-y divide-gray-100 dark:divide-gray-700">
+            <thead class="bg-gray-50/80 dark:bg-gray-700/50">
               <tr>
-                <th class="px-6 py-3 text-left">
+                 <th scope="col" class="w-12 px-6 py-4">
                   <input
                     type="checkbox"
-                    @change="toggleSelectAll"
-                    :checked="selectedIds.length === creditMemos.data.length && creditMemos.data.length > 0"
-                    class="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                    v-model="selectAll"
+                    :indeterminate.prop="someSelected"
+                     class="rounded border-gray-300 dark:border-gray-600 text-blue-600 focus:ring-blue-500 bg-white dark:bg-gray-700 w-4 h-4 transition-all"
                   />
                 </th>
-                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th scope="col" class="px-6 py-4 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">
                   Credit Memo
                 </th>
-                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th scope="col" class="hidden sm:table-cell px-6 py-4 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">
                   Order
                 </th>
-                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th scope="col" class="hidden md:table-cell px-6 py-4 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">
                   Customer
                 </th>
-                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th scope="col" class="px-6 py-4 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">
                   Status
                 </th>
-                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th scope="col" class="hidden lg:table-cell px-6 py-4 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">
                   Method
                 </th>
-                <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th scope="col" class="px-6 py-4 text-right text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">
                   Amount
                 </th>
-                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th scope="col" class="hidden xl:table-cell px-6 py-4 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">
                   Date
                 </th>
-                <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th scope="col" class="px-6 py-4 text-right text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">
                   Actions
                 </th>
               </tr>
             </thead>
-            <tbody class="bg-white divide-y divide-gray-200">
-              <tr
-                v-for="creditMemo in creditMemos.data"
-                :key="creditMemo.id"
-                @click="viewCreditMemo(creditMemo.id)"
-                class="hover:bg-gray-50 cursor-pointer"
-              >
-                <td class="px-6 py-4 whitespace-nowrap" @click.stop>
-                  <input
-                    type="checkbox"
-                    v-model="selectedIds"
-                    :value="creditMemo.id"
-                    class="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
-                  />
-                </td>
-                <td class="px-6 py-4 whitespace-nowrap">
-                  <div class="text-sm font-medium text-blue-600">{{ creditMemo.credit_memo_number }}</div>
-                </td>
-                <td class="px-6 py-4 whitespace-nowrap">
-                  <div class="text-sm text-gray-900">{{ creditMemo.order?.order_number || '-' }}</div>
-                </td>
-                <td class="px-6 py-4">
-                  <div class="text-sm text-gray-900">
-                    {{ creditMemo.order?.user?.name || 'Guest' }}
+            <tbody class="bg-white dark:bg-gray-800 divide-y divide-gray-100 dark:divide-gray-700">
+              <template v-for="creditMemo in creditMemos.data" :key="creditMemo.id">
+              <tr class="group hover:bg-blue-50/50 dark:hover:bg-blue-900/10 transition-colors">
+                 <td class="px-6 py-4 relative">
+                   <div class="flex items-center">
+                    <button
+                      @click="toggleRow(creditMemo.id)"
+                      class="lg:hidden absolute left-2 p-1 text-blue-600 hover:text-blue-800 focus:outline-none"
+                    >
+                      <MinusCircle v-if="expandedRows.includes(creditMemo.id)" class="w-5 h-5 fill-blue-100 dark:fill-blue-900/30" />
+                      <PlusCircle v-else class="w-5 h-5 fill-blue-50 dark:fill-blue-900/20" />
+                    </button>
+                    <input
+                      type="checkbox"
+                      :value="creditMemo.id"
+                      v-model="selectedIds"
+                      class="rounded border-gray-300 dark:border-gray-600 text-blue-600 focus:ring-blue-500 bg-white dark:bg-gray-700 w-4 h-4 cursor-pointer transition-all ml-4 lg:ml-0"
+                    />
                   </div>
-                  <div class="text-sm text-gray-500">{{ creditMemo.order?.customer_email }}</div>
                 </td>
                 <td class="px-6 py-4 whitespace-nowrap">
-                  <span :class="['px-3 py-1 inline-flex text-sm font-semibold rounded-full', getStatusBadge(creditMemo.status)]">
+                  <div class="text-sm font-bold text-blue-600 dark:text-blue-400">
+                    {{ creditMemo.credit_memo_number }}
+                  </div>
+                </td>
+                <td class="hidden sm:table-cell px-6 py-4 whitespace-nowrap">
+                   <div class="text-sm text-gray-600 dark:text-gray-300">
+                      {{ creditMemo.order?.order_number || '-' }}
+                   </div>
+                </td>
+                <td class="hidden md:table-cell px-6 py-4 whitespace-nowrap">
+                   <div class="flex items-center">
+                     <div class="h-8 w-8 rounded-full bg-gray-100 dark:bg-gray-700 flex items-center justify-center text-gray-500 dark:text-gray-400 border border-gray-200 dark:border-gray-600 mr-3">
+                      <User class="w-4 h-4" />
+                    </div>
+                    <div>
+                      <div class="text-sm font-medium text-gray-900 dark:text-white">
+                        {{ creditMemo.order?.user?.name || 'Guest' }}
+                      </div>
+                      <div class="text-xs text-gray-500 dark:text-gray-400">{{ creditMemo.order?.customer_email }}</div>
+                    </div>
+                  </div>
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap">
+                  <span :class="['inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border shadow-sm', getStatusBadge(creditMemo.status)]">
                     {{ creditMemo.status }}
                   </span>
                 </td>
-                <td class="px-6 py-4 whitespace-nowrap">
-                  <span :class="['px-2 py-1 inline-flex text-xs font-medium rounded', getRefundMethodBadge(creditMemo.refund_method)]">
+                 <td class="hidden lg:table-cell px-6 py-4 whitespace-nowrap">
+                  <span :class="['inline-flex items-center px-2 py-0.5 rounded text-xs font-medium border shadow-sm', getRefundMethodBadge(creditMemo.refund_method)]">
                     {{ creditMemo.refund_method }}
                   </span>
                 </td>
                 <td class="px-6 py-4 whitespace-nowrap text-right">
-                  <div class="text-sm font-medium text-gray-900">{{ formatPrice(creditMemo.grand_total) }}</div>
+                  <div class="text-sm font-bold text-gray-900 dark:text-white">{{ formatPrice(creditMemo.grand_total) }}</div>
                 </td>
-                <td class="px-6 py-4 whitespace-nowrap">
-                  <div class="text-sm text-gray-900">{{ formatDate(creditMemo.created_at) }}</div>
+                <td class="hidden xl:table-cell px-6 py-4 whitespace-nowrap">
+                  <div class="text-sm text-gray-500 dark:text-gray-400">{{ formatDate(creditMemo.created_at) }}</div>
                 </td>
-                <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium" @click.stop>
-                  <div class="flex items-center justify-end space-x-2">
-                    <button
-                      v-if="creditMemo.status === 'pending'"
-                      @click="processRefund(creditMemo.id)"
-                      class="text-green-600 hover:text-green-900"
-                      title="Process Refund"
-                    >
-                      <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                      </svg>
-                    </button>
-                    <button
-                      @click="downloadPdf(creditMemo.id)"
-                      class="text-blue-600 hover:text-blue-900"
-                      title="Download PDF"
-                    >
-                      <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                      </svg>
-                    </button>
-                    <button
-                      @click="sendEmail(creditMemo.id)"
-                      class="text-purple-600 hover:text-purple-900"
-                      title="Send Email"
-                    >
-                      <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-                      </svg>
-                    </button>
-                    <button
-                      v-if="creditMemo.status === 'pending'"
-                      @click="cancelCreditMemo(creditMemo.id)"
-                      class="text-red-600 hover:text-red-900"
-                      title="Cancel"
-                    >
-                      <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-                      </svg>
-                    </button>
-                  </div>
+                <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                   <div class="flex items-center justify-end gap-2 opacity-60 group-hover:opacity-100 transition-opacity">
+                      <button
+                        v-if="creditMemo.status === 'pending'"
+                        @click="processRefund(creditMemo.id)"
+                        class="p-2 text-green-600 hover:text-green-800 hover:bg-green-50 dark:hover:bg-green-900/20 rounded-lg transition-colors"
+                        title="Process Refund"
+                      >
+                         <RefreshCw class="w-4 h-4" />
+                      </button>
+                      <button
+                        @click="downloadPdf(creditMemo.id)"
+                        class="p-2 text-gray-400 hover:text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-lg transition-colors"
+                        title="Download PDF"
+                      >
+                        <Download class="w-4 h-4" />
+                      </button>
+                      <button
+                        @click="sendEmail(creditMemo.id)"
+                        class="p-2 text-gray-400 hover:text-purple-600 hover:bg-purple-50 dark:hover:bg-purple-900/20 rounded-lg transition-colors"
+                        title="Send Email"
+                      >
+                         <Mail class="w-4 h-4" />
+                      </button>
+                      <Link
+                        :href="`/admin/sales/credit-memos/${creditMemo.id}`"
+                         class="p-2 text-gray-400 hover:text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-lg transition-colors"
+                        title="View"
+                      >
+                         <Eye class="w-4 h-4" />
+                      </Link>
+                   </div>
                 </td>
               </tr>
+               <!-- Expanded Mobile Row -->
+              <tr v-if="expandedRows.includes(creditMemo.id)" class="bg-gray-50/50 dark:bg-gray-900/50 lg:hidden">
+                 <td colspan="9" class="px-6 py-4 border-t border-gray-100 dark:border-gray-700">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
+                        <div class="sm:hidden flex flex-col gap-2">
+                          <span class="text-xs text-gray-500 font-medium uppercase tracking-wider">Order Reference</span>
+                           <span class="text-sm text-gray-600 dark:text-gray-300">
+                              {{ creditMemo.order?.order_number || '-' }}
+                            </span>
+                       </div>
+                       <div class="md:hidden flex flex-col gap-2">
+                           <span class="text-xs text-gray-500 font-medium uppercase tracking-wider">Customer</span>
+                           <div class="flex items-center">
+                               <div class="h-8 w-8 rounded-full bg-gray-100 dark:bg-gray-700 flex items-center justify-center text-gray-500 dark:text-gray-400 border border-gray-200 dark:border-gray-600 mr-3">
+                                <User class="w-4 h-4" />
+                              </div>
+                              <div>
+                                <div class="text-sm font-medium text-gray-900 dark:text-white">
+                                  {{ creditMemo.order?.user?.name || 'Guest' }}
+                                </div>
+                                <div class="text-xs text-gray-500 dark:text-gray-400">{{ creditMemo.order?.customer_email }}</div>
+                              </div>
+                           </div>
+                        </div>
+                        <div class="lg:hidden flex flex-col gap-2">
+                            <span class="text-xs text-gray-500 font-medium uppercase tracking-wider">Details</span>
+                            <div class="grid grid-cols-2 gap-4">
+                               <div>
+                                  <span class="text-xs text-gray-500 block">Method</span>
+                                  <span :class="['inline-flex items-center px-2 py-0.5 rounded text-xs font-medium border shadow-sm mt-1', getRefundMethodBadge(creditMemo.refund_method)]">
+                                    {{ creditMemo.refund_method }}
+                                  </span>
+                               </div>
+                               <div>
+                                  <span class="text-xs text-gray-500 block">Date</span>
+                                  <span class="text-gray-700 dark:text-gray-300 mt-1 block">{{ formatDate(creditMemo.created_at) }}</span>
+                               </div>
+                            </div>
+                        </div>
+                    </div>
+                 </td>
+              </tr>
+              </template>
 
-              <!-- Empty State -->
               <tr v-if="creditMemos.data.length === 0">
-                <td colspan="9" class="px-6 py-12 text-center">
-                  <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 14l6-6m-5.5.5h.01m4.99 5h.01M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16l3.5-2 3.5 2 3.5-2 3.5 2z" />
-                  </svg>
-                  <h3 class="mt-2 text-sm font-medium text-gray-900">No credit memos</h3>
-                  <p class="mt-1 text-sm text-gray-500">Get started by creating a new credit memo.</p>
-                  <div class="mt-6">
-                    <button
-                      @click="createCreditMemo"
-                      class="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700"
-                    >
-                      <svg class="-ml-1 mr-2 h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
-                      </svg>
-                      Create Credit Memo
-                    </button>
+                 <td colspan="9" class="px-6 py-16 text-center text-gray-500 dark:text-gray-400">
+                  <div class="flex flex-col items-center">
+                    <div class="w-16 h-16 bg-gray-50 dark:bg-gray-700 rounded-full flex items-center justify-center mb-4 text-gray-400">
+                      <FileText class="w-8 h-8" />
+                    </div>
+                    <p class="text-lg font-semibold text-gray-900 dark:text-white">No credit memos found</p>
+                    <p class="text-sm text-gray-500 dark:text-gray-400 mt-1 max-w-sm">Try adjusting your filters or create a new one.</p>
                   </div>
                 </td>
               </tr>
@@ -457,51 +528,27 @@ const cancelCreditMemo = (id: number) => {
         </div>
 
         <!-- Pagination -->
-        <div v-if="creditMemos.total > creditMemos.per_page" class="bg-white px-4 py-3 flex items-center justify-between border-t border-gray-200">
-          <div class="flex-1 flex justify-between sm:hidden">
-            <button
-              v-if="creditMemos.current_page > 1"
-              @click="router.get('/admin/sales/credit-memos', { ...filters, page: creditMemos.current_page - 1 })"
-              class="relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50"
+        <div class="bg-gray-50/50 dark:bg-gray-700/50 border-t border-gray-100 dark:border-gray-700 px-6 py-4 flex items-center justify-between">
+          <div class="text-xs text-gray-500 dark:text-gray-400">
+            Showing <span class="font-medium">{{ creditMemos.from || 0 }}</span> to <span class="font-medium">{{ creditMemos.to || 0 }}</span> of <span class="font-medium">{{ creditMemos.total }}</span> results
+          </div>
+          <div class="flex gap-2">
+            <Link
+              v-if="creditMemos.prev_page_url"
+              :href="creditMemos.prev_page_url"
+              class="px-3 py-1.5 text-xs font-medium text-gray-600 dark:text-gray-300 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors flex items-center gap-1"
             >
+              <ChevronLeft class="w-3 h-3" />
               Previous
-            </button>
-            <button
-              v-if="creditMemos.current_page < creditMemos.last_page"
-              @click="router.get('/admin/sales/credit-memos', { ...filters, page: creditMemos.current_page + 1 })"
-              class="ml-3 relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50"
+            </Link>
+            <Link
+              v-if="creditMemos.next_page_url"
+              :href="creditMemos.next_page_url"
+              class="px-3 py-1.5 text-xs font-medium text-gray-600 dark:text-gray-300 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors flex items-center gap-1"
             >
               Next
-            </button>
-          </div>
-          <div class="hidden sm:flex-1 sm:flex sm:items-center sm:justify-between">
-            <div>
-              <p class="text-sm text-gray-700">
-                Showing
-                <span class="font-medium">{{ creditMemos.from }}</span>
-                to
-                <span class="font-medium">{{ creditMemos.to }}</span>
-                of
-                <span class="font-medium">{{ creditMemos.total }}</span>
-                results
-              </p>
-            </div>
-            <div class="flex space-x-2">
-              <button
-                v-if="creditMemos.current_page > 1"
-                @click="router.get('/admin/sales/credit-memos', { ...filters, page: creditMemos.current_page - 1 })"
-                class="px-3 py-1 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50"
-              >
-                Previous
-              </button>
-              <button
-                v-if="creditMemos.current_page < creditMemos.last_page"
-                @click="router.get('/admin/sales/credit-memos', { ...filters, page: creditMemos.current_page + 1 })"
-                class="px-3 py-1 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50"
-              >
-                Next
-              </button>
-            </div>
+              <ChevronRight class="w-3 h-3" />
+            </Link>
           </div>
         </div>
       </div>

@@ -1,6 +1,22 @@
 <script setup lang="ts">
 import { computed } from 'vue'
-import type { PaymentMethod } from '@/composables/usePaymentMethods'
+import { Settings, Power, Check, Info, CreditCard, Wallet, Banknote, Globe } from 'lucide-vue-next'
+
+// Local interface definition to avoid import issues if the composable path is incorrect
+interface PaymentMethod {
+  id: number
+  code: string
+  name: string
+  description: string
+  type: string
+  is_active: boolean
+  is_default: boolean
+  sort_order: number
+  instructions: string
+  configuration: Record<string, any>
+  created_at: string
+  updated_at: string
+}
 
 interface Props {
   paymentMethod: PaymentMethod
@@ -19,96 +35,106 @@ const emit = defineEmits<{
 
 const statusBadgeClass = computed(() => {
   if (!props.paymentMethod.is_active) {
-    return 'bg-gray-100 text-gray-800'
+    return 'bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-400 border border-gray-200 dark:border-gray-600'
   }
-  return 'bg-green-100 text-green-800'
+  return 'bg-green-50 text-green-700 dark:bg-green-900/30 dark:text-green-400 border border-green-200 dark:border-green-800'
 })
 
-const statusText = computed(() => {
-  return props.paymentMethod.is_active ? 'Active' : 'Inactive'
+const defaultBadgeClass = computed(() => {
+   return 'bg-blue-50 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400 border border-blue-200 dark:border-blue-800' 
 })
 
-const defaultBadge = computed(() => {
-  return props.paymentMethod.is_default ? 'Default' : null
-})
-
-const displayType = computed(() => {
-  // For custom gateways (type=other), use the code as display type
-  if (props.paymentMethod.type === 'other') {
-    return props.paymentMethod.code.toUpperCase()
-  }
-  return props.paymentMethod.type.toUpperCase()
+const iconComponent = computed(() => {
+  const code = props.paymentMethod.code.toLowerCase()
+  if (code.includes('card') || code.includes('stripe')) return CreditCard
+  if (code.includes('paypal')) return Wallet
+  if (code.includes('bank') || code.includes('transfer')) return Banknote
+  if (code.includes('cod')) return Banknote
+  return Globe
 })
 </script>
 
 <template>
-  <div class="bg-white rounded-lg shadow-sm border border-gray-200 hover:shadow-md transition-shadow">
-    <!-- Header -->
-    <div class="p-4 border-b border-gray-100">
-      <div class="flex items-start justify-between">
-        <div class="flex-1">
-          <div class="flex items-center gap-2 mb-2">
-            <h3 class="text-lg font-semibold text-gray-900">{{ paymentMethod.name }}</h3>
-            <span :class="['px-2 py-1 text-xs font-medium rounded-full', statusBadgeClass]">
-              {{ statusText }}
-            </span>
-            <span v-if="defaultBadge" class="px-2 py-1 text-xs font-medium rounded-full bg-blue-100 text-blue-800">
-              {{ defaultBadge }}
-            </span>
+  <div class="group bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 hover:shadow-lg hover:border-blue-100 dark:hover:border-gray-600 transition-all duration-300 flex flex-col h-full relative overflow-hidden">
+    
+    <!-- Active Indicator Stripe -->
+    <div 
+      class="absolute top-0 left-0 w-1 h-full transition-colors duration-300"
+      :class="paymentMethod.is_active ? 'bg-green-500' : 'bg-gray-200 dark:bg-gray-700'"
+    ></div>
+
+    <div class="p-6 flex-1 flex flex-col">
+      <!-- Header Section -->
+      <div class="flex justify-between items-start mb-4 pl-3">
+        <div class="flex items-center space-x-3">
+          <div class="p-2.5 rounded-lg bg-gray-50 dark:bg-gray-700 text-gray-600 dark:text-gray-300 group-hover:bg-blue-50 group-hover:text-blue-600 dark:group-hover:bg-blue-900/20 dark:group-hover:text-blue-400 transition-colors">
+            <component :is="iconComponent" class="w-6 h-6" />
           </div>
-          <p class="text-sm text-gray-600">{{ paymentMethod.description }}</p>
+          <div>
+            <h3 class="font-bold text-gray-900 dark:text-white text-lg leading-tight">{{ paymentMethod.name }}</h3>
+            <span class="text-xs text-gray-500 dark:text-gray-400 font-mono mt-0.5 block">{{ paymentMethod.code }}</span>
+          </div>
         </div>
       </div>
-    </div>
 
-    <!-- Body -->
-    <div class="p-4 space-y-3">
-      <!-- Details -->
-      <div class="space-y-2 text-sm">
-        <div class="flex justify-between">
-          <span class="text-gray-600">Type:</span>
-          <span class="font-medium text-gray-900 uppercase">{{ displayType }}</span>
-        </div>
-        <div class="flex justify-between">
-          <span class="text-gray-600">Code:</span>
-          <span class="font-mono text-gray-900">{{ paymentMethod.code }}</span>
-        </div>
-        <div v-if="paymentMethod.instructions" class="flex justify-between">
-          <span class="text-gray-600">Instructions:</span>
-          <span class="text-gray-900 truncate">{{ paymentMethod.instructions }}</span>
-        </div>
+      <!-- Description -->
+      <p class="text-sm text-gray-600 dark:text-gray-400 pl-3 mb-6 flex-1 text-pretty group-hover:text-gray-900 dark:group-hover:text-gray-300 transition-colors">
+        {{ paymentMethod.description || 'No description provided.' }}
+      </p>
+
+      <!-- Status Badges -->
+      <div class="flex flex-wrap gap-2 pl-3 mb-6">
+        <span 
+          :class="['px-2.5 py-1 text-xs font-semibold rounded-full flex items-center space-x-1.5', statusBadgeClass]"
+        >
+          <span class="w-1.5 h-1.5 rounded-full" :class="paymentMethod.is_active ? 'bg-green-500' : 'bg-gray-400'"></span>
+          <span>{{ paymentMethod.is_active ? 'Active' : 'Inactive' }}</span>
+        </span>
+        
+        <span 
+          v-if="paymentMethod.is_default" 
+          :class="['px-2.5 py-1 text-xs font-semibold rounded-full flex items-center space-x-1.5', defaultBadgeClass]"
+        >
+          <Check class="w-3 h-3" />
+          <span>Default Method</span>
+        </span>
       </div>
-    </div>
 
-    <!-- Footer -->
-    <div class="px-4 py-3 bg-gray-50 border-t border-gray-100 flex gap-2">
-      <button
-        @click="$emit('configure')"
-        :disabled="processing"
-        class="flex-1 px-3 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50"
-      >
-        Configure
-      </button>
-      <button
-        @click="$emit('toggle')"
-        :disabled="processing"
-        :class="[
-          'flex-1 px-3 py-2 text-sm font-medium rounded-lg transition-colors disabled:opacity-50',
-          paymentMethod.is_active
-            ? 'bg-red-100 text-red-700 hover:bg-red-200'
-            : 'bg-green-100 text-green-700 hover:bg-green-200'
-        ]"
-      >
-        {{ paymentMethod.is_active ? 'Disable' : 'Enable' }}
-      </button>
-      <button
-        v-if="!paymentMethod.is_default"
-        @click="$emit('setDefault')"
-        :disabled="processing"
-        class="flex-1 px-3 py-2 bg-gray-200 text-gray-700 text-sm font-medium rounded-lg hover:bg-gray-300 transition-colors disabled:opacity-50"
-      >
-        Set Default
-      </button>
+      <!-- Action Buttons -->
+      <div class="flex items-center gap-3 pl-3 pt-4 border-t border-gray-50 dark:border-gray-700/50 mt-auto">
+        <button
+          @click="$emit('configure')"
+          :disabled="processing"
+          class="flex-1 flex items-center justify-center px-4 py-2 bg-blue-600 dark:bg-blue-600 text-white text-sm font-semibold rounded-lg hover:bg-blue-700 dark:hover:bg-blue-500 transition-all focus:ring-2 focus:ring-offset-2 focus:ring-blue-600 dark:focus:ring-blue-500 disabled:opacity-50 shadow-sm"
+        >
+          <Settings class="w-4 h-4 mr-2" />
+          Configure
+        </button>
+        
+        <button
+          @click="$emit('toggle')"
+          :disabled="processing"
+          class="p-2 rounded-lg border transition-all disabled:opacity-50 hover:shadow-sm focus:ring-2 focus:ring-offset-2"
+          :class="[
+            paymentMethod.is_active
+              ? 'border-gray-200 dark:border-gray-600 text-gray-500 dark:text-gray-400 hover:bg-red-50 hover:text-red-600 hover:border-red-100 dark:hover:bg-red-900/20 dark:hover:text-red-400 dark:hover:border-red-900/30'
+              : 'border-green-200 dark:border-green-800 text-green-600 dark:text-green-400 bg-green-50 dark:bg-green-900/20 hover:bg-green-100 dark:hover:bg-green-900/40'
+          ]"
+          :title="paymentMethod.is_active ? 'Deactivate' : 'Activate'"
+        >
+          <Power class="w-4 h-4" />
+        </button>
+
+        <button
+          v-if="!paymentMethod.is_default && paymentMethod.is_active"
+          @click="$emit('setDefault')"
+          :disabled="processing"
+          class="p-2 rounded-lg border border-gray-200 dark:border-gray-600 text-gray-500 dark:text-gray-400 hover:bg-blue-50 hover:text-blue-600 hover:border-blue-100 dark:hover:bg-blue-900/20 dark:hover:text-blue-400 dark:hover:border-blue-900/30 transition-all disabled:opacity-50 hover:shadow-sm"
+          title="Set as Default"
+        >
+          <Check class="w-4 h-4" />
+        </button>
+      </div>
     </div>
   </div>
 </template>

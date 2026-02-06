@@ -8,6 +8,7 @@ use Cartxis\Sales\Repositories\InvoiceRepository;
 use Cartxis\Sales\Services\InvoiceService;
 use Cartxis\Sales\Services\InvoicePdfService;
 use Illuminate\Http\Request;
+use Cartxis\Core\Models\Currency;
 use Inertia\Inertia;
 use Inertia\Response;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
@@ -241,7 +242,7 @@ class InvoiceController extends Controller
                 'issue_date' => $invoice->issue_date->format('F d, Y'),
                 'due_date' => $invoice->due_date->format('F d, Y'),
                 'status' => strtoupper($invoice->status),
-                'total' => '₹' . number_format($invoice->total, 2),
+                'total' => $this->formatCurrency($invoice->total),
                 'store_name' => config('app.name'),
                 'store_url' => config('app.url'),
                 'year' => date('Y'),
@@ -270,5 +271,14 @@ class InvoiceController extends Controller
         } catch (\Exception $e) {
             return back()->with('error', 'Failed to send email: ' . $e->getMessage());
         }
+    }
+
+    protected function formatCurrency(float $amount): string
+    {
+        $currency = Currency::getDefault();
+
+        return $currency
+            ? $currency->format($amount)
+            : '$' . number_format($amount, 2);
     }
 }

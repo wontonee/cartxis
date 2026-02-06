@@ -1,107 +1,143 @@
 <template>
-  <AdminLayout title="Channels">
-    <template #default>
-      <Head title="Channels" />
-      <!-- Title -->
-      <div class="mb-6">
-        <h1 class="text-3xl font-bold text-gray-900">Channel - Theme Management</h1>
-        <p class="mt-2 text-sm text-gray-600">Manage theme settings for your sales channels</p>
-      </div>
+  <Head title="Channels" />
 
-      <!-- Channels Table -->
-    <div class="bg-white rounded-lg shadow overflow-hidden">
-      <div v-if="channels.data.length === 0" class="p-6 text-center text-gray-500">
-        <p>No channels found.</p>
-      </div>
-
-      <table v-else class="w-full">
-        <thead class="bg-gray-50 border-b border-gray-300">
-          <tr>
-            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Channel Name</th>
-            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Current Theme</th>
-            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Select Theme</th>
-            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Default</th>
-          </tr>
-        </thead>
-        <tbody class="divide-y divide-gray-200">
-          <tr v-for="channel in channels.data" :key="channel.id" class="hover:bg-gray-50">
-            <td class="px-6 py-4 whitespace-nowrap">
-              <div>
-                <p class="text-sm font-medium text-gray-900">{{ channel.name }}</p>
-                <p v-if="channel.description" class="text-xs text-gray-500 truncate max-w-xs">{{ channel.description }}</p>
-              </div>
-            </td>
-            <td class="px-6 py-4 whitespace-nowrap">
-              <span class="inline-flex items-center px-3 py-1 rounded-md text-sm font-medium bg-blue-50 text-blue-700 border border-blue-200">
-                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01" />
-                </svg>
-                {{ channel.theme?.name || 'No Theme' }}
-              </span>
-            </td>
-            <td class="px-6 py-4 whitespace-nowrap">
-              <select 
-                :value="channel.theme_id"
-                @change="updateTheme(channel.id, ($event.target as HTMLSelectElement).value)"
-                class="px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white"
-              >
-                <option value="">Select Theme...</option>
-                <option v-for="theme in availableThemes" :key="theme.id" :value="theme.id">
-                  {{ theme.name }}
-                </option>
-              </select>
-            </td>
-            <td class="px-6 py-4 whitespace-nowrap">
-              <span
-                :class="[
-                  'px-3 py-1 rounded-md text-sm font-medium inline-flex items-center',
-                  channel.status === 'active' 
-                    ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' 
-                    : 'bg-gray-100 text-gray-700 border border-gray-300'
-                ]"
-              >
-                <svg v-if="channel.status === 'active'" class="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
-                  <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
-                </svg>
-                {{ channel.status === 'active' ? 'Active' : 'Inactive' }}
-              </span>
-            </td>
-            <td class="px-6 py-4 whitespace-nowrap text-center">
-              <span v-if="channel.is_default" class="inline-flex items-center px-3 py-1 rounded-md text-sm font-medium bg-yellow-50 text-yellow-700 border border-yellow-200">
-                <svg class="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
-                  <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-                </svg>
-                Default
-              </span>
-              <span v-else class="text-gray-400 text-sm">—</span>
-            </td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
-
-    <!-- Info Box -->
-    <div class="mt-6 bg-blue-50 border border-blue-200 rounded-lg p-4">
-      <div class="flex items-start">
-        <svg class="w-5 h-5 text-blue-600 mt-0.5 mr-3" fill="currentColor" viewBox="0 0 20 20">
-          <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd" />
-        </svg>
+  <AdminLayout>
+    <div class="space-y-6">
+      <!-- Header -->
+      <div class="flex items-center justify-between">
         <div>
-          <h3 class="text-sm font-medium text-blue-900">Theme Management</h3>
-          <p class="mt-1 text-sm text-blue-700">
-            Select a theme from the dropdown to change the appearance of your channel. Themes are located in the <code class="px-2 py-1 bg-blue-100 rounded text-xs">themes/</code> directory.
+          <h2 class="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-gray-900 to-gray-600 dark:from-white dark:to-gray-300">
+            Channels
+          </h2>
+          <p class="mt-1 text-sm text-gray-500 dark:text-gray-400 flex items-center gap-2">
+            <Monitor class="w-4 h-4" />
+            Manage your sales channels and their themes
           </p>
         </div>
       </div>
+
+      <!-- Channels List -->
+      <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
+        <div class="overflow-x-auto">
+          <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+            <thead class="bg-gray-50 dark:bg-gray-700/50">
+              <tr>
+                <th scope="col" class="px-6 py-4 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                  Channel Info
+                </th>
+                <th scope="col" class="px-6 py-4 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                  Theme
+                </th>
+                <th scope="col" class="px-6 py-4 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                  Status
+                </th>
+                <th scope="col" class="px-6 py-4 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                  Default
+                </th>
+                <th scope="col" class="px-6 py-4 text-right text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                  Actions
+                </th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-gray-200 dark:divide-gray-700 bg-white dark:bg-gray-800">
+              <tr v-for="channel in channels.data" :key="channel.id" class="hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
+                <td class="px-6 py-4 whitespace-nowrap">
+                  <div class="flex items-center">
+                    <div class="flex-shrink-0 h-10 w-10 bg-blue-100 dark:bg-blue-900/30 rounded-lg flex items-center justify-center text-blue-600 dark:text-blue-400">
+                      <Globe class="w-5 h-5" />
+                    </div>
+                    <div class="ml-4">
+                      <div class="text-sm font-medium text-gray-900 dark:text-white flex items-center gap-2">
+                        {{ channel.name }}
+                      </div>
+                      <div class="text-sm text-gray-500 dark:text-gray-400">
+                        {{ channel.url || 'No URL configured' }}
+                      </div>
+                    </div>
+                  </div>
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap">
+                  <div class="flex items-center gap-2">
+                    <Palette class="w-4 h-4 text-gray-400" />
+                    <select
+                      :value="channel.theme_id"
+                      @change="(e) => updateTheme(channel.id, (e.target as HTMLSelectElement).value)"
+                      class="block w-full max-w-xs pl-3 pr-10 py-2 text-base border-gray-300 dark:border-gray-600 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm rounded-xl bg-gray-50 dark:bg-gray-700/50 dark:text-white transition-shadow"
+                    >
+                      <option value="">Select a Theme</option>
+                      <option v-for="theme in availableThemes" :key="theme.id" :value="theme.id">
+                        {{ theme.name }}
+                      </option>
+                    </select>
+                  </div>
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap">
+                  <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium capitalize"
+                    :class="channel.status === 'active' 
+                      ? 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400' 
+                      : 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400'">
+                    <span class="w-1.5 h-1.5 rounded-full mr-1.5"
+                      :class="channel.status === 'active' ? 'bg-green-500' : 'bg-red-500'"></span>
+                    {{ channel.status }}
+                  </span>
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap">
+                  <div v-if="channel.is_default" class="flex items-center text-green-600 dark:text-green-400">
+                    <CheckCircle2 class="w-5 h-5 mr-1.5" />
+                    <span class="text-sm font-medium">Default</span>
+                  </div>
+                  <div v-else class="flex items-center text-gray-400">
+                    <div class="w-5 h-5 mr-1.5 border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-full"></div>
+                  </div>
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                  <button v-if="channel.url" class="text-blue-600 dark:text-blue-400 hover:text-blue-900 dark:hover:text-blue-300 transition-colors">
+                    <ExternalLink class="w-4 h-4" />
+                  </button>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Theme Info Box -->
+      <div class="bg-blue-50 dark:bg-blue-900/20 rounded-xl p-4 border border-blue-100 dark:border-blue-800">
+        <div class="flex">
+          <div class="flex-shrink-0">
+            <Info class="h-5 w-5 text-blue-400" aria-hidden="true" />
+          </div>
+          <div class="ml-3">
+            <h3 class="text-sm font-medium text-blue-800 dark:text-blue-300">
+              Theme Management
+            </h3>
+            <div class="mt-2 text-sm text-blue-700 dark:text-blue-400">
+              <p>
+                Changing the theme will immediately update the visual appearance of your storefront. 
+                Make sure to preview changes in a staging environment if available.
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
-    </template>
   </AdminLayout>
 </template>
 
 <script setup lang="ts">
 import AdminLayout from '@/layouts/AdminLayout.vue'
-import { router } from '@inertiajs/vue3'
+import { router, Head } from '@inertiajs/vue3'
+import { 
+  Monitor, 
+  Palette, 
+  CheckCircle2, 
+  AlertCircle, 
+  Info, 
+  Globe, 
+  Star,
+  Layout,
+  ExternalLink
+} from 'lucide-vue-next'
 
 interface Channel {
   id: number
@@ -138,8 +174,6 @@ interface Props {
   }
   availableThemes: Theme[]
 }
-
-import { Head } from '@inertiajs/vue3'
 
 defineProps<Props>()
 

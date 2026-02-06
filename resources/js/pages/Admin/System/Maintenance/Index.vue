@@ -10,7 +10,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Switch } from '@/components/ui/switch';
 import { Badge } from '@/components/ui/badge';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Power, PowerOff, Clock, Shield, Mail, AlertTriangle, Copy, Check } from 'lucide-vue-next';
+import { Power, PowerOff, Clock, Shield, Mail, AlertTriangle, Copy, Check, Hammer } from 'lucide-vue-next';
 import ConfirmModal from '@/components/Admin/ConfirmModal.vue';
 import * as maintenanceRoutes from '@/routes/admin/system/maintenance';
 
@@ -171,285 +171,293 @@ const formatDateTime = (datetime: string | undefined) => {
 <template>
     <Head title="Maintenance Mode" />
     
-    <AdminLayout title="Maintenance Mode">
-        <div class="px-4 sm:px-6 lg:px-8 py-8 w-full max-w-9xl mx-auto">
+    <AdminLayout title="System Maintenance">
+        <div class="space-y-6">
             <!-- Header -->
-            <div class="mb-8">
-                <div class="flex items-center justify-between">
-                    <div>
-                        <h1 class="text-2xl md:text-3xl text-gray-800 font-bold">Maintenance Mode</h1>
-                        <p class="text-sm text-gray-600 mt-1">
-                            Manage site maintenance and scheduled downtime
-                        </p>
-                    </div>
-                
-                <Button 
-                    v-if="settings.enabled"
-                    variant="destructive"
-                    @click="disableMaintenance"
-                    :disabled="isSubmitting"
-                >
-                    <PowerOff class="mr-2 h-4 w-4" />
-                    Disable Maintenance
-                </Button>
-                <Button 
-                    v-else
-                    class="bg-blue-600 hover:bg-blue-700 text-white"
-                    @click="enableMaintenance"
-                    :disabled="isSubmitting"
-                >
-                    <Power class="mr-2 h-4 w-4" />
-                    Enable Maintenance
-                </Button>
+            <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                <div>
+                    <h1 class="text-2xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
+                        Maintenance Mode
+                    </h1>
+                    <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
+                        Manage site maintenance and scheduled downtime
+                    </p>
+                </div>
+            
+                <div class="flex items-center gap-2">
+                    <Button 
+                        v-if="settings.enabled"
+                        variant="destructive"
+                        @click="disableMaintenance"
+                        :disabled="isSubmitting"
+                    >
+                        <PowerOff class="mr-2 h-4 w-4" />
+                        Disable Maintenance
+                    </Button>
+                    <Button 
+                        v-else
+                        class="bg-blue-600 hover:bg-blue-700 text-white shadow-sm border-transparent rounded-xl"
+                        @click="enableMaintenance"
+                        :disabled="isSubmitting"
+                    >
+                        <Power class="mr-2 h-4 w-4" />
+                        Enable Maintenance
+                    </Button>
+                </div>
             </div>
-            </div>
 
-            <!-- Current Status Alert -->
-            <Alert v-if="settings.enabled" variant="destructive">
-                <AlertTriangle class="h-4 w-4" />
-                <AlertDescription>
-                    <strong>Maintenance Mode is Active</strong> - Your site is currently in maintenance mode.
-                    Visitors will see the maintenance page.
-                </AlertDescription>
-            </Alert>
-
-            <!-- Bypass URL (when enabled) -->
-            <Card v-if="settings.enabled && settings.secret">
-                <CardHeader>
-                    <CardTitle class="flex items-center">
-                        <Shield class="mr-2 h-5 w-5" />
-                        Bypass URL
-                    </CardTitle>
-                    <CardDescription>
-                        Use this URL to access the site during maintenance
-                    </CardDescription>
-                </CardHeader>
-                <CardContent>
-                    <div class="flex items-center gap-2">
-                        <Input 
-                            :value="bypassUrl" 
-                            readonly 
-                            class="font-mono text-sm"
-                        />
-                        <Button 
-                            variant="outline" 
-                            size="icon"
-                            @click="copyBypassUrl"
-                        >
-                            <Check v-if="copiedSecret" class="h-4 w-4 text-green-500" />
-                            <Copy v-else class="h-4 w-4" />
-                        </Button>
-                    </div>
-                </CardContent>
-            </Card>
-
-            <div class="grid gap-6 lg:grid-cols-2">
-                <!-- Maintenance Settings -->
-                <Card>
-                    <CardHeader>
-                        <CardTitle>Maintenance Settings</CardTitle>
-                        <CardDescription>
-                            Configure maintenance page content and options
-                        </CardDescription>
-                    </CardHeader>
-                    <CardContent class="space-y-4">
-                        <div class="space-y-2">
-                            <Label for="title">Title</Label>
-                            <Input 
-                                id="title"
-                                v-model="form.title"
-                                placeholder="We'll be back soon!"
-                            />
-                        </div>
-
-                        <div class="space-y-2">
-                            <Label for="message">Message</Label>
-                            <Textarea 
-                                id="message"
-                                v-model="form.message"
-                                placeholder="We are performing scheduled maintenance..."
-                                rows="4"
-                            />
-                        </div>
-
-                        <div class="space-y-2">
-                            <Label for="contact">Contact Email</Label>
-                            <div class="flex items-center gap-2">
-                                <Mail class="h-4 w-4 text-muted-foreground" />
-                                <Input 
-                                    id="contact"
-                                    v-model="form.contact_email"
-                                    type="email"
-                                    placeholder="support@example.com"
-                                />
-                            </div>
-                        </div>
-
-                        <div class="space-y-2">
-                            <Label for="retry">Retry After (seconds)</Label>
-                            <Input 
-                                id="retry"
-                                v-model.number="form.retry_after"
-                                type="number"
-                                min="60"
-                            />
-                            <p class="text-sm text-muted-foreground">
-                                Tells browsers when to retry ({{ Math.floor(form.retry_after / 60) }} minutes)
-                            </p>
-                        </div>
-
-                        <div class="space-y-2">
-                            <Label for="ips">Allowed IP Addresses</Label>
-                            <Textarea 
-                                id="ips"
-                                v-model="form.allowed_ips"
-                                placeholder="Enter one IP per line&#10;192.168.1.1&#10;10.0.0.1"
-                                rows="3"
-                            />
-                            <p class="text-sm text-muted-foreground">
-                                These IPs can access the site during maintenance
-                            </p>
-                        </div>
-                    </CardContent>
-                </Card>
-
-                <!-- Schedule Maintenance -->
+            <!-- Content -->
+            <div class="overflow-auto rounded-xl">
                 <div class="space-y-6">
-                    <Card>
+                    <!-- Current Status Alert -->
+                    <Alert v-if="settings.enabled" variant="destructive">
+                        <AlertTriangle class="h-4 w-4" />
+                        <AlertDescription>
+                            <strong>Maintenance Mode is Active</strong> - Your site is currently in maintenance mode.
+                            Visitors will see the maintenance page.
+                        </AlertDescription>
+                    </Alert>
+
+                    <!-- Bypass URL (when enabled) -->
+                    <Card v-if="settings.enabled && settings.secret" class="bg-white dark:bg-gray-900/70 border-gray-200 dark:border-gray-800">
                         <CardHeader>
                             <CardTitle class="flex items-center">
-                                <Clock class="mr-2 h-5 w-5" />
-                                Schedule Maintenance
+                                <Shield class="mr-2 h-5 w-5" />
+                                Bypass URL
                             </CardTitle>
                             <CardDescription>
-                                Plan future maintenance windows
+                                Use this URL to access the site during maintenance
                             </CardDescription>
                         </CardHeader>
-                        <CardContent class="space-y-4">
-                            <div class="space-y-2">
-                                <Label for="start">Start Time</Label>
+                        <CardContent>
+                            <div class="flex items-center gap-2">
                                 <Input 
-                                    id="start"
-                                    v-model="scheduleForm.start_time"
-                                    type="datetime-local"
+                                    :value="bypassUrl" 
+                                    readonly 
+                                    class="font-mono text-sm"
                                 />
+                                <Button 
+                                    variant="outline" 
+                                    size="icon"
+                                    @click="copyBypassUrl"
+                                >
+                                    <Check v-if="copiedSecret" class="h-4 w-4 text-green-500" />
+                                    <Copy v-else class="h-4 w-4" />
+                                </Button>
                             </div>
-
-                            <div class="space-y-2">
-                                <Label for="end">End Time</Label>
-                                <Input 
-                                    id="end"
-                                    v-model="scheduleForm.end_time"
-                                    type="datetime-local"
-                                />
-                            </div>
-
-                            <div class="space-y-2">
-                                <Label for="schedule-message">Reason</Label>
-                                <Textarea 
-                                    id="schedule-message"
-                                    v-model="scheduleForm.message"
-                                    placeholder="Scheduled server upgrade..."
-                                    rows="2"
-                                />
-                            </div>
-
-                            <Button 
-                                class="w-full bg-blue-600 hover:bg-blue-700 text-white"
-                                @click="scheduleMaintenance"
-                                :disabled="isSubmitting"
-                            >
-                                <Clock class="mr-2 h-4 w-4" />
-                                Schedule Maintenance
-                            </Button>
                         </CardContent>
                     </Card>
 
-                    <!-- Quick Stats -->
-                    <Card>
+                    <div class="grid gap-6 lg:grid-cols-2">
+                        <!-- Maintenance Settings -->
+                        <Card class="bg-white dark:bg-gray-900/70 border-gray-200 dark:border-gray-800">
+                            <CardHeader>
+                                <CardTitle>Maintenance Settings</CardTitle>
+                                <CardDescription>
+                                    Configure maintenance page content and options
+                                </CardDescription>
+                            </CardHeader>
+                            <CardContent class="space-y-4">
+                                <div class="space-y-2">
+                                    <Label for="title">Title</Label>
+                                    <Input 
+                                        id="title"
+                                        v-model="form.title"
+                                        placeholder="We'll be back soon!"
+                                    />
+                                </div>
+
+                                <div class="space-y-2">
+                                    <Label for="message">Message</Label>
+                                    <Textarea 
+                                        id="message"
+                                        v-model="form.message"
+                                        placeholder="We are performing scheduled maintenance..."
+                                        rows="4"
+                                    />
+                                </div>
+
+                                <div class="space-y-2">
+                                    <Label for="contact">Contact Email</Label>
+                                    <div class="flex items-center gap-2">
+                                        <Mail class="h-4 w-4 text-muted-foreground" />
+                                        <Input 
+                                            id="contact"
+                                            v-model="form.contact_email"
+                                            type="email"
+                                            placeholder="support@example.com"
+                                        />
+                                    </div>
+                                </div>
+
+                                <div class="space-y-2">
+                                    <Label for="retry">Retry After (seconds)</Label>
+                                    <Input 
+                                        id="retry"
+                                        v-model.number="form.retry_after"
+                                        type="number"
+                                        min="60"
+                                    />
+                                    <p class="text-sm text-muted-foreground">
+                                        Tells browsers when to retry ({{ Math.floor(form.retry_after / 60) }} minutes)
+                                    </p>
+                                </div>
+
+                                <div class="space-y-2">
+                                    <Label for="ips">Allowed IP Addresses</Label>
+                                    <Textarea 
+                                        id="ips"
+                                        v-model="form.allowed_ips"
+                                        placeholder="Enter one IP per line&#10;192.168.1.1&#10;10.0.0.1"
+                                        rows="3"
+                                    />
+                                    <p class="text-sm text-muted-foreground">
+                                        These IPs can access the site during maintenance
+                                    </p>
+                                </div>
+                            </CardContent>
+                        </Card>
+
+                        <!-- Right Column: Schedule & Stats -->
+                        <div class="space-y-6">
+                            <!-- Schedule Maintenance -->
+                            <Card class="bg-white dark:bg-gray-900/70 border-gray-200 dark:border-gray-800">
+                                <CardHeader>
+                                    <CardTitle class="flex items-center">
+                                        <Clock class="mr-2 h-5 w-5" />
+                                        Schedule Maintenance
+                                    </CardTitle>
+                                    <CardDescription>
+                                        Plan future maintenance windows
+                                    </CardDescription>
+                                </CardHeader>
+                                <CardContent class="space-y-4">
+                                    <div class="space-y-2">
+                                        <Label for="start">Start Time</Label>
+                                        <Input 
+                                            id="start"
+                                            v-model="scheduleForm.start_time"
+                                            type="datetime-local"
+                                        />
+                                    </div>
+
+                                    <div class="space-y-2">
+                                        <Label for="end">End Time</Label>
+                                        <Input 
+                                            id="end"
+                                            v-model="scheduleForm.end_time"
+                                            type="datetime-local"
+                                        />
+                                    </div>
+
+                                    <div class="space-y-2">
+                                        <Label for="schedule-message">Reason</Label>
+                                        <Textarea 
+                                            id="schedule-message"
+                                            v-model="scheduleForm.message"
+                                            placeholder="Scheduled server upgrade..."
+                                            rows="2"
+                                        />
+                                    </div>
+
+                                    <Button 
+                                        class="w-full bg-blue-600 hover:bg-blue-700 text-white"
+                                        @click="scheduleMaintenance"
+                                        :disabled="isSubmitting"
+                                    >
+                                        <Clock class="mr-2 h-4 w-4" />
+                                        Schedule Maintenance
+                                    </Button>
+                                </CardContent>
+                            </Card>
+
+                            <!-- Quick Stats -->
+                            <Card class="bg-white dark:bg-gray-900/70 border-gray-200 dark:border-gray-800">
+                                <CardHeader>
+                                    <CardTitle>Statistics</CardTitle>
+                                </CardHeader>
+                                <CardContent class="space-y-2">
+                                    <div class="flex justify-between items-center">
+                                        <span class="text-sm text-muted-foreground">Status</span>
+                                        <Badge :variant="settings.enabled ? 'destructive' : 'default'">
+                                            {{ settings.enabled ? 'Active' : 'Inactive' }}
+                                        </Badge>
+                                    </div>
+                                    <div class="flex justify-between items-center">
+                                        <span class="text-sm text-muted-foreground">Total Logs</span>
+                                        <span class="font-semibold text-gray-900 dark:text-gray-100">{{ logs.length }}</span>
+                                    </div>
+                                    <div class="flex justify-between items-center">
+                                        <span class="text-sm text-muted-foreground">Allowed IPs</span>
+                                        <span class="font-semibold text-gray-900 dark:text-gray-100">{{ settings.allowed_ips.length }}</span>
+                                    </div>
+                                </CardContent>
+                            </Card>
+                        </div>
+                    </div>
+
+                    <!-- Maintenance History -->
+                    <Card class="bg-white dark:bg-gray-900/70 border-gray-200 dark:border-gray-800">
                         <CardHeader>
-                            <CardTitle>Statistics</CardTitle>
+                            <CardTitle>Maintenance History</CardTitle>
+                            <CardDescription>
+                                Recent maintenance mode activities
+                            </CardDescription>
                         </CardHeader>
-                        <CardContent class="space-y-2">
-                            <div class="flex justify-between items-center">
-                                <span class="text-sm text-muted-foreground">Status</span>
-                                <Badge :variant="settings.enabled ? 'destructive' : 'default'">
-                                    {{ settings.enabled ? 'Active' : 'Inactive' }}
-                                </Badge>
-                            </div>
-                            <div class="flex justify-between items-center">
-                                <span class="text-sm text-muted-foreground">Total Logs</span>
-                                <span class="font-semibold">{{ logs.length }}</span>
-                            </div>
-                            <div class="flex justify-between items-center">
-                                <span class="text-sm text-muted-foreground">Allowed IPs</span>
-                                <span class="font-semibold">{{ settings.allowed_ips.length }}</span>
+                        <CardContent>
+                            <div class="space-y-4">
+                                <div 
+                                    v-for="log in logs" 
+                                    :key="log.id"
+                                    class="flex items-start gap-4 border-b border-gray-200 dark:border-gray-800 pb-4 last:border-0"
+                                >
+                                    <Badge :variant="getActionBadge(log.action)">
+                                        {{ log.action }}
+                                    </Badge>
+                                    <div class="flex-1 space-y-1">
+                                        <p class="text-sm font-medium text-gray-900 dark:text-gray-100">{{ log.reason }}</p>
+                                        <div class="flex gap-4 text-xs text-muted-foreground">
+                                            <span>By: {{ log.admin_name }}</span>
+                                            <span v-if="log.actual_start">
+                                                Started: {{ formatDateTime(log.actual_start) }}
+                                            </span>
+                                            <span v-if="log.actual_end">
+                                                Ended: {{ formatDateTime(log.actual_end) }}
+                                            </span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div v-if="logs.length === 0" class="text-center py-8 text-muted-foreground">
+                                    No maintenance history yet
+                                </div>
                             </div>
                         </CardContent>
                     </Card>
                 </div>
             </div>
 
-            <!-- Maintenance History -->
-            <Card>
-                <CardHeader>
-                    <CardTitle>Maintenance History</CardTitle>
-                    <CardDescription>
-                        Recent maintenance mode activities
-                    </CardDescription>
-                </CardHeader>
-                <CardContent>
-                    <div class="space-y-4">
-                        <div 
-                            v-for="log in logs" 
-                            :key="log.id"
-                            class="flex items-start gap-4 border-b pb-4 last:border-0"
-                        >
-                            <Badge :variant="getActionBadge(log.action)">
-                                {{ log.action }}
-                            </Badge>
-                            <div class="flex-1 space-y-1">
-                                <p class="text-sm font-medium">{{ log.reason }}</p>
-                                <div class="flex gap-4 text-xs text-muted-foreground">
-                                    <span>By: {{ log.admin_name }}</span>
-                                    <span v-if="log.actual_start">
-                                        Started: {{ formatDateTime(log.actual_start) }}
-                                    </span>
-                                    <span v-if="log.actual_end">
-                                        Ended: {{ formatDateTime(log.actual_end) }}
-                                    </span>
-                                </div>
-                            </div>
-                        </div>
+            <!-- Enable Maintenance Confirmation Modal -->
+            <ConfirmModal
+                v-model:show="showEnableDialog"
+                title="Enable Maintenance Mode"
+                message="Are you sure you want to enable maintenance mode? This will make the site inaccessible to visitors."
+                confirm-text="Enable Maintenance"
+                cancel-text="Cancel"
+                variant="warning"
+                @confirm="confirmEnableMaintenance"
+            />
 
-                        <div v-if="logs.length === 0" class="text-center py-8 text-muted-foreground">
-                            No maintenance history yet
-                        </div>
-                    </div>
-                </CardContent>
-            </Card>
+            <!-- Disable Maintenance Confirmation Modal -->
+            <ConfirmModal
+                v-model:show="showDisableDialog"
+                title="Disable Maintenance Mode"
+                message="Are you sure you want to disable maintenance mode? The site will become accessible to all visitors again."
+                confirm-text="Disable Maintenance"
+                cancel-text="Cancel"
+                variant="danger"
+                @confirm="confirmDisableMaintenance"
+            />
         </div>
-
-        <!-- Enable Maintenance Confirmation Modal -->
-        <ConfirmModal
-            v-model:show="showEnableDialog"
-            title="Enable Maintenance Mode"
-            message="Are you sure you want to enable maintenance mode? This will make the site inaccessible to visitors."
-            confirm-text="Enable Maintenance"
-            cancel-text="Cancel"
-            variant="warning"
-            @confirm="confirmEnableMaintenance"
-        />
-
-        <!-- Disable Maintenance Confirmation Modal -->
-        <ConfirmModal
-            v-model:show="showDisableDialog"
-            title="Disable Maintenance Mode"
-            message="Are you sure you want to disable maintenance mode? The site will become accessible to all visitors again."
-            confirm-text="Disable Maintenance"
-            cancel-text="Cancel"
-            variant="danger"
-            @confirm="confirmDisableMaintenance"
-        />
     </AdminLayout>
 </template>

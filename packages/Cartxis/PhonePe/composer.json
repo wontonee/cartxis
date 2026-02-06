@@ -1,0 +1,23 @@
+{
+    "name": "cartxis/phonepe",
+    "description": "PhonePe Payment Gateway for Cartxis E-Commerce Platform",
+    "type": "library",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Cartxis Team",
+            "email": "support@cartxis-commerce.com"
+        }
+    ],
+    "require": {
+        "php": "^8.2",
+        "phonepe/pg-php-sdk-v2": "^2.0",
+        "vlucas/phpdotenv": "^5.6",
+        "netresearch/jsonmapper": "^4.4"
+    },
+    "autoload": {
+        "psr-4": {
+            "Cartxis\\PhonePe\\": "src/"
+        }
+    }
+}

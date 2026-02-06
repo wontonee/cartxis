@@ -1,7 +1,18 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue';
 import { Head, router } from '@inertiajs/vue3';
-import { Plus, GripVertical } from 'lucide-vue-next';
+import { 
+    Plus, 
+    GripVertical,
+    Edit, 
+    Trash2, 
+    Menu, 
+    Smartphone, 
+    LayoutTemplate,
+    Info,
+    CheckCircle,
+    XCircle
+} from 'lucide-vue-next';
 import AdminLayout from '@/layouts/AdminLayout.vue';
 import MenuFormModal from '@/components/Admin/Content/StorefrontMenu/MenuFormModal.vue';
 import ConfirmDeleteModal from '@/components/Admin/ConfirmDeleteModal.vue';
@@ -172,87 +183,100 @@ const handleDragEnd = () => {
   <Head title="Storefront Menu" />
 
   <AdminLayout title="Storefront Menu">
-    <div class="space-y-6">
-      <div class="flex items-center justify-between">
+    <div class="p-6 space-y-6">
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <h1 class="text-2xl font-bold text-gray-900 dark:text-white">Storefront Menu</h1>
-          <p class="mt-1 text-sm text-gray-600 dark:text-gray-400">Content → Storefront Menu</p>
+          <p class="mt-1 text-sm text-gray-600 dark:text-gray-400">Manage header, footer, and mobile navigation menus.</p>
         </div>
         <button
           @click="handleCreate"
-          class="inline-flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 dark:focus:ring-offset-gray-900"
+          class="inline-flex items-center px-4 py-2 bg-blue-600 border border-transparent rounded-lg font-semibold text-xs text-white uppercase tracking-widest hover:bg-blue-700 focus:bg-blue-700 active:bg-blue-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition ease-in-out duration-150"
         >
-          <Plus class="h-4 w-4" />
+          <Plus class="w-4 h-4 mr-2" />
           Add Menu Item
         </button>
       </div>
 
-      <div class="rounded-lg border border-blue-200 bg-blue-50 p-4 dark:border-blue-800 dark:bg-blue-900/20">
+      <div class="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-xl p-4 flex items-start gap-3">
+        <Info class="w-5 h-5 text-blue-600 dark:text-blue-400 mt-0.5 shrink-0" />
         <p class="text-sm text-blue-800 dark:text-blue-200">
-          <strong>Storefront Navigation:</strong> Manage header, footer, and mobile navigation menus for your store. Drag and drop to reorder items.
+          <strong>Storefront Navigation:</strong> Manage header, footer, and mobile navigation menus. Drag and drop to reorder items.
         </p>
       </div>
 
-      <div class="border-b border-gray-200 dark:border-gray-700">
-        <nav class="-mb-px flex space-x-8">
-          <button
-            @click="activeTab = 'header'"
-            :class="[
-              activeTab === 'header'
-                ? 'border-blue-500 text-blue-600 dark:text-blue-400'
-                : 'border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300',
-              'whitespace-nowrap border-b-2 px-1 py-4 text-sm font-medium transition-colors'
-            ]"
-          >
-            Header Menu
-            <span class="ml-2 rounded-full bg-gray-100 px-2 py-0.5 text-xs dark:bg-gray-700">
-              {{ headerMenuItems.length }}
-            </span>
-          </button>
-          <button
-            @click="activeTab = 'footer'"
-            :class="[
-              activeTab === 'footer'
-                ? 'border-blue-500 text-blue-600 dark:text-blue-400'
-                : 'border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300',
-              'whitespace-nowrap border-b-2 px-1 py-4 text-sm font-medium transition-colors'
-            ]"
-          >
-            Footer Menu
-            <span class="ml-2 rounded-full bg-gray-100 px-2 py-0.5 text-xs dark:bg-gray-700">
-              {{ footerMenuItems.length }}
-            </span>
-          </button>
-          <button
-            @click="activeTab = 'mobile'"
-            :class="[
-              activeTab === 'mobile'
-                ? 'border-blue-500 text-blue-600 dark:text-blue-400'
-                : 'border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300',
-              'whitespace-nowrap border-b-2 px-1 py-4 text-sm font-medium transition-colors'
-            ]"
-          >
-            Mobile Menu
-            <span class="ml-2 rounded-full bg-gray-100 px-2 py-0.5 text-xs dark:bg-gray-700">
-              {{ mobileMenuItems.length }}
-            </span>
-          </button>
-        </nav>
-      </div>
+      <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 overflow-hidden">
+        <div class="border-b border-gray-100 dark:border-gray-700 px-6">
+            <nav class="-mb-px flex space-x-8">
+            <button
+                @click="activeTab = 'header'"
+                :class="[
+                activeTab === 'header'
+                    ? 'border-blue-500 text-blue-600 dark:text-blue-400'
+                    : 'border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300',
+                'whitespace-nowrap border-b-2 px-1 py-4 text-sm font-medium transition-colors flex items-center gap-2'
+                ]"
+            >
+                <LayoutTemplate class="w-4 h-4" />
+                Header Menu
+                <span :class="[
+                    activeTab === 'header' ? 'bg-blue-100 text-blue-600 dark:bg-blue-900/40' : 'bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-400',
+                    'ml-2 rounded-full px-2 py-0.5 text-xs transition-colors'
+                ]">
+                {{ headerMenuItems.length }}
+                </span>
+            </button>
+            <button
+                @click="activeTab = 'footer'"
+                :class="[
+                activeTab === 'footer'
+                    ? 'border-blue-500 text-blue-600 dark:text-blue-400'
+                    : 'border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300',
+                'whitespace-nowrap border-b-2 px-1 py-4 text-sm font-medium transition-colors flex items-center gap-2'
+                ]"
+            >
+                <Menu class="w-4 h-4" />
+                Footer Menu
+                <span :class="[
+                     activeTab === 'footer' ? 'bg-blue-100 text-blue-600 dark:bg-blue-900/40' : 'bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-400',
+                    'ml-2 rounded-full px-2 py-0.5 text-xs transition-colors'
+                ]">
+                {{ footerMenuItems.length }}
+                </span>
+            </button>
+            <button
+                @click="activeTab = 'mobile'"
+                :class="[
+                activeTab === 'mobile'
+                    ? 'border-blue-500 text-blue-600 dark:text-blue-400'
+                    : 'border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300',
+                'whitespace-nowrap border-b-2 px-1 py-4 text-sm font-medium transition-colors flex items-center gap-2'
+                ]"
+            >
+                <Smartphone class="w-4 h-4" />
+                Mobile Menu
+                <span :class="[
+                     activeTab === 'mobile' ? 'bg-blue-100 text-blue-600 dark:bg-blue-900/40' : 'bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-400',
+                    'ml-2 rounded-full px-2 py-0.5 text-xs transition-colors'
+                ]">
+                {{ mobileMenuItems.length }}
+                </span>
+            </button>
+            </nav>
+        </div>
 
-      <div class="overflow-hidden rounded-lg border border-gray-200 bg-white shadow dark:border-gray-700 dark:bg-gray-800">
         <div class="overflow-x-auto">
           <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
-            <thead class="bg-gray-50 dark:bg-gray-900">
+            <thead class="bg-gray-50 dark:bg-gray-700/50">
               <tr>
-                <th class="w-10 px-6 py-3"></th>
+                <th class="w-12 px-6 py-3"></th>
                 <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-400">Title</th>
                 <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-400">URL/Route</th>
                 <th class="px-6 py-3 text-center text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-400">Status</th>
                 <th class="px-6 py-3 text-right text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-400">Actions</th>
               </tr>
             </thead>
-            <tbody class="divide-y divide-gray-200 bg-white dark:divide-gray-700 dark:bg-gray-800">
+            <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
               <template v-for="item in parentItems" :key="item.id">
                 <tr
                   draggable="true"
@@ -261,45 +285,41 @@ const handleDragEnd = () => {
                   @drop="handleDrop($event, item)"
                   @dragend="handleDragEnd"
                   :class="{ 'bg-blue-50 dark:bg-blue-900/20': dragOverItem?.id === item.id }"
-                  class="hover:bg-gray-50 dark:hover:bg-gray-700/50"
+                  class="bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors group"
                 >
                   <td class="px-6 py-4">
-                    <button class="cursor-pointer text-gray-400 hover:text-gray-600 dark:hover:text-gray-300">
+                    <button class="cursor-move text-gray-400 hover:text-gray-600 dark:hover:text-gray-300">
                       <GripVertical class="h-5 w-5" />
                     </button>
                   </td>
                   <td class="whitespace-nowrap px-6 py-4">
                     <div class="flex items-center">
                       <span class="text-sm font-medium text-gray-900 dark:text-white">{{ item.title }}</span>
-                      <span v-if="item.children && item.children.length > 0" class="ml-2 text-xs text-gray-500">
-                        ({{ item.children.length }} sub-items)
+                      <span v-if="item.children && item.children.length > 0" class="ml-2 text-xs text-gray-500 font-mono">
+                         ({{ item.children.length }} sub-items)
                       </span>
                     </div>
                   </td>
-                  <td class="whitespace-nowrap px-6 py-4 text-sm text-gray-500 dark:text-gray-400">
+                  <td class="whitespace-nowrap px-6 py-4 text-sm text-gray-500 dark:text-gray-400 font-mono">
                     {{ item.url || item.route || '-' }}
                   </td>
                   <td class="whitespace-nowrap px-6 py-4 text-center">
                     <span
                       :class="[
-                        item.active ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200' : 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300',
-                        'inline-flex rounded-full px-2 py-1 text-xs font-semibold'
+                        item.active ? 'bg-green-50 text-green-700 border-green-200 dark:bg-green-900/20 dark:text-green-300 dark:border-green-800' : 'bg-gray-50 text-gray-700 border-gray-200 dark:bg-gray-900/20 dark:text-gray-300 dark:border-gray-800',
+                        'inline-flex px-2.5 py-0.5 rounded-full text-xs font-medium border shadow-sm'
                       ]"
                     >
                       {{ item.active ? 'Active' : 'Inactive' }}
                     </span>
                   </td>
                   <td class="whitespace-nowrap px-6 py-4 text-right text-sm font-medium">
-                    <div class="flex items-center justify-end gap-2">
-                      <button @click="handleEdit(item)" class="text-blue-600 hover:text-blue-900 dark:text-blue-400 dark:hover:text-blue-300" title="Edit">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                        </svg>
+                    <div class="flex items-center justify-end gap-2 opacity-60 group-hover:opacity-100 transition-opacity">
+                      <button @click="handleEdit(item)" class="p-2 text-gray-400 hover:text-indigo-600 hover:bg-indigo-50 dark:hover:bg-indigo-900/20 rounded-lg transition-colors" title="Edit">
+                        <Edit class="w-4 h-4" />
                       </button>
-                      <button @click="handleDelete(item)" class="text-red-600 hover:text-red-900 dark:text-red-400 dark:hover:text-red-300" title="Delete">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                        </svg>
+                      <button @click="handleDelete(item)" class="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors" title="Delete">
+                        <Trash2 class="w-4 h-4" />
                       </button>
                     </div>
                   </td>
@@ -314,42 +334,39 @@ const handleDragEnd = () => {
                   @drop="handleDrop($event, child)"
                   @dragend="handleDragEnd"
                   :class="{ 'bg-blue-50 dark:bg-blue-900/20': dragOverItem?.id === child.id }"
-                  class="bg-gray-50 hover:bg-gray-100 dark:bg-gray-900 dark:hover:bg-gray-800"
+                  class="bg-gray-50/50 dark:bg-gray-900/20 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors group"
                 >
                   <td class="px-6 py-3">
-                    <button class="cursor-pointer pl-4 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300">
+                    <button class="cursor-move pl-6 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300">
                       <GripVertical class="h-4 w-4" />
                     </button>
                   </td>
                   <td class="whitespace-nowrap px-6 py-3">
-                    <div class="flex items-center pl-8">
-                      <span class="text-sm text-gray-900 dark:text-white">{{ child.title }}</span>
+                    <div class="flex items-center pl-8 text-sm text-gray-600 dark:text-gray-300">
+                        <div class="w-4 border-l border-b border-gray-300 dark:border-gray-600 h-4 absolute -ml-6 -mt-4 rounded-bl"></div>
+                         {{ child.title }}
                     </div>
                   </td>
-                  <td class="whitespace-nowrap px-6 py-3 text-sm text-gray-500 dark:text-gray-400">
+                  <td class="whitespace-nowrap px-6 py-3 text-sm text-gray-500 dark:text-gray-400 font-mono">
                     {{ child.url || child.route || '-' }}
                   </td>
                   <td class="whitespace-nowrap px-6 py-3 text-center">
                     <span
                       :class="[
-                        child.active ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200' : 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300',
-                        'inline-flex rounded-full px-2 py-1 text-xs font-semibold'
+                        child.active ? 'bg-green-50 text-green-700 border-green-200 dark:bg-green-900/20 dark:text-green-300 dark:border-green-800' : 'bg-gray-50 text-gray-700 border-gray-200 dark:bg-gray-900/20 dark:text-gray-300 dark:border-gray-800',
+                        'inline-flex px-2.5 py-0.5 rounded-full text-xs font-medium border shadow-sm'
                       ]"
                     >
                       {{ child.active ? 'Active' : 'Inactive' }}
                     </span>
                   </td>
                   <td class="whitespace-nowrap px-6 py-3 text-right text-sm font-medium">
-                    <div class="flex items-center justify-end gap-2">
-                      <button @click="handleEdit(child)" class="text-blue-600 hover:text-blue-900 dark:text-blue-400 dark:hover:text-blue-300" title="Edit">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                        </svg>
+                    <div class="flex items-center justify-end gap-2 opacity-60 group-hover:opacity-100 transition-opacity">
+                      <button @click="handleEdit(child)" class="p-2 text-gray-400 hover:text-indigo-600 hover:bg-indigo-50 dark:hover:bg-indigo-900/20 rounded-lg transition-colors" title="Edit">
+                        <Edit class="w-4 h-4" />
                       </button>
-                      <button @click="handleDelete(child)" class="text-red-600 hover:text-red-900 dark:text-red-400 dark:hover:text-red-300" title="Delete">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                        </svg>
+                      <button @click="handleDelete(child)" class="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors" title="Delete">
+                        <Trash2 class="w-4 h-4" />
                       </button>
                     </div>
                   </td>
@@ -358,11 +375,20 @@ const handleDragEnd = () => {
 
               <tr v-if="currentMenuItems.length === 0">
                 <td colspan="5" class="px-6 py-12 text-center">
-                  <p class="text-sm text-gray-500 dark:text-gray-400">No menu items found</p>
-                  <button @click="handleCreate" class="mt-4 inline-flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700">
-                    <Plus class="h-4 w-4" />
-                    Add Menu Item
-                  </button>
+                  <div class="flex flex-col items-center justify-center">
+                        <div class="w-16 h-16 bg-gray-50 dark:bg-gray-700 rounded-full flex items-center justify-center mb-4 text-gray-400">
+                            <Menu class="w-8 h-8" />
+                        </div>
+                        <h3 class="text-lg font-bold text-gray-900 dark:text-white mb-1">No menu items found</h3>
+                        <p class="text-sm text-gray-500 dark:text-gray-400 mb-4">Starts adding items to your {{ activeTab }} menu.</p>
+                        <button
+                            @click="handleCreate"
+                            class="inline-flex items-center px-4 py-2 bg-blue-600 border border-transparent rounded-lg font-semibold text-xs text-white uppercase tracking-widest hover:bg-blue-700 focus:bg-blue-700 active:bg-blue-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition ease-in-out duration-150"
+                        >
+                            <Plus class="w-4 h-4 mr-2" />
+                            Add Menu Item
+                        </button>
+                  </div>
                 </td>
               </tr>
             </tbody>

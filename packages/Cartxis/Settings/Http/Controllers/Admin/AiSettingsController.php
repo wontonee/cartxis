@@ -32,43 +32,73 @@ class AiSettingsController
     public function save(Request $request)
     {
         try {
-            $validated = $request->validate([
-                'ai_enabled' => 'nullable|boolean',
-                'default_provider' => 'nullable|string|max:100',
-                'default_agent' => 'nullable|string|max:100',
-                'product_description_agent' => 'nullable|string|max:100',
-                'providers' => 'nullable|array',
-                'providers.*.name' => 'required|string|max:100',
-                'providers.*.type' => 'required|string|max:50',
-                'providers.*.base_url' => 'nullable|string|max:255',
-                'providers.*.api_key' => 'nullable|string|max:255',
-                'providers.*.org_id' => 'nullable|string|max:255',
-                'providers.*.project_id' => 'nullable|string|max:255',
-                'providers.*.headers' => 'nullable|array',
-                'providers.*.is_default' => 'nullable|boolean',
-                'models' => 'nullable|array',
-                'models.*.name' => 'required|string|max:120',
-                'models.*.provider' => 'required|string|max:100',
-                'models.*.mode' => 'nullable|string|max:50',
-                'models.*.max_tokens' => 'nullable|integer|min:1|max:200000',
-                'models.*.is_default' => 'nullable|boolean',
-                'agents' => 'nullable|array',
-                'agents.*.name' => 'required|string|max:120',
-                'agents.*.provider' => 'required|string|max:100',
-                'agents.*.model' => 'required|string|max:120',
-                'agents.*.temperature' => 'nullable|numeric|min:0|max:2',
-                'agents.*.max_tokens' => 'nullable|integer|min:1|max:200000',
-                'agents.*.system_prompt' => 'nullable|string|max:4000',
-                'agents.*.is_default' => 'nullable|boolean',
-            ]);
+            $rules = [];
 
-            $this->settingService->set('ai.enabled', (bool) ($validated['ai_enabled'] ?? false), 'boolean', 'ai');
-            $this->settingService->set('ai.default_provider', $validated['default_provider'] ?? '', 'string', 'ai');
-            $this->settingService->set('ai.default_agent', $validated['default_agent'] ?? '', 'string', 'ai');
-            $this->settingService->set('ai.product_description_agent', $validated['product_description_agent'] ?? '', 'string', 'ai');
-            $this->settingService->set('ai.providers', $validated['providers'] ?? [], 'json', 'ai');
-            $this->settingService->set('ai.models', $validated['models'] ?? [], 'json', 'ai');
-            $this->settingService->set('ai.agents', $validated['agents'] ?? [], 'json', 'ai');
+            if ($request->has('ai_enabled')) {
+                $rules['ai_enabled'] = 'nullable|boolean';
+            }
+            if ($request->has('default_provider')) {
+                $rules['default_provider'] = 'nullable|string|max:100';
+            }
+            if ($request->has('default_agent')) {
+                $rules['default_agent'] = 'nullable|string|max:100';
+            }
+            if ($request->has('product_description_agent')) {
+                $rules['product_description_agent'] = 'nullable|string|max:100';
+            }
+            if ($request->has('providers')) {
+                $rules['providers'] = 'nullable|array';
+                $rules['providers.*.name'] = 'required|string|max:100';
+                $rules['providers.*.type'] = 'required|string|max:50';
+                $rules['providers.*.base_url'] = 'nullable|string|max:255';
+                $rules['providers.*.api_key'] = 'nullable|string|max:255';
+                $rules['providers.*.org_id'] = 'nullable|string|max:255';
+                $rules['providers.*.project_id'] = 'nullable|string|max:255';
+                $rules['providers.*.headers'] = 'nullable|array';
+                $rules['providers.*.is_default'] = 'nullable|boolean';
+            }
+            if ($request->has('models')) {
+                $rules['models'] = 'nullable|array';
+                $rules['models.*.name'] = 'required|string|max:120';
+                $rules['models.*.provider'] = 'required|string|max:100';
+                $rules['models.*.mode'] = 'nullable|string|max:50';
+                $rules['models.*.max_tokens'] = 'nullable|integer|min:1|max:200000';
+                $rules['models.*.is_default'] = 'nullable|boolean';
+            }
+            if ($request->has('agents')) {
+                $rules['agents'] = 'nullable|array';
+                $rules['agents.*.name'] = 'required|string|max:120';
+                $rules['agents.*.provider'] = 'required|string|max:100';
+                $rules['agents.*.model'] = 'required|string|max:120';
+                $rules['agents.*.temperature'] = 'nullable|numeric|min:0|max:2';
+                $rules['agents.*.max_tokens'] = 'nullable|integer|min:1|max:200000';
+                $rules['agents.*.system_prompt'] = 'nullable|string|max:4000';
+                $rules['agents.*.is_default'] = 'nullable|boolean';
+            }
+
+            $validated = $request->validate($rules);
+
+            if ($request->has('ai_enabled')) {
+                $this->settingService->set('ai.enabled', (bool) ($validated['ai_enabled'] ?? false), 'boolean', 'ai');
+            }
+            if ($request->has('default_provider')) {
+                $this->settingService->set('ai.default_provider', $validated['default_provider'] ?? '', 'string', 'ai');
+            }
+            if ($request->has('default_agent')) {
+                $this->settingService->set('ai.default_agent', $validated['default_agent'] ?? '', 'string', 'ai');
+            }
+            if ($request->has('product_description_agent')) {
+                $this->settingService->set('ai.product_description_agent', $validated['product_description_agent'] ?? '', 'string', 'ai');
+            }
+            if ($request->has('providers')) {
+                $this->settingService->set('ai.providers', $validated['providers'] ?? [], 'json', 'ai');
+            }
+            if ($request->has('models')) {
+                $this->settingService->set('ai.models', $validated['models'] ?? [], 'json', 'ai');
+            }
+            if ($request->has('agents')) {
+                $this->settingService->set('ai.agents', $validated['agents'] ?? [], 'json', 'ai');
+            }
 
             return redirect()->route('admin.settings.ai.index')
                 ->with('success', 'AI settings saved successfully.');

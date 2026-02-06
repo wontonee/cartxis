@@ -8,6 +8,7 @@ use Cartxis\Sales\Repositories\CreditMemoRepository;
 use Cartxis\Shop\Models\Order;
 use Cartxis\Shop\Models\OrderItem;
 use Cartxis\Core\Models\EmailTemplate;
+use Cartxis\Core\Models\Currency;
 use Cartxis\Product\Models\Product;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
@@ -424,7 +425,7 @@ class CreditMemoService
             'customer_name' => $creditMemo->order->customer_name ?? 'Valued Customer',
             'credit_memo_number' => $creditMemo->credit_memo_number,
             'order_number' => $creditMemo->order->order_number,
-            'refund_amount' => '₹' . number_format($creditMemo->grand_total, 2),
+            'refund_amount' => $this->formatCurrency($creditMemo->grand_total),
             'refund_method' => ucfirst(str_replace('_', ' ', $creditMemo->refund_method ?? 'original payment')),
             'issue_date' => $creditMemo->created_at->format('F d, Y'),
             'store_name' => config('app.name'),
@@ -433,5 +434,14 @@ class CreditMemoService
         ];
 
         $template->send($creditMemo->order->customer_email, $data);
+    }
+
+    protected function formatCurrency(float $amount): string
+    {
+        $currency = Currency::getDefault();
+
+        return $currency
+            ? $currency->format($amount)
+            : '$' . number_format($amount, 2);
     }
 }

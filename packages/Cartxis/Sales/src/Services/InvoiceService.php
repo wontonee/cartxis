@@ -49,6 +49,18 @@ class InvoiceService
     }
 
     /**
+     * Create invoice from order only if one does not already exist.
+     */
+    public function createFromOrderIfMissing(Order $order, array $additionalData = []): ?Invoice
+    {
+        if ($this->orderHasInvoice($order->id)) {
+            return $this->invoiceRepository->getByOrder($order->id)->first();
+        }
+
+        return $this->createFromOrder($order, $additionalData);
+    }
+
+    /**
      * Update invoice
      */
     public function update(int $invoiceId, array $data): bool

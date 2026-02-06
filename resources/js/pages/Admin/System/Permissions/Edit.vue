@@ -67,12 +67,12 @@ const submit = () => {
       <div class="mb-8">
         <div class="flex items-center justify-between">
           <div>
-            <h1 class="text-2xl md:text-3xl text-gray-800 font-bold">Edit Permission</h1>
-            <p class="text-sm text-gray-600 mt-1">Update permission details</p>
+            <h1 class="text-2xl md:text-3xl text-gray-800 dark:text-gray-100 font-bold">Edit Permission</h1>
+            <p class="text-sm text-gray-600 dark:text-gray-300 mt-1">Update permission details</p>
           </div>
           <Link
             href="/admin/system/permissions"
-            class="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+            class="inline-flex items-center px-4 py-2 border border-gray-300 dark:border-gray-700 rounded-md shadow-sm text-sm font-medium text-gray-700 dark:text-gray-200 bg-white dark:bg-gray-900 hover:bg-gray-50 dark:hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
           >
             <ArrowLeft class="w-4 h-4 mr-2" />
             Back to Permissions
@@ -80,7 +80,7 @@ const submit = () => {
         </div>
       </div>
       <!-- Form -->
-      <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+      <div class="bg-white dark:bg-gray-900 rounded-lg shadow-sm border border-gray-200 dark:border-gray-800 p-6">
         <form @submit.prevent="submit" class="space-y-6">
             <!-- Name -->
             <div class="space-y-2">
@@ -93,7 +93,7 @@ const submit = () => {
                 class="font-mono"
                 required
               />
-              <p class="text-sm text-gray-500">
+              <p class="text-sm text-gray-500 dark:text-gray-300">
                 Use dot notation for permission keys (e.g., module.resource.action)
               </p>
               <p v-if="form.errors.name" class="text-sm text-red-600">
@@ -111,7 +111,7 @@ const submit = () => {
                 placeholder="e.g., View Products"
                 required
               />
-              <p class="text-sm text-gray-500">
+              <p class="text-sm text-gray-500 dark:text-gray-300">
                 A human-readable name for this permission
               </p>
               <p v-if="form.errors.display_name" class="text-sm text-red-600">
@@ -127,7 +127,7 @@ const submit = () => {
                   v-if="!showCustomGroup"
                   id="group"
                   v-model="form.group"
-                  class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                  class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100"
                   required
                 >
                   <option value="" disabled>Select a group</option>
@@ -160,7 +160,7 @@ const submit = () => {
                   {{ showCustomGroup ? 'Select Existing' : 'Custom Group' }}
                 </Button>
               </div>
-              <p class="text-sm text-gray-500">
+              <p class="text-sm text-gray-500 dark:text-gray-300">
                 Group related permissions together
               </p>
               <p v-if="form.errors.group" class="text-sm text-red-600">
@@ -177,7 +177,7 @@ const submit = () => {
                 placeholder="Describe what this permission allows..."
                 rows="3"
               />
-              <p class="text-sm text-gray-500">
+              <p class="text-sm text-gray-500 dark:text-gray-300">
                 Optional description to explain what this permission controls
               </p>
               <p v-if="form.errors.description" class="text-sm text-red-600">
@@ -186,10 +186,10 @@ const submit = () => {
             </div>
 
             <!-- Actions -->
-            <div class="flex items-center justify-end gap-3 pt-4 border-t">
+            <div class="flex items-center justify-end gap-3 pt-4 border-t dark:border-gray-800">
               <Link
                 href="/admin/system/permissions"
-                class="px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                class="px-4 py-2 border border-gray-300 dark:border-gray-700 rounded-md shadow-sm text-sm font-medium text-gray-700 dark:text-gray-200 bg-white dark:bg-gray-900 hover:bg-gray-50 dark:hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
               >
                 Cancel
               </Link>

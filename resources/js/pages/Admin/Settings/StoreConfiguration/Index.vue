@@ -3,6 +3,21 @@ import { ref, watch } from 'vue'
 import { Head, useForm, router } from '@inertiajs/vue3'
 import AdminLayout from '@/layouts/AdminLayout.vue'
 import TiptapEditor from '@/components/Admin/TiptapEditor.vue'
+import {
+  Store,
+  MapPin,
+  Phone,
+  Share2,
+  ShoppingBag,
+  FileText,
+  Save,
+  Package,
+  Globe,
+  Mail,
+  ShieldCheck,
+  CreditCard,
+  Building2
+} from 'lucide-vue-next'
 
 interface Props {
   settings?: {
@@ -160,29 +175,46 @@ watch(() => form.store_email, (newEmail) => {
   <AdminLayout title="Store Configuration">
     <Head title="Store Configuration" />
 
-    <div class="p-6">
-      <div class="mb-6">
-        <h1 class="text-2xl font-bold text-gray-900">Store Configuration</h1>
-        <p class="mt-1 text-sm text-gray-500">
-          Manage store details, contact information, social media links, and policies
-        </p>
+    <div class="space-y-6">
+      <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div>
+          <h1 class="text-2xl font-bold text-gray-900 dark:text-white">Store Configuration</h1>
+          <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
+            Manage store details, contact information, social media links, and policies
+          </p>
+        </div>
+        <div>
+            <button
+                @click="save"
+                :disabled="form.processing"
+                class="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 border border-transparent rounded-xl text-sm font-medium text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 shadow-sm transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+                <Save v-if="!form.processing" class="w-4 h-4" />
+                <svg v-else class="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">
+                  <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                  <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+                {{ form.processing ? 'Saving...' : 'Save Configuration' }}
+            </button>
+        </div>
       </div>
 
       <form @submit.prevent="save" novalidate>
-        <div class="bg-white rounded-lg shadow">
+        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
           <!-- Tabs Navigation -->
-          <div class="border-b border-gray-200">
-            <nav class="-mb-px flex space-x-8 px-6" aria-label="Tabs">
+          <div class="border-b border-gray-200 dark:border-gray-700 bg-gray-50/50 dark:bg-gray-800">
+            <nav class="flex space-x-8 px-6 overflow-x-auto" aria-label="Tabs">
               <button
                 type="button"
                 @click="activeTab = 'details'"
                 :class="[
                   activeTab === 'details'
-                    ? 'border-blue-500 text-blue-600'
-                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300',
-                  'whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm'
+                    ? 'border-blue-500 text-blue-600 dark:text-blue-400'
+                    : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300 dark:hover:border-gray-600',
+                  'group inline-flex items-center py-4 px-1 border-b-2 font-medium text-sm transition-colors duration-200 whitespace-nowrap'
                 ]"
               >
+                <Store class="w-4 h-4 mr-2" :class="activeTab === 'details' ? 'text-blue-500' : 'text-gray-400 group-hover:text-gray-500'" />
                 Store Details
               </button>
               <button
@@ -190,11 +222,12 @@ watch(() => form.store_email, (newEmail) => {
                 @click="activeTab = 'contact'"
                 :class="[
                   activeTab === 'contact'
-                    ? 'border-blue-500 text-blue-600'
-                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300',
-                  'whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm'
+                    ? 'border-blue-500 text-blue-600 dark:text-blue-400'
+                    : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300 dark:hover:border-gray-600',
+                  'group inline-flex items-center py-4 px-1 border-b-2 font-medium text-sm transition-colors duration-200 whitespace-nowrap'
                 ]"
               >
+                <MapPin class="w-4 h-4 mr-2" :class="activeTab === 'contact' ? 'text-blue-500' : 'text-gray-400 group-hover:text-gray-500'" />
                 Contact & Address
               </button>
               <button
@@ -202,11 +235,12 @@ watch(() => form.store_email, (newEmail) => {
                 @click="activeTab = 'social'"
                 :class="[
                   activeTab === 'social'
-                    ? 'border-blue-500 text-blue-600'
-                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300',
-                  'whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm'
+                    ? 'border-blue-500 text-blue-600 dark:text-blue-400'
+                    : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300 dark:hover:border-gray-600',
+                  'group inline-flex items-center py-4 px-1 border-b-2 font-medium text-sm transition-colors duration-200 whitespace-nowrap'
                 ]"
               >
+                <Share2 class="w-4 h-4 mr-2" :class="activeTab === 'social' ? 'text-blue-500' : 'text-gray-400 group-hover:text-gray-500'" />
                 Social Media
               </button>
               <button
@@ -214,11 +248,12 @@ watch(() => form.store_email, (newEmail) => {
                 @click="activeTab = 'checkout'"
                 :class="[
                   activeTab === 'checkout'
-                    ? 'border-blue-500 text-blue-600'
-                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300',
-                  'whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm'
+                    ? 'border-blue-500 text-blue-600 dark:text-blue-400'
+                    : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300 dark:hover:border-gray-600',
+                  'group inline-flex items-center py-4 px-1 border-b-2 font-medium text-sm transition-colors duration-200 whitespace-nowrap'
                 ]"
               >
+                <ShoppingBag class="w-4 h-4 mr-2" :class="activeTab === 'checkout' ? 'text-blue-500' : 'text-gray-400 group-hover:text-gray-500'" />
                 Checkout
               </button>
               <button
@@ -226,111 +261,123 @@ watch(() => form.store_email, (newEmail) => {
                 @click="activeTab = 'policies'"
                 :class="[
                   activeTab === 'policies'
-                    ? 'border-blue-500 text-blue-600'
-                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300',
-                  'whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm'
+                    ? 'border-blue-500 text-blue-600 dark:text-blue-400'
+                    : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300 dark:hover:border-gray-600',
+                  'group inline-flex items-center py-4 px-1 border-b-2 font-medium text-sm transition-colors duration-200 whitespace-nowrap'
                 ]"
               >
+                <FileText class="w-4 h-4 mr-2" :class="activeTab === 'policies' ? 'text-blue-500' : 'text-gray-400 group-hover:text-gray-500'" />
                 Policies
               </button>
             </nav>
           </div>
 
           <!-- Store Details Tab -->
-          <div v-show="activeTab === 'details'" class="p-6">
-            <div class="space-y-6">
-              <div class="grid grid-cols-1 gap-6 sm:grid-cols-2">
-                <div>
-                  <label for="store_name" class="block text-sm font-medium text-gray-700">
-                    Business Name <span class="text-red-500">*</span>
-                  </label>
-                  <input
-                    id="store_name"
-                    v-model="form.store_name"
-                    type="text"
-                    class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                    required
-                  />
-                  <p v-if="form.errors.store_name" class="mt-1 text-sm text-red-600">{{ form.errors.store_name }}</p>
-                </div>
+          <div v-show="activeTab === 'details'" class="p-6 sm:p-8">
+            <div class="space-y-8">
+              <div>
+                 <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
+                    <Store class="w-5 h-5 text-gray-400" />
+                    Business Information
+                </h3>
+                  <div class="grid grid-cols-1 gap-6 sm:grid-cols-2">
+                    <div>
+                      <label for="store_name" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
+                        Business Name <span class="text-red-500">*</span>
+                      </label>
+                      <input
+                        id="store_name"
+                        v-model="form.store_name"
+                        type="text"
+                        class="block w-full px-3 py-2.5 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg text-sm shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-shadow duration-200"
+                        required
+                      />
+                      <p v-if="form.errors.store_name" class="mt-1 text-sm text-red-600">{{ form.errors.store_name }}</p>
+                    </div>
 
-                <div>
-                  <label for="business_registration" class="block text-sm font-medium text-gray-700">
-                    Business Registration Number
-                  </label>
-                  <input
-                    id="business_registration"
-                    v-model="form.business_registration"
-                    type="text"
-                    class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                  />
-                  <p v-if="form.errors.business_registration" class="mt-1 text-sm text-red-600">{{ form.errors.business_registration }}</p>
-                </div>
+                    <div>
+                      <label for="business_registration" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
+                        Business Registration Number
+                      </label>
+                      <input
+                        id="business_registration"
+                        v-model="form.business_registration"
+                        type="text"
+                        class="block w-full px-3 py-2.5 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg text-sm shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-shadow duration-200"
+                      />
+                      <p v-if="form.errors.business_registration" class="mt-1 text-sm text-red-600">{{ form.errors.business_registration }}</p>
+                    </div>
+                  </div>
               </div>
 
-              <div class="grid grid-cols-1 gap-6 sm:grid-cols-2">
+              <div class="grid grid-cols-1 gap-6 sm:grid-cols-2 pt-6 border-t border-gray-100 dark:border-gray-700">
                 <div>
-                  <label for="vat_number" class="block text-sm font-medium text-gray-700">
+                  <label for="vat_number" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
                     VAT Number
                   </label>
                   <input
                     id="vat_number"
                     v-model="form.vat_number"
                     type="text"
-                    class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    class="block w-full px-3 py-2.5 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg text-sm shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-shadow duration-200"
                   />
                   <p v-if="form.errors.vat_number" class="mt-1 text-sm text-red-600">{{ form.errors.vat_number }}</p>
                 </div>
 
                 <div>
-                  <label for="store_license" class="block text-sm font-medium text-gray-700">
+                  <label for="store_license" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
                     License Number
                   </label>
                   <input
                     id="store_license"
                     v-model="form.store_license"
                     type="text"
-                    class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    class="block w-full px-3 py-2.5 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg text-sm shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-shadow duration-200"
                   />
                   <p v-if="form.errors.store_license" class="mt-1 text-sm text-red-600">{{ form.errors.store_license }}</p>
                 </div>
 
                 <div>
-                  <label for="store_timezone" class="block text-sm font-medium text-gray-700">
+                  <label for="store_timezone" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
                     Store Timezone <span class="text-red-500">*</span>
                   </label>
-                  <select
-                    id="store_timezone"
-                    v-model="form.store_timezone"
-                    class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                    required
-                  >
-                    <option value="UTC">UTC</option>
-                    <option value="America/New_York">America/New York</option>
-                    <option value="America/Chicago">America/Chicago</option>
-                    <option value="America/Denver">America/Denver</option>
-                    <option value="America/Los_Angeles">America/Los Angeles</option>
-                    <option value="Europe/London">Europe/London</option>
-                    <option value="Europe/Paris">Europe/Paris</option>
-                    <option value="Asia/Dubai">Asia/Dubai</option>
-                    <option value="Asia/Kolkata">Asia/Kolkata</option>
-                    <option value="Asia/Singapore">Asia/Singapore</option>
-                    <option value="Asia/Tokyo">Asia/Tokyo</option>
-                    <option value="Australia/Sydney">Australia/Sydney</option>
-                  </select>
+                  <div class="relative">
+                      <div class="absolute inset-y-0 left-0 padding-l-3 flex items-center pl-3 pointer-events-none">
+                            <Globe class="h-4 w-4 text-gray-400" />
+                      </div>
+                      <select
+                        id="store_timezone"
+                        v-model="form.store_timezone"
+                        class="block w-full pl-10 pr-10 py-2.5 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-shadow duration-200"
+                        required
+                      >
+                        <option value="UTC">UTC</option>
+                        <option value="America/New_York">America/New York</option>
+                        <option value="America/Chicago">America/Chicago</option>
+                        <option value="America/Denver">America/Denver</option>
+                        <option value="America/Los_Angeles">America/Los Angeles</option>
+                        <option value="Europe/London">Europe/London</option>
+                        <option value="Europe/Paris">Europe/Paris</option>
+                        <option value="Asia/Dubai">Asia/Dubai</option>
+                        <option value="Asia/Kolkata">Asia/Kolkata</option>
+                        <option value="Asia/Singapore">Asia/Singapore</option>
+                        <option value="Asia/Tokyo">Asia/Tokyo</option>
+                        <option value="Australia/Sydney">Australia/Sydney</option>
+                      </select>
+                  </div>
                   <p v-if="form.errors.store_timezone" class="mt-1 text-sm text-red-600">{{ form.errors.store_timezone }}</p>
                 </div>
               </div>
 
               <div>
-                <label for="store_description" class="block text-sm font-medium text-gray-700">
+                <label for="store_description" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
                   Business Description
                 </label>
                 <textarea
                   id="store_description"
                   v-model="form.store_description"
                   rows="4"
-                  class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  class="block w-full px-3 py-2.5 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg text-sm shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-shadow duration-200"
                   placeholder="Brief description of your business for SEO purposes..."
                 ></textarea>
                 <p v-if="form.errors.store_description" class="mt-1 text-sm text-red-600">{{ form.errors.store_description }}</p>
@@ -339,148 +386,154 @@ watch(() => form.store_email, (newEmail) => {
           </div>
 
           <!-- Contact & Address Tab -->
-          <div v-show="activeTab === 'contact'" class="p-6">
-            <div class="space-y-6">
-              <div class="grid grid-cols-1 gap-6 sm:grid-cols-2">
-                <div>
-                  <label for="store_email" class="block text-sm font-medium text-gray-700">
-                    Primary Email <span class="text-red-500">*</span>
-                  </label>
-                  <input
-                    id="store_email"
-                    v-model="form.store_email"
-                    type="email"
-                    class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                    required
-                  />
-                  <p v-if="form.errors.store_email" class="mt-1 text-sm text-red-600">{{ form.errors.store_email }}</p>
-                </div>
+          <div v-show="activeTab === 'contact'" class="p-6 sm:p-8">
+            <div class="space-y-8">
+               <div>
+                 <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
+                    <MapPin class="w-5 h-5 text-gray-400" />
+                    Contact Information
+                </h3>
+                  <div class="grid grid-cols-1 gap-6 sm:grid-cols-2">
+                    <div>
+                      <label for="store_email" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
+                        Primary Email <span class="text-red-500">*</span>
+                      </label>
+                      <input
+                        id="store_email"
+                        v-model="form.store_email"
+                        type="email"
+                        class="block w-full px-3 py-2.5 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg text-sm shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-shadow duration-200"
+                        required
+                      />
+                      <p v-if="form.errors.store_email" class="mt-1 text-sm text-red-600">{{ form.errors.store_email }}</p>
+                    </div>
 
-                <div>
-                  <label for="support_email" class="block text-sm font-medium text-gray-700">
-                    Support Email
-                  </label>
-                  <input
-                    id="support_email"
-                    v-model="form.support_email"
-                    type="email"
-                    class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                  />
-                  <p v-if="form.errors.support_email" class="mt-1 text-sm text-red-600">{{ form.errors.support_email }}</p>
-                </div>
-              </div>
+                    <div>
+                      <label for="support_email" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
+                        Support Email
+                      </label>
+                      <input
+                        id="support_email"
+                        v-model="form.support_email"
+                        type="email"
+                        class="block w-full px-3 py-2.5 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg text-sm shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-shadow duration-200"
+                      />
+                      <p v-if="form.errors.support_email" class="mt-1 text-sm text-red-600">{{ form.errors.support_email }}</p>
+                    </div>
+                  </div>
 
-              <div class="grid grid-cols-1 gap-6 sm:grid-cols-3">
-                <div>
-                  <label for="store_phone" class="block text-sm font-medium text-gray-700">
-                    Phone Number <span class="text-red-500">*</span>
-                  </label>
-                  <input
-                    id="store_phone"
-                    v-model="form.store_phone"
-                    type="tel"
-                    class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                    required
-                  />
-                  <p v-if="form.errors.store_phone" class="mt-1 text-sm text-red-600">{{ form.errors.store_phone }}</p>
-                </div>
+                  <div class="grid grid-cols-1 gap-6 sm:grid-cols-3 mt-6">
+                    <div>
+                      <label for="store_phone" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
+                        Phone Number <span class="text-red-500">*</span>
+                      </label>
+                      <input
+                        id="store_phone"
+                        v-model="form.store_phone"
+                        type="tel"
+                        class="block w-full px-3 py-2.5 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg text-sm shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-shadow duration-200"
+                        required
+                      />
+                      <p v-if="form.errors.store_phone" class="mt-1 text-sm text-red-600">{{ form.errors.store_phone }}</p>
+                    </div>
 
-                <div>
-                  <label for="store_phone_alt" class="block text-sm font-medium text-gray-700">
-                    Alternate Phone
-                  </label>
-                  <input
-                    id="store_phone_alt"
-                    v-model="form.store_phone_alt"
-                    type="tel"
-                    class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                  />
-                  <p v-if="form.errors.store_phone_alt" class="mt-1 text-sm text-red-600">{{ form.errors.store_phone_alt }}</p>
-                </div>
+                    <div>
+                      <label for="store_phone_alt" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
+                        Alternate Phone
+                      </label>
+                      <input
+                        id="store_phone_alt"
+                        v-model="form.store_phone_alt"
+                        type="tel"
+                        class="block w-full px-3 py-2.5 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg text-sm shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-shadow duration-200"
+                      />
+                      <p v-if="form.errors.store_phone_alt" class="mt-1 text-sm text-red-600">{{ form.errors.store_phone_alt }}</p>
+                    </div>
 
-                <div>
-                  <label for="store_whatsapp" class="block text-sm font-medium text-gray-700">
-                    WhatsApp Number
-                  </label>
-                  <input
-                    id="store_whatsapp"
-                    v-model="form.store_whatsapp"
-                    type="tel"
-                    class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                  />
-                  <p v-if="form.errors.store_whatsapp" class="mt-1 text-sm text-red-600">{{ form.errors.store_whatsapp }}</p>
-                </div>
-              </div>
+                    <div>
+                      <label for="store_whatsapp" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
+                        WhatsApp Number
+                      </label>
+                      <input
+                        id="store_whatsapp"
+                        v-model="form.store_whatsapp"
+                        type="tel"
+                        class="block w-full px-3 py-2.5 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg text-sm shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-shadow duration-200"
+                      />
+                      <p v-if="form.errors.store_whatsapp" class="mt-1 text-sm text-red-600">{{ form.errors.store_whatsapp }}</p>
+                    </div>
+                  </div>
+               </div>
 
-              <div class="border-t border-gray-200 pt-6">
-                <h3 class="text-lg font-medium text-gray-900 mb-4">Store Address</h3>
+              <div class="pt-6 border-t border-gray-100 dark:border-gray-700">
+                <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Store Address</h3>
                 
                 <div class="space-y-6">
                   <div>
-                    <label for="store_address_1" class="block text-sm font-medium text-gray-700">
+                    <label for="store_address_1" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
                       Street Address <span class="text-red-500">*</span>
                     </label>
                     <input
                       id="store_address_1"
                       v-model="form.store_address_1"
                       type="text"
-                      class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                      class="block w-full px-3 py-2.5 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg text-sm shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-shadow duration-200"
                       required
                     />
                     <p v-if="form.errors.store_address_1" class="mt-1 text-sm text-red-600">{{ form.errors.store_address_1 }}</p>
                   </div>
 
                   <div>
-                    <label for="store_address_2" class="block text-sm font-medium text-gray-700">
+                    <label for="store_address_2" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
                       Address Line 2
                     </label>
                     <input
                       id="store_address_2"
                       v-model="form.store_address_2"
                       type="text"
-                      class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                      class="block w-full px-3 py-2.5 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg text-sm shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-shadow duration-200"
                     />
                     <p v-if="form.errors.store_address_2" class="mt-1 text-sm text-red-600">{{ form.errors.store_address_2 }}</p>
                   </div>
 
                   <div class="grid grid-cols-1 gap-6 sm:grid-cols-3">
                     <div>
-                      <label for="store_city" class="block text-sm font-medium text-gray-700">
+                      <label for="store_city" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
                         City <span class="text-red-500">*</span>
                       </label>
                       <input
                         id="store_city"
                         v-model="form.store_city"
                         type="text"
-                        class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                        class="block w-full px-3 py-2.5 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg text-sm shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-shadow duration-200"
                         required
                       />
                       <p v-if="form.errors.store_city" class="mt-1 text-sm text-red-600">{{ form.errors.store_city }}</p>
                     </div>
 
                     <div>
-                      <label for="store_state" class="block text-sm font-medium text-gray-700">
+                      <label for="store_state" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
                         State/Province <span class="text-red-500">*</span>
                       </label>
                       <input
                         id="store_state"
                         v-model="form.store_state"
                         type="text"
-                        class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                        class="block w-full px-3 py-2.5 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg text-sm shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-shadow duration-200"
                         required
                       />
                       <p v-if="form.errors.store_state" class="mt-1 text-sm text-red-600">{{ form.errors.store_state }}</p>
                     </div>
 
                     <div>
-                      <label for="store_postal_code" class="block text-sm font-medium text-gray-700">
+                      <label for="store_postal_code" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
                         Postal Code <span class="text-red-500">*</span>
                       </label>
                       <input
                         id="store_postal_code"
                         v-model="form.store_postal_code"
                         type="text"
-                        class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                        class="block w-full px-3 py-2.5 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg text-sm shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-shadow duration-200"
                         required
                       />
                       <p v-if="form.errors.store_postal_code" class="mt-1 text-sm text-red-600">{{ form.errors.store_postal_code }}</p>
@@ -488,13 +541,13 @@ watch(() => form.store_email, (newEmail) => {
                   </div>
 
                   <div>
-                    <label for="store_country" class="block text-sm font-medium text-gray-700">
+                    <label for="store_country" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
                       Country <span class="text-red-500">*</span>
                     </label>
                     <select
                       id="store_country"
                       v-model="form.store_country"
-                      class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                      class="block w-full px-3 py-2.5 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-shadow duration-200"
                       required
                     >
                       <option value="">Select a country...</option>
@@ -702,164 +755,176 @@ watch(() => form.store_email, (newEmail) => {
           </div>
 
           <!-- Social Media Tab -->
-          <div v-show="activeTab === 'social'" class="p-6">
+          <div v-show="activeTab === 'social'" class="p-6 sm:p-8">
             <div class="space-y-6">
-              <div>
-                <label for="social_facebook" class="block text-sm font-medium text-gray-700">
-                  Facebook
-                </label>
-                <input
-                  id="social_facebook"
-                  v-model="form.social_facebook"
-                  type="url"
-                  class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                  placeholder="https://facebook.com/yourstore"
-                />
-                <p v-if="form.errors.social_facebook" class="mt-1 text-sm text-red-600">{{ form.errors.social_facebook }}</p>
-              </div>
+                <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
+                    <Share2 class="w-5 h-5 text-gray-400" />
+                    Social Media Profiles
+                </h3>
+              <div class="grid grid-cols-1 gap-6 sm:grid-cols-2">
+                <div>
+                  <label for="social_facebook" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
+                    Facebook
+                  </label>
+                  <input
+                    id="social_facebook"
+                    v-model="form.social_facebook"
+                    type="url"
+                    class="block w-full px-3 py-2.5 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg text-sm shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-shadow duration-200"
+                    placeholder="https://facebook.com/yourstore"
+                  />
+                  <p v-if="form.errors.social_facebook" class="mt-1 text-sm text-red-600">{{ form.errors.social_facebook }}</p>
+                </div>
 
-              <div>
-                <label for="social_instagram" class="block text-sm font-medium text-gray-700">
-                  Instagram
-                </label>
-                <input
-                  id="social_instagram"
-                  v-model="form.social_instagram"
-                  type="url"
-                  class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                  placeholder="https://instagram.com/yourstore"
-                />
-                <p v-if="form.errors.social_instagram" class="mt-1 text-sm text-red-600">{{ form.errors.social_instagram }}</p>
-              </div>
+                <div>
+                  <label for="social_instagram" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
+                    Instagram
+                  </label>
+                  <input
+                    id="social_instagram"
+                    v-model="form.social_instagram"
+                    type="url"
+                    class="block w-full px-3 py-2.5 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg text-sm shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-shadow duration-200"
+                    placeholder="https://instagram.com/yourstore"
+                  />
+                  <p v-if="form.errors.social_instagram" class="mt-1 text-sm text-red-600">{{ form.errors.social_instagram }}</p>
+                </div>
 
-              <div>
-                <label for="social_twitter" class="block text-sm font-medium text-gray-700">
-                  Twitter/X
-                </label>
-                <input
-                  id="social_twitter"
-                  v-model="form.social_twitter"
-                  type="url"
-                  class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                  placeholder="https://twitter.com/yourstore"
-                />
-                <p v-if="form.errors.social_twitter" class="mt-1 text-sm text-red-600">{{ form.errors.social_twitter }}</p>
-              </div>
+                <div>
+                  <label for="social_twitter" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
+                    Twitter/X
+                  </label>
+                  <input
+                    id="social_twitter"
+                    v-model="form.social_twitter"
+                    type="url"
+                    class="block w-full px-3 py-2.5 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg text-sm shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-shadow duration-200"
+                    placeholder="https://twitter.com/yourstore"
+                  />
+                  <p v-if="form.errors.social_twitter" class="mt-1 text-sm text-red-600">{{ form.errors.social_twitter }}</p>
+                </div>
 
-              <div>
-                <label for="social_linkedin" class="block text-sm font-medium text-gray-700">
-                  LinkedIn
-                </label>
-                <input
-                  id="social_linkedin"
-                  v-model="form.social_linkedin"
-                  type="url"
-                  class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                  placeholder="https://linkedin.com/company/yourstore"
-                />
-                <p v-if="form.errors.social_linkedin" class="mt-1 text-sm text-red-600">{{ form.errors.social_linkedin }}</p>
-              </div>
-
-              <div>
-                <label for="social_youtube" class="block text-sm font-medium text-gray-700">
-                  YouTube
-                </label>
-                <input
-                  id="social_youtube"
-                  v-model="form.social_youtube"
-                  type="url"
-                  class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                  placeholder="https://youtube.com/@yourstore"
-                />
-                <p v-if="form.errors.social_youtube" class="mt-1 text-sm text-red-600">{{ form.errors.social_youtube }}</p>
-              </div>
-
-              <div>
-                <label for="social_tiktok" class="block text-sm font-medium text-gray-700">
-                  TikTok
-                </label>
-                <input
-                  id="social_tiktok"
-                  v-model="form.social_tiktok"
-                  type="url"
-                  class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                  placeholder="https://tiktok.com/@yourstore"
-                />
-                <p v-if="form.errors.social_tiktok" class="mt-1 text-sm text-red-600">{{ form.errors.social_tiktok }}</p>
-              </div>
-
-              <div>
-                <label for="social_pinterest" class="block text-sm font-medium text-gray-700">
-                  Pinterest
-                </label>
-                <input
-                  id="social_pinterest"
-                  v-model="form.social_pinterest"
-                  type="url"
-                  class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                  placeholder="https://pinterest.com/yourstore"
-                />
-                <p v-if="form.errors.social_pinterest" class="mt-1 text-sm text-red-600">{{ form.errors.social_pinterest }}</p>
+                <div>
+                    <label for="social_linkedin" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
+                      LinkedIn
+                    </label>
+                    <input
+                      id="social_linkedin"
+                      v-model="form.social_linkedin"
+                      type="url"
+                      class="block w-full px-3 py-2.5 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg text-sm shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-shadow duration-200"
+                      placeholder="https://linkedin.com/company/yourstore"
+                    />
+                    <p v-if="form.errors.social_linkedin" class="mt-1 text-sm text-red-600">{{ form.errors.social_linkedin }}</p>
+                  </div>
+    
+                  <div>
+                    <label for="social_youtube" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
+                      YouTube
+                    </label>
+                    <input
+                      id="social_youtube"
+                      v-model="form.social_youtube"
+                      type="url"
+                      class="block w-full px-3 py-2.5 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg text-sm shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-shadow duration-200"
+                      placeholder="https://youtube.com/@yourstore"
+                    />
+                    <p v-if="form.errors.social_youtube" class="mt-1 text-sm text-red-600">{{ form.errors.social_youtube }}</p>
+                  </div>
+    
+                  <div>
+                    <label for="social_tiktok" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
+                      TikTok
+                    </label>
+                    <input
+                      id="social_tiktok"
+                      v-model="form.social_tiktok"
+                      type="url"
+                      class="block w-full px-3 py-2.5 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg text-sm shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-shadow duration-200"
+                      placeholder="https://tiktok.com/@yourstore"
+                    />
+                    <p v-if="form.errors.social_tiktok" class="mt-1 text-sm text-red-600">{{ form.errors.social_tiktok }}</p>
+                  </div>
+    
+                  <div>
+                    <label for="social_pinterest" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
+                      Pinterest
+                    </label>
+                    <input
+                      id="social_pinterest"
+                      v-model="form.social_pinterest"
+                      type="url"
+                      class="block w-full px-3 py-2.5 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg text-sm shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-shadow duration-200"
+                      placeholder="https://pinterest.com/yourstore"
+                    />
+                    <p v-if="form.errors.social_pinterest" class="mt-1 text-sm text-red-600">{{ form.errors.social_pinterest }}</p>
+                  </div>
               </div>
             </div>
           </div>
 
 
           <!-- Checkout Tab -->
-          <div v-show="activeTab === 'checkout'" class="p-6">
-            <div class="space-y-6">
+          <div v-show="activeTab === 'checkout'" class="p-6 sm:p-8">
+            <div class="space-y-8">
               <div>
-                <h3 class="text-lg font-medium text-gray-900 mb-4">Checkout Options</h3>
-                <p class="text-sm text-gray-600 mb-6">Configure checkout flow and account requirements for your store</p>
+                <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-2 flex items-center gap-2">
+                    <ShoppingCart class="w-5 h-5 text-gray-400" />
+                    Checkout Preferences
+                </h3>
+                <p class="text-sm text-gray-500 dark:text-gray-400">Configure checkout flow and account requirements used in your storefront</p>
               </div>
 
-              <!-- Allow Guest Checkout -->
-              <div class="flex items-start">
-                <div class="flex items-center h-5">
-                  <input
-                    id="checkout_allow_guest"
-                    v-model="form.checkout_allow_guest"
-                    type="checkbox"
-                    class="focus:ring-blue-500 h-4 w-4 text-blue-600 border-gray-300 rounded"
-                  />
-                </div>
-                <div class="ml-3">
-                  <label for="checkout_allow_guest" class="font-medium text-gray-700">
-                    Allow Guest Checkout
-                  </label>
-                  <p class="text-sm text-gray-500">
-                    Allow customers to complete checkout without creating an account. They can optionally create one during checkout.
-                  </p>
-                </div>
-              </div>
+              <div class="space-y-6 border-t border-gray-100 dark:border-gray-700 pt-6">
+                  <!-- Allow Guest Checkout -->
+                  <div class="flex items-start">
+                    <div class="flex items-center h-5">
+                      <input
+                        id="checkout_allow_guest"
+                        v-model="form.checkout_allow_guest"
+                        type="checkbox"
+                        class="h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 transition duration-150 ease-in-out"
+                      />
+                    </div>
+                    <div class="ml-3 text-sm">
+                      <label for="checkout_allow_guest" class="font-medium text-gray-700 dark:text-gray-300">
+                        Allow Guest Checkout
+                      </label>
+                      <p class="text-gray-500 dark:text-gray-400 mt-1">
+                        Allow customers to complete checkout without creating an account. They can optionally create one during checkout.
+                      </p>
+                    </div>
+                  </div>
 
-              <!-- Require Account Creation -->
-              <div class="flex items-start">
-                <div class="flex items-center h-5">
-                  <input
-                    id="checkout_require_account"
-                    v-model="form.checkout_require_account"
-                    type="checkbox"
-                    :disabled="!form.checkout_allow_guest"
-                    class="focus:ring-blue-500 h-4 w-4 text-blue-600 border-gray-300 rounded disabled:opacity-50 disabled:cursor-not-allowed"
-                  />
-                </div>
-                <div class="ml-3">
-                  <label for="checkout_require_account" class="font-medium text-gray-700" :class="{ 'text-gray-400': !form.checkout_allow_guest }">
-                    Require Account Creation
-                  </label>
-                  <p class="text-sm text-gray-500">
-                    When enabled, guests must create an account during checkout (cannot proceed without registration).
-                  </p>
-                </div>
+                  <!-- Require Account Creation -->
+                  <div class="flex items-start">
+                    <div class="flex items-center h-5">
+                      <input
+                        id="checkout_require_account"
+                        v-model="form.checkout_require_account"
+                        type="checkbox"
+                        :disabled="!form.checkout_allow_guest"
+                        class="h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed transition duration-150 ease-in-out"
+                      />
+                    </div>
+                    <div class="ml-3 text-sm">
+                      <label for="checkout_require_account" class="font-medium text-gray-700 dark:text-gray-300" :class="{ 'text-gray-400 dark:text-gray-600': !form.checkout_allow_guest }">
+                        Require Account Creation
+                      </label>
+                      <p class="text-gray-500 dark:text-gray-400 mt-1">
+                        When enabled, guests must create an account during checkout (cannot proceed without registration).
+                      </p>
+                    </div>
+                  </div>
               </div>
 
               <!-- Info Box -->
-              <div class="bg-blue-50 border-l-4 border-blue-400 p-4 mt-6">
+              <div class="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800/50 rounded-lg p-4">
                 <div class="flex">
-                  <div class="ml-3">
-                    <h3 class="text-sm font-medium text-blue-800">Configuration Options</h3>
-                    <div class="mt-2 text-sm text-blue-700">
+                   <Info class="h-5 w-5 text-blue-400 mt-0.5 mr-3 flex-shrink-0" />
+                  <div>
+                    <h3 class="text-sm font-medium text-blue-800 dark:text-blue-200">Configuration Options</h3>
+                    <div class="mt-2 text-sm text-blue-700 dark:text-blue-300">
                       <ul class="list-disc list-inside space-y-1">
                         <li><strong>Both disabled:</strong> Customers must log in or register before checkout (no guest option)</li>
                         <li><strong>Guest allowed only:</strong> Customers can checkout as guests or create an account (optional)</li>
@@ -873,70 +938,78 @@ watch(() => form.store_email, (newEmail) => {
           </div>
 
           <!-- Policies Tab -->
-          <div v-show="activeTab === 'policies'" class="p-6">
+          <div v-show="activeTab === 'policies'" class="p-6 sm:p-8">
             <div class="space-y-8">
-              <div>
-                <label for="policy_privacy" class="block text-sm font-medium text-gray-700 mb-2">
-                  Privacy Policy
-                </label>
-                <TiptapEditor
-                  v-model="form.policy_privacy"
-                  placeholder="Enter your privacy policy content..."
-                />
-                <p v-if="form.errors.policy_privacy" class="mt-1 text-sm text-red-600">{{ form.errors.policy_privacy }}</p>
-              </div>
+                <div>
+                    <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-2 flex items-center gap-2">
+                        <FileText class="w-5 h-5 text-gray-400" />
+                        Store Policies
+                    </h3>
+                    <p class="text-sm text-gray-500 dark:text-gray-400">Define the legal policies for your store to ensure transparency with customers.</p>
+                </div>
 
-              <div>
-                <label for="policy_terms" class="block text-sm font-medium text-gray-700 mb-2">
-                  Terms & Conditions
-                </label>
-                <TiptapEditor
-                  v-model="form.policy_terms"
-                  placeholder="Enter your terms and conditions..."
-                />
-                <p v-if="form.errors.policy_terms" class="mt-1 text-sm text-red-600">{{ form.errors.policy_terms }}</p>
-              </div>
+                <div class="space-y-8 border-t border-gray-100 dark:border-gray-700 pt-6">
+                  <div>
+                    <label for="policy_privacy" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                      Privacy Policy
+                    </label>
+                    <TiptapEditor
+                      v-model="form.policy_privacy"
+                      placeholder="Enter your privacy policy content..."
+                    />
+                    <p v-if="form.errors.policy_privacy" class="mt-1 text-sm text-red-600">{{ form.errors.policy_privacy }}</p>
+                  </div>
 
-              <div>
-                <label for="policy_return" class="block text-sm font-medium text-gray-700 mb-2">
-                  Return Policy
-                </label>
-                <TiptapEditor
-                  v-model="form.policy_return"
-                  placeholder="Enter your return and refund policy..."
-                />
-                <p v-if="form.errors.policy_return" class="mt-1 text-sm text-red-600">{{ form.errors.policy_return }}</p>
-              </div>
+                  <div>
+                    <label for="policy_terms" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                      Terms & Conditions
+                    </label>
+                    <TiptapEditor
+                      v-model="form.policy_terms"
+                      placeholder="Enter your terms and conditions..."
+                    />
+                    <p v-if="form.errors.policy_terms" class="mt-1 text-sm text-red-600">{{ form.errors.policy_terms }}</p>
+                  </div>
 
-              <div>
-                <label for="policy_shipping" class="block text-sm font-medium text-gray-700 mb-2">
-                  Shipping Policy
-                </label>
-                <TiptapEditor
-                  v-model="form.policy_shipping"
-                  placeholder="Enter your shipping terms and conditions..."
-                />
-                <p v-if="form.errors.policy_shipping" class="mt-1 text-sm text-red-600">{{ form.errors.policy_shipping }}</p>
+                  <div>
+                    <label for="policy_return" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                      Return Policy
+                    </label>
+                    <TiptapEditor
+                      v-model="form.policy_return"
+                      placeholder="Enter your return and refund policy..."
+                    />
+                    <p v-if="form.errors.policy_return" class="mt-1 text-sm text-red-600">{{ form.errors.policy_return }}</p>
+                  </div>
+
+                  <div>
+                    <label for="policy_shipping" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                      Shipping Policy
+                    </label>
+                    <TiptapEditor
+                      v-model="form.policy_shipping"
+                      placeholder="Enter your shipping terms and conditions..."
+                    />
+                    <p v-if="form.errors.policy_shipping" class="mt-1 text-sm text-red-600">{{ form.errors.policy_shipping }}</p>
+                  </div>
               </div>
             </div>
           </div>
 
           <!-- Save Button -->
-          <div class="border-t border-gray-200 px-6 py-4 bg-gray-50 flex justify-end rounded-b-lg">
-            <button
-              type="submit"
-              :disabled="form.processing"
-              class="inline-flex items-center px-6 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              <svg v-if="!form.processing" class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
-              </svg>
-              <svg v-else class="w-4 h-4 mr-2 animate-spin" fill="none" viewBox="0 0 24 24">
-                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-              </svg>
-              {{ form.processing ? 'Saving...' : 'Save Configuration' }}
-            </button>
+          <div class="bg-gray-50 dark:bg-gray-800 px-6 py-4 border-t border-gray-200 dark:border-gray-700 flex items-center justify-end">
+             <button
+                type="submit"
+                :disabled="form.processing"
+                class="inline-flex items-center gap-2 px-6 py-2 bg-blue-600 border border-transparent rounded-xl text-sm font-medium text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 shadow-sm transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                <Save v-if="!form.processing" class="w-4 h-4" />
+                <svg v-else class="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">
+                  <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                  <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+                {{ form.processing ? 'Saving...' : 'Save Configuration' }}
+             </button>
           </div>
         </div>
       </form>

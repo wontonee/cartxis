@@ -1,129 +1,138 @@
 <template>
-  <AdminLayout title="Edit Shipping Method">
-    <template #default>
+  <Head title="Edit Shipping Method" />
+
+  <AdminLayout>
+    <div class="space-y-6">
       <!-- Header -->
-      <div class="mb-8">
-        <div class="flex items-center justify-between">
-          <div>
-            <h1 class="text-3xl font-bold text-gray-900">Edit Shipping Method</h1>
-            <p class="text-gray-600 mt-1">{{ method.name }}</p>
-          </div>
-          <Link
-            href="/admin/settings/shipping-methods"
-            class="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
-          >
-            <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
-            </svg>
-            Back to Shipping Methods
-          </Link>
+      <div class="flex items-center justify-between">
+        <div>
+          <h2 class="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-gray-900 to-gray-600 dark:from-white dark:to-gray-300">
+            Edit Shipping Method
+          </h2>
+          <p class="mt-1 text-sm text-gray-500 dark:text-gray-400 flex items-center gap-2">
+            <Truck class="w-4 h-4" />
+            {{ method.name }}
+          </p>
         </div>
+        <Link
+          href="/admin/settings/shipping-methods"
+          class="inline-flex items-center px-4 py-2 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-xl text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors shadow-sm"
+        >
+          <ChevronLeft class="w-4 h-4 mr-2" />
+          Back to List
+        </Link>
       </div>
 
-      <!-- Main Form -->
       <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <!-- Form -->
+        <!-- Main Form -->
         <div class="lg:col-span-2">
-          <div class="bg-white rounded-lg shadow-sm p-8 space-y-6">
-            <form @submit.prevent="submit">
+          <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-6">
+            <form @submit.prevent="submit" class="space-y-6">
               <!-- Name -->
               <div>
-                <label class="block text-sm font-medium text-gray-700 mb-2">Method Name</label>
+                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">Method Name</label>
                 <input
                   v-model="form.name"
                   type="text"
-                  class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  class="block w-full px-3 py-2.5 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-xl text-sm shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-shadow dark:text-white"
                 />
                 <p v-if="errors.name" class="text-red-600 text-sm mt-1">{{ errors.name }}</p>
               </div>
 
               <!-- Slug -->
               <div>
-                <label class="block text-sm font-medium text-gray-700 mb-2">Slug</label>
+                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">Slug</label>
                 <input
                   v-model="form.slug"
                   type="text"
-                  class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  class="block w-full px-3 py-2.5 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-xl text-sm shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-shadow dark:text-white"
                 />
                 <p v-if="errors.slug" class="text-red-600 text-sm mt-1">{{ errors.slug }}</p>
               </div>
 
               <!-- Type (Read-only) -->
               <div>
-                <label class="block text-sm font-medium text-gray-700 mb-2">Shipping Type</label>
-                <input
-                  :value="form.type === 'flat-rate' ? 'Flat Rate' : 'Calculated'"
-                  type="text"
-                  disabled
-                  class="w-full px-4 py-2 border border-gray-300 rounded-lg bg-gray-50 text-gray-600"
-                />
-                <p class="text-gray-500 text-sm mt-1">Type cannot be changed after creation</p>
+                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">Shipping Type</label>
+                <div class="relative">
+                  <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                    <component :is="form.type === 'flat-rate' ? Package : Scale" class="h-5 w-5 text-gray-400" />
+                  </div>
+                  <input
+                    :value="form.type === 'flat-rate' ? 'Flat Rate' : 'Calculated'"
+                    type="text"
+                    disabled
+                    class="block w-full pl-10 pr-3 py-2.5 bg-gray-50 dark:bg-gray-700/50 border border-gray-200 dark:border-gray-600 rounded-xl text-sm text-gray-500 dark:text-gray-400 shadow-sm cursor-not-allowed"
+                  />
+                </div>
+                <p class="text-gray-500 dark:text-gray-400 text-xs mt-1">Type cannot be changed after creation</p>
               </div>
 
-              <!-- Base Cost -->
-              <div>
-                <label class="block text-sm font-medium text-gray-700 mb-2">Base Cost ($)</label>
-                <input
-                  v-model="form.base_cost"
-                  type="number"
-                  step="0.01"
-                  min="0"
-                  class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                />
-                <p v-if="errors.base_cost" class="text-red-600 text-sm mt-1">{{ errors.base_cost }}</p>
-              </div>
+              <!-- Cost Fields -->
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">Base Cost ($)</label>
+                  <input
+                    v-model="form.base_cost"
+                    type="number"
+                    step="0.01"
+                    min="0"
+                    class="block w-full px-3 py-2.5 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-xl text-sm shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-shadow dark:text-white"
+                  />
+                  <p v-if="errors.base_cost" class="text-red-600 text-sm mt-1">{{ errors.base_cost }}</p>
+                </div>
 
-              <!-- Cost Per KG -->
-              <div>
-                <label class="block text-sm font-medium text-gray-700 mb-2">Cost per Kilogram ($)</label>
-                <input
-                  v-model="form.cost_per_kg"
-                  type="number"
-                  step="0.0001"
-                  min="0"
-                  class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                />
-                <p v-if="errors.cost_per_kg" class="text-red-600 text-sm mt-1">{{ errors.cost_per_kg }}</p>
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">Cost per Kg ($)</label>
+                  <input
+                    v-model="form.cost_per_kg"
+                    type="number"
+                    step="0.0001"
+                    min="0"
+                    class="block w-full px-3 py-2.5 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-xl text-sm shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-shadow dark:text-white"
+                  />
+                  <p v-if="errors.cost_per_kg" class="text-red-600 text-sm mt-1">{{ errors.cost_per_kg }}</p>
+                </div>
               </div>
 
               <!-- Description -->
               <div>
-                <label class="block text-sm font-medium text-gray-700 mb-2">Description</label>
+                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">Description</label>
                 <textarea
                   v-model="form.description"
                   rows="4"
-                  class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  class="block w-full px-3 py-2.5 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-xl text-sm shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-shadow dark:text-white"
                 ></textarea>
                 <p v-if="errors.description" class="text-red-600 text-sm mt-1">{{ errors.description }}</p>
               </div>
 
               <!-- Default -->
-              <div>
-                <label class="flex items-center gap-3">
+              <div class="bg-gray-50 dark:bg-gray-700/50 rounded-xl p-4 border border-gray-200 dark:border-gray-700">
+                <label class="flex items-center gap-3 cursor-pointer">
                   <input
                     v-model="form.is_default"
                     type="checkbox"
-                    class="w-4 h-4 border-gray-300 rounded focus:ring-2 focus:ring-blue-500"
+                    class="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700"
                   />
-                  <span class="text-sm font-medium text-gray-700">Set as default shipping method</span>
+                  <span class="text-sm font-medium text-gray-700 dark:text-gray-300">Set as default shipping method</span>
                 </label>
               </div>
 
-              <!-- Buttons -->
-              <div class="flex gap-3 pt-6 border-t">
-                <button
-                  type="submit"
-                  :disabled="loading"
-                  class="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-medium disabled:opacity-50"
-                >
-                  {{ loading ? 'Saving...' : 'Save Changes' }}
-                </button>
+              <!-- Actions -->
+              <div class="flex items-center justify-end gap-3 pt-4 border-t border-gray-200 dark:border-gray-700">
                 <Link
                   href="/admin/settings/shipping-methods"
-                  class="px-6 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 font-medium"
+                  class="px-4 py-2 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-xl hover:bg-gray-50 dark:hover:bg-gray-700 font-medium text-sm transition-colors"
                 >
                   Cancel
                 </Link>
+                <button
+                  type="submit"
+                  :disabled="loading"
+                  class="inline-flex items-center px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-sm font-medium transition-colors shadow-sm focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  <Save class="w-4 h-4 mr-2" />
+                  {{ loading ? 'Saving...' : 'Save Changes' }}
+                </button>
               </div>
             </form>
           </div>
@@ -132,88 +141,90 @@
         <!-- Sidebar -->
         <div class="space-y-6">
           <!-- Status Card -->
-          <div class="bg-white rounded-lg shadow-sm p-6">
-            <h3 class="text-lg font-semibold text-gray-900 mb-4">Status</h3>
-            <div class="space-y-3">
-              <div class="flex items-center justify-between pb-3 border-b">
-                <span class="text-gray-600">Current Status</span>
-                <span
-                  :class="[
-                    'px-3 py-1 rounded-full text-sm font-medium',
-                    method.status === 'active'
-                      ? 'bg-emerald-50 text-emerald-700'
-                      : 'bg-gray-100 text-gray-700'
-                  ]"
-                >
-                  {{ method.status === 'active' ? 'Active' : 'Inactive' }}
+          <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-6">
+            <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
+              <Activity class="w-5 h-5 text-gray-400" />
+              Status
+            </h3>
+            <div class="space-y-4">
+              <div class="flex items-center justify-between pb-3 border-b border-gray-100 dark:border-gray-700">
+                <span class="text-sm text-gray-600 dark:text-gray-400">Current Status</span>
+                <span :class="[
+                  'px-2.5 py-0.5 rounded-full text-xs font-medium capitalize',
+                  method.status === 'active' 
+                    ? 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400' 
+                    : 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400'
+                ]">
+                  {{ method.status }}
                 </span>
               </div>
               <button
                 @click="toggleStatus"
                 :disabled="loading"
-                class="w-full px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 font-medium disabled:opacity-50"
+                class="w-full flex items-center justify-center px-4 py-2 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-xl hover:bg-gray-50 dark:hover:bg-gray-700 font-medium text-sm transition-colors disabled:opacity-50"
               >
-                {{ method.status === 'active' ? 'Deactivate' : 'Activate' }}
+                <Power class="w-4 h-4 mr-2" />
+                {{ method.status === 'active' ? 'Deactivate Method' : 'Activate Method' }}
               </button>
             </div>
           </div>
 
           <!-- Info Card -->
-          <div class="bg-white rounded-lg shadow-sm p-6">
-            <h3 class="text-lg font-semibold text-gray-900 mb-4">Details</h3>
+          <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-6">
+            <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Details</h3>
             <div class="space-y-3 text-sm">
-              <div>
-                <span class="text-gray-600">Type</span>
-                <div class="text-gray-900 font-medium">
-                  {{ method.type === 'flat-rate' ? 'Flat Rate' : 'Calculated' }}
-                </div>
-              </div>
-              <div>
-                <span class="text-gray-600">Default</span>
-                <div class="text-gray-900 font-medium">
-                  {{ method.is_default ? 'Yes' : 'No' }}
-                </div>
-              </div>
-              <div v-if="method.rates && method.rates.length">
-                <span class="text-gray-600">Rates</span>
-                <div class="text-gray-900 font-medium">
-                  {{ method.rates.length }} configured
-                </div>
-              </div>
-              <div>
-                <span class="text-gray-600">Created</span>
-                <div class="text-gray-900 font-medium">
+              <div class="flex justify-between items-center">
+                <span class="text-gray-600 dark:text-gray-400">Created</span>
+                <div class="text-gray-900 dark:text-white font-medium flex items-center gap-1.5">
+                  <Calendar class="w-3.5 h-3.5 text-gray-400" />
                   {{ formatDate(method.created_at) }}
+                </div>
+              </div>
+              <div v-if="method.rates && method.rates.length" class="flex justify-between items-center pt-3 border-t border-gray-100 dark:border-gray-700">
+                <span class="text-gray-600 dark:text-gray-400">Rates</span>
+                <div class="text-gray-900 dark:text-white font-medium">
+                  {{ method.rates.length }} configured
                 </div>
               </div>
             </div>
           </div>
 
           <!-- Rates Preview -->
-          <div v-if="method.type === 'calculated' && method.rates && method.rates.length" class="bg-white rounded-lg shadow-sm p-6">
-            <h3 class="text-lg font-semibold text-gray-900 mb-4">Shipping Rates</h3>
+          <div v-if="method.type === 'calculated' && method.rates && method.rates.length" class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-6">
+            <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Shipping Rates</h3>
             <div class="space-y-2 text-sm max-h-48 overflow-y-auto">
-              <div v-for="rate in method.rates" :key="rate.id" class="flex items-center justify-between pb-2 border-b last:border-0">
+              <div v-for="rate in method.rates" :key="rate.id" class="flex items-center justify-between pb-2 border-b border-gray-100 dark:border-gray-700 last:border-0 last:pb-0">
                 <div class="flex-1">
-                  <div class="font-medium text-gray-900">{{ rate.country }}</div>
+                  <div class="font-medium text-gray-900 dark:text-white">{{ rate.country }}</div>
                   <div class="text-gray-500 text-xs">{{ rate.min_weight }}-{{ rate.max_weight }}kg</div>
                 </div>
                 <div class="text-right">
-                  <div class="font-medium text-gray-900">${{ parseFloat(rate.base_cost).toFixed(2) }}</div>
+                  <div class="font-medium text-gray-900 dark:text-white">${{ parseFloat(rate.base_cost).toFixed(2) }}</div>
                 </div>
               </div>
             </div>
           </div>
         </div>
       </div>
-    </template>
+    </div>
   </AdminLayout>
 </template>
 
 <script setup lang="ts">
 import { ref } from 'vue'
-import { Link, usePage, router } from '@inertiajs/vue3'
+import { Link, usePage, router, Head } from '@inertiajs/vue3'
 import AdminLayout from '@/layouts/AdminLayout.vue'
+import { 
+  Truck, 
+  ChevronLeft, 
+  Save, 
+  Activity, 
+  Calendar, 
+  Package, 
+  Scale,
+  Power
+} from 'lucide-vue-next'
+import axios from 'axios'
 
 interface ShippingMethod {
   id: number
@@ -231,7 +242,7 @@ interface ShippingMethod {
 }
 
 const page = usePage()
-const method = ref<ShippingMethod>(page.props.method)
+const method = ref<ShippingMethod>(page.props.method as ShippingMethod)
 
 const form = ref({
   name: method.value.name,
@@ -262,8 +273,8 @@ const submit = () => {
     onSuccess: () => {
       loading.value = false
     },
-    onError: (errors: Record<string, string>) => {
-      Object.assign(errors.value, errors)
+    onError: (errs: Record<string, string>) => {
+      errors.value = errs
       loading.value = false
     },
   })
@@ -272,12 +283,8 @@ const submit = () => {
 const toggleStatus = async () => {
   loading.value = true
   try {
-    const response = await fetch(`/admin/settings/shipping-methods/${method.value.id}/toggle-status`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' }
-    })
-    const data = await response.json()
-    method.value.status = data.status
+    const response = await axios.post(`/admin/settings/shipping-methods/${method.value.id}/toggle-status`)
+    method.value.status = response.data.status
   } catch (error) {
     console.error('Error toggling status:', error)
   } finally {
