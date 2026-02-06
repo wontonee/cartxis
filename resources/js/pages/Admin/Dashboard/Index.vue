@@ -1,11 +1,13 @@
 <script setup lang="ts">
 import { Head, Link } from '@inertiajs/vue3'
 import AdminLayout from '@/layouts/AdminLayout.vue'
+import { useCurrency } from '@/composables/useCurrency'
 import {
   TrendingUp,
   TrendingDown,
   ShoppingCart,
   DollarSign,
+  CreditCard,
   Users,
   Package,
   ArrowUpRight,
@@ -69,25 +71,35 @@ const props = defineProps<{
   currencySymbol?: string
 }>()
 
+const { formatPrice } = useCurrency()
+
 // Icon mapping
 const iconMap = {
   DollarSign,
+  CreditCard,
   ShoppingCart,
   Users,
   Package
 }
 
+const normalizedSales = computed(() => {
+  return (props.salesChart?.data || []).map((value) => {
+    const numeric = Number(value)
+    return Number.isFinite(numeric) ? numeric : 0
+  })
+})
+
 // Compute max value for chart scaling
 const maxSales = computed(() => {
-  if (!props.salesChart?.data?.length) return 1000
-  return Math.max(...props.salesChart.data, 1) * 1.2 // Add 20% padding
+  if (!normalizedSales.value.length) return 1000
+  return Math.max(...normalizedSales.value, 1) * 1.2 // Add 20% padding
 })
 
 // Compute chart bars
 const chartBars = computed(() => {
-  if (!props.salesChart?.data) return []
-  return props.salesChart.data.map((value, index) => ({
-    label: props.salesChart.labels[index] || '',
+  if (!props.salesChart?.labels?.length) return []
+  return normalizedSales.value.map((value, index) => ({
+    label: props.salesChart?.labels?.[index] || '',
     value: value,
     height: maxSales.value > 0 ? (value / maxSales.value) * 100 : 0
   }))
@@ -125,7 +137,7 @@ const chartBars = computed(() => {
     </div>
 
     <!-- Stats Grid -->
-    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-5 mb-8">
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 lg:gap-5 mb-8">
       <div
         v-for="stat in (props.stats || [])"
         :key="stat.title"
@@ -199,16 +211,16 @@ const chartBars = computed(() => {
           <div
             v-for="(bar, index) in chartBars"
             :key="index"
-            class="flex-1 flex flex-col items-center group"
+            class="flex-1 flex flex-col items-center group h-full"
           >
-            <div class="w-full flex items-end justify-center h-full pb-6">
+            <div class="w-full flex items-end justify-center flex-1 pb-6">
               <div
                 class="w-full max-w-[60px] bg-gradient-to-t from-blue-500 to-indigo-500 dark:from-blue-600 dark:to-indigo-600 rounded-t-lg transition-all duration-300 hover:from-blue-600 hover:to-indigo-600 relative"
-                :style="{ height: `${Math.max(bar.height, 4)}%`, opacity: bar.height > 0 ? 1 : 0.5 }"
+                :style="{ height: bar.value > 0 ? `${Math.max(bar.height, 4)}%` : '0%', opacity: bar.value > 0 ? 1 : 0 }"
               >
                 <!-- Tooltip -->
                 <div class="absolute -top-12 left-1/2 transform -translate-x-1/2 bg-gray-900 text-white text-xs font-bold px-3 py-1.5 rounded shadow-lg opacity-0 group-hover:opacity-100 transition-all duration-200 pointer-events-none whitespace-nowrap z-20">
-                  {{ props.currencySymbol || '$' }}{{ bar.value.toFixed(2) }}
+                  {{ formatPrice(bar.value, { decimals: 2 }) }}
                   <div class="absolute bottom-0 left-1/2 transform -translate-x-1/2 translate-y-1 border-4 border-transparent border-t-gray-900"></div>
                 </div>
               </div>

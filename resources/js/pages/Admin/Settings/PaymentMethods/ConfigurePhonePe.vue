@@ -42,6 +42,7 @@ const form = useForm({
     client_id: props.method.configuration?.client_id || '',
     client_secret: props.method.configuration?.client_secret || '',
     client_version: props.method.configuration?.client_version || 1,
+     environment: props.method.configuration?.environment || 'PRODUCTION',
     callback_username: props.method.configuration?.callback_username || '',
     callback_password: props.method.configuration?.callback_password || '',
     payment_methods: {
@@ -185,6 +186,22 @@ const save = () => {
               <p v-if="errors['configuration.client_version']" class="mt-1 text-sm text-red-600">{{ errors['configuration.client_version'] }}</p>
               <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">PhonePe API version (usually 1)</p>
             </div>
+
+              <!-- Environment -->
+              <div>
+                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                  Environment <span class="text-red-500">*</span>
+                </label>
+                <select
+                  v-model="form.configuration.environment"
+                  class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                >
+                  <option value="PRODUCTION">Production</option>
+                  <option value="UAT">UAT (Test)</option>
+                  <option value="STAGE">Stage</option>
+                </select>
+                <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">Use UAT for test credentials; Production for live keys.</p>
+              </div>
           </div>
         </div>
 

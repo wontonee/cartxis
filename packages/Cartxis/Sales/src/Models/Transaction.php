@@ -5,6 +5,7 @@ namespace Cartxis\Sales\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Cartxis\Shop\Models\Order;
+use Cartxis\Core\Models\Currency;
 
 class Transaction extends Model
 {
@@ -194,7 +195,11 @@ class Transaction extends Model
      */
     public function getFormattedAmountAttribute(): string
     {
-        return '₹' . number_format($this->amount, 2);
+        $currency = Currency::getDefault();
+
+        return $currency
+            ? $currency->format($this->amount)
+            : '$' . number_format($this->amount, 2);
     }
 
     /**

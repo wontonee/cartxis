@@ -8,15 +8,25 @@ use Cartxis\Shop\Models\Order;
 use Cartxis\Core\Models\EmailTemplate;
 use Cartxis\Core\Models\PaymentMethod;
 use Cartxis\Core\Services\PaymentGatewayManager;
+use Cartxis\Sales\Services\InvoiceService;
+use Cartxis\Sales\Services\TransactionService;
 use Illuminate\Support\Facades\Log;
 
 class PhonePeController extends Controller
 {
     protected PaymentGatewayManager $gatewayManager;
+    protected InvoiceService $invoiceService;
+    protected TransactionService $transactionService;
 
-    public function __construct(PaymentGatewayManager $gatewayManager)
+    public function __construct(
+        PaymentGatewayManager $gatewayManager,
+        InvoiceService $invoiceService,
+        TransactionService $transactionService
+    )
     {
         $this->gatewayManager = $gatewayManager;
+        $this->invoiceService = $invoiceService;
+        $this->transactionService = $transactionService;
     }
 
     /**
@@ -56,6 +66,19 @@ class PhonePeController extends Controller
         $order->update([
             'payment_status' => Order::PAYMENT_PAID,
             'status' => Order::STATUS_PROCESSING,
+        ]);
+
+        $paymentData = json_decode($order->payment_data, true) ?? [];
+        $invoice = $this->invoiceService->createFromOrderIfMissing($order);
+        $this->transactionService->createPaymentIfMissing($order, [
+            'payment_method' => 'phonepe',
+            'gateway' => 'phonepe',
+            'gateway_transaction_id' => $paymentData['phonepe_order_id'] ?? null,
+            'amount' => $order->total,
+            'status' => 'completed',
+            'notes' => 'Payment completed via PhonePe',
+            'response_data' => $paymentData,
+            'invoice_id' => $invoice?->id,
         ]);
 
         Log::info('PhonePeController: Order updated to paid', [
@@ -228,6 +251,18 @@ class PhonePeController extends Controller
                     $paymentData['callback_state'] = $state;
                     $order->update(['payment_data' => json_encode($paymentData)]);
 
+                    $invoice = $this->invoiceService->createFromOrderIfMissing($order);
+                    $this->transactionService->createPaymentIfMissing($order, [
+                        'payment_method' => 'phonepe',
+                        'gateway' => 'phonepe',
+                        'gateway_transaction_id' => $transactionId ?? $merchantOrderId,
+                        'amount' => $order->total,
+                        'status' => 'completed',
+                        'notes' => 'Payment completed via PhonePe webhook',
+                        'response_data' => $paymentData,
+                        'invoice_id' => $invoice?->id,
+                    ]);
+
                     // Send order confirmation email
                     $this->sendOrderConfirmationEmail($order);
 
@@ -250,6 +285,21 @@ class PhonePeController extends Controller
                 'error' => $e->getMessage(),
             ]);
         }
+    }
+
+    /**
+     * Resolve the PhonePe environment from configuration.
+     */
+    protected function resolveEnvironment(PaymentMethod $paymentMethod): string
+    {
+        $env = strtoupper((string) $paymentMethod->getConfigValue(
+            'environment',
+            config('phonepe.phonepe.environment', 'PRODUCTION')
+        ));
+
+        return in_array($env, ['PRODUCTION', 'UAT', 'STAGE'], true)
+            ? $env
+            : 'PRODUCTION';
     }
 
     /**

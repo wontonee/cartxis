@@ -65,7 +65,7 @@ const downloadBackup = (backup: Backup) => {
     <Head title="System Backups" />
 
     <AdminLayout title="System Backups">
-        <div class="p-6 max-w-7xl mx-auto space-y-6">
+        <div class="space-y-6">
             <!-- Header -->
             <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                 <div>
@@ -144,7 +144,7 @@ const downloadBackup = (backup: Backup) => {
                                     {{ backup.date }}
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap text-right text-sm">
-                                    <div class="flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                                    <div class="flex items-center justify-end gap-2">
                                         <button
                                             @click="downloadBackup(backup)"
                                             class="p-2 text-gray-400 hover:text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-lg transition-colors"

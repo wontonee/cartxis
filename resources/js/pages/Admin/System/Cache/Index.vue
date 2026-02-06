@@ -161,7 +161,7 @@ onUnmounted(() => {
 <template>
     <Head title="Cache Management" />
     <AdminLayout title="Cache Management">
-        <div class="p-6 max-w-7xl mx-auto space-y-6">
+        <div class="space-y-6">
             <!-- Page Header -->
             <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                 <div>

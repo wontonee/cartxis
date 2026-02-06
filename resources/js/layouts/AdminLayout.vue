@@ -177,27 +177,19 @@ const hasActiveChild = (item: any): boolean => {
   return false
 }
 
-// Initialize open menus based on active routes and localStorage
+// Initialize open menus based on active routes only
 const initializeOpenMenus = () => {
-  // First, load saved state from localStorage
-  const savedState = loadMenuState()
-  
   // Clear current state
   openMenus.value.clear()
   
-  // Merge saved state with active routes
+  // Only open menus that have an active child (current page)
   menuItems.value.forEach((item: any) => {
-    // Always open menus with active children
     if (hasActiveChild(item)) {
-      openMenus.value.add(item.id)
-    } 
-    // Also restore previously opened menus from localStorage
-    else if (savedState.has(item.id)) {
       openMenus.value.add(item.id)
     }
   })
   
-  // Save the merged state
+  // Save the new state
   saveMenuState()
 }
 
@@ -254,6 +246,9 @@ const toggleAppearance = () => {
   }
 }
 
+const appVersion = computed(() => page.props.appVersion as string | undefined)
+const versionLabel = computed(() => (appVersion.value ? `v${appVersion.value}` : 'v--'))
+
 // Also watch URL changes as backup
 watch(() => page.url, () => {
   nextTick(() => {
@@ -304,7 +299,7 @@ const toggleSidebar = () => {
     <!-- Sidebar -->
     <aside
       :class="[
-        'fixed inset-y-0 left-0 z-50 transform transition-all duration-200 ease-in-out',
+        'fixed inset-y-0 left-0 z-50 transform transition-all duration-200 ease-in-out flex flex-col',
         'bg-gradient-to-b from-slate-900 via-slate-900 to-slate-950 dark:from-slate-950 dark:via-slate-950 dark:to-black',
         'border-r border-slate-800/50',
         sidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0',
@@ -337,7 +332,7 @@ const toggleSidebar = () => {
       </div>
 
       <!-- Navigation -->
-      <nav class="flex-1 h-[calc(100vh-4rem)] overflow-visible">
+      <nav class="flex-1 overflow-hidden">
         <div class="py-4 overflow-y-auto h-full custom-scrollbar" :class="sidebarCollapsed ? 'px-2' : 'px-3'">
 
         <!-- Section label -->
@@ -370,7 +365,7 @@ const toggleSidebar = () => {
                 isActive(item) ? 'text-white' : 'text-slate-500 group-hover:text-slate-300'
               ]" 
             />
-            <span v-if="!sidebarCollapsed" class="text-[13px] font-medium">{{ item.title }}</span>
+            <span v-if="!sidebarCollapsed" class="text-[15px] font-medium">{{ item.title }}</span>
           </Link>
 
           <!-- Parent Menu with children (Expandable) -->
@@ -401,7 +396,7 @@ const toggleSidebar = () => {
                   (isMenuOpen(item.id) || hasActiveChild(item)) ? 'text-blue-400' : 'text-slate-500 group-hover:text-slate-300'
                 ]" 
               />
-              <span v-if="!sidebarCollapsed" class="flex-1 text-left text-[13px] font-medium">{{ item.title }}</span>
+              <span v-if="!sidebarCollapsed" class="flex-1 text-left text-[15px] font-medium">{{ item.title }}</span>
               <ChevronDown 
                 v-if="!sidebarCollapsed" 
                 :class="[
@@ -495,6 +490,11 @@ const toggleSidebar = () => {
         </div>
         </div>
       </nav>
+
+      <div class="border-t border-white/[0.06] text-slate-400" :class="sidebarCollapsed ? 'px-2 py-3' : 'px-4 py-3'">
+        <span v-if="!sidebarCollapsed" class="text-xs">Version {{ appVersion || '--' }}</span>
+        <span v-else class="text-[10px] font-semibold uppercase block text-center">{{ versionLabel }}</span>
+      </div>
     </aside>
 
     <!-- Main Content -->

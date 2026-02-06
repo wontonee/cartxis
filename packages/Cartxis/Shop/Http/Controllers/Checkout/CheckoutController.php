@@ -17,6 +17,8 @@ use Cartxis\Core\Models\EmailTemplate;
 use Cartxis\Core\Services\ThemeViewResolver;
 use Cartxis\Core\Services\SettingService;
 use Cartxis\Core\Services\PaymentGatewayManager;
+use Cartxis\Sales\Services\InvoiceService;
+use Cartxis\Sales\Services\TransactionService;
 use Illuminate\Support\Facades\Session;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
@@ -29,6 +31,8 @@ class CheckoutController extends Controller
     protected ThemeViewResolver $themeResolver;
     protected SettingService $settingService;
     protected PaymentGatewayManager $gatewayManager;
+    protected InvoiceService $invoiceService;
+    protected TransactionService $transactionService;
 
     public function __construct(
         CartTaxCalculator $taxCalculator,
@@ -36,7 +40,9 @@ class CheckoutController extends Controller
         CheckoutService $checkoutService,
         ThemeViewResolver $themeResolver,
         SettingService $settingService,
-        PaymentGatewayManager $gatewayManager
+        PaymentGatewayManager $gatewayManager,
+        InvoiceService $invoiceService,
+        TransactionService $transactionService
     ) {
         $this->taxCalculator = $taxCalculator;
         $this->shippingCalculator = $shippingCalculator;
@@ -44,6 +50,8 @@ class CheckoutController extends Controller
         $this->themeResolver = $themeResolver;
         $this->settingService = $settingService;
         $this->gatewayManager = $gatewayManager;
+        $this->invoiceService = $invoiceService;
+        $this->transactionService = $transactionService;
     }
 
     /**
@@ -410,6 +418,16 @@ class CheckoutController extends Controller
         $order->update([
             'payment_status' => Order::PAYMENT_PAID,
             'status' => Order::STATUS_PROCESSING,
+        ]);
+
+        $invoice = $this->invoiceService->createFromOrderIfMissing($order);
+        $this->transactionService->createPaymentIfMissing($order, [
+            'payment_method' => $paymentMethod,
+            'gateway' => $paymentMethod,
+            'amount' => $order->total,
+            'status' => 'completed',
+            'notes' => 'Payment completed via manual/instant method',
+            'invoice_id' => $invoice?->id,
         ]);
 
         // Send order confirmation email

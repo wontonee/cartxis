@@ -6,6 +6,7 @@ use Cartxis\Shop\Models\Order;
 use Cartxis\Sales\Models\OrderHistory;
 use Cartxis\Sales\Repositories\OrderRepository;
 use Cartxis\Core\Models\EmailTemplate;
+use Cartxis\Core\Models\Currency;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Mail;
@@ -78,7 +79,7 @@ class OrderService
      *
      * @param Order $order
      * @param string $newPaymentStatus
-     * @param string|null $comment
+                        'order_total' => $this->formatCurrency($order->total),
      * @return bool
      */
     public function updatePaymentStatus(
@@ -283,7 +284,7 @@ class OrderService
                 'order_number' => $order->order_number,
                 'customer_name' => $order->user->name ?? 'Customer',
                 'customer_email' => $order->customer_email,
-                'order_date' => $order->created_at->format('F d, Y'),
+                'payment_amount' => $this->formatCurrency($order->total),
                 'order_total' => '₹' . number_format($order->total, 2),
                 'old_status' => ucfirst($oldStatus),
                 'new_status' => ucfirst($newStatus),
@@ -308,6 +309,15 @@ class OrderService
      * @param Order $order
      * @param string $oldPaymentStatus
      * @param string $newPaymentStatus
+
+    protected function formatCurrency(float $amount): string
+    {
+        $currency = Currency::getDefault();
+
+        return $currency
+            ? $currency->format($amount)
+            : '$' . number_format($amount, 2);
+    }
      * @return void
      */
     protected function sendPaymentStatusEmail(

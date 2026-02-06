@@ -143,8 +143,9 @@ class PhonePeServiceProvider extends ServiceProvider
                 return;
             }
 
-            // Create or update PhonePe payment method
-            PaymentMethod::updateOrCreate(
+            // Only create PhonePe payment method if it doesn't already exist.
+            // Using firstOrCreate so we never overwrite user settings (is_active, configuration, etc.)
+            PaymentMethod::firstOrCreate(
                 ['code' => 'phonepe'],
                 [
                     'name' => 'PhonePe',
@@ -158,6 +159,7 @@ class PhonePeServiceProvider extends ServiceProvider
                         'client_id' => config('phonepe.phonepe.client_id', ''),
                         'client_secret' => '',
                         'client_version' => config('phonepe.phonepe.client_version', 1),
+                        'environment' => config('phonepe.phonepe.environment', 'PRODUCTION'),
                         'callback_username' => config('phonepe.phonepe.callback_username', ''),
                         'callback_password' => '',
                         'payment_methods' => [

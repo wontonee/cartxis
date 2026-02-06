@@ -7,7 +7,7 @@ import {
     Languages, 
     Coins, 
     Plus, 
-    Pencil, 
+    Edit, 
     Trash2, 
     Check, 
     X, 
@@ -305,14 +305,14 @@ const confirmDelete = () => {
                                         <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium space-x-2">
                                             <button 
                                                 @click="openEditLocaleModal(locale)" 
-                                                class="text-blue-600 hover:text-blue-900 dark:text-blue-400 dark:hover:text-blue-300 p-1 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-lg transition-colors" 
+                                                class="text-gray-400 hover:text-blue-600 dark:text-gray-400 dark:hover:text-blue-400 p-1.5 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-lg transition-colors" 
                                                 title="Edit"
                                             >
-                                                <Pencil class="w-4 h-4" />
+                                                <Edit class="w-4 h-4" />
                                             </button>
                                             <button 
                                                 @click="deleteLocale(locale)" 
-                                                class="text-red-600 hover:text-red-900 dark:text-red-400 dark:hover:text-red-300 p-1 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors" 
+                                                class="text-gray-400 hover:text-red-600 dark:text-gray-400 dark:hover:text-red-400 p-1.5 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors" 
                                                 title="Delete"
                                             >
                                                 <Trash2 class="w-4 h-4" />
@@ -369,14 +369,14 @@ const confirmDelete = () => {
                                         <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium space-x-2">
                                             <button 
                                                 @click="openEditCurrencyModal(currency)" 
-                                                class="text-blue-600 hover:text-blue-900 dark:text-blue-400 dark:hover:text-blue-300 p-1 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-lg transition-colors" 
+                                                class="text-gray-400 hover:text-blue-600 dark:text-gray-400 dark:hover:text-blue-400 p-1.5 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-lg transition-colors" 
                                                 title="Edit"
                                             >
-                                                <Pencil class="w-4 h-4" />
+                                                <Edit class="w-4 h-4" />
                                             </button>
                                             <button 
                                                 @click="deleteCurrency(currency)" 
-                                                class="text-red-600 hover:text-red-900 dark:text-red-400 dark:hover:text-red-300 p-1 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors" 
+                                                class="text-gray-400 hover:text-red-600 dark:text-gray-400 dark:hover:text-red-400 p-1.5 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors" 
                                                 title="Delete"
                                             >
                                                 <Trash2 class="w-4 h-4" />

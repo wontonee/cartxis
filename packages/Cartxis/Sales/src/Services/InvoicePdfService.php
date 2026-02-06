@@ -3,6 +3,7 @@
 namespace Cartxis\Sales\Services;
 
 use Cartxis\Sales\Models\Invoice;
+use Cartxis\Core\Models\Currency;
 use Mpdf\Mpdf;
 use Mpdf\MpdfException;
 
@@ -287,8 +288,8 @@ class InvoicePdfService
                     <tr>
                         <td>' . htmlspecialchars($item->product_name) . '</td>
                         <td class="text-right">' . number_format($item->quantity) . '</td>
-                        <td class="text-right">₹' . number_format($item->price, 2) . '</td>
-                        <td class="text-right">₹' . number_format($item->quantity * $item->price, 2) . '</td>
+                        <td class="text-right">' . $this->formatCurrency($item->price) . '</td>
+                        <td class="text-right">' . $this->formatCurrency($item->quantity * $item->price) . '</td>
                     </tr>';
         }
 
@@ -299,19 +300,19 @@ class InvoicePdfService
             <div class="totals">
                 <div class="total-row">
                     <span class="total-label">Subtotal:</span>
-                    <span class="total-value">₹' . number_format($invoice->subtotal, 2) . '</span>
+                    <span class="total-value">' . $this->formatCurrency($invoice->subtotal) . '</span>
                 </div>
                 <div class="total-row">
                     <span class="total-label">Tax:</span>
-                    <span class="total-value">₹' . number_format($invoice->tax, 2) . '</span>
+                    <span class="total-value">' . $this->formatCurrency($invoice->tax) . '</span>
                 </div>
                 <div class="total-row">
                     <span class="total-label">Shipping:</span>
-                    <span class="total-value">₹' . number_format($invoice->shipping, 2) . '</span>
+                    <span class="total-value">' . $this->formatCurrency($invoice->shipping) . '</span>
                 </div>
                 <div class="total-row">
                     <span>Total Amount:</span>
-                    <span>₹' . number_format($invoice->total, 2) . '</span>
+                    <span>' . $this->formatCurrency($invoice->total) . '</span>
                 </div>
             </div>
 
@@ -334,5 +335,15 @@ class InvoicePdfService
         </html>';
 
         return $html;
+    }
+
+    protected function formatCurrency(?float $amount): string
+    {
+        $amount = $amount ?? 0.0;
+        $currency = Currency::getDefault();
+
+        return $currency
+            ? $currency->format($amount)
+            : '$' . number_format($amount, 2);
     }
 }

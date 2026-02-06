@@ -3,6 +3,7 @@
 namespace Cartxis\Sales\Services;
 
 use Cartxis\Sales\Models\CreditMemo;
+use Cartxis\Core\Models\Currency;
 use Mpdf\Mpdf;
 use Mpdf\MpdfException;
 
@@ -239,9 +240,9 @@ class CreditMemoPdfService
                         <td>' . htmlspecialchars($item->product_name) . '</td>
                         <td>' . htmlspecialchars($item->sku ?? '-') . '</td>
                         <td class="text-right">' . number_format($item->qty_refunded) . '</td>
-                        <td class="text-right">₹' . number_format($item->price, 2) . '</td>
-                        <td class="text-right">₹' . number_format($item->tax_amount, 2) . '</td>
-                        <td class="text-right">₹' . number_format($item->row_total, 2) . '</td>
+                        <td class="text-right">' . $this->formatCurrency($item->price) . '</td>
+                        <td class="text-right">' . $this->formatCurrency($item->tax_amount) . '</td>
+                        <td class="text-right">' . $this->formatCurrency($item->row_total) . '</td>
                     </tr>';
         }
 
@@ -253,18 +254,18 @@ class CreditMemoPdfService
                 <table>
                     <tr>
                         <td>Subtotal:</td>
-                        <td class="text-right">₹' . number_format($creditMemo->subtotal, 2) . '</td>
+                        <td class="text-right">' . $this->formatCurrency($creditMemo->subtotal) . '</td>
                     </tr>
                     <tr>
                         <td>Tax:</td>
-                        <td class="text-right">₹' . number_format($creditMemo->tax_amount, 2) . '</td>
+                        <td class="text-right">' . $this->formatCurrency($creditMemo->tax_amount) . '</td>
                     </tr>';
 
         if ($creditMemo->shipping_amount > 0) {
             $html .= '
                     <tr>
                         <td>Shipping Refund:</td>
-                        <td class="text-right">₹' . number_format($creditMemo->shipping_amount, 2) . '</td>
+                        <td class="text-right">' . $this->formatCurrency($creditMemo->shipping_amount) . '</td>
                     </tr>';
         }
 
@@ -272,7 +273,7 @@ class CreditMemoPdfService
             $html .= '
                     <tr>
                         <td>Discount:</td>
-                        <td class="text-right">-₹' . number_format($creditMemo->discount_amount, 2) . '</td>
+                        <td class="text-right">-' . $this->formatCurrency($creditMemo->discount_amount) . '</td>
                     </tr>';
         }
 
@@ -280,7 +281,7 @@ class CreditMemoPdfService
             $html .= '
                     <tr>
                         <td>Adjustment (Fee):</td>
-                        <td class="text-right">-₹' . number_format($creditMemo->adjustment_positive, 2) . '</td>
+                        <td class="text-right">-' . $this->formatCurrency($creditMemo->adjustment_positive) . '</td>
                     </tr>';
         }
 
@@ -288,14 +289,14 @@ class CreditMemoPdfService
             $html .= '
                     <tr>
                         <td>Adjustment (Refund):</td>
-                        <td class="text-right">₹' . number_format($creditMemo->adjustment_negative, 2) . '</td>
+                        <td class="text-right">' . $this->formatCurrency($creditMemo->adjustment_negative) . '</td>
                     </tr>';
         }
 
         $html .= '
                     <tr class="grand-total">
                         <td>Total Refund:</td>
-                        <td class="text-right">₹' . number_format($creditMemo->grand_total, 2) . '</td>
+                        <td class="text-right">' . $this->formatCurrency($creditMemo->grand_total) . '</td>
                     </tr>
                 </table>
             </div>
@@ -320,5 +321,14 @@ class CreditMemoPdfService
         </html>';
 
         return $html;
+    }
+
+    protected function formatCurrency(float $amount): string
+    {
+        $currency = Currency::getDefault();
+
+        return $currency
+            ? $currency->format($amount)
+            : '$' . number_format($amount, 2);
     }
 }

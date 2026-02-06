@@ -72,7 +72,7 @@ onUnmounted(() => {
   <AdminLayout title="API Sync">
     <Head title="API Sync" />
 
-    <div class="p-6 max-w-7xl mx-auto space-y-6">
+    <div class="space-y-6">
       <!-- Header -->
       <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
@@ -91,7 +91,7 @@ onUnmounted(() => {
 
       <!-- Content -->
       <div class="overflow-auto rounded-xl">
-        <div class="max-w-5xl space-y-6">
+        <div class="space-y-6">
           <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
             <Card class="bg-white dark:bg-gray-900/70 border-gray-200 dark:border-gray-800 shadow-sm">
               <CardHeader>

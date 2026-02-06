@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { Head, useForm } from '@inertiajs/vue3'
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed } from 'vue'
 import '@admin/css/styles.css'
 import admin from '@/routes/admin'
 
@@ -12,11 +12,6 @@ const form = useForm({
 
 const showPassword = ref(false)
 const currentYear = computed(() => new Date().getFullYear())
-const mounted = ref(false)
-
-onMounted(() => {
-  setTimeout(() => { mounted.value = true }, 50)
-})
 
 const submit = () => {
   form.post(admin.login.store.url(), {
@@ -28,7 +23,7 @@ const submit = () => {
 <template>
   <Head title="Admin Login - Cartxis" />
 
-  <div class="min-h-screen relative flex overflow-hidden bg-gray-50 dark:bg-transparent">
+  <div class="min-h-screen relative overflow-hidden bg-gray-50 dark:bg-transparent flex items-center justify-center">
 
     <!-- ============================================ -->
     <!-- BACKGROUND: LIGHT MODE                       -->
@@ -57,13 +52,16 @@ const submit = () => {
     </div>
 
 
+    <!-- Centered container -->
+    <div class="relative z-10 w-full max-w-7xl mx-auto flex min-h-screen">
+
     <!-- ============================================ -->
     <!-- LEFT PANEL - BRANDING                        -->
     <!-- ============================================ -->
-    <div class="hidden lg:flex lg:w-[55%] relative z-10 flex-col justify-between p-12 xl:p-16">
+    <div class="hidden lg:flex lg:w-[55%] relative flex-col justify-between p-12 xl:p-16">
       
       <!-- Top: Logo -->
-      <div :class="['transition-all duration-700 ease-out', mounted ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4']">
+      <div>
         <div class="flex items-center gap-3">
           <div class="w-11 h-11 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-xl flex items-center justify-center shadow-lg shadow-blue-500/20 dark:shadow-blue-500/15">
             <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -75,14 +73,14 @@ const submit = () => {
       </div>
 
       <!-- Center: Headline + Stats -->
-      <div :class="['transition-all duration-700 delay-200 ease-out', mounted ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8']">
+      <div>
         <div class="max-w-lg space-y-6">
           <h1 class="text-5xl xl:text-6xl font-bold leading-[1.1] tracking-tight text-gray-900 dark:text-white">
             Your store,<br />
             <span class="bg-gradient-to-r from-blue-600 via-indigo-600 to-violet-600 dark:from-blue-400 dark:via-indigo-400 dark:to-violet-400 bg-clip-text text-transparent">simplified.</span>
           </h1>
           <p class="text-lg leading-relaxed max-w-md text-gray-500 dark:text-slate-400">
-            The all-in-one commerce platform that puts you in control. Manage products, orders, and customers from a single, elegant dashboard.
+            The all-in-one commerce platform that puts you in control. Manage products, orders, and customers from a single, elegant dashboard with unlimited custom agent creation for agentic commerce.
           </p>
         </div>
 
@@ -127,7 +125,7 @@ const submit = () => {
       </div>
 
       <!-- Bottom: Copyright -->
-      <div :class="['transition-all duration-700 delay-500 ease-out', mounted ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4']">
+      <div>
         <p class="text-sm text-gray-400 dark:text-slate-600">&copy; {{ currentYear }} Cartxis Commerce. All rights reserved.</p>
       </div>
     </div>
@@ -136,10 +134,10 @@ const submit = () => {
     <!-- ============================================ -->
     <!-- RIGHT PANEL - LOGIN FORM                     -->
     <!-- ============================================ -->
-    <div class="w-full lg:w-[45%] relative z-10 flex items-center justify-center p-6 sm:p-8">
+    <div class="w-full lg:w-[45%] flex items-center justify-center p-6 sm:p-8">
       
       <div 
-        :class="['w-full max-w-[420px] transition-all duration-700 delay-300 ease-out', mounted ? 'opacity-100 translate-y-0 scale-100' : 'opacity-0 translate-y-6 scale-[0.98]']"
+        class="w-full max-w-[420px]"
       >
         <!-- LIGHT: elevated white card / DARK: glass card -->
         <div class="
@@ -318,5 +316,7 @@ const submit = () => {
         </div>
       </div>
     </div>
+
+    </div><!-- /centered container -->
   </div>
 </template>

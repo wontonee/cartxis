@@ -4,6 +4,7 @@ namespace Cartxis\Reports\Services;
 
 use Carbon\Carbon;
 use Cartxis\Reports\Repositories\SalesReportRepository;
+use Cartxis\Shop\Models\Order;
 
 class SalesReportService
 {
@@ -18,8 +19,11 @@ class SalesReportService
     public function getReportData(array $filters = []): array
     {
         [$startDate, $endDate] = $this->parseDateRange($filters);
-        
-        return $this->cacheService->remember('sales', $filters, function () use ($startDate, $endDate, $filters) {
+
+        $cacheBuster = (string) (Order::max('updated_at') ?? 'none');
+        $cacheFilters = array_merge($filters, ['cache_bust' => $cacheBuster]);
+
+        return $this->cacheService->remember('sales', $cacheFilters, function () use ($startDate, $endDate, $filters) {
             return [
                 'statistics' => $this->repository->getRevenueStatistics($startDate, $endDate, $filters),
                 'revenueChart' => $this->repository->getRevenueOverTime($startDate, $endDate, $filters['group_by'] ?? 'day'),

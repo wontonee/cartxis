@@ -9,15 +9,25 @@ use Stripe\Webhook;
 use Cartxis\Shop\Models\Order;
 use Cartxis\Core\Models\EmailTemplate;
 use Cartxis\Core\Services\PaymentGatewayManager;
+use Cartxis\Sales\Services\InvoiceService;
+use Cartxis\Sales\Services\TransactionService;
 use Illuminate\Support\Facades\Log;
 
 class StripeController extends Controller
 {
     protected PaymentGatewayManager $gatewayManager;
+    protected InvoiceService $invoiceService;
+    protected TransactionService $transactionService;
 
-    public function __construct(PaymentGatewayManager $gatewayManager)
+    public function __construct(
+        PaymentGatewayManager $gatewayManager,
+        InvoiceService $invoiceService,
+        TransactionService $transactionService
+    )
     {
         $this->gatewayManager = $gatewayManager;
+        $this->invoiceService = $invoiceService;
+        $this->transactionService = $transactionService;
     }
 
     /**
@@ -48,6 +58,17 @@ class StripeController extends Controller
         $order->update([
             'payment_status' => Order::PAYMENT_PAID,
             'status' => Order::STATUS_PROCESSING,
+        ]);
+
+        $invoice = $this->invoiceService->createFromOrderIfMissing($order);
+        $this->transactionService->createPaymentIfMissing($order, [
+            'payment_method' => 'stripe',
+            'gateway' => 'stripe',
+            'gateway_transaction_id' => $result['transaction_id'] ?? null,
+            'amount' => $order->total,
+            'status' => 'completed',
+            'notes' => 'Payment completed via Stripe',
+            'invoice_id' => $invoice?->id,
         ]);
 
         // Send order confirmation email

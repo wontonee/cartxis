@@ -95,12 +95,16 @@ class PhonePeGateway implements PaymentGatewayInterface
 
         try {
             // Import PhonePe SDK classes
-            $envClass = '\PhonePe\Env';
-            $clientClass = '\PhonePe\payments\v2\standardCheckout\StandardCheckoutClient';
-            
-            // PhonePe SDK only supports PRODUCTION environment
-            $env = $envClass::PRODUCTION;
-            
+            $envClass = '\\PhonePe\\Env';
+            $clientClass = '\\PhonePe\\payments\\v2\\standardCheckout\\StandardCheckoutClient';
+
+            $envKey = $this->resolveEnvironment();
+            $env = match ($envKey) {
+                'UAT' => $envClass::UAT,
+                'STAGE' => $envClass::STAGE,
+                default => $envClass::PRODUCTION,
+            };
+
             $this->client = $clientClass::getInstance(
                 $clientId,
                 $clientVersion,
@@ -113,6 +117,21 @@ class PhonePeGateway implements PaymentGatewayInterface
             ]);
             throw new Exception('Failed to initialize PhonePe SDK: ' . $e->getMessage());
         }
+    }
+
+    /**
+     * Resolve the PhonePe environment from configuration.
+     */
+    protected function resolveEnvironment(): string
+    {
+        $env = strtoupper((string) $this->getConfig(
+            'environment',
+            config('phonepe.phonepe.environment', 'PRODUCTION')
+        ));
+
+        return in_array($env, ['PRODUCTION', 'UAT', 'STAGE'], true)
+            ? $env
+            : 'PRODUCTION';
     }
 
     /**

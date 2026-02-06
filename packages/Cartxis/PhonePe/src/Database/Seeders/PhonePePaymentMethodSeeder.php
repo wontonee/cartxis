@@ -18,7 +18,7 @@ class PhonePePaymentMethodSeeder extends Seeder
                 'code' => 'phonepe',
                 'name' => 'PhonePe',
                 'description' => 'Pay securely using PhonePe with UPI, credit/debit cards, net banking, and wallets',
-                'type' => 'phonepe',
+                'type' => 'other',
                 'is_active' => false,
                 'is_default' => false,
                 'sort_order' => 7,
@@ -27,6 +27,7 @@ class PhonePePaymentMethodSeeder extends Seeder
                     'client_id' => '',
                     'client_secret' => '',
                     'client_version' => 1,
+                    'environment' => 'PRODUCTION',
                     'callback_username' => '',
                     'callback_password' => '',
                     'payment_methods' => [
