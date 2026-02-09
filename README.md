@@ -25,6 +25,7 @@ A modern, extensible e-commerce platform built with Laravel 12, Inertia.js, Vue 
 - **Order Processing**: Complete order lifecycle management
 - **Customer Management**: Customer profiles, addresses, and notes
 - **Settings**: Store configuration, payment methods, shipping rates, tax rules
+- **AI Agents**: Create and manage custom AI agents for commerce workflows
 - **Email Templates**: Customizable transactional email templates
 - **CMS**: Content management for pages and blocks
 - **Reports**: Sales, customer, and inventory reporting
