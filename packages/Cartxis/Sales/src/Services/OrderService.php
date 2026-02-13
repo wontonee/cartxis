@@ -7,6 +7,7 @@ use Cartxis\Sales\Models\OrderHistory;
 use Cartxis\Sales\Repositories\OrderRepository;
 use Cartxis\Core\Models\EmailTemplate;
 use Cartxis\Core\Models\Currency;
+use Cartxis\Admin\Services\AdminNotificationService;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Mail;
@@ -15,7 +16,8 @@ use Illuminate\Support\Facades\Log;
 class OrderService
 {
     public function __construct(
-        protected OrderRepository $orderRepository
+        protected OrderRepository $orderRepository,
+        protected AdminNotificationService $adminNotificationService
     ) {}
 
     /**
@@ -60,6 +62,20 @@ class OrderService
 
             // Auto-actions based on status
             $this->handleStatusChangeActions($order, $newStatus);
+
+            $this->dispatchOrderEvent(
+                action: 'order.status.updated',
+                title: "Order #{$order->order_number} status updated",
+                message: "Status changed from {$oldStatus} to {$newStatus}.",
+                order: $order,
+                severity: $newStatus === Order::STATUS_CANCELLED ? 'warning' : 'info',
+                context: [
+                    'old_status' => $oldStatus,
+                    'new_status' => $newStatus,
+                    'comment' => $comment,
+                    'notify_customer' => $notifyCustomer,
+                ]
+            );
 
             DB::commit();
             return true;
@@ -118,6 +134,19 @@ class OrderService
             // Send payment status email
             $this->sendPaymentStatusEmail($order, $oldPaymentStatus, $newPaymentStatus);
 
+            $this->dispatchOrderEvent(
+                action: 'order.payment.updated',
+                title: "Order #{$order->order_number} payment updated",
+                message: "Payment status changed from {$oldPaymentStatus} to {$newPaymentStatus}.",
+                order: $order,
+                severity: $newPaymentStatus === Order::PAYMENT_FAILED ? 'warning' : 'info',
+                context: [
+                    'old_payment_status' => $oldPaymentStatus,
+                    'new_payment_status' => $newPaymentStatus,
+                    'comment' => $comment,
+                ]
+            );
+
             DB::commit();
             return true;
 
@@ -171,6 +200,19 @@ class OrderService
 
             // Send cancellation email
             $this->sendCancellationEmail($order, $reason);
+
+            $this->dispatchOrderEvent(
+                action: 'order.cancelled',
+                title: "Order #{$order->order_number} cancelled",
+                message: "Order was cancelled. Reason: {$reason}",
+                order: $order,
+                severity: 'warning',
+                context: [
+                    'reason' => $reason,
+                    'restore_stock' => $restoreStock,
+                    'old_status' => $oldStatus,
+                ]
+            );
 
             DB::commit();
             return true;
@@ -233,6 +275,19 @@ class OrderService
                 'customer_notified' => false,
                 'visible_to_customer' => true,
             ]);
+
+            $this->dispatchOrderEvent(
+                action: 'order.created',
+                title: "New order #{$order->order_number}",
+                message: 'A new order was created from admin panel.',
+                order: $order,
+                severity: 'success',
+                context: [
+                    'status' => $order->status,
+                    'payment_status' => $order->payment_status,
+                    'total' => $order->total,
+                ]
+            );
 
             DB::commit();
             return $order->fresh(['items', 'addresses']);
@@ -491,5 +546,54 @@ class OrderService
         } while ($exists);
 
         return $number;
+    }
+
+    protected function dispatchOrderEvent(
+        string $action,
+        string $title,
+        ?string $message,
+        Order $order,
+        string $severity = 'info',
+        array $context = []
+    ): void {
+        try {
+            $actorUserId = Auth::id();
+            $actionUrl = "/admin/sales/orders/{$order->id}";
+
+            $meta = array_merge($context, [
+                'order_id' => $order->id,
+                'order_number' => $order->order_number,
+                'order_status' => $order->status,
+                'payment_status' => $order->payment_status,
+            ]);
+
+            $this->adminNotificationService->notifyAllAdmins(
+                type: $action,
+                title: $title,
+                message: $message,
+                actionUrl: $actionUrl,
+                actorUserId: $actorUserId,
+                entityType: 'order',
+                entityId: (int) $order->id,
+                meta: $meta,
+                severity: $severity
+            );
+
+            $this->adminNotificationService->log(
+                action: $action,
+                description: $message,
+                actorUserId: $actorUserId,
+                entityType: 'order',
+                entityId: (int) $order->id,
+                context: $meta,
+                level: $severity === 'success' ? 'info' : $severity
+            );
+        } catch (\Exception $e) {
+            Log::error('Failed to dispatch admin order event', [
+                'order_id' => $order->id,
+                'action' => $action,
+                'error' => $e->getMessage(),
+            ]);
+        }
     }
 }

@@ -9,7 +9,6 @@ export interface Page {
     meta_description: string | null;
     meta_keywords: string | null;
     status: PageStatus;
-    channel_id: number | null;
     created_by: number | null;
     updated_by: number | null;
     created_at: string;
@@ -36,7 +35,6 @@ export interface PageFormData {
     meta_description?: string;
     meta_keywords?: string;
     status: PageStatus;
-    channel_id?: number | null;
 }
 
 export interface PageFilters {

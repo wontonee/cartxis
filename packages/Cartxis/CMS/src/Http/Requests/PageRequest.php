@@ -38,7 +38,6 @@ class PageRequest extends FormRequest
             'meta_description' => 'nullable|string|max:500',
             'meta_keywords' => 'nullable|string|max:500',
             'status' => 'required|in:draft,published,disabled',
-            'channel_id' => 'nullable|exists:channels,id',
         ];
     }
 

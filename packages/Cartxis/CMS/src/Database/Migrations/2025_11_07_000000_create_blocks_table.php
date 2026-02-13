@@ -15,12 +15,11 @@ return new class extends Migration
             $table->id();
             $table->string('identifier')->unique()->comment('Unique identifier for embedding block');
             $table->string('title');
-            $table->enum('type', ['text', 'html', 'banner', 'promotion', 'newsletter'])
+            $table->enum('type', ['text', 'html', 'banner', 'promotion', 'newsletter', 'testimonial'])
                 ->default('html')
                 ->comment('Type of block content');
             $table->longText('content')->nullable()->comment('JSON or HTML content based on type');
             $table->enum('status', ['active', 'inactive'])->default('active');
-            $table->foreignId('channel_id')->nullable()->constrained('channels')->onDelete('cascade');
             $table->dateTime('start_date')->nullable()->comment('Scheduled start date for block visibility');
             $table->dateTime('end_date')->nullable()->comment('Scheduled end date for block visibility');
             $table->foreignId('created_by')->nullable()->constrained('users')->onDelete('set null');
@@ -33,7 +32,6 @@ return new class extends Migration
             $table->index('status');
             $table->index('type');
             $table->index(['start_date', 'end_date']);
-            $table->index('channel_id');
         });
     }
 

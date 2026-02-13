@@ -185,7 +185,7 @@ class PayPalGateway implements PaymentGatewayInterface
 
         try {
             // Get shipping address
-            $shippingAddress = $order->shippingAddress();
+            $shippingAddress = $order->shippingAddress;
 
             $currency = strtoupper($order->currency_code ?? 'USD');
             $parseAmount = static function ($value): float {

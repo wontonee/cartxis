@@ -97,6 +97,18 @@ class AdminMenuSeeder extends Seeder
                 'active' => true,
             ],
 
+            // Appearance (single page — active theme customization)
+            [
+                'key' => 'appearance',
+                'title' => 'Appearance',
+                'icon' => 'palette',
+                'route' => null,
+                'parent_id' => null,
+                'order' => 75,
+                'location' => 'admin',
+                'active' => true,
+            ],
+
             // Settings Parent (Separate from System)
             [
                 'key' => 'settings',
@@ -140,6 +152,7 @@ class AdminMenuSeeder extends Seeder
         $marketingId = DB::table('menu_items')->where('key', 'marketing')->value('id');
         $contentId = DB::table('menu_items')->where('key', 'content')->value('id');
         $reportsId = DB::table('menu_items')->where('key', 'reports')->value('id');
+        $appearanceId = DB::table('menu_items')->where('key', 'appearance')->value('id');
         $settingsId = DB::table('menu_items')->where('key', 'settings')->value('id');
         $systemId = DB::table('menu_items')->where('key', 'system')->value('id');
 
@@ -333,6 +346,28 @@ class AdminMenuSeeder extends Seeder
                 'active' => true,
             ],
 
+            // Appearance Children
+            [
+                'key' => 'appearance-theme',
+                'title' => 'Theme',
+                'icon' => 'palette',
+                'route' => 'admin.themes.index',
+                'parent_id' => $appearanceId,
+                'order' => 1,
+                'location' => 'admin',
+                'active' => true,
+            ],
+            [
+                'key' => 'appearance-theme-setting',
+                'title' => 'Theme Setting',
+                'icon' => 'sliders',
+                'route' => 'admin.appearance.index',
+                'parent_id' => $appearanceId,
+                'order' => 2,
+                'location' => 'admin',
+                'active' => true,
+            ],
+
             // Settings Children (8 sub-modules as per documentation)
             [
                 'key' => 'settings-general',
@@ -365,12 +400,12 @@ class AdminMenuSeeder extends Seeder
                 'active' => true,
             ],
             [
-                'key' => 'settings-channels',
-                'title' => 'Channels',
-                'icon' => 'devices',
-                'route' => 'admin.settings.channels.index',
+                'key' => 'settings-countries',
+                'title' => 'Countries',
+                'icon' => 'globe',
+                'route' => 'admin.settings.countries.index',
                 'parent_id' => $settingsId,
-                'order' => 4,
+                'order' => 3,
                 'location' => 'admin',
                 'active' => true,
             ],
@@ -380,7 +415,7 @@ class AdminMenuSeeder extends Seeder
                 'icon' => 'credit-card',
                 'route' => 'admin.settings.payment-methods.index',
                 'parent_id' => $settingsId,
-                'order' => 5,
+                'order' => 4,
                 'location' => 'admin',
                 'active' => true,
             ],
@@ -390,7 +425,7 @@ class AdminMenuSeeder extends Seeder
                 'icon' => 'truck',
                 'route' => 'admin.settings.shipping-methods.index',
                 'parent_id' => $settingsId,
-                'order' => 6,
+                'order' => 5,
                 'location' => 'admin',
                 'active' => true,
             ],
@@ -400,7 +435,7 @@ class AdminMenuSeeder extends Seeder
                 'icon' => 'percent',
                 'route' => 'admin.settings.tax-rules.index',
                 'parent_id' => $settingsId,
-                'order' => 7,
+                'order' => 6,
                 'location' => 'admin',
                 'active' => true,
             ],
@@ -410,7 +445,7 @@ class AdminMenuSeeder extends Seeder
                 'icon' => 'mail',
                 'route' => 'admin.settings.email.index',
                 'parent_id' => $settingsId,
-                'order' => 8,
+                'order' => 7,
                 'location' => 'admin',
                 'active' => true,
             ],
@@ -420,7 +455,7 @@ class AdminMenuSeeder extends Seeder
                 'icon' => 'sparkles',
                 'route' => 'admin.settings.ai.index',
                 'parent_id' => $settingsId,
-                'order' => 9,
+                'order' => 8,
                 'location' => 'admin',
                 'active' => true,
             ],
@@ -503,6 +538,16 @@ class AdminMenuSeeder extends Seeder
                 'route' => 'admin.system.backups.index',
                 'parent_id' => $systemId,
                 'order' => 8,
+                'location' => 'admin',
+                'active' => true,
+            ],
+            [
+                'key' => 'system-activity-logs',
+                'title' => 'Activity Logs',
+                'icon' => 'list',
+                'route' => 'admin.activity-logs.index',
+                'parent_id' => $systemId,
+                'order' => 9,
                 'location' => 'admin',
                 'active' => true,
             ],

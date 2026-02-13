@@ -9,7 +9,6 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use App\Models\User;
-use Cartxis\Core\Models\Channel;
 
 class Block extends Model
 {
@@ -26,7 +25,6 @@ class Block extends Model
         'type',
         'content',
         'status',
-        'channel_id',
         'start_date',
         'end_date',
         'created_by',
@@ -64,14 +62,6 @@ class Block extends Model
                 $block->updated_by = auth('admin')->id();
             }
         });
-    }
-
-    /**
-     * Get the channel that owns the block.
-     */
-    public function channel(): BelongsTo
-    {
-        return $this->belongsTo(Channel::class);
     }
 
     /**

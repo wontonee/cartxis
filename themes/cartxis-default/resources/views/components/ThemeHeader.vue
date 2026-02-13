@@ -57,7 +57,7 @@ let closeTimeout: ReturnType<typeof setTimeout> | null = null;
 let userMenuTimeout: ReturnType<typeof setTimeout> | null = null;
 let categoriesTimeout: ReturnType<typeof setTimeout> | null = null;
 
-const primaryColor = computed(() => props.theme?.settings?.primary_color ?? '#3b82f6');
+const primaryColor = computed(() => props.theme?.settings?.['colors.primary'] ?? props.theme?.settings?.['colors.primary_color'] ?? props.theme?.settings?.primary_color ?? '#3b82f6');
 
 const toggleDropdown = (itemId: number) => {
     if (closeTimeout) {

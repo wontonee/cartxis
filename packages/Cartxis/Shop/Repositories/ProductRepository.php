@@ -62,7 +62,7 @@ class ProductRepository extends ShopRepository implements ProductRepositoryInter
         return $this->model
             ->where('slug', $slug)
             ->where('status', 'enabled')
-            ->with(['images', 'categories', 'brand', 'attributeOptions', 'attributeValues.attribute'])
+            ->with(['images', 'categories', 'brand', 'attributeOptions', 'attributeValues.attribute', 'approvedReviews'])
             ->withAvg('approvedReviews as rating', 'rating')
             ->withCount('approvedReviews as reviews_count')
             ->first();

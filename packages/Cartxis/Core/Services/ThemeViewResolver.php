@@ -15,9 +15,14 @@ use Illuminate\Support\Facades\File;
 class ThemeViewResolver
 {
     /**
-     * Active theme name
+     * Active theme name (resolved lazily)
      */
-    protected string $activeTheme;
+    protected ?string $activeTheme = null;
+    
+    /**
+     * Whether the active theme has been resolved
+     */
+    protected bool $resolved = false;
     
     /**
      * Default fallback theme
@@ -29,7 +34,21 @@ class ThemeViewResolver
      */
     public function __construct()
     {
-        $this->activeTheme = config('theme.active', $this->defaultTheme);
+        // Intentionally empty — active theme is resolved lazily on first resolve() call
+        // so that ThemeServiceProvider has time to set config('theme.active') during boot.
+    }
+    
+    /**
+     * Get the active theme slug, resolving it on first call.
+     */
+    protected function getActiveThemeSlug(): string
+    {
+        if (!$this->resolved) {
+            $this->activeTheme = config('theme.active', $this->defaultTheme);
+            $this->resolved = true;
+        }
+        
+        return $this->activeTheme ?? $this->defaultTheme;
     }
     
     /**
@@ -52,13 +71,15 @@ class ThemeViewResolver
      */
     public function resolve(string $view): string
     {
+        $active = $this->getActiveThemeSlug();
+        
         // Check active theme first
-        if ($this->hasThemeView($this->activeTheme, $view)) {
-            return $this->formatThemePath($this->activeTheme, $view);
+        if ($this->hasThemeView($active, $view)) {
+            return $this->formatThemePath($active, $view);
         }
         
         // Fallback to default theme
-        if ($this->activeTheme !== $this->defaultTheme && $this->hasThemeView($this->defaultTheme, $view)) {
+        if ($active !== $this->defaultTheme && $this->hasThemeView($this->defaultTheme, $view)) {
             return $this->formatThemePath($this->defaultTheme, $view);
         }
         
@@ -125,7 +146,7 @@ class ThemeViewResolver
      */
     public function getActiveTheme(): string
     {
-        return $this->activeTheme;
+        return $this->getActiveThemeSlug();
     }
     
     /**
@@ -137,6 +158,7 @@ class ThemeViewResolver
     public function setActiveTheme(string $theme): self
     {
         $this->activeTheme = $theme;
+        $this->resolved = true;
         return $this;
     }
     

@@ -77,10 +77,15 @@ Route::group([
         Route::post('/addresses/{address}/default-shipping', [Cartxis\Shop\Http\Controllers\Account\AddressController::class, 'setDefaultShipping'])->name('addresses.default-shipping');
         Route::post('/addresses/{address}/default-billing', [Cartxis\Shop\Http\Controllers\Account\AddressController::class, 'setDefaultBilling'])->name('addresses.default-billing');
         Route::get('/wishlist', [Cartxis\Shop\Http\Controllers\Account\WishlistController::class, 'index'])->name('wishlist.index');
+        Route::get('/wishlist/get', [Cartxis\Shop\Http\Controllers\Account\WishlistController::class, 'get'])->name('wishlist.get');
+        Route::post('/wishlist/add', [Cartxis\Shop\Http\Controllers\Account\WishlistController::class, 'add'])->name('wishlist.add');
+        Route::delete('/wishlist/item/{id}', [Cartxis\Shop\Http\Controllers\Account\WishlistController::class, 'remove'])->name('wishlist.remove');
+        Route::post('/wishlist/item/{id}/move-to-cart', [Cartxis\Shop\Http\Controllers\Account\WishlistController::class, 'moveToCart'])->name('wishlist.move-to-cart');
         Route::post('/wishlist/{product}', [Cartxis\Shop\Http\Controllers\Account\WishlistController::class, 'toggle'])->name('wishlist.toggle');
         Route::delete('/wishlist/{product}', [Cartxis\Shop\Http\Controllers\Account\WishlistController::class, 'destroy'])->name('wishlist.destroy');
         Route::get('/profile', [Cartxis\Shop\Http\Controllers\Account\ProfileController::class, 'show'])->name('profile.show');
         Route::put('/profile', [Cartxis\Shop\Http\Controllers\Account\ProfileController::class, 'update'])->name('profile.update');
+        Route::put('/password', [Cartxis\Shop\Http\Controllers\Account\ProfileController::class, 'updatePassword'])->name('password.update');
     });
 
     /*
@@ -96,5 +101,7 @@ Route::group([
         Route::post('/', [Cartxis\Shop\Http\Controllers\Checkout\CheckoutController::class, 'store'])->name('store');
         Route::post('/shipping', [Cartxis\Shop\Http\Controllers\Checkout\CheckoutController::class, 'updateShipping'])->name('shipping.update');
         Route::get('/success/{order}', [Cartxis\Shop\Http\Controllers\Checkout\CheckoutController::class, 'success'])->name('success');
+        Route::get('/track-order', [Cartxis\Shop\Http\Controllers\Checkout\CheckoutController::class, 'guestTrack'])->name('track');
+        Route::post('/track-order', [Cartxis\Shop\Http\Controllers\Checkout\CheckoutController::class, 'guestTrackLookup'])->name('track.lookup');
     });
 });

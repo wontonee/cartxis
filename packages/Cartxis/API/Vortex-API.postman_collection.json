@@ -615,12 +615,6 @@
 									"disabled": true
 								},
 								{
-									"key": "channel_id",
-									"value": "1",
-									"description": "Optional channel filter",
-									"disabled": true
-								},
-								{
 									"key": "limit",
 									"value": "10",
 									"description": "Max items (default 10, max 50)",

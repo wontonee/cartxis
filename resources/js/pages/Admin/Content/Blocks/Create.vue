@@ -82,6 +82,7 @@
                             <option value="banner">Banner - Image with CTA button</option>
                             <option value="promotion">Promotion - Special offer/discount</option>
                             <option value="newsletter">Newsletter - Email signup form</option>
+                            <option value="testimonial">Testimonial - Customer reviews</option>
                         </select>
                         <p v-if="form.errors.type" class="mt-1 text-sm text-red-600">{{ form.errors.type }}</p>
                     </div>
@@ -300,6 +301,63 @@
                                 />
                             </div>
                         </div>
+
+                        <!-- Testimonial Type -->
+                        <div v-if="form.type === 'testimonial'" class="space-y-4">
+                            <div v-for="(testimonial, index) in testimonialData" :key="index" class="border border-gray-200 rounded-lg p-4 space-y-3">
+                                <div class="flex items-center justify-between">
+                                    <h4 class="text-sm font-semibold text-gray-700">Testimonial #{{ index + 1 }}</h4>
+                                    <button
+                                        v-if="testimonialData.length > 1"
+                                        type="button"
+                                        @click="removeTestimonial(index)"
+                                        class="text-red-500 hover:text-red-700 text-xs"
+                                    >
+                                        Remove
+                                    </button>
+                                </div>
+                                <div class="grid grid-cols-2 gap-4">
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700 mb-1">Name</label>
+                                        <input v-model="testimonial.name" type="text" class="w-full px-3 py-2 border border-gray-300 rounded-lg" placeholder="John Doe" />
+                                    </div>
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700 mb-1">Role / Title</label>
+                                        <input v-model="testimonial.role" type="text" class="w-full px-3 py-2 border border-gray-300 rounded-lg" placeholder="Verified Buyer" />
+                                    </div>
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">Review Text</label>
+                                    <textarea v-model="testimonial.text" rows="3" class="w-full px-3 py-2 border border-gray-300 rounded-lg" placeholder="Customer review text..."></textarea>
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">Rating</label>
+                                    <div class="flex gap-1">
+                                        <button
+                                            v-for="star in 5"
+                                            :key="star"
+                                            type="button"
+                                            @click="testimonial.rating = star"
+                                            class="text-2xl focus:outline-none"
+                                            :class="star <= testimonial.rating ? 'text-yellow-400' : 'text-gray-300'"
+                                        >
+                                            &#9733;
+                                        </button>
+                                    </div>
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">Avatar URL</label>
+                                    <input v-model="testimonial.avatar" type="text" class="w-full px-3 py-2 border border-gray-300 rounded-lg" placeholder="/images/avatars/user.jpg" />
+                                </div>
+                            </div>
+                            <button
+                                type="button"
+                                @click="addTestimonial"
+                                class="px-4 py-2 text-sm font-medium text-blue-600 border border-blue-300 rounded-lg hover:bg-blue-50"
+                            >
+                                + Add Testimonial
+                            </button>
+                        </div>
                     </div>
 
                     <!-- Status -->
@@ -410,6 +468,18 @@ const newsletterData = reactive({
     action: '/newsletter/subscribe',
 });
 
+const testimonialData = reactive<Array<{ name: string; role: string; text: string; rating: number; avatar: string }>>([
+    { name: '', role: '', text: '', rating: 5, avatar: '' },
+]);
+
+const addTestimonial = () => {
+    testimonialData.push({ name: '', role: '', text: '', rating: 5, avatar: '' });
+};
+
+const removeTestimonial = (index: number) => {
+    testimonialData.splice(index, 1);
+};
+
 const generateIdentifier = debounce(() => {
     if (!form.title) return;
     
@@ -463,6 +533,8 @@ watch(() => form.type, (newType) => {
         form.content = JSON.stringify(promotionData);
     } else if (newType === 'newsletter') {
         form.content = JSON.stringify(newsletterData);
+    } else if (newType === 'testimonial') {
+        form.content = JSON.stringify({ testimonials: testimonialData });
     }
 });
 
@@ -482,6 +554,12 @@ watch(promotionData, () => {
 watch(newsletterData, () => {
     if (form.type === 'newsletter') {
         form.content = JSON.stringify(newsletterData);
+    }
+}, { deep: true });
+
+watch(testimonialData, () => {
+    if (form.type === 'testimonial') {
+        form.content = JSON.stringify({ testimonials: testimonialData });
     }
 }, { deep: true });
 

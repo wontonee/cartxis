@@ -13,6 +13,7 @@ use Cartxis\Shop\Models\ShippingMethod;
 use Cartxis\Shop\Models\Order;
 use Cartxis\Product\Models\Product;
 use Cartxis\Core\Models\PaymentMethod;
+use Cartxis\Core\Models\Country;
 use Cartxis\Core\Models\EmailTemplate;
 use Cartxis\Core\Services\ThemeViewResolver;
 use Cartxis\Core\Services\SettingService;
@@ -89,6 +90,10 @@ class CheckoutController extends Controller
                 ],
                 'userAddresses' => [],
                 'paymentMethods' => [],
+                'countries' => Country::active()->ordered()
+                    ->select('id', 'name', 'code', 'phone_code')
+                    ->get()
+                    ->toArray(),
             ]);
         }
 
@@ -124,7 +129,7 @@ class CheckoutController extends Controller
             ->get()
             ->map(function ($method) use ($grandTotal) {
                 return [
-                    'id' => $method->id,
+                    'id' => $method->code,
                     'code' => $method->code,
                     'name' => $method->name,
                     'description' => $method->description,
@@ -206,6 +211,10 @@ class CheckoutController extends Controller
             'checkoutConfig' => $checkoutConfig,
             'userAddresses' => $userAddresses,
             'paymentMethods' => $paymentMethods,
+            'countries' => Country::active()->ordered()
+                ->select('id', 'name', 'code', 'phone_code')
+                ->get()
+                ->toArray(),
             'cartEmpty' => false,
         ]);
     }
@@ -469,14 +478,18 @@ class CheckoutController extends Controller
      */
     public function success(Request $request, $order)
     {
-        $order = \Cartxis\Shop\Models\Order::with(['items', 'addresses'])
-                ->where('id', $order)
-                ->where('user_id', auth()->id())
-            ->firstOrFail();
+        $order = \Cartxis\Shop\Models\Order::with(['items', 'addresses'])->findOrFail($order);
 
-        // Verify order belongs to current user or session
-        if (Auth::check() && $order->user_id !== Auth::id()) {
-            abort(403);
+        if (Auth::check()) {
+            if ((int) $order->user_id !== (int) Auth::id()) {
+                abort(403);
+            }
+        } else {
+            $lastOrderId = (int) Session::get('checkout.last_order_id');
+
+            if ($lastOrderId !== (int) $order->id) {
+                abort(403);
+            }
         }
 
         if (Session::get('checkout.last_order_id') === $order->id) {
@@ -484,6 +497,8 @@ class CheckoutController extends Controller
             Session::forget('checkout');
             Session::forget('checkout.last_order_id');
         }
+
+        $shippingAddress = $order->shippingAddress;
 
         return Inertia::render($this->themeResolver->resolve('Checkout/Success'), [
             'order' => [
@@ -496,6 +511,7 @@ class CheckoutController extends Controller
                 'total' => round($order->total, 2),
                 'customer_email' => $order->customer_email,
                 'customer_phone' => $order->customer_phone,
+                'is_guest' => $order->user_id === null,
                 'created_at' => $order->created_at->format('F j, Y g:i A'),
                 'items' => $order->items->map(function ($item) {
                     return [
@@ -506,16 +522,81 @@ class CheckoutController extends Controller
                         'total' => round($item->total, 2),
                     ];
                 })->toArray(),
-                'shipping_address' => $order->shippingAddress() ? [
-                    'first_name' => $order->shippingAddress()->first_name,
-                    'last_name' => $order->shippingAddress()->last_name,
-                    'address_line1' => $order->shippingAddress()->address_line1,
-                    'address_line2' => $order->shippingAddress()->address_line2,
-                    'city' => $order->shippingAddress()->city,
-                    'state' => $order->shippingAddress()->state,
-                    'postal_code' => $order->shippingAddress()->postal_code,
-                    'country' => $order->shippingAddress()->country,
-                    'phone' => $order->shippingAddress()->phone,
+                'shipping_address' => $shippingAddress ? [
+                    'first_name' => $shippingAddress->first_name,
+                    'last_name' => $shippingAddress->last_name,
+                    'address_line1' => $shippingAddress->address_line1,
+                    'address_line2' => $shippingAddress->address_line2,
+                    'city' => $shippingAddress->city,
+                    'state' => $shippingAddress->state,
+                    'postal_code' => $shippingAddress->postal_code,
+                    'country' => $shippingAddress->country,
+                    'phone' => $shippingAddress->phone,
+                ] : null,
+            ],
+        ]);
+    }
+
+    /**
+     * Guest order tracking form page.
+     */
+    public function guestTrack(Request $request): Response
+    {
+        $prefilledOrderNumber = trim((string) $request->query('order_number', ''));
+
+        return Inertia::render($this->themeResolver->resolve('Checkout/GuestTrack'), [
+            'lookup' => [
+                'order_number' => $prefilledOrderNumber,
+            ],
+            'trackedOrder' => null,
+        ]);
+    }
+
+    /**
+     * Guest order tracking lookup by order number.
+     */
+    public function guestTrackLookup(Request $request): Response
+    {
+        $validated = $request->validate([
+            'order_number' => 'required|string|max:120',
+        ]);
+
+        $orderNumber = ltrim(trim((string) $validated['order_number']), '#');
+
+        $order = Order::with(['items', 'shippingAddress'])
+            ->where('order_number', $orderNumber)
+            ->whereNull('user_id')
+            ->first();
+
+        if (!$order) {
+            return Inertia::render($this->themeResolver->resolve('Checkout/GuestTrack'), [
+                'lookup' => [
+                    'order_number' => $validated['order_number'],
+                ],
+                'trackedOrder' => null,
+                'error' => 'Guest order not found. Please check your order ID.',
+            ]);
+        }
+
+        return Inertia::render($this->themeResolver->resolve('Checkout/GuestTrack'), [
+            'lookup' => [
+                'order_number' => $validated['order_number'],
+            ],
+            'trackedOrder' => [
+                'id' => $order->id,
+                'order_number' => $order->order_number,
+                'status' => $order->status,
+                'payment_status' => $order->payment_status,
+                'total' => round((float) $order->total, 2),
+                'created_at' => $order->created_at->format('F j, Y g:i A'),
+                'items_count' => $order->items->sum('quantity'),
+                'shipping_address' => $order->shippingAddress ? [
+                    'first_name' => $order->shippingAddress->first_name,
+                    'last_name' => $order->shippingAddress->last_name,
+                    'city' => $order->shippingAddress->city,
+                    'state' => $order->shippingAddress->state,
+                    'postal_code' => $order->shippingAddress->postal_code,
+                    'country' => $order->shippingAddress->country,
                 ] : null,
             ],
         ]);

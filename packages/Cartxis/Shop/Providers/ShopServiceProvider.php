@@ -132,7 +132,8 @@ class ShopServiceProvider extends ServiceProvider
             \Cartxis\Shop\Services\CheckoutService::class,
             function ($app) {
                 return new \Cartxis\Shop\Services\CheckoutService(
-                    $app->make(\Cartxis\Shop\Contracts\OrderRepositoryInterface::class)
+                    $app->make(\Cartxis\Shop\Contracts\OrderRepositoryInterface::class),
+                    $app->make(\Cartxis\Admin\Services\AdminNotificationService::class)
                 );
             }
         );

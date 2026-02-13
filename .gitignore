@@ -13,6 +13,9 @@
 /example-shop
 /Agent-Mac
 /design
+/templates-design
+/themes/dmart-electronics/*
+/test-screenshots
 /_backup
 /vendor
 .DS_Store

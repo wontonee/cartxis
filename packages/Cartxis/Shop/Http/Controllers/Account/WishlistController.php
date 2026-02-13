@@ -8,19 +8,27 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Session;
-use Inertia\Inertia;
 use Inertia\Response;
+use Cartxis\Customer\Models\Customer;
+use Cartxis\Customer\Models\CustomerGroup;
 use Cartxis\Customer\Models\Wishlist;
-use Cartxis\Product\Models\Product;
+use Cartxis\Core\Services\ThemeViewResolver;
 
 class WishlistController extends Controller
 {
+    protected ThemeViewResolver $themeResolver;
+
+    public function __construct(ThemeViewResolver $themeResolver)
+    {
+        $this->themeResolver = $themeResolver;
+    }
+
     /**
      * Display the customer's wishlist.
      */
     public function index(): Response
     {
-        return Inertia::render('Wishlist');
+        return $this->themeResolver->inertia('Account/Wishlist/Index');
     }
 
     /**
@@ -34,15 +42,7 @@ class WishlistController extends Controller
             return response()->json(['items' => [], 'count' => 0]);
         }
 
-        // Get or create customer record for this user
-        $customer = \Cartxis\Customer\Models\Customer::firstOrCreate(
-            ['user_id' => $user->id],
-            [
-                'first_name' => $user->name,
-                'email' => $user->email,
-                'is_active' => true,
-            ]
-        );
+        $customer = $this->resolveCustomer($user);
 
         $wishlistItems = Wishlist::with(['product.images', 'product.brand'])
             ->where('customer_id', $customer->id)
@@ -82,15 +82,7 @@ class WishlistController extends Controller
             'product_id' => 'required|exists:products,id',
         ]);
 
-        // Get or create customer record for this user
-        $customer = \Cartxis\Customer\Models\Customer::firstOrCreate(
-            ['user_id' => $user->id],
-            [
-                'first_name' => $user->name,
-                'email' => $user->email,
-                'is_active' => true,
-            ]
-        );
+        $customer = $this->resolveCustomer($user);
 
         // Check if already in wishlist
         $exists = Wishlist::where('customer_id', $customer->id)
@@ -138,7 +130,7 @@ class WishlistController extends Controller
         }
 
         // Get customer record
-        $customer = \Cartxis\Customer\Models\Customer::where('user_id', $user->id)->first();
+        $customer = Customer::where('user_id', $user->id)->first();
         
         if (!$customer) {
             return response()->json(['message' => 'Not found'], 404);
@@ -168,15 +160,7 @@ class WishlistController extends Controller
             return response()->json(['message' => 'Unauthorized'], 401);
         }
 
-        // Get or create customer record
-        $customer = \Cartxis\Customer\Models\Customer::firstOrCreate(
-            ['user_id' => $user->id],
-            [
-                'first_name' => $user->name ?? 'Customer',
-                'email' => $user->email,
-                'is_active' => true,
-            ]
-        );
+        $customer = $this->resolveCustomer($user);
 
         $wishlistItem = Wishlist::where('customer_id', $customer->id)
             ->where('id', $id)
@@ -233,5 +217,33 @@ class WishlistController extends Controller
             'message' => 'Moved to cart successfully',
             'cart_count' => collect($cart)->sum('quantity'),
         ]);
+    }
+
+    private function resolveCustomer(object $user): Customer
+    {
+        $firstName = trim((string) ($user->first_name ?? ''));
+        $lastName = trim((string) ($user->last_name ?? ''));
+
+        if ($firstName === '' || $lastName === '') {
+            $name = trim((string) ($user->name ?? 'Customer User'));
+            $parts = preg_split('/\s+/', $name, 2) ?: [];
+            $firstName = $firstName !== '' ? $firstName : ($parts[0] ?? 'Customer');
+            $lastName = $lastName !== '' ? $lastName : ($parts[1] ?? 'User');
+        }
+
+        $defaultGroupId = CustomerGroup::query()->where('is_default', true)->value('id')
+            ?? CustomerGroup::query()->orderBy('id')->value('id')
+            ?? 1;
+
+        return Customer::firstOrCreate(
+            ['user_id' => $user->id],
+            [
+                'first_name' => $firstName,
+                'last_name' => $lastName,
+                'email' => $user->email,
+                'customer_group_id' => $defaultGroupId,
+                'is_active' => true,
+            ]
+        );
     }
 }

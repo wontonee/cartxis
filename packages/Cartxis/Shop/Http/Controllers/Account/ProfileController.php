@@ -18,6 +18,14 @@ class ProfileController extends Controller
     }
 
     /**
+     * Display profile page.
+     */
+    public function show(Request $request)
+    {
+        return $this->edit($request);
+    }
+
+    /**
      * Show the profile edit form.
      */
     public function edit(Request $request)

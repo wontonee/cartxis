@@ -25,10 +25,6 @@ class PageRepository
     {
         $query = Page::published();
 
-        if (!empty($filters['channel_id'])) {
-            $query->where('channel_id', $filters['channel_id']);
-        }
-
         return $query->orderBy('title')->get();
     }
 
@@ -64,11 +60,6 @@ class PageRepository
         // Status filter
         if (!empty($filters['status'])) {
             $query->where('status', $filters['status']);
-        }
-
-        // Channel filter
-        if (!empty($filters['channel_id'])) {
-            $query->where('channel_id', $filters['channel_id']);
         }
 
         // Sorting

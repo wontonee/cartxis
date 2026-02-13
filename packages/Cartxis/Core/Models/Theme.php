@@ -4,6 +4,7 @@ namespace Cartxis\Core\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Support\Facades\Cache;
 
 class Theme extends Model
 {
@@ -51,7 +52,13 @@ class Theme extends Model
         static::query()->update(['is_active' => false]);
 
         // Activate this theme
-        return $this->update(['is_active' => true]);
+        $activated = $this->update(['is_active' => true]);
+
+        if ($activated) {
+            Cache::forget('active_theme');
+        }
+
+        return $activated;
     }
 
     /**

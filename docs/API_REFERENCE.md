@@ -1,6 +1,6 @@
 # Cartxis API Reference
 
-**Version 1.0** | **Base URL**: `/api/v1`
+**Version 1.0.4** | **Base URL**: `/api/v1` | **Last Updated**: February 2026
 
 A complete REST API reference for Cartxis mobile app integration.
 
@@ -26,9 +26,12 @@ A complete REST API reference for Cartxis mobile app integration.
    - [Search API](#search-api)
    - [Banners API](#banners-api)
    - [Currency API](#currency-api)
-7. [Data Models](#data-models)
-8. [SDK Integration](#sdk-integration)
-9. [Testing](#testing)
+   - [Product AI API](#product-ai-api)
+   - [API Sync](#api-sync)
+7. [Feature Flags](#feature-flags)
+8. [Data Models](#data-models)
+9. [SDK Integration](#sdk-integration)
+10. [Testing](#testing)
 
 ---
 
@@ -39,7 +42,7 @@ The Cartxis API provides a RESTful interface for mobile applications to interact
 ### Base URL
 
 ```
-Production: https://your-domain.com/api/v1
+Production: https://your-domain/api/v1
 Development: http://localhost:8000/api/v1
 ```
 
@@ -176,6 +179,7 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
 | `INSUFFICIENT_STOCK` | 400 | Not enough stock |
 | `ORDER_NOT_FOUND` | 404 | Order does not exist |
 | `INVALID_PASSWORD` | 400 | Current password incorrect |
+| `AI_GENERATION_FAILED` | 422 | AI description generation failed |
 | `NOT_FOUND` | 404 | Generic resource not found |
 | `SERVER_ERROR` | 500 | Internal server error |
 
@@ -188,6 +192,7 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
 | Guest (unauthenticated) | 60 requests/minute |
 | Authenticated | 300 requests/minute |
 | Login endpoint | 5 attempts/minute |
+| Payment endpoints | 10 requests/minute |
 
 When rate limited, you'll receive a `429 Too Many Requests` response.
 
@@ -1514,6 +1519,163 @@ GET /api/v1/currency
 
 ---
 
+### Product AI API
+
+> **Note:** Requires authentication. Requires AI features to be enabled in admin Settings → AI Settings.
+
+#### Generate Product Description
+
+Use AI to generate product descriptions based on product data and optional context.
+
+```http
+POST /api/v1/products/{id}/generate-description
+```
+
+**Headers:** `Authorization: Bearer {token}`
+
+**Request Body:**
+
+```json
+{
+  "product_title": "Premium Yoga Mat",
+  "category": "Sports & Outdoors",
+  "attributes": ["Non-slip", "6mm thickness", "Eco-friendly"],
+  "brand": "FitPro",
+  "key_features": ["Anti-tear", "Moisture resistant", "Carrying strap included"],
+  "target_audience": "Fitness enthusiasts",
+  "tone_preference": "professional",
+  "language": "en",
+  "agent": "Product Description Writer"
+}
+```
+
+**Request Fields:**
+
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| `product_title` | string | No | Override product name (max 200 chars) |
+| `category` | string | No | Product category context (max 255 chars) |
+| `attributes` | array | No | Product attributes for context |
+| `images` | array | No | Image URLs for vision-capable models |
+| `brand` | string | No | Brand name (max 120 chars) |
+| `key_features` | array | No | Key selling points |
+| `target_audience` | string | No | Intended audience (max 120 chars) |
+| `tone_preference` | string | No | Writing tone: `professional`, `casual`, `luxury`, etc. (max 50 chars) |
+| `language` | string | No | Output language code, e.g., `en`, `hi` (max 10 chars) |
+| `agent` | string | No | Specific AI agent name to use (max 120 chars) |
+
+**Response:** `200 OK`
+
+```json
+{
+  "success": true,
+  "message": "Product description generated",
+  "data": {
+    "short_description": "Professional-grade yoga mat with non-slip surface...",
+    "description": "Elevate your yoga practice with the Premium Yoga Mat by FitPro..."
+  }
+}
+```
+
+**Error Response:** `422`
+
+```json
+{
+  "success": false,
+  "message": "AI generation failed: Provider not configured",
+  "error_code": "AI_GENERATION_FAILED"
+}
+```
+
+---
+
+### API Sync
+
+Endpoints for mobile app connectivity monitoring. Used by the admin panel's **System → API Sync** page to show connection status.
+
+> **Note:** Requires authentication. All authenticated API requests automatically update the sync heartbeat via the `TrackApiSync` middleware.
+
+#### Get Sync Status
+
+Get current sync/connectivity status.
+
+```http
+GET /api/v1/system/api-sync/status
+```
+
+**Headers:** `Authorization: Bearer {token}`
+
+**Response:** `200 OK`
+
+```json
+{
+  "connected": true,
+  "sync_enabled": true,
+  "last_sync_at": "2026-02-09T10:30:00",
+  "last_status": "success",
+  "last_message": "All data synchronized",
+  "last_checked_at": "2026-02-09T10:35:00"
+}
+```
+
+> **Note:** `connected` is `true` if a heartbeat was received within the last 120 seconds.
+
+---
+
+#### Send Heartbeat
+
+Report mobile app connectivity and sync status to the server.
+
+```http
+POST /api/v1/system/api-sync/heartbeat
+```
+
+**Headers:** `Authorization: Bearer {token}`
+
+**Request Body:**
+
+```json
+{
+  "connected": true,
+  "sync_enabled": true,
+  "last_status": "success",
+  "last_message": "Synchronized 42 products",
+  "last_sync_at": "2026-02-09T10:30:00"
+}
+```
+
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| `connected` | boolean | ✅ | Whether the app considers itself connected |
+| `sync_enabled` | boolean | No | Whether auto-sync is enabled in the app |
+| `last_status` | string | No | Status of the last sync operation |
+| `last_message` | string | No | Descriptive message about the last sync |
+| `last_sync_at` | datetime | No | Timestamp of the last sync operation |
+
+**Response:** `200 OK`
+
+```json
+{
+  "success": true
+}
+```
+
+---
+
+## Feature Flags
+
+The API has configurable feature flags. Disabled features will return `404` or `403` responses.
+
+| Feature | Default | Description |
+|---------|---------|-------------|
+| `wishlist` | ✅ Enabled | Wishlist functionality |
+| `reviews` | ✅ Enabled | Product reviews and ratings |
+| `coupons` | ✅ Enabled | Coupon/discount code support |
+| `gift_cards` | ❌ Disabled | Gift card support (planned) |
+| `loyalty_points` | ❌ Disabled | Loyalty points system (planned) |
+
+---
+
 ## Data Models
 
 ### User
@@ -1646,7 +1808,7 @@ import 'package:http/http.dart' as http;
 import 'dart:convert';
 
 class CartxisApi {
-  static const String baseUrl = 'https://your-domain.com/api/v1';
+  static const String baseUrl = 'https://your-domain/api/v1';
   String? _token;
 
   Map<String, String> get _headers => {
@@ -1725,7 +1887,7 @@ class CartxisApi {
 ### React Native/JavaScript Example
 
 ```javascript
-const API_BASE = 'https://your-domain.com/api/v1';
+const API_BASE = 'https://your-domain/api/v1';
 
 class CartxisApi {
   constructor() {
@@ -1832,4 +1994,4 @@ curl -X POST http://localhost:8000/api/v1/cart/add \
 
 ---
 
-**Cartxis API v1.0** | Built with Laravel Sanctum | MIT License
+**Cartxis API v1.0.4** | Built with Laravel Sanctum | MIT License

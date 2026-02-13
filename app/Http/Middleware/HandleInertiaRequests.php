@@ -5,10 +5,10 @@ namespace App\Http\Middleware;
 use Illuminate\Foundation\Inspiring;
 use Illuminate\Http\Request;
 use Inertia\Middleware;
-use Cartxis\Core\Models\Theme;
 use Cartxis\Core\Models\Currency;
 use Cartxis\Core\Services\MenuService;
 use Cartxis\Core\Services\SettingService;
+use Cartxis\Admin\Services\AdminNotificationService;
 
 class HandleInertiaRequests extends Middleware
 {
@@ -87,6 +87,7 @@ class HandleInertiaRequests extends Middleware
 
         $menuService = app(MenuService::class);
         $settingService = app(SettingService::class);
+        $adminNotificationService = app(AdminNotificationService::class);
 
         // Build menu trees with error handling
         $adminMenu = [];
@@ -111,6 +112,23 @@ class HandleInertiaRequests extends Middleware
             'auth' => [
                 'user' => $request->user(),
             ],
+            'adminNotifications' => function () use ($request, $adminNotificationService) {
+                if ((!$request->is('admin/*') && !$request->is('admin')) || !$request->user('admin')) {
+                    return [
+                        'unread_count' => 0,
+                    ];
+                }
+
+                try {
+                    return [
+                        'unread_count' => $adminNotificationService->unreadCountForAdmin((int) $request->user('admin')->id),
+                    ];
+                } catch (\Exception $e) {
+                    return [
+                        'unread_count' => 0,
+                    ];
+                }
+            },
             'adminConfig' => function () use ($request, $settingService) {
                 // Only load for admin routes
                 if (!$request->is('admin/*') && !$request->is('admin')) {
@@ -159,6 +177,10 @@ class HandleInertiaRequests extends Middleware
                     return null;
                 }
             },
+            // Note: Theme-specific data (theme, contactInfo, socialLinks) is shared
+            // by ShareFrontendData middleware via the hook system. Each theme registers
+            // only the shared props it needs through its hooks.php file.
+
         ]);
     }
 }

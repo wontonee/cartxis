@@ -311,7 +311,7 @@ class PhonePeController extends Controller
             $template = EmailTemplate::findByCode('order_placed');
 
             if ($template) {
-                $shippingAddress = $order->shippingAddress();
+                $shippingAddress = $order->shippingAddress;
                 $customerName = $shippingAddress
                     ? $shippingAddress->first_name . ' ' . $shippingAddress->last_name
                     : $order->customer_name ?? 'Customer';

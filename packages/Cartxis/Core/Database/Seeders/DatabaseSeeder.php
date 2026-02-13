@@ -9,7 +9,6 @@ use Cartxis\Admin\Database\Seeders\AdminUserSeeder;
 use Cartxis\Admin\Database\Seeders\AdminMenuSeeder;
 use Cartxis\Shop\Database\Seeders\ThemeSeeder;
 use Cartxis\Core\Database\Seeders\PaymentMethodsTableSeeder;
-use Cartxis\Core\Database\Seeders\ChannelSeeder;
 use Cartxis\Core\Database\Seeders\ShippingMethodSeeder;
 use Cartxis\Core\Database\Seeders\TaxSeeder;
 use Cartxis\Core\Database\Seeders\EmailSeeder;
@@ -38,7 +37,7 @@ class DatabaseSeeder extends Seeder
             AdminMenuSeeder::class,
 
             // Core Package Seeders
-            ChannelSeeder::class,
+            CountrySeeder::class,
             PaymentMethodsTableSeeder::class,
             ShippingMethodSeeder::class,
             TaxSeeder::class,

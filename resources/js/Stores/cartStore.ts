@@ -36,6 +36,16 @@ export const useCartStore = defineStore('cart', () => {
 
     const isEmpty = computed(() => items.value.length === 0);
 
+    // Normalize API cart item fields to match CartItem interface
+    const normalizeItems = (rawItems: any[]): CartItem[] => {
+        return rawItems.map((item: any) => ({
+            ...item,
+            product_name: item.product_name || item.name || '',
+            product_slug: item.product_slug || item.slug || '',
+            product_image: item.product_image || item.image || null,
+        }));
+    };
+
     // Actions
     const fetchCart = async () => {
         loading.value = true;
@@ -53,7 +63,7 @@ export const useCartStore = defineStore('cart', () => {
             }
 
             const data = await response.json();
-            items.value = data.items || [];
+            items.value = normalizeItems(data.items || []);
         } catch (e) {
             error.value = e instanceof Error ? e.message : 'Unknown error';
             console.error('Cart fetch error:', e);
@@ -71,7 +81,7 @@ export const useCartStore = defineStore('cart', () => {
         error.value = null;
 
         try {
-            const response = await fetch('/cart/add', {
+            const response = await fetch('/api/cart/add', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -91,7 +101,7 @@ export const useCartStore = defineStore('cart', () => {
             }
 
             const data = await response.json();
-            items.value = data.items || [];
+            items.value = normalizeItems(data.items || []);
 
             return { success: true, message: data.message || 'Added to cart successfully' };
         } catch (e) {
@@ -140,7 +150,7 @@ export const useCartStore = defineStore('cart', () => {
             }
 
             const data = await response.json();
-            items.value = data.items || [];
+            items.value = normalizeItems(data.items || []);
 
             return { success: true };
         } catch (e) {
@@ -178,7 +188,7 @@ export const useCartStore = defineStore('cart', () => {
             }
 
             const data = await response.json();
-            items.value = data.items || [];
+            items.value = normalizeItems(data.items || []);
 
             return { success: true };
         } catch (e) {

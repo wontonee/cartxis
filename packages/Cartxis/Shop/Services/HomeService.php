@@ -6,6 +6,7 @@ use Cartxis\Shop\Contracts\ProductRepositoryInterface;
 use Cartxis\Shop\Contracts\CategoryRepositoryInterface;
 use Cartxis\Shop\Services\ShopService;
 use Cartxis\CMS\Models\Block;
+use Cartxis\Core\Models\Theme;
 
 class HomeService extends ShopService
 {
@@ -42,6 +43,22 @@ class HomeService extends ShopService
     {
         try {
             $featuredCount = config('shop.homepage.featured_products_count', 12);
+            $activeThemeSlug = Theme::query()
+                ->where('is_active', true)
+                ->value('slug') ?? (string) config('theme.default', 'cartxis-default');
+
+            $identifierCandidates = function (string $identifier) use ($activeThemeSlug): array {
+                $slug = trim((string) $activeThemeSlug);
+
+                if ($slug === '') {
+                    return [$identifier];
+                }
+
+                return array_values(array_unique([
+                    $slug . '-' . $identifier,
+                    $identifier,
+                ]));
+            };
 
             // Primary hero identifier is configurable; fall back to existing demo identifiers.
             $primaryHeroIdentifier = (string) config('shop.homepage.hero_block_identifier', 'homepage-hero');
@@ -50,7 +67,7 @@ class HomeService extends ShopService
                 $configuredHeroIdentifiers = [];
             }
 
-            $heroCandidates = array_values(array_unique(array_filter(array_merge(
+            $baseHeroCandidates = array_values(array_unique(array_filter(array_merge(
                 $configuredHeroIdentifiers,
                 [
                     $primaryHeroIdentifier,
@@ -61,18 +78,42 @@ class HomeService extends ShopService
                 ]
             ))));
 
-            $blockIdentifiers = array_values(array_unique(array_filter(array_merge([
+            $baseBlockIdentifiers = [
                 'homepage-deal',
                 'homepage-features',
                 'homepage-testimonials',
                 'homepage-brands',
-            ], $heroCandidates))));
+                'homepage-banner',
+                'homepage-offer-1',
+                'homepage-offer-2',
+                'homepage-marquee',
+            ];
+
+            $heroCandidateGroups = array_map($identifierCandidates, $baseHeroCandidates);
+
+            $sectionCandidateGroups = [];
+            foreach ($baseBlockIdentifiers as $identifier) {
+                $sectionCandidateGroups[$identifier] = $identifierCandidates($identifier);
+            }
+
+            $blockIdentifiers = [];
+            foreach ($heroCandidateGroups as $candidates) {
+                foreach ($candidates as $identifier) {
+                    $blockIdentifiers[] = $identifier;
+                }
+            }
+            foreach ($sectionCandidateGroups as $candidates) {
+                foreach ($candidates as $identifier) {
+                    $blockIdentifiers[] = $identifier;
+                }
+            }
+            $blockIdentifiers = array_values(array_unique($blockIdentifiers));
 
             // Version cache key by CMS block updates so homepage banners update immediately.
             $blocksUpdatedAt = Block::whereIn('identifier', $blockIdentifiers)->max('updated_at');
             $blocksVersion = $blocksUpdatedAt ? (int) strtotime((string) $blocksUpdatedAt) : 0;
 
-            return $this->remember('homepage.data.v2.' . $blocksVersion, 3600, function () use ($featuredCount, $blockIdentifiers, $heroCandidates) {
+            return $this->remember('homepage.data.v3.' . $activeThemeSlug . '.' . $blocksVersion, 3600, function () use ($featuredCount, $blockIdentifiers, $heroCandidateGroups, $sectionCandidateGroups) {
                 // Get active CMS blocks for homepage
                 $blocks = Block::whereIn('identifier', $blockIdentifiers)
                     ->active()
@@ -80,9 +121,20 @@ class HomeService extends ShopService
                     ->get()
                     ->keyBy('identifier');
 
+                $resolveBlock = function (array $candidates) use ($blocks) {
+                    foreach ($candidates as $identifier) {
+                        $block = $blocks->get($identifier);
+                        if ($block) {
+                            return $block;
+                        }
+                    }
+
+                    return null;
+                };
+
                 $heroBlocks = [];
-                foreach ($heroCandidates as $identifier) {
-                    $block = $blocks->get($identifier);
+                foreach ($heroCandidateGroups as $candidates) {
+                    $block = $resolveBlock($candidates);
                     if ($block) {
                         $heroBlocks[] = $block;
                     }
@@ -90,10 +142,14 @@ class HomeService extends ShopService
 
                 $heroBlock = $heroBlocks[0] ?? null;
 
-                $dealBlock = $blocks->get('homepage-deal');
-                $featuresBlock = $blocks->get('homepage-features');
-                $testimonialsBlock = $blocks->get('homepage-testimonials');
-                $brandsBlock = $blocks->get('homepage-brands');
+                $dealBlock = $resolveBlock($sectionCandidateGroups['homepage-deal'] ?? []);
+                $featuresBlock = $resolveBlock($sectionCandidateGroups['homepage-features'] ?? []);
+                $testimonialsBlock = $resolveBlock($sectionCandidateGroups['homepage-testimonials'] ?? []);
+                $brandsBlock = $resolveBlock($sectionCandidateGroups['homepage-brands'] ?? []);
+                $bannerBlock = $resolveBlock($sectionCandidateGroups['homepage-banner'] ?? []);
+                $offer1Block = $resolveBlock($sectionCandidateGroups['homepage-offer-1'] ?? []);
+                $offer2Block = $resolveBlock($sectionCandidateGroups['homepage-offer-2'] ?? []);
+                $marqueeBlock = $resolveBlock($sectionCandidateGroups['homepage-marquee'] ?? []);
                 
                 // Get categories with product counts
                 $categories = $this->categoryRepository->getRootCategories()
@@ -159,6 +215,33 @@ class HomeService extends ShopService
                             'title' => $brandsBlock->title,
                             'content' => $brandsBlock->content,
                             'type' => $brandsBlock->type,
+                        ] : null,
+                        'banner' => $bannerBlock ? [
+                            'id' => $bannerBlock->id,
+                            'title' => $bannerBlock->title,
+                            'content' => $bannerBlock->content,
+                            'type' => $bannerBlock->type,
+                            'data' => json_decode($bannerBlock->content, true),
+                        ] : null,
+                        'offer_1' => $offer1Block ? [
+                            'id' => $offer1Block->id,
+                            'title' => $offer1Block->title,
+                            'content' => $offer1Block->content,
+                            'type' => $offer1Block->type,
+                            'data' => json_decode($offer1Block->content, true),
+                        ] : null,
+                        'offer_2' => $offer2Block ? [
+                            'id' => $offer2Block->id,
+                            'title' => $offer2Block->title,
+                            'content' => $offer2Block->content,
+                            'type' => $offer2Block->type,
+                            'data' => json_decode($offer2Block->content, true),
+                        ] : null,
+                        'marquee' => $marqueeBlock ? [
+                            'id' => $marqueeBlock->id,
+                            'title' => $marqueeBlock->title,
+                            'content' => $marqueeBlock->content,
+                            'type' => $marqueeBlock->type,
                         ] : null,
                     ],
                 ];

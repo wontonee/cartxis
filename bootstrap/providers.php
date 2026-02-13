@@ -3,7 +3,7 @@
 return [
     App\Providers\AppServiceProvider::class,
     App\Providers\FortifyServiceProvider::class,
-    App\Providers\ThemeServiceProvider::class,
+    Cartxis\Core\Providers\ThemeServiceProvider::class,
     Cartxis\Core\Providers\CoreServiceProvider::class,
     Cartxis\Core\Providers\MailConfigServiceProvider::class,
     Cartxis\Admin\Providers\AdminServiceProvider::class,

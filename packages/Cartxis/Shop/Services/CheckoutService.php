@@ -9,6 +9,7 @@ use Cartxis\Shop\Models\Address;
 use Cartxis\Product\Models\Product;
 use Cartxis\Customer\Models\Customer;
 use Cartxis\Customer\Models\CustomerAddress;
+use Cartxis\Admin\Services\AdminNotificationService;
 use App\Models\User;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -31,7 +32,8 @@ class CheckoutService extends ShopService
      * @return void
      */
     public function __construct(
-        OrderRepositoryInterface $orderRepository
+        OrderRepositoryInterface $orderRepository,
+        protected AdminNotificationService $adminNotificationService
     ) {
         $this->orderRepository = $orderRepository;
     }
@@ -174,6 +176,8 @@ class CheckoutService extends ShopService
             // Clear cart after successful order creation (handled in controller)
             // Session::forget('cart');
 
+            $this->dispatchOrderCreatedEvent($order);
+
             DB::commit();
 
             return $this->formatResponse([
@@ -185,6 +189,62 @@ class CheckoutService extends ShopService
             DB::rollBack();
             Log::error('Order creation failed: ' . $e->getMessage());
             return $this->handleException($e, 'Failed to create order');
+        }
+    }
+
+    /**
+     * Dispatch admin notification + activity log for storefront order creation.
+     */
+    protected function dispatchOrderCreatedEvent(Order $order): void
+    {
+        try {
+            $actionUrl = "/admin/sales/orders/{$order->id}";
+            $isGuest = $order->user_id === null;
+
+            $this->adminNotificationService->notifyAllAdmins(
+                type: 'order.created',
+                title: "New order #{$order->order_number}",
+                message: $isGuest
+                    ? 'A guest customer placed a new order.'
+                    : 'A registered customer placed a new order.',
+                actionUrl: $actionUrl,
+                actorUserId: $order->user_id,
+                entityType: 'order',
+                entityId: (int) $order->id,
+                meta: [
+                    'order_id' => $order->id,
+                    'order_number' => $order->order_number,
+                    'source' => 'storefront_checkout',
+                    'customer_email' => $order->customer_email,
+                    'is_guest' => $isGuest,
+                    'payment_method' => $order->payment_method,
+                    'payment_status' => $order->payment_status,
+                    'status' => $order->status,
+                    'total' => (float) $order->total,
+                ],
+                severity: 'info'
+            );
+
+            $this->adminNotificationService->log(
+                action: 'order.created',
+                description: "Order {$order->order_number} was created from storefront checkout.",
+                actorUserId: $order->user_id,
+                entityType: 'order',
+                entityId: (int) $order->id,
+                context: [
+                    'order_number' => $order->order_number,
+                    'source' => 'storefront_checkout',
+                    'is_guest' => $isGuest,
+                    'customer_email' => $order->customer_email,
+                    'total' => (float) $order->total,
+                ],
+                level: 'info'
+            );
+        } catch (\Throwable $exception) {
+            Log::error('CheckoutService: failed to dispatch order-created admin notification', [
+                'order_id' => $order->id,
+                'error' => $exception->getMessage(),
+            ]);
         }
     }
 

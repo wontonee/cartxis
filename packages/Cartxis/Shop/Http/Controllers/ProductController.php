@@ -155,15 +155,16 @@ class ProductController extends Controller
                     
                     return [
                         'id' => $attribute->id,
-                        'name' => $attribute->name,
+                        'label' => $attribute->name,
                         'code' => $attribute->code ?? strtolower(str_replace(' ', '_', $attribute->name)),
                         'type' => $attribute->type ?? 'select',
                         'is_required' => $attribute->is_required ?? true,
                         'options' => $attribute->options->map(function ($option) {
                             return [
                                 'id' => $option->id,
+                                'label' => $option->label,
                                 'value' => $option->value,
-                                'color_code' => $option->color_code ?? null,
+                                'swatch_value' => $option->swatch_value ?? null,
                             ];
                         })->values()->toArray(),
                     ];
@@ -174,8 +175,26 @@ class ProductController extends Controller
             $configurableAttributes = $attributes;
         }
 
+        // Map approvedReviews to reviews for frontend
+        $productData = $product->toArray();
+        $productData['reviews'] = collect($productData['approved_reviews'] ?? [])->map(function ($r) {
+            return [
+                'id' => $r['id'],
+                'author' => $r['reviewer_name'] ?? 'Anonymous',
+                'rating' => $r['rating'],
+                'title' => $r['title'] ?? '',
+                'comment' => $r['comment'] ?? '',
+                'created_at' => $r['created_at'],
+            ];
+        })->values()->toArray();
+        $productData['reviews_count'] = count($productData['reviews']);
+        $productData['rating'] = count($productData['reviews']) > 0
+            ? round(collect($productData['reviews'])->avg('rating'), 1)
+            : 0;
+        unset($productData['approved_reviews']);
+
         return Inertia::render($this->themeResolver->resolve('Products/Show'), [
-            'product' => $product,
+            'product' => $productData,
             'relatedProducts' => $relatedProducts,
             'configurableAttributes' => $configurableAttributes,
             'seo' => [

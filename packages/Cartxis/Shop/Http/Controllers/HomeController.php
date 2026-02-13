@@ -4,7 +4,6 @@ namespace Cartxis\Shop\Http\Controllers;
 
 use Cartxis\Shop\Services\HomeService;
 use Cartxis\Core\Services\ThemeViewResolver;
-use Cartxis\Core\Models\Theme;
 use Cartxis\Core\Services\SettingService;
 use Inertia\Inertia;
 
@@ -47,27 +46,9 @@ class HomeController extends Controller
     {
         $data = $this->homeService->getHomepageData();
         
-        // Get active theme
-        $theme = Theme::active();
-        
-        // Get theme settings
-        $themeSettings = [
-            'primary_color' => $theme?->getSetting('colors.primary') ?? '#3b82f6',
-            'secondary_color' => $theme?->getSetting('colors.secondary') ?? '#8b5cf6',
-            'features' => [
-                'sticky_header' => $theme?->getSetting('features.sticky_header') ?? true,
-                'back_to_top' => $theme?->getSetting('features.back_to_top') ?? true,
-                'wishlist' => $theme?->getSetting('features.wishlist') ?? true,
-            ]
-        ];
-        
         // Use ThemeViewResolver to get correct view path
         return Inertia::render($this->themeResolver->resolve('Home/Index'), [
-            'theme' => [
-                'name' => $theme?->name ?? 'Default',
-                'slug' => $theme?->slug ?? 'default',
-                'settings' => $themeSettings
-            ],
+            // 'theme' prop is shared via HandleInertiaRequests middleware (flattened settings)
             'featuredProducts' => $data['featured_products'],
             'featuredCategories' => $data['categories'], // Renamed for clarity
             'newProducts' => $data['new_products'],

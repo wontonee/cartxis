@@ -37,7 +37,6 @@ return [
     ],
     
     'defaults' => [
-        'channel_id' => 1,
         'locale_code' => 'en',
         'currency_code' => 'USD',
         'inventory_source_id' => 1,

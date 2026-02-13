@@ -85,6 +85,10 @@ class CoreServiceProvider extends ServiceProvider
                 ExtensionsUninstallCommand::class,
                 ExtensionsActivateCommand::class,
                 ExtensionsDeactivateCommand::class,
+                \Cartxis\Core\Console\Commands\ThemeDiscoverCommand::class,
+                \Cartxis\Core\Console\Commands\ThemeListCommand::class,
+                \Cartxis\Core\Console\Commands\ThemeActivateCommand::class,
+                \Cartxis\Core\Console\Commands\ThemeImportDataCommand::class,
             ]);
         }
     }
@@ -113,8 +117,35 @@ class CoreServiceProvider extends ServiceProvider
             __DIR__ . '/../Resources/lang' => lang_path('vendor/core'),
         ], 'core-translations');
 
+        // Boot themes — discover filesystem, load active theme assets
+        $this->bootThemes();
+
         // Boot active extensions
         $this->bootExtensions();
+    }
+
+    /**
+     * Discover themes from filesystem and boot the active theme's assets/hooks.
+     */
+    protected function bootThemes(): void
+    {
+        try {
+            /** @var \Cartxis\Core\Services\ThemeService $themeService */
+            $themeService = $this->app->make('vortex.theme');
+
+            // Auto-discover themes from the themes/ directory into the DB
+            $themeService->discover();
+
+            // Load asset paths and hooks for the currently active theme
+            $activeTheme = $themeService->active();
+
+            if ($activeTheme) {
+                config(['theme.active' => $activeTheme->slug]);
+                $themeService->loadAssets($activeTheme);
+            }
+        } catch (\Exception $e) {
+            // Silently fail during install/migration when tables don't exist yet
+        }
     }
 
     /**

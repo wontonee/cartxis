@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
+use Illuminate\Database\Eloquent\Relations\MorphOne;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use App\Models\User;
@@ -160,21 +161,23 @@ class Order extends Model
     /**
      * Get the shipping address.
      *
-    * @return \Cartxis\Shop\Models\Address|null
+     * @return \Illuminate\Database\Eloquent\Relations\MorphOne
      */
-    public function shippingAddress()
+    public function shippingAddress(): MorphOne
     {
-        return $this->addresses()->where('type', Address::TYPE_SHIPPING)->first();
+        return $this->morphOne(Address::class, 'addressable')
+            ->where('type', Address::TYPE_SHIPPING);
     }
 
     /**
      * Get billing address for the order.
      *
-    * @return \Cartxis\Shop\Models\Address|null
+     * @return \Illuminate\Database\Eloquent\Relations\MorphOne
      */
-    public function billingAddress()
+    public function billingAddress(): MorphOne
     {
-        return $this->addresses()->where('type', Address::TYPE_BILLING)->first();
+        return $this->morphOne(Address::class, 'addressable')
+            ->where('type', Address::TYPE_BILLING);
     }
 
     /**

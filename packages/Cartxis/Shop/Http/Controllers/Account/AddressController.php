@@ -5,6 +5,7 @@ namespace Cartxis\Shop\Http\Controllers\Account;
 use Illuminate\Http\Request;
 use Cartxis\Shop\Http\Controllers\Controller;
 use Cartxis\Shop\Models\Address;
+use Cartxis\Core\Models\Country;
 use Cartxis\Core\Services\ThemeViewResolver;
 
 class AddressController extends Controller
@@ -27,8 +28,18 @@ class AddressController extends Controller
             ->orderByDesc('created_at')
             ->get();
 
+        $countries = Country::query()
+            ->active()
+            ->ordered()
+            ->get(['name', 'code'])
+            ->map(fn ($country) => [
+                'name' => $country->name,
+                'code' => $country->code,
+            ]);
+
         return $this->themeResolver->inertia('Account/Addresses/Index', [
             'addresses' => $addresses,
+            'countries' => $countries,
         ]);
     }
 

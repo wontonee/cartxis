@@ -30,8 +30,11 @@ const form = useForm({
   description: props.method.description || '',
   instructions: props.method.instructions || '',
   configuration: {
+    mode: props.method.configuration?.mode || 'test',
     key_id: props.method.configuration?.key_id || '',
     key_secret: props.method.configuration?.key_secret || '',
+    test_key_id: props.method.configuration?.test_key_id || '',
+    test_key_secret: props.method.configuration?.test_key_secret || '',
     currency: props.method.configuration?.currency || 'INR',
     webhook_secret: props.method.configuration?.webhook_secret || '',
     auto_capture: props.method.configuration?.auto_capture ?? true,
@@ -116,7 +119,50 @@ const save = () => {
 
         <!-- Razorpay API Keys Section -->
         <div class="p-6 border-b border-gray-200 dark:border-gray-700">
-          <h2 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Razorpay API Keys</h2>
+          <h2 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Environment Mode</h2>
+
+          <div class="flex items-center gap-4 mb-6">
+            <label
+              class="relative flex items-center gap-3 px-4 py-3 border-2 rounded-lg cursor-pointer transition-all"
+              :class="form.configuration.mode === 'test' ? 'border-amber-500 bg-amber-50 dark:bg-amber-900/20' : 'border-gray-200 dark:border-gray-600'"
+            >
+              <input v-model="form.configuration.mode" type="radio" value="test" class="sr-only" />
+              <div class="w-4 h-4 rounded-full border-2 flex items-center justify-center" :class="form.configuration.mode === 'test' ? 'border-amber-500' : 'border-gray-300'">
+                <div v-if="form.configuration.mode === 'test'" class="w-2 h-2 rounded-full bg-amber-500"></div>
+              </div>
+              <div>
+                <div class="text-sm font-semibold" :class="form.configuration.mode === 'test' ? 'text-amber-700 dark:text-amber-400' : 'text-gray-700 dark:text-gray-300'">Test Mode</div>
+                <div class="text-xs text-gray-500">Use test API keys for development</div>
+              </div>
+            </label>
+            <label
+              class="relative flex items-center gap-3 px-4 py-3 border-2 rounded-lg cursor-pointer transition-all"
+              :class="form.configuration.mode === 'production' ? 'border-green-500 bg-green-50 dark:bg-green-900/20' : 'border-gray-200 dark:border-gray-600'"
+            >
+              <input v-model="form.configuration.mode" type="radio" value="production" class="sr-only" />
+              <div class="w-4 h-4 rounded-full border-2 flex items-center justify-center" :class="form.configuration.mode === 'production' ? 'border-green-500' : 'border-gray-300'">
+                <div v-if="form.configuration.mode === 'production'" class="w-2 h-2 rounded-full bg-green-500"></div>
+              </div>
+              <div>
+                <div class="text-sm font-semibold" :class="form.configuration.mode === 'production' ? 'text-green-700 dark:text-green-400' : 'text-gray-700 dark:text-gray-300'">Production Mode</div>
+                <div class="text-xs text-gray-500">Use live API keys for real transactions</div>
+              </div>
+            </label>
+          </div>
+
+          <div v-if="form.configuration.mode === 'test'" class="bg-amber-50 dark:bg-amber-900/30 border border-amber-200 dark:border-amber-800 rounded-lg p-4 mb-6">
+            <p class="text-sm text-amber-800 dark:text-amber-200">
+              <strong>⚠ Test Mode Active:</strong> No real charges will be made. Use Razorpay test keys (starting with <code class="bg-amber-100 dark:bg-amber-800 px-1 rounded">rzp_test_</code>).
+            </p>
+          </div>
+
+          <div v-if="form.configuration.mode === 'production'" class="bg-green-50 dark:bg-green-900/30 border border-green-200 dark:border-green-800 rounded-lg p-4 mb-6">
+            <p class="text-sm text-green-800 dark:text-green-200">
+              <strong>✓ Production Mode:</strong> Real charges will be processed. Use live keys (starting with <code class="bg-green-100 dark:bg-green-800 px-1 rounded">rzp_live_</code>).
+            </p>
+          </div>
+
+          <h2 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">{{ form.configuration.mode === 'test' ? 'Test' : 'Production' }} API Keys</h2>
 
           <div class="bg-blue-50 dark:bg-blue-900/30 border border-blue-200 dark:border-blue-800 rounded-lg p-4 mb-4">
             <p class="text-sm text-blue-900 dark:text-blue-200">
@@ -125,35 +171,61 @@ const save = () => {
           </div>
 
           <div class="space-y-4">
-            <!-- Key ID -->
-            <div>
-              <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                Key ID <span class="text-red-500">*</span>
-              </label>
-              <input
-                v-model="form.configuration.key_id"
-                type="text"
-                :class="['w-full px-3 py-2 border rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:ring-2 focus:ring-blue-500 focus:border-transparent font-mono text-sm', errors['configuration.key_id'] ? 'border-red-500' : 'border-gray-300 dark:border-gray-600']"
-                placeholder="rzp_test_..."
-              />
-              <p v-if="errors['configuration.key_id']" class="mt-1 text-sm text-red-600">{{ errors['configuration.key_id'] }}</p>
-              <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">Starts with <code class="bg-gray-100 dark:bg-gray-700 px-1 rounded">rzp_test_</code> or <code class="bg-gray-100 dark:bg-gray-700 px-1 rounded">rzp_live_</code></p>
-            </div>
+            <!-- Test Keys -->
+            <template v-if="form.configuration.mode === 'test'">
+              <div>
+                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                  Test Key ID <span class="text-red-500">*</span>
+                </label>
+                <input
+                  v-model="form.configuration.test_key_id"
+                  type="text"
+                  :class="['w-full px-3 py-2 border rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:ring-2 focus:ring-blue-500 focus:border-transparent font-mono text-sm', errors['configuration.test_key_id'] ? 'border-red-500' : 'border-gray-300 dark:border-gray-600']"
+                  placeholder="rzp_test_..."
+                />
+                <p v-if="errors['configuration.test_key_id']" class="mt-1 text-sm text-red-600">{{ errors['configuration.test_key_id'] }}</p>
+              </div>
+              <div>
+                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                  Test Key Secret <span class="text-red-500">*</span>
+                </label>
+                <input
+                  v-model="form.configuration.test_key_secret"
+                  type="password"
+                  :class="['w-full px-3 py-2 border rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:ring-2 focus:ring-blue-500 focus:border-transparent font-mono text-sm', errors['configuration.test_key_secret'] ? 'border-red-500' : 'border-gray-300 dark:border-gray-600']"
+                  placeholder="Enter your Test Key Secret"
+                />
+                <p v-if="errors['configuration.test_key_secret']" class="mt-1 text-sm text-red-600">{{ errors['configuration.test_key_secret'] }}</p>
+              </div>
+            </template>
 
-            <!-- Key Secret -->
-            <div>
-              <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                Key Secret <span class="text-red-500">*</span>
-              </label>
-              <input
-                v-model="form.configuration.key_secret"
-                type="password"
-                :class="['w-full px-3 py-2 border rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:ring-2 focus:ring-blue-500 focus:border-transparent font-mono text-sm', errors['configuration.key_secret'] ? 'border-red-500' : 'border-gray-300 dark:border-gray-600']"
-                placeholder="Enter your Razorpay Key Secret"
-              />
-              <p v-if="errors['configuration.key_secret']" class="mt-1 text-sm text-red-600">{{ errors['configuration.key_secret'] }}</p>
-              <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">Keep this secret secure - never share it publicly</p>
-            </div>
+            <!-- Production Keys -->
+            <template v-else>
+              <div>
+                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                  Live Key ID <span class="text-red-500">*</span>
+                </label>
+                <input
+                  v-model="form.configuration.key_id"
+                  type="text"
+                  :class="['w-full px-3 py-2 border rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:ring-2 focus:ring-blue-500 focus:border-transparent font-mono text-sm', errors['configuration.key_id'] ? 'border-red-500' : 'border-gray-300 dark:border-gray-600']"
+                  placeholder="rzp_live_..."
+                />
+                <p v-if="errors['configuration.key_id']" class="mt-1 text-sm text-red-600">{{ errors['configuration.key_id'] }}</p>
+              </div>
+              <div>
+                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                  Live Key Secret <span class="text-red-500">*</span>
+                </label>
+                <input
+                  v-model="form.configuration.key_secret"
+                  type="password"
+                  :class="['w-full px-3 py-2 border rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:ring-2 focus:ring-blue-500 focus:border-transparent font-mono text-sm', errors['configuration.key_secret'] ? 'border-red-500' : 'border-gray-300 dark:border-gray-600']"
+                  placeholder="Enter your Live Key Secret"
+                />
+                <p v-if="errors['configuration.key_secret']" class="mt-1 text-sm text-red-600">{{ errors['configuration.key_secret'] }}</p>
+              </div>
+            </template>
 
             <!-- Currency -->
             <div>

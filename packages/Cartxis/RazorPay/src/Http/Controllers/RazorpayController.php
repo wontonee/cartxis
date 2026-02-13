@@ -77,8 +77,10 @@ class RazorpayController extends Controller
             $template = EmailTemplate::findByCode('order_placed');
             
             if ($template) {
-                $shippingAddress = $order->shippingAddress();
-                $customerName = $shippingAddress->first_name . ' ' . $shippingAddress->last_name;
+                $shippingAddress = $order->shippingAddress;
+                $customerName = $shippingAddress
+                    ? trim($shippingAddress->first_name . ' ' . $shippingAddress->last_name)
+                    : ($order->customer_name ?? 'Customer');
                 
                 $template->send($order->customer_email, [
                     'customer_name' => $customerName,

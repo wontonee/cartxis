@@ -32,12 +32,25 @@ class RazorpayGateway implements PaymentGatewayInterface
     }
 
     /**
-     * Get configuration value.
+     * Get configuration value, resolving test/production mode for API keys.
      */
     protected function getConfig(string $key, mixed $default = null): mixed
     {
         $method = $this->getPaymentMethod();
-        return $method?->getConfigValue($key, $default);
+        if (!$method) return $default;
+
+        // Resolve key_id / key_secret based on mode (test vs production)
+        if (in_array($key, ['key_id', 'key_secret'])) {
+            $mode = $method->getConfigValue('mode', 'test');
+            if ($mode === 'test') {
+                $testVal = $method->getConfigValue('test_' . $key);
+                if ($testVal) return $testVal;
+            }
+            // In production mode or no test key set, use the live key
+            return $method->getConfigValue($key, $default);
+        }
+
+        return $method->getConfigValue($key, $default);
     }
 
     /**
@@ -48,10 +61,17 @@ class RazorpayGateway implements PaymentGatewayInterface
         if (!$this->razorpay) {
             $keyId = $this->getConfig('key_id');
             $keySecret = $this->getConfig('key_secret');
+            $mode = $this->getPaymentMethod()?->getConfigValue('mode', 'test');
             
             if (!$keyId || !$keySecret) {
                 throw new \Exception('Razorpay API credentials not configured');
             }
+            
+            Log::info('RazorpayGateway: Using credentials', [
+                'mode' => $mode,
+                'key_id' => substr($keyId, 0, 12) . '***',
+                'key_secret_length' => strlen($keySecret),
+            ]);
             
             $this->razorpay = new Api($keyId, $keySecret);
         }
@@ -102,8 +122,10 @@ class RazorpayGateway implements PaymentGatewayInterface
             ]);
 
             // Get shipping address for receipt
-            $shippingAddress = $order->shippingAddress();
-            $customerName = $shippingAddress->first_name . ' ' . $shippingAddress->last_name;
+            $shippingAddress = $order->shippingAddress;
+            $customerName = $shippingAddress
+                ? trim($shippingAddress->first_name . ' ' . $shippingAddress->last_name)
+                : ($order->customer_name ?? 'Customer');
 
             // Create Razorpay Order
             $razorpayOrder = $api->order->create([
@@ -145,7 +167,7 @@ class RazorpayGateway implements PaymentGatewayInterface
                     'prefill' => [
                         'name' => $customerName,
                         'email' => $order->customer_email,
-                        'contact' => $shippingAddress->phone ?? '',
+                        'contact' => $shippingAddress?->phone ?? '',
                     ],
                     'theme' => [
                         'color' => '#3399cc',

@@ -32,10 +32,6 @@ class BlockRepository
             $query->where('type', $filters['type']);
         }
 
-        if (!empty($filters['channel_id'])) {
-            $query->where('channel_id', $filters['channel_id']);
-        }
-
         return $query->orderBy('title')->get();
     }
 
@@ -63,11 +59,6 @@ class BlockRepository
         // Filter by type
         if (!empty($filters['type'])) {
             $query->where('type', $filters['type']);
-        }
-
-        // Filter by channel
-        if (!empty($filters['channel_id'])) {
-            $query->where('channel_id', $filters['channel_id']);
         }
 
         // Sorting

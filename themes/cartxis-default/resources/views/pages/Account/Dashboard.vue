@@ -46,9 +46,19 @@ const formatPrice = (price: number) => {
     <div class="container mx-auto px-4 py-8">
       <div class="max-w-7xl mx-auto">
         <!-- Welcome Header -->
-        <div class="mb-8">
-          <h1 class="text-3xl font-bold mb-2">Welcome back, {{ user?.name || 'Customer' }}!</h1>
-          <p class="text-gray-600">Manage your orders, profile, and account settings</p>
+        <div class="mb-8 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+          <div>
+            <h1 class="text-3xl font-bold mb-2">Welcome back, {{ user?.name || 'Customer' }}!</h1>
+            <p class="text-gray-600">Manage your orders, profile, and account settings</p>
+          </div>
+          <Link
+            href="/logout"
+            method="post"
+            as="button"
+            class="inline-flex items-center px-4 py-2 text-sm font-medium text-red-600 border border-red-200 rounded-lg hover:bg-red-50 transition-colors"
+          >
+            Logout
+          </Link>
         </div>
 
         <!-- Quick Stats Cards -->

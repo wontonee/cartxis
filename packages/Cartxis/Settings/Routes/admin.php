@@ -10,6 +10,7 @@ use Cartxis\Settings\Http\Controllers\Admin\TaxZonesController;
 use Cartxis\Settings\Http\Controllers\Admin\TaxRulesController;
 use Cartxis\Settings\Http\Controllers\Admin\EmailController;
 use Cartxis\Settings\Http\Controllers\Admin\AiSettingsController;
+use Cartxis\Settings\Http\Controllers\Admin\CountryController;
 use Illuminate\Support\Facades\Route;
 
 Route::middleware(['web', 'auth:admin'])
@@ -98,5 +99,15 @@ Route::middleware(['web', 'auth:admin'])
         // AI Settings
         Route::get('ai', [AiSettingsController::class, 'index'])->name('ai.index');
         Route::post('ai', [AiSettingsController::class, 'save'])->name('ai.save');
+
+        // Countries
+        Route::prefix('countries')->name('countries.')->group(function () {
+            Route::get('/', [CountryController::class, 'index'])->name('index');
+            Route::post('/', [CountryController::class, 'store'])->name('store');
+            Route::put('{country}', [CountryController::class, 'update'])->name('update');
+            Route::post('{country}/toggle', [CountryController::class, 'toggle'])->name('toggle');
+            Route::post('bulk-toggle', [CountryController::class, 'bulkToggle'])->name('bulk-toggle');
+            Route::delete('{country}', [CountryController::class, 'destroy'])->name('destroy');
+        });
     });
 

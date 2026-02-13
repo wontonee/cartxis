@@ -6,11 +6,12 @@ use Cartxis\Admin\Http\Controllers\Auth\AdminLoginController;
 use Cartxis\Admin\Http\Controllers\UserController;
 use Cartxis\Admin\Http\Controllers\ProfileController;
 use Cartxis\Admin\Http\Controllers\PasswordController;
+use Cartxis\Admin\Http\Controllers\NotificationController;
+use Cartxis\Admin\Http\Controllers\ActivityLogController;
 use Cartxis\Core\Http\Controllers\Admin\DashboardController;
 use Cartxis\Core\Http\Controllers\Admin\ThemeController;
 use Cartxis\Core\Http\Controllers\Admin\Settings\GeneralSettingsController;
 use Cartxis\Settings\Http\Controllers\Admin\ShippingMethodsController;
-use Cartxis\Settings\Http\Controllers\Admin\ChannelsController;
 
 /*
 |--------------------------------------------------------------------------
@@ -35,6 +36,17 @@ Route::prefix('admin')->name('admin.')->middleware(['web'])->group(function () {
         
         // Dashboard
         Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
+
+        // Notifications
+        Route::prefix('notifications')->name('notifications.')->group(function () {
+            Route::get('/', [NotificationController::class, 'index'])->name('index');
+            Route::post('/mark-all-read', [NotificationController::class, 'markAllAsRead'])->name('mark-all-read');
+            Route::post('/{notification}/read', [NotificationController::class, 'markAsRead'])->name('mark-read');
+        });
+
+        // Activity logs
+        Route::get('/activity-logs', [ActivityLogController::class, 'index'])->name('activity-logs.index');
+        Route::get('/activity-logs/data', [ActivityLogController::class, 'data'])->name('activity-logs.data');
         
         // User Management
         Route::prefix('users')->name('users.')->group(function () {
@@ -58,23 +70,20 @@ Route::prefix('admin')->name('admin.')->middleware(['web'])->group(function () {
         });
         
         // Appearance -> Themes
+        Route::get('appearance', [ThemeController::class, 'appearance'])->name('appearance.index');
         Route::prefix('appearance/themes')->name('themes.')->group(function () {
             Route::get('/', [ThemeController::class, 'index'])->name('index');
+            Route::get('/active-settings', [ThemeController::class, 'activeSettings'])->name('active-settings');
             Route::post('/{slug}/activate', [ThemeController::class, 'activate'])->name('activate');
             Route::get('/{slug}/settings', [ThemeController::class, 'settings'])->name('settings');
             Route::put('/{slug}/settings', [ThemeController::class, 'updateSettings'])->name('settings.update');
             Route::delete('/{slug}', [ThemeController::class, 'destroy'])->name('destroy');
+            Route::post('/{slug}/import-data', [ThemeController::class, 'importData'])->name('import-data');
+            Route::post('/{slug}/screenshot', [ThemeController::class, 'uploadScreenshot'])->name('screenshot');
             Route::post('/upload', [ThemeController::class, 'upload'])->name('upload');
         });
-
         // Settings Routes
         Route::prefix('settings')->name('settings.')->group(function () {
-            // Channels Routes
-            Route::resource('channels', ChannelsController::class);
-            Route::post('channels/{channel}/update-theme', [ChannelsController::class, 'updateTheme'])->name('channels.updateTheme');
-            Route::post('channels/{channel}/set-default', [ChannelsController::class, 'setDefault'])->name('channels.setDefault');
-            Route::post('channels/{channel}/toggle-status', [ChannelsController::class, 'toggleStatus'])->name('channels.toggleStatus');
-
             // Shipping Methods Routes
             Route::resource('shipping-methods', ShippingMethodsController::class);
             Route::post('shipping-methods/{shippingMethod}/set-default', [ShippingMethodsController::class, 'setDefault'])->name('shipping-methods.setDefault');
