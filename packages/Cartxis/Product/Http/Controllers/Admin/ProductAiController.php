@@ -43,4 +43,30 @@ class ProductAiController extends Controller
             ], 422);
         }
     }
+
+    public function generatePriceComparison(Request $request): JsonResponse
+    {
+        $validated = $request->validate([
+            'product_name' => 'required|string|max:200',
+            'category' => 'required|string|max:255',
+            'current_price' => 'nullable|numeric|min:0',
+            'cost' => 'nullable|numeric|min:0',
+            'store_country' => 'nullable|string|max:100',
+            'agent' => 'nullable|string|max:120',
+        ]);
+
+        try {
+            $result = $this->service->generatePriceComparison($validated);
+
+            return response()->json([
+                'success' => true,
+                'data' => $result,
+            ]);
+        } catch (\Throwable $e) {
+            return response()->json([
+                'success' => false,
+                'message' => $e->getMessage(),
+            ], 422);
+        }
+    }
 }

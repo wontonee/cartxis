@@ -119,6 +119,31 @@
 
                     <!-- Currency -->
                     <div>
+                        <label for="store_country" class="block text-sm font-medium text-gray-700 mb-2">
+                            Store Country <span class="text-red-500">*</span>
+                        </label>
+                        <select
+                            id="store_country"
+                            v-model="form.store_country"
+                            required
+                            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900"
+                            :class="{ 'border-red-500': errors.store_country }"
+                        >
+                            <option value="">Select country...</option>
+                            <option value="India">India</option>
+                            <option value="United Kingdom">United Kingdom</option>
+                            <option value="United States">United States</option>
+                            <option value="Canada">Canada</option>
+                            <option value="Australia">Australia</option>
+                            <option value="Germany">Germany</option>
+                            <option value="France">France</option>
+                            <option value="United Arab Emirates">United Arab Emirates</option>
+                        </select>
+                        <p v-if="errors.store_country" class="mt-1 text-sm text-red-600">{{ errors.store_country }}</p>
+                    </div>
+
+                    <!-- Currency -->
+                    <div>
                         <label for="currency" class="block text-sm font-medium text-gray-700 mb-2">
                             Currency <span class="text-red-500">*</span>
                         </label>
@@ -212,6 +237,7 @@ const form = ref({
     admin_password_confirmation: '',
     contact_phone: '',
     store_address: '',
+    store_country: '',
     currency: 'USD',
     timezone: 'UTC',
 });
@@ -222,6 +248,7 @@ const processing = ref(false);
 const isValid = computed(() => {
     return form.value.store_name && 
            form.value.admin_email && 
+           form.value.store_country && 
            form.value.currency && 
            form.value.timezone;
 });

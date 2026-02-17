@@ -14,7 +14,7 @@
 /Agent-Mac
 /design
 /templates-design
-/themes/dmart-electronics/*
+# /themes/dmart-electronics/*
 /test-screenshots
 /_backup
 /vendor

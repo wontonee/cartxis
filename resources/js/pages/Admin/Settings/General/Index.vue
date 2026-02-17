@@ -11,6 +11,7 @@ import {
   Mail, 
   Phone, 
   MapPin, 
+  Flag,
   BarChart, 
   Facebook,
   Tag
@@ -41,6 +42,7 @@ const form = useForm({
   admin_email: props.settings['admin_email'] || '',
   contact_phone: props.settings['contact_phone'] || '',
   contact_address: props.settings['contact_address'] || '',
+  store_country: props.settings['store_country'] || '',
   
   // SEO Settings
   meta_title: props.settings['meta_title'] || '',
@@ -261,6 +263,34 @@ const save = () => {
                         </div>
                         <p v-if="form.errors.contact_address" class="mt-1 text-sm text-red-600">{{ form.errors.contact_address }}</p>
                     </div>
+
+                      <!-- Store Country -->
+                      <div>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
+                          Store Country <span class="text-red-500">*</span>
+                        </label>
+                        <div class="relative rounded-lg shadow-sm">
+                          <div class="absolute inset-y-0 left-0 padding-l-3 flex items-center pl-3 pointer-events-none">
+                            <Flag class="h-4 w-4 text-gray-400" />
+                          </div>
+                          <select
+                            v-model="form.store_country"
+                            class="block w-full pl-10 pr-3 py-2.5 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-shadow duration-200"
+                            :class="{ 'border-red-500': form.errors.store_country }"
+                          >
+                            <option value="">Select country...</option>
+                            <option value="India">India</option>
+                            <option value="United Kingdom">United Kingdom</option>
+                            <option value="United States">United States</option>
+                            <option value="Canada">Canada</option>
+                            <option value="Australia">Australia</option>
+                            <option value="Germany">Germany</option>
+                            <option value="France">France</option>
+                            <option value="United Arab Emirates">United Arab Emirates</option>
+                          </select>
+                        </div>
+                        <p v-if="form.errors.store_country" class="mt-1 text-sm text-red-600">{{ form.errors.store_country }}</p>
+                      </div>
                 </div>
               </div>
 

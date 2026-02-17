@@ -12,6 +12,7 @@ use Cartxis\Core\Http\Controllers\Admin\DashboardController;
 use Cartxis\Core\Http\Controllers\Admin\ThemeController;
 use Cartxis\Core\Http\Controllers\Admin\Settings\GeneralSettingsController;
 use Cartxis\Settings\Http\Controllers\Admin\ShippingMethodsController;
+use Cartxis\Settings\Http\Controllers\Admin\ShiprocketSettingsController;
 
 /*
 |--------------------------------------------------------------------------
@@ -84,10 +85,16 @@ Route::prefix('admin')->name('admin.')->middleware(['web'])->group(function () {
         });
         // Settings Routes
         Route::prefix('settings')->name('settings.')->group(function () {
+            Route::get('shiprocket', [ShiprocketSettingsController::class, 'index'])->name('shiprocket.index');
+            Route::post('shiprocket', [ShiprocketSettingsController::class, 'save'])->name('shiprocket.save');
+            Route::post('shiprocket/test-connection', [ShiprocketSettingsController::class, 'testConnection'])->name('shiprocket.test-connection');
+            Route::get('shiprocket/metadata', [ShiprocketSettingsController::class, 'fetchMetadata'])->name('shiprocket.metadata');
+
             // Shipping Methods Routes
             Route::resource('shipping-methods', ShippingMethodsController::class);
             Route::post('shipping-methods/{shippingMethod}/set-default', [ShippingMethodsController::class, 'setDefault'])->name('shipping-methods.setDefault');
             Route::post('shipping-methods/{shippingMethod}/toggle-status', [ShippingMethodsController::class, 'toggleStatus'])->name('shipping-methods.toggleStatus');
+            Route::post('shipping-extensions/{extension}/toggle', [ShippingMethodsController::class, 'toggleExtension'])->name('shipping-extensions.toggle');
             Route::post('shipping-methods/{shippingMethod}/add-rate', [ShippingMethodsController::class, 'addRate'])->name('shipping-methods.addRate');
             Route::put('shipping-rates/{shippingRate}', [ShippingMethodsController::class, 'updateRate'])->name('shipping-rates.update');
             Route::delete('shipping-rates/{shippingRate}', [ShippingMethodsController::class, 'deleteRate'])->name('shipping-rates.delete');

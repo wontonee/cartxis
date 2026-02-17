@@ -121,6 +121,10 @@ Route::middleware(['web', 'auth:admin'])->prefix('admin/sales')->name('admin.sal
         
         // Print shipping label
         Route::get('/{id}/print-label', [ShipmentController::class, 'printLabel'])->name('print-label');
+
+        // Shiprocket integration
+        Route::post('/{id}/shiprocket/create', [ShipmentController::class, 'createInShiprocket'])->name('shiprocket.create');
+        Route::post('/{id}/shiprocket/sync', [ShipmentController::class, 'syncShiprocketTracking'])->name('shiprocket.sync');
     });
 
     // Credit Memos

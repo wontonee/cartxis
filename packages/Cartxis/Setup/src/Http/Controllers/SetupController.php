@@ -68,6 +68,7 @@ class SetupController extends Controller
             'admin_password' => 'nullable|string|min:8|confirmed',
             'contact_phone' => 'nullable|string|max:50',
             'store_address' => 'nullable|string',
+            'store_country' => 'required|string|max:100',
             'currency' => 'required|string|max:10',
             'timezone' => 'required|string|max:100',
         ]);
@@ -91,6 +92,7 @@ class SetupController extends Controller
             $this->settingService->set('admin_email', $validated['admin_email'], 'string', 'general');
             $this->settingService->set('contact_phone', $validated['contact_phone'] ?? '', 'string', 'general');
             $this->settingService->set('contact_address', $validated['store_address'] ?? '', 'string', 'general');
+            $this->settingService->set('store_country', $validated['store_country'], 'string', 'general');
 
             // Optionally create or update admin user credentials
             if (!empty($validated['admin_password'])) {
@@ -127,7 +129,7 @@ class SetupController extends Controller
                     'symbol' => $currencyMeta['symbol'],
                     'symbol_position' => $currencyMeta['symbol_position'],
                     'decimal_places' => $currencyMeta['decimal_places'],
-                    'exchange_rate' => 1,
+                    'exchange_rate' => $currencyMeta['exchange_rate'],
                     'is_default' => true,
                     'is_active' => true,
                     'sort_order' => 0,
@@ -245,6 +247,14 @@ class SetupController extends Controller
             'symbol' => $meta['symbol'],
             'symbol_position' => 'before',
             'decimal_places' => 2,
+            'exchange_rate' => [
+                'USD' => 1.0,
+                'EUR' => 0.92,
+                'GBP' => 0.79,
+                'INR' => 83.0,
+                'AUD' => 1.52,
+                'CAD' => 1.36,
+            ][$code] ?? 1.0,
         ];
     }
 }

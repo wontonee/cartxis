@@ -18,6 +18,7 @@ Route::middleware(['web', 'auth:admin'])
         Route::post('products/bulk-destroy', [ProductController::class, 'bulkDestroy'])->name('products.bulk-destroy');
         Route::post('products/bulk-status', [ProductController::class, 'bulkUpdateStatus'])->name('products.bulk-status');
         Route::post('products/{product}/generate-description', [ProductAiController::class, 'generateDescription'])->name('products.generate-description');
+        Route::post('products/price-comparison', [ProductAiController::class, 'generatePriceComparison'])->name('products.price-comparison');
         
         // Product Image Management
         Route::post('products/{product}/images/upload', [ProductImageController::class, 'upload'])->name('products.images.upload');

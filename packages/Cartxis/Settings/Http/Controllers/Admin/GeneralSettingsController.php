@@ -30,6 +30,7 @@ class GeneralSettingsController extends Controller
                 'admin_email' => (string) $this->settingService->get('admin_email', ''),
                 'contact_phone' => (string) $this->settingService->get('contact_phone', ''),
                 'contact_address' => (string) $this->settingService->get('contact_address', ''),
+                'store_country' => (string) $this->settingService->get('store_country', ''),
                 'site_logo' => (string) $this->settingService->get('site_logo', ''),
                 'admin_logo' => (string) $this->settingService->get('admin_logo', ''),
                 'site_favicon' => (string) $this->settingService->get('site_favicon', ''),
@@ -57,6 +58,7 @@ class GeneralSettingsController extends Controller
             'admin_email' => 'required|email|max:255',
             'contact_phone' => 'nullable|string|max:50',
             'contact_address' => 'nullable|string|max:500',
+            'store_country' => 'required|string|max:100',
 
             // SEO Settings
             'meta_title' => 'nullable|string|max:255',

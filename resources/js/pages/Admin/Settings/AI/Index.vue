@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, ref } from 'vue'
+import { computed, ref, watch } from 'vue'
 import { Head, useForm, usePage } from '@inertiajs/vue3'
 import AdminLayout from '@/layouts/AdminLayout.vue'
 import { 
@@ -7,6 +7,8 @@ import {
   Server, 
   Cpu, 
   Bot, 
+  ChevronDown,
+  ChevronRight,
   Save, 
   Plus, 
   Trash2, 
@@ -45,6 +47,7 @@ interface AgentConfig {
   max_tokens?: number | null
   system_prompt?: string
   is_default?: boolean
+  is_system?: boolean
 }
 
 interface Props {
@@ -53,6 +56,7 @@ interface Props {
     default_provider?: string
     default_agent?: string
     product_description_agent?: string
+    price_comparison_agent?: string
     providers?: ProviderConfig[]
     models?: ModelConfig[]
     agents?: AgentConfig[]
@@ -71,6 +75,7 @@ const form = useForm({
   default_provider: props.settings.default_provider ?? '',
   default_agent: props.settings.default_agent ?? '',
   product_description_agent: props.settings.product_description_agent ?? '',
+  price_comparison_agent: props.settings.price_comparison_agent ?? '',
   providers: (props.settings.providers ?? []) as ProviderConfig[],
   models: (props.settings.models ?? []) as ModelConfig[],
   agents: (props.settings.agents ?? []) as AgentConfig[],
@@ -78,6 +83,7 @@ const form = useForm({
 
 const showApiKeys = ref<Record<number, boolean>>({})
 const activeTab = ref<'access' | 'providers' | 'models' | 'agents'>('access')
+const expandedAgentIndex = ref<number | null>(0)
 
 const providerOptions = computed(() => form.providers.map((p) => p.name).filter(Boolean))
 const agentOptions = computed(() => form.agents.map((a) => a.name).filter(Boolean))
@@ -132,20 +138,60 @@ const removeModel = (index: number) => {
 }
 
 const addAgent = () => {
+  const provider = form.default_provider || (providerOptions.value[0] ?? '')
+  const model = provider ? (getModelsForProvider(provider)[0] || '') : ''
+
   form.agents.push({
     name: '',
-    provider: form.default_provider || (providerOptions.value[0] ?? ''),
-    model: form.models[0]?.name || '',
+    provider,
+    model,
     temperature: 0.7,
     max_tokens: 1024,
     system_prompt: '',
-    is_default: false,
   })
+
+  expandedAgentIndex.value = form.agents.length - 1
 }
 
 const removeAgent = (index: number) => {
+  if (form.agents[index]?.is_system) {
+    showToast('System agents cannot be deleted.', 'warning')
+    return
+  }
+
   form.agents.splice(index, 1)
+
+  if (expandedAgentIndex.value === index) {
+    expandedAgentIndex.value = null
+  } else if (expandedAgentIndex.value !== null && expandedAgentIndex.value > index) {
+    expandedAgentIndex.value -= 1
+  }
 }
+
+const toggleAgentAccordion = (index: number) => {
+  expandedAgentIndex.value = expandedAgentIndex.value === index ? null : index
+}
+
+watch(
+  () => form.agents.map((agent) => ({ provider: agent.provider, model: agent.model })),
+  (agents) => {
+    agents.forEach((agentState, index) => {
+      const availableModels = getModelsForProvider(agentState.provider)
+
+      if (availableModels.length === 0) {
+        if (form.agents[index].model) {
+          form.agents[index].model = ''
+        }
+        return
+      }
+
+      if (!availableModels.includes(agentState.model)) {
+        form.agents[index].model = availableModels[0]
+      }
+    })
+  },
+  { deep: true }
+)
 
 const showToast = (message: string, type: 'success' | 'error' | 'warning' | 'info' = 'success') => {
   window.dispatchEvent(new CustomEvent('show-toast', {
@@ -182,6 +228,7 @@ const save = () => {
           default_provider: form.default_provider,
           default_agent: form.default_agent,
           product_description_agent: form.product_description_agent,
+          price_comparison_agent: form.price_comparison_agent,
         }
       default:
         return {}
@@ -293,6 +340,18 @@ const save = () => {
                     <Terminal class="w-4 h-4 text-gray-400 absolute left-3 top-1/2 -translate-y-1/2" />
                   </div>
                   <p class="mt-1.5 text-xs text-gray-500 dark:text-gray-400">Helper agent for generating product descriptions.</p>
+                </div>
+
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Price Comparison Agent</label>
+                  <div class="relative">
+                    <select v-model="form.price_comparison_agent" class="w-full pl-10 pr-4 py-2.5 bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-blue-500 dark:text-white appearance-none">
+                      <option value="">Select agent</option>
+                      <option v-for="agent in agentOptions" :key="agent" :value="agent">{{ agent }}</option>
+                    </select>
+                    <Database class="w-4 h-4 text-gray-400 absolute left-3 top-1/2 -translate-y-1/2" />
+                  </div>
+                  <p class="mt-1.5 text-xs text-gray-500 dark:text-gray-400">Agent used by product pricing comparison modal.</p>
                 </div>
               </div>
             </div>
@@ -473,16 +532,25 @@ const save = () => {
                <div v-else class="space-y-4">
                 <div v-for="(agent, index) in form.agents" :key="index" class="bg-gray-50 dark:bg-gray-700/20 rounded-xl border border-gray-200 dark:border-gray-700 overflow-hidden">
                   <div class="p-4 border-b border-gray-200 dark:border-gray-700 flex justify-between items-center bg-gray-100/50 dark:bg-gray-700/40">
-                    <div class="flex items-center gap-2">
+                    <button type="button" class="flex items-center gap-2 text-left" @click="toggleAgentAccordion(index)">
+                      <component :is="expandedAgentIndex === index ? ChevronDown : ChevronRight" class="w-4 h-4 text-gray-500 dark:text-gray-400" />
                        <Bot class="w-4 h-4 text-blue-600 dark:text-blue-400" />
                        <h4 class="font-medium text-gray-900 dark:text-white">{{ agent.name || 'New Agent' }}</h4>
-                    </div>
-                    <button type="button" @click="removeAgent(index)" class="text-red-500 hover:text-red-700 dark:hover:text-red-400 p-1 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors">
-                      <Trash2 class="w-4 h-4" />
                     </button>
+                    <div class="flex items-center gap-2">
+                      <span v-if="agent.is_system" class="inline-flex items-center rounded-full bg-blue-100 dark:bg-blue-900/30 px-2 py-0.5 text-xs font-medium text-blue-700 dark:text-blue-300">
+                        System
+                      </span>
+                      <button type="button" @click="toggleAgentAccordion(index)" class="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 p-1 hover:bg-gray-200/60 dark:hover:bg-gray-600/40 rounded-lg transition-colors">
+                        <component :is="expandedAgentIndex === index ? ChevronDown : ChevronRight" class="w-4 h-4" />
+                      </button>
+                      <button v-if="!agent.is_system" type="button" @click="removeAgent(index)" class="text-red-500 hover:text-red-700 dark:hover:text-red-400 p-1 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors">
+                        <Trash2 class="w-4 h-4" />
+                      </button>
+                    </div>
                   </div>
 
-                  <div class="p-6 grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div v-show="expandedAgentIndex === index" class="p-6 grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div>
                       <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Agent Name <span class="text-red-500">*</span></label>
                       <input v-model="agent.name" type="text" class="w-full px-4 py-2.5 bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-blue-500 dark:text-white" placeholder="Product Describer" />
@@ -514,12 +582,6 @@ const save = () => {
                     <div class="md:col-span-2">
                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">System Prompt</label>
                        <textarea v-model="agent.system_prompt" rows="4" class="w-full px-4 py-2.5 bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-blue-500 dark:text-white font-mono text-sm" placeholder="You are a helpful assistant..."></textarea>
-                    </div>
-                    <div class="md:col-span-2 flex items-center pt-2">
-                       <label class="flex items-center gap-3 cursor-pointer">
-                          <input v-model="agent.is_default" type="checkbox" class="w-4 h-4 text-blue-600 border-gray-300 dark:border-gray-600 rounded focus:ring-blue-500 dark:bg-gray-700">
-                          <span class="text-sm font-medium text-gray-900 dark:text-gray-200">Set as default general agent</span>
-                       </label>
                     </div>
                   </div>
                 </div>

@@ -10,6 +10,7 @@ use Cartxis\Core\Services\PaymentGatewayManager;
 use Cartxis\Sales\Services\InvoiceService;
 use Cartxis\Sales\Services\TransactionService;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Session;
 
 class RazorpayController extends Controller
 {
@@ -98,9 +99,11 @@ class RazorpayController extends Controller
             ]);
         }
 
-        // Clear cart and checkout session after successful payment
-        session()->forget('cart');
-        session()->forget('checkout');
+        // Keep last order marker for guest success page authorization
+        Session::put('checkout.last_order_id', $order->id);
+
+        // Clear cart after successful payment
+        Session::forget('cart');
 
         // Redirect to order success page
         return redirect()->route('shop.checkout.success', ['order' => $order->id])

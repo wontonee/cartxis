@@ -11,6 +11,7 @@ use Cartxis\Core\Services\PaymentGatewayManager;
 use Cartxis\Sales\Services\InvoiceService;
 use Cartxis\Sales\Services\TransactionService;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Session;
 
 class PhonePeController extends Controller
 {
@@ -87,6 +88,9 @@ class PhonePeController extends Controller
 
         // Send order confirmation email
         $this->sendOrderConfirmationEmail($order);
+
+        // Keep last order marker for guest success page authorization
+        Session::put('checkout.last_order_id', $order->id);
 
         // Redirect to order success page
         return redirect()->route('shop.checkout.success', ['order' => $order->id])

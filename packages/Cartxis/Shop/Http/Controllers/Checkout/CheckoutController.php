@@ -405,7 +405,7 @@ class CheckoutController extends Controller
                 
                 // For immediate payment methods (COD, etc.), clear cart now
                 Session::forget('cart');
-                Session::forget('checkout');
+                Session::put('checkout.last_order_id', $order->id);
                 
                 // For any other response type, return as-is
                 return $response;
@@ -463,9 +463,11 @@ class CheckoutController extends Controller
             ]);
         }
 
+        // Keep last order marker for guest success page authorization
+        Session::put('checkout.last_order_id', $order->id);
+
         // Clear cart and checkout session
         Session::forget('cart');
-        Session::forget('checkout');
 
         // Redirect to success page
         return redirect()->route('shop.checkout.success', [
@@ -479,14 +481,16 @@ class CheckoutController extends Controller
     public function success(Request $request, $order)
     {
         $order = \Cartxis\Shop\Models\Order::with(['items', 'addresses'])->findOrFail($order);
+        $lastOrderId = (int) Session::get('checkout.last_order_id');
 
         if (Auth::check()) {
-            if ((int) $order->user_id !== (int) Auth::id()) {
+            $isOrderOwner = (int) $order->user_id === (int) Auth::id();
+            $isLastGuestOrderInSession = $lastOrderId === (int) $order->id;
+
+            if (! $isOrderOwner && ! $isLastGuestOrderInSession) {
                 abort(403);
             }
         } else {
-            $lastOrderId = (int) Session::get('checkout.last_order_id');
-
             if ($lastOrderId !== (int) $order->id) {
                 abort(403);
             }

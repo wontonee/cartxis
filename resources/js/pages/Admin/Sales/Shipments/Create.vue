@@ -11,7 +11,7 @@ interface OrderItem {
     id: number;
     name: string;
     sku: string;
-  };
+  } | null;
 }
 
 interface Order {
@@ -37,6 +37,7 @@ interface Order {
 
 interface Props {
   order: Order | null;
+  shiprocket_available: boolean;
   statuses: Array<{ value: string; label: string }>;
 }
 
@@ -44,6 +45,7 @@ const props = defineProps<Props>();
 
 const form = useForm({
   order_id: props.order?.id || null,
+  shipment_mode: 'manual' as 'manual' | 'shiprocket',
   carrier: '',
   tracking_number: '',
   tracking_url: '',
@@ -119,6 +121,41 @@ function cancel() {
       </div>
 
       <form @submit.prevent="submit" class="space-y-6">
+        <div class="bg-white rounded-lg shadow-sm p-6">
+          <h3 class="text-lg font-semibold text-gray-900 mb-4">Shipment Method</h3>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <label class="border rounded-lg p-4 cursor-pointer" :class="form.shipment_mode === 'manual' ? 'border-blue-500 bg-blue-50' : 'border-gray-200'">
+              <div class="flex items-start gap-3">
+                <input v-model="form.shipment_mode" type="radio" value="manual" class="mt-1" />
+                <div>
+                  <p class="font-medium text-gray-900">Manual Shipment</p>
+                  <p class="text-sm text-gray-600 mt-1">You enter carrier/tracking details manually.</p>
+                </div>
+              </div>
+            </label>
+
+            <label
+              class="border rounded-lg p-4"
+              :class="[props.shiprocket_available ? 'cursor-pointer' : 'opacity-60 cursor-not-allowed', form.shipment_mode === 'shiprocket' ? 'border-cyan-500 bg-cyan-50' : 'border-gray-200']"
+            >
+              <div class="flex items-start gap-3">
+                <input
+                  v-model="form.shipment_mode"
+                  type="radio"
+                  value="shiprocket"
+                  class="mt-1"
+                  :disabled="!props.shiprocket_available"
+                />
+                <div>
+                  <p class="font-medium text-gray-900">Shiprocket Shipment</p>
+                  <p class="text-sm text-gray-600 mt-1">System creates shipment and sends it to Shiprocket automatically.</p>
+                  <p v-if="!props.shiprocket_available" class="text-xs text-red-600 mt-2">Enable/configure Shiprocket in Settings to use this option.</p>
+                </div>
+              </div>
+            </label>
+          </div>
+        </div>
+
         <!-- Order Information (if provided) -->
         <div v-if="order" class="bg-white rounded-lg shadow-sm p-6">
           <h3 class="text-lg font-semibold text-gray-900 mb-4">Order Information</h3>
@@ -139,7 +176,7 @@ function cancel() {
         </div>
 
         <!-- Tracking Information -->
-        <div class="bg-white rounded-lg shadow-sm p-6">
+        <div v-if="form.shipment_mode === 'manual'" class="bg-white rounded-lg shadow-sm p-6">
           <h3 class="text-lg font-semibold text-gray-900 mb-4">Tracking Information</h3>
           <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
@@ -180,6 +217,11 @@ function cancel() {
           </div>
         </div>
 
+        <div v-else class="bg-cyan-50 border border-cyan-200 rounded-lg p-6">
+          <h3 class="text-lg font-semibold text-cyan-900 mb-2">Shiprocket Flow Selected</h3>
+          <p class="text-sm text-cyan-800">After clicking create, this shipment will be sent to Shiprocket automatically and AWB/tracking will be filled when available.</p>
+        </div>
+
         <!-- Items to Ship -->
         <div v-if="order" class="bg-white rounded-lg shadow-sm p-6">
           <h3 class="text-lg font-semibold text-gray-900 mb-4">Items to Ship</h3>
@@ -207,10 +249,10 @@ function cancel() {
               <tbody class="bg-white divide-y divide-gray-200">
                 <tr v-for="(item, index) in order.items" :key="item.id">
                   <td class="px-6 py-4">
-                    <div class="text-sm font-medium text-gray-900">{{ item.product.name }}</div>
+                    <div class="text-sm font-medium text-gray-900">{{ item.product?.name || item.product_name || `Item #${item.id}` }}</div>
                   </td>
                   <td class="px-6 py-4 whitespace-nowrap">
-                    <div class="text-sm text-gray-500">{{ item.product.sku }}</div>
+                    <div class="text-sm text-gray-500">{{ item.product?.sku || 'N/A' }}</div>
                   </td>
                   <td class="px-6 py-4 whitespace-nowrap text-right">
                     <div class="text-sm text-gray-900">{{ item.quantity }}</div>
@@ -248,21 +290,28 @@ function cancel() {
         </div>
 
         <!-- Actions -->
-        <div class="flex justify-end space-x-3">
-          <button
-            type="button"
-            @click="cancel"
-            class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50"
-          >
-            Cancel
-          </button>
-          <button
-            type="submit"
-            :disabled="!canSubmit || form.processing"
-            class="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
-          >
-            {{ form.processing ? 'Creating...' : 'Create Shipment' }}
-          </button>
+        <div class="flex items-center justify-between">
+          <p class="text-sm text-gray-600">
+            {{ form.shipment_mode === 'shiprocket'
+              ? 'Shipment will be created and pushed to Shiprocket in one step.'
+              : 'Shipment will be created using manual flow.' }}
+          </p>
+          <div class="flex space-x-3">
+            <button
+              type="button"
+              @click="cancel"
+              class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50"
+            >
+              Cancel
+            </button>
+            <button
+              type="submit"
+              :disabled="!canSubmit || form.processing"
+              class="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {{ form.processing ? 'Creating...' : form.shipment_mode === 'shiprocket' ? 'Create & Send to Shiprocket' : 'Create Manual Shipment' }}
+            </button>
+          </div>
         </div>
       </form>
     </div>

@@ -4,6 +4,16 @@
 
 @source '../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php';
 @source '../../storage/framework/views/*.php';
+@source '../**/*.php';
+@source '../**/*.blade.php';
+@source '../**/*.js';
+@source '../**/*.ts';
+@source '../**/*.vue';
+@source '../../themes/**/*.php';
+@source '../../themes/**/*.blade.php';
+@source '../../themes/**/*.js';
+@source '../../themes/**/*.ts';
+@source '../../themes/**/*.vue';
 
 @custom-variant dark (&:is(.dark *));
 

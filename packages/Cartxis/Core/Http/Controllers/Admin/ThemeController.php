@@ -18,10 +18,12 @@ use Cartxis\Product\Models\ProductReview;
 use Cartxis\Product\Models\Attribute;
 use Cartxis\Product\Models\AttributeOption;
 use Cartxis\Product\Models\ProductAttributeValue;
+use Cartxis\Core\Models\Currency;
 
 class ThemeController extends Controller
 {
     protected ThemeService $themeService;
+    protected ?Currency $defaultCurrency = null;
 
     public function __construct(ThemeService $themeService)
     {
@@ -493,6 +495,14 @@ class ThemeController extends Controller
             $reviewsData = $prodData['reviews'] ?? [];
             $attributeValues = $prodData['attribute_values'] ?? [];
 
+            if (array_key_exists('price', $prodData) && is_numeric($prodData['price'])) {
+                $prodData['price'] = $this->toStorePrice((float) $prodData['price']);
+            }
+
+            if (array_key_exists('special_price', $prodData) && is_numeric($prodData['special_price'])) {
+                $prodData['special_price'] = $this->toStorePrice((float) $prodData['special_price']);
+            }
+
             // Strip non-product fields
             unset(
                 $prodData['id'], $prodData['category_slug'], $prodData['in_stock'],
@@ -639,6 +649,64 @@ class ThemeController extends Controller
             'images' => $imageCount,
             'attributes' => $attributeCount,
         ];
+    }
+
+    protected function toStorePrice(float $basePrice): float
+    {
+        $currency = $this->getDefaultCurrency();
+        if (! $currency) {
+            return round($basePrice, 2);
+        }
+
+        $exchangeRate = $this->resolveExchangeRate($currency);
+        $decimalPlaces = max(0, (int) $currency->decimal_places);
+
+        if ($exchangeRate <= 0) {
+            return round($basePrice, $decimalPlaces);
+        }
+
+        return round($basePrice * $exchangeRate, $decimalPlaces);
+    }
+
+    protected function getDefaultCurrency(): ?Currency
+    {
+        if ($this->defaultCurrency instanceof Currency) {
+            return $this->defaultCurrency;
+        }
+
+        $this->defaultCurrency = Currency::query()
+            ->where('is_default', true)
+            ->where('is_active', true)
+            ->first();
+
+        if (! $this->defaultCurrency) {
+            $this->defaultCurrency = Currency::query()
+                ->where('is_default', true)
+                ->first();
+        }
+
+        return $this->defaultCurrency;
+    }
+
+    protected function resolveExchangeRate(Currency $currency): float
+    {
+        $rate = (float) $currency->exchange_rate;
+        $code = strtoupper((string) $currency->code);
+
+        if ($rate > 0 && !($code !== 'USD' && $rate == 1.0)) {
+            return $rate;
+        }
+
+        $fallbackRates = [
+            'USD' => 1.0,
+            'EUR' => 0.92,
+            'GBP' => 0.79,
+            'INR' => 83.0,
+            'AUD' => 1.52,
+            'CAD' => 1.36,
+        ];
+
+        return $fallbackRates[$code] ?? max($rate, 1.0);
     }
 
     /**

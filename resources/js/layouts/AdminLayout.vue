@@ -155,6 +155,14 @@ const isActive = (item: any) => {
     // Remove trailing slashes for comparison
     const cleanCurrentPath = currentPath.replace(/\/$/, '')
     const cleanMenuPath = menuPath.replace(/\/$/, '')
+
+    // Map extension routes under the Shipping Methods navigation item
+    if (
+      cleanMenuPath === '/admin/settings/shipping-methods' &&
+      (cleanCurrentPath === '/admin/settings/shiprocket' || cleanCurrentPath.startsWith('/admin/settings/shiprocket/'))
+    ) {
+      return true
+    }
     
     // Exact match (most common case)
     if (cleanCurrentPath === cleanMenuPath) return true
@@ -188,10 +196,10 @@ const hasActiveChild = (item: any): boolean => {
 
 // Initialize open menus based on active routes only
 const initializeOpenMenus = () => {
-  // Clear current state
+  // Reset first so unrelated previously opened menus are closed.
   openMenus.value.clear()
-  
-  // Only open menus that have an active child (current page)
+
+  // Open only menus that have an active child for the current route.
   menuItems.value.forEach((item: any) => {
     if (hasActiveChild(item)) {
       openMenus.value.add(item.id)
