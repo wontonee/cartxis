@@ -159,7 +159,12 @@ const isActive = (item: any) => {
     // Map extension routes under the Shipping Methods navigation item
     if (
       cleanMenuPath === '/admin/settings/shipping-methods' &&
-      (cleanCurrentPath === '/admin/settings/shiprocket' || cleanCurrentPath.startsWith('/admin/settings/shiprocket/'))
+      (
+        cleanCurrentPath === '/admin/settings/shiprocket' ||
+        cleanCurrentPath.startsWith('/admin/settings/shiprocket/') ||
+        cleanCurrentPath === '/admin/settings/delivery' ||
+        cleanCurrentPath.startsWith('/admin/settings/delivery/')
+      )
     ) {
       return true
     }

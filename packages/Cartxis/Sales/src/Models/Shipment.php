@@ -16,6 +16,13 @@ class Shipment extends Model
         'carrier',
         'tracking_number',
         'tracking_url',
+        'delivery_order_id',
+        'delivery_shipment_id',
+        'delivery_awb_code',
+        'delivery_courier_name',
+        'delivery_status',
+        'delivery_tracking_payload',
+        'delivery_synced_at',
         'shiprocket_order_id',
         'shiprocket_shipment_id',
         'shiprocket_awb_code',
@@ -29,6 +36,8 @@ class Shipment extends Model
     ];
 
     protected $casts = [
+        'delivery_tracking_payload' => 'array',
+        'delivery_synced_at' => 'datetime',
         'shiprocket_tracking_payload' => 'array',
         'shiprocket_synced_at' => 'datetime',
         'shipped_at' => 'datetime',

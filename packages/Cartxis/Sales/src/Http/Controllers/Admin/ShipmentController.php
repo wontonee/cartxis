@@ -5,6 +5,7 @@ namespace Cartxis\Sales\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use Cartxis\Core\Services\SettingService;
 use Cartxis\Sales\Models\Shipment;
+use Cartxis\Sales\Services\DeliveryService;
 use Cartxis\Sales\Services\ShiprocketService;
 use Cartxis\Sales\Services\ShipmentService;
 use Cartxis\Shop\Models\Order;
@@ -17,12 +18,14 @@ class ShipmentController extends Controller
 {
     protected ShipmentService $shipmentService;
     protected ShiprocketService $shiprocketService;
+    protected DeliveryService $deliveryService;
     protected SettingService $settingService;
 
-    public function __construct(ShipmentService $shipmentService, ShiprocketService $shiprocketService, SettingService $settingService)
+    public function __construct(ShipmentService $shipmentService, ShiprocketService $shiprocketService, DeliveryService $deliveryService, SettingService $settingService)
     {
         $this->shipmentService = $shipmentService;
         $this->shiprocketService = $shiprocketService;
+        $this->deliveryService = $deliveryService;
         $this->settingService = $settingService;
     }
 
@@ -83,9 +86,14 @@ class ShipmentController extends Controller
             && (string) $this->settingService->get('shipping.shiprocket.email', '') !== ''
             && (string) $this->settingService->get('shipping.shiprocket.password', '') !== '';
 
+        $deliveryEnabled = (bool) $this->settingService->get('shipping.delivery.enabled', false);
+        $deliveryConfigured = $deliveryEnabled
+            && (string) $this->settingService->get('shipping.delivery.api_token', '') !== '';
+
         return Inertia::render('Admin/Sales/Shipments/Create', [
             'order' => $order,
             'shiprocket_available' => $shiprocketConfigured,
+            'delivery_available' => $deliveryConfigured,
             'statuses' => collect(Shipment::getStatuses())->map(function ($label, $value) {
                 return ['value' => $value, 'label' => $label];
             })->values(),
@@ -99,7 +107,7 @@ class ShipmentController extends Controller
     {
         $validated = $request->validate([
             'order_id' => 'required|exists:orders,id',
-            'shipment_mode' => 'required|string|in:manual,shiprocket',
+            'shipment_mode' => 'required|string|in:manual,shiprocket,delivery',
             'carrier' => 'nullable|string|max:100',
             'tracking_number' => 'nullable|string|max:255',
             'tracking_url' => 'nullable|url|max:500',
@@ -139,6 +147,34 @@ class ShipmentController extends Controller
                     return back()
                         ->withInput()
                         ->with('error', 'Shiprocket shipment creation failed: ' . $shiprocketError->getMessage());
+                }
+            }
+
+            if (($validated['shipment_mode'] ?? 'manual') === 'delivery') {
+                $deliveryConfigured = (bool) $this->settingService->get('shipping.delivery.enabled', false)
+                    && (string) $this->settingService->get('shipping.delivery.api_token', '') !== '';
+
+                if (!$deliveryConfigured) {
+                    $shipment->delete();
+
+                    return back()
+                        ->withInput()
+                        ->with('error', 'Delivery extension is not configured. Please complete Delivery settings first.');
+                }
+
+                try {
+                    $shipment->loadMissing(['order.items', 'order.shippingAddress', 'shipmentItems.orderItem']);
+                    $this->syncShipmentWithDelivery($shipment);
+
+                    return redirect()
+                        ->route('admin.sales.shipments.show', $shipment->id)
+                        ->with('success', 'Shipment created and sent to Delivery successfully.');
+                } catch (\Throwable $deliveryError) {
+                    $shipment->delete();
+
+                    return back()
+                        ->withInput()
+                        ->with('error', 'Delivery shipment creation failed: ' . $deliveryError->getMessage());
                 }
             }
 
@@ -380,6 +416,111 @@ class ShipmentController extends Controller
         }
     }
 
+    /**
+     * Create shipment order in Delivery.
+     */
+    public function createInDelivery(int $id): RedirectResponse
+    {
+        try {
+            $shipment = Shipment::with([
+                'order.items',
+                'order.shippingAddress',
+                'shipmentItems.orderItem',
+            ])->findOrFail($id);
+
+            $this->syncShipmentWithDelivery($shipment);
+
+            return back()->with('success', 'Shipment created in Delivery successfully.');
+        } catch (\Throwable $e) {
+            return back()->with('error', $e->getMessage());
+        }
+    }
+
+    /**
+     * Sync tracking status from Delivery.
+     */
+    public function syncDeliveryTracking(int $id): RedirectResponse
+    {
+        try {
+            $shipment = Shipment::findOrFail($id);
+            $awbCode = (string) ($shipment->delivery_awb_code ?: $shipment->tracking_number);
+
+            if ($awbCode === '') {
+                return back()->with('error', 'AWB/Tracking number is not available for this shipment.');
+            }
+
+            $result = $this->deliveryService->fetchTrackingByAwb($awbCode);
+
+            $updateData = [
+                'delivery_awb_code' => $awbCode,
+                'delivery_status' => $result['delivery_status'] ?? $shipment->delivery_status,
+                'delivery_courier_name' => $result['delivery_courier_name'] ?? $shipment->delivery_courier_name,
+                'delivery_tracking_payload' => $result['raw'] ?? null,
+                'delivery_synced_at' => now(),
+            ];
+
+            if (!empty($updateData['delivery_courier_name'])) {
+                $updateData['carrier'] = $updateData['delivery_courier_name'];
+            }
+
+            $mappedStatus = $this->mapDeliveryStatusToShipmentStatus($updateData['delivery_status'] ?? null);
+            if ($mappedStatus !== null) {
+                $updateData['status'] = $mappedStatus;
+                if ($mappedStatus === Shipment::STATUS_DELIVERED && empty($shipment->delivered_at)) {
+                    $updateData['delivered_at'] = now();
+                }
+                if (in_array($mappedStatus, [Shipment::STATUS_SHIPPED, Shipment::STATUS_IN_TRANSIT, Shipment::STATUS_OUT_FOR_DELIVERY], true) && empty($shipment->shipped_at)) {
+                    $updateData['shipped_at'] = now();
+                }
+            }
+
+            $shipment->update($updateData);
+
+            return back()->with('success', 'Delivery tracking synced successfully.');
+        } catch (\Throwable $e) {
+            return back()->with('error', $e->getMessage());
+        }
+    }
+
+    private function mapDeliveryStatusToShipmentStatus(?string $deliveryStatus): ?string
+    {
+        if (!is_string($deliveryStatus) || trim($deliveryStatus) === '') {
+            return null;
+        }
+
+        $status = strtolower(trim($deliveryStatus));
+
+        if (str_contains($status, 'deliver')) {
+            return Shipment::STATUS_DELIVERED;
+        }
+
+        if (str_contains($status, 'out for delivery')) {
+            return Shipment::STATUS_OUT_FOR_DELIVERY;
+        }
+
+        if (str_contains($status, 'transit') || str_contains($status, 'in route')) {
+            return Shipment::STATUS_IN_TRANSIT;
+        }
+
+        if (str_contains($status, 'ship') || str_contains($status, 'awb') || str_contains($status, 'pickup')) {
+            return Shipment::STATUS_SHIPPED;
+        }
+
+        if (str_contains($status, 'cancel')) {
+            return Shipment::STATUS_CANCELLED;
+        }
+
+        if (str_contains($status, 'fail') || str_contains($status, 'rto') || str_contains($status, 'undelivered')) {
+            return Shipment::STATUS_FAILED;
+        }
+
+        if (str_contains($status, 'pending') || str_contains($status, 'new')) {
+            return Shipment::STATUS_PENDING;
+        }
+
+        return null;
+    }
+
     private function mapShiprocketStatusToShipmentStatus(?string $shiprocketStatus): ?string
     {
         if (!is_string($shiprocketStatus) || trim($shiprocketStatus) === '') {
@@ -443,6 +584,36 @@ class ShipmentController extends Controller
         }
 
         $mappedStatus = $this->mapShiprocketStatusToShipmentStatus($updateData['shiprocket_status'] ?? null);
+        if ($mappedStatus !== null) {
+            $updateData['status'] = $mappedStatus;
+        }
+
+        $shipment->update($updateData);
+    }
+
+    private function syncShipmentWithDelivery(Shipment $shipment): void
+    {
+        $result = $this->deliveryService->createOrderForShipment($shipment);
+
+        $updateData = [
+            'delivery_order_id' => $result['delivery_order_id'] ?? $shipment->delivery_order_id,
+            'delivery_shipment_id' => $result['delivery_shipment_id'] ?? $shipment->delivery_shipment_id,
+            'delivery_awb_code' => $result['delivery_awb_code'] ?? $shipment->delivery_awb_code,
+            'delivery_courier_name' => $result['delivery_courier_name'] ?? $shipment->delivery_courier_name,
+            'delivery_status' => $result['delivery_status'] ?? $shipment->delivery_status,
+            'delivery_tracking_payload' => $result['raw'] ?? null,
+            'delivery_synced_at' => now(),
+        ];
+
+        if (!empty($updateData['delivery_awb_code'])) {
+            $updateData['tracking_number'] = $updateData['delivery_awb_code'];
+        }
+
+        if (!empty($updateData['delivery_courier_name'])) {
+            $updateData['carrier'] = $updateData['delivery_courier_name'];
+        }
+
+        $mappedStatus = $this->mapDeliveryStatusToShipmentStatus($updateData['delivery_status'] ?? null);
         if ($mappedStatus !== null) {
             $updateData['status'] = $mappedStatus;
         }

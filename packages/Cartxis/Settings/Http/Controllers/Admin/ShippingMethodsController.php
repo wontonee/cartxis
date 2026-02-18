@@ -27,6 +27,9 @@ class ShippingMethodsController extends Controller
         return Inertia::render('Admin/Settings/ShippingMethods/Index', [
             'methods' => $methods,
             'extensions' => [
+                'delivery' => [
+                    'enabled' => (bool) $this->settingService->get('shipping.delivery.enabled', false),
+                ],
                 'shiprocket' => [
                     'enabled' => (bool) $this->settingService->get('shipping.shiprocket.enabled', false),
                 ],
@@ -39,7 +42,7 @@ class ShippingMethodsController extends Controller
      */
     public function toggleExtension(Request $request, string $extension)
     {
-        if (!in_array($extension, ['shiprocket'], true)) {
+        if (!in_array($extension, ['shiprocket', 'delivery'], true)) {
             return response()->json([
                 'success' => false,
                 'message' => 'Unsupported shipment extension.',
@@ -52,6 +55,10 @@ class ShippingMethodsController extends Controller
 
         if ($extension === 'shiprocket') {
             $this->settingService->set('shipping.shiprocket.enabled', (bool) $validated['enabled'], 'boolean', 'shipping');
+        }
+
+        if ($extension === 'delivery') {
+            $this->settingService->set('shipping.delivery.enabled', (bool) $validated['enabled'], 'boolean', 'shipping');
         }
 
         return response()->json([

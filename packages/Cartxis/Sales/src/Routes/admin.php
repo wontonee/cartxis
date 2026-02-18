@@ -125,6 +125,10 @@ Route::middleware(['web', 'auth:admin'])->prefix('admin/sales')->name('admin.sal
         // Shiprocket integration
         Route::post('/{id}/shiprocket/create', [ShipmentController::class, 'createInShiprocket'])->name('shiprocket.create');
         Route::post('/{id}/shiprocket/sync', [ShipmentController::class, 'syncShiprocketTracking'])->name('shiprocket.sync');
+
+        // Delivery integration
+        Route::post('/{id}/delivery/create', [ShipmentController::class, 'createInDelivery'])->name('delivery.create');
+        Route::post('/{id}/delivery/sync', [ShipmentController::class, 'syncDeliveryTracking'])->name('delivery.sync');
     });
 
     // Credit Memos

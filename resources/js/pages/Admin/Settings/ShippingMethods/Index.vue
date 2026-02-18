@@ -37,19 +37,49 @@
           <div class="border border-gray-200 dark:border-gray-700 rounded-xl p-4">
             <div class="flex items-center justify-between gap-3">
               <div>
+                <p class="text-sm font-semibold text-gray-900 dark:text-white">Delivery</p>
+                <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Create and track shipments via Delhivery/Delivery extension.</p>
+              </div>
+              <div class="flex items-center gap-2">
+                <span class="text-xs font-medium text-gray-700 dark:text-gray-300">
+                  {{ extensions.delivery.enabled ? 'Enabled' : 'Disabled' }}
+                </span>
+                <Switch
+                  :model-value="extensions.delivery.enabled"
+                  @update:model-value="(val) => toggleExtension('delivery', val)"
+                />
+              </div>
+            </div>
+
+            <div class="mt-4 flex items-center justify-between">
+              <span class="text-xs text-gray-500 dark:text-gray-400">
+                {{ extensions.delivery.enabled ? 'Extension is active' : 'Enable extension to configure settings' }}
+              </span>
+              <Link
+                v-if="extensions.delivery.enabled"
+                href="/admin/settings/delivery"
+                class="inline-flex items-center px-3 py-1.5 border border-indigo-300 text-indigo-700 hover:bg-indigo-50 rounded-lg text-xs font-medium transition-colors"
+              >
+                Configure
+              </Link>
+            </div>
+          </div>
+
+          <div class="border border-gray-200 dark:border-gray-700 rounded-xl p-4">
+            <div class="flex items-center justify-between gap-3">
+              <div>
                 <p class="text-sm font-semibold text-gray-900 dark:text-white">Shiprocket</p>
                 <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Create and track shipments via Shiprocket.</p>
               </div>
-              <button
-                type="button"
-                @click="toggleExtension('shiprocket')"
-                class="inline-flex items-center rounded-full px-3 py-1.5 text-xs font-medium transition-colors"
-                :class="extensions.shiprocket.enabled
-                  ? 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400'
-                  : 'bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-300'"
-              >
-                {{ extensions.shiprocket.enabled ? 'Enabled' : 'Disabled' }}
-              </button>
+              <div class="flex items-center gap-2">
+                <span class="text-xs font-medium text-gray-700 dark:text-gray-300">
+                  {{ extensions.shiprocket.enabled ? 'Enabled' : 'Disabled' }}
+                </span>
+                <Switch
+                  :model-value="extensions.shiprocket.enabled"
+                  @update:model-value="(val) => toggleExtension('shiprocket', val)"
+                />
+              </div>
             </div>
 
             <div class="mt-4 flex items-center justify-between">
@@ -251,6 +281,7 @@ import {
   Package,
   Scale
 } from 'lucide-vue-next'
+import { Switch } from '@/components/ui/switch'
 import axios from 'axios'
 
 interface ShippingMethod {
@@ -273,6 +304,9 @@ const props = defineProps<{
     data: ShippingMethod[]
   },
   extensions: {
+    delivery: {
+      enabled: boolean
+    }
     shiprocket: {
       enabled: boolean
     }
@@ -280,7 +314,7 @@ const props = defineProps<{
 }>()
 
 const methods = ref<ShippingMethod[]>(props.methods?.data || [])
-const extensions = ref(props.extensions || { shiprocket: { enabled: false } })
+const extensions = ref(props.extensions || { delivery: { enabled: false }, shiprocket: { enabled: false } })
 
 const search = ref('')
 const typeFilter = ref('')
@@ -318,17 +352,19 @@ const setDefault = async (method: ShippingMethod) => {
   }
 }
 
-const toggleExtension = async (extension: 'shiprocket') => {
-  const current = extensions.value[extension]?.enabled ?? false
+const toggleExtension = async (extension: 'shiprocket' | 'delivery', enabled: boolean | 'indeterminate') => {
+  const normalizedEnabled = enabled === true
 
   try {
     const response = await axios.post(`/admin/settings/shipping-extensions/${extension}/toggle`, {
-      enabled: !current,
+      enabled: normalizedEnabled,
     })
 
     extensions.value[extension].enabled = Boolean(response.data?.enabled)
   } catch (error) {
     console.error('Error toggling shipment extension:', error)
+    // Revert state if api call fails
+    extensions.value[extension].enabled = !normalizedEnabled
   }
 }
 
