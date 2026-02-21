@@ -8,6 +8,8 @@ use Illuminate\Support\Facades\Validator;
 use Cartxis\API\Helpers\ApiResponse;
 use Cartxis\Cart\Models\Cart;
 use Cartxis\Shop\Models\Order;
+use Cartxis\Shop\Models\OrderItem;
+use Cartxis\Shop\Models\Address;
 use Cartxis\Customer\Models\Customer;
 use Cartxis\Customer\Models\CustomerAddress;
 use Cartxis\Core\Models\PaymentMethod;
@@ -481,26 +483,90 @@ class CheckoutController extends Controller
         // 5. Send confirmation email
 
         $order = Order::create([
+            'user_id' => $request->user()->id,
             'customer_id' => $customer->id,
             'order_number' => Order::generateOrderNumber(),
             'status' => 'pending',
             'payment_method' => $request->payment_method,
-            'shipping_address_id' => $request->shipping_address_id,
             'subtotal' => $subtotal,
             'shipping_cost' => $shippingCost,
             'tax' => $tax,
             'total' => $total,
             'notes' => $request->notes,
+            'customer_email' => $customer->email ?? $request->user()->email,
+            'customer_phone' => $shippingAddress->phone ?? null,
         ]);
 
-        // Clear cart
+        // Create order items from cart items
+        foreach ($cart->items as $cartItem) {
+            $product = $cartItem->product;
+            OrderItem::create([
+                'order_id' => $order->id,
+                'product_id' => $cartItem->product_id,
+                'product_sku' => $product?->sku ?? '',
+                'product_name' => $product?->name ?? $cartItem->product_name ?? 'Product',
+                'product_image' => $product?->mainImage?->url ?? null,
+                'quantity' => $cartItem->quantity,
+                'price' => $cartItem->price,
+                'total' => $cartItem->price * $cartItem->quantity,
+                'tax_amount' => 0,
+                'discount_amount' => 0,
+            ]);
+        }
+
+        // Create polymorphic shipping address for the order
+        Address::create([
+            'addressable_type' => Order::class,
+            'addressable_id' => $order->id,
+            'type' => Address::TYPE_SHIPPING,
+            'first_name' => $shippingAddress->first_name,
+            'last_name' => $shippingAddress->last_name,
+            'company' => $shippingAddress->company ?? null,
+            'phone' => $shippingAddress->phone,
+            'email' => $customer->email ?? $request->user()->email,
+            'address_line1' => $shippingAddress->address_line_1,
+            'address_line2' => $shippingAddress->address_line_2 ?? null,
+            'city' => $shippingAddress->city,
+            'state' => $shippingAddress->state,
+            'postal_code' => $shippingAddress->postal_code,
+            'country' => $shippingAddress->country,
+            'is_default' => true,
+        ]);
+
+        // Use shipping address as billing address too
+        Address::create([
+            'addressable_type' => Order::class,
+            'addressable_id' => $order->id,
+            'type' => Address::TYPE_BILLING,
+            'first_name' => $shippingAddress->first_name,
+            'last_name' => $shippingAddress->last_name,
+            'company' => $shippingAddress->company ?? null,
+            'phone' => $shippingAddress->phone,
+            'email' => $customer->email ?? $request->user()->email,
+            'address_line1' => $shippingAddress->address_line_1,
+            'address_line2' => $shippingAddress->address_line_2 ?? null,
+            'city' => $shippingAddress->city,
+            'state' => $shippingAddress->state,
+            'postal_code' => $shippingAddress->postal_code,
+            'country' => $shippingAddress->country,
+            'is_default' => true,
+        ]);
+
+        // Clear cart items after order is created successfully
         $cart->items()->delete();
+
+        $currency = Currency::getDefault();
 
         return ApiResponse::success([
             'order_id' => $order->id,
-            'order_number' => $order->order_number ?? $order->id,
+            'order_number' => $order->order_number,
             'status' => $order->status,
-            'total' => $total,
+            'subtotal' => (float) $subtotal,
+            'shipping_cost' => (float) $shippingCost,
+            'tax' => (float) $tax,
+            'grand_total' => (float) $total,
+            'currency' => $currency?->code ?? 'INR',
+            'currency_symbol' => $currency?->symbol ?? '₹',
         ], 'Order placed successfully', 201);
     }
 }

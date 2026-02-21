@@ -9,6 +9,7 @@ use Cartxis\Core\Models\Currency;
 use Cartxis\Core\Services\MenuService;
 use Cartxis\Core\Services\SettingService;
 use Cartxis\Admin\Services\AdminNotificationService;
+use Cartxis\Settings\Models\Setting as SystemSetting;
 
 class HandleInertiaRequests extends Middleware
 {
@@ -142,6 +143,23 @@ class HandleInertiaRequests extends Middleware
                     ];
                 } catch (\Exception $e) {
                     return null;
+                }
+            },
+            'adminMaintenance' => function () use ($request) {
+                if (!$request->is('admin/*') && !$request->is('admin')) {
+                    return null;
+                }
+
+                try {
+                    return [
+                        'enabled' => (bool) SystemSetting::get('system.maintenance_enabled', false),
+                        'title' => (string) SystemSetting::get('system.maintenance_title', "We'll be back soon!"),
+                    ];
+                } catch (\Exception $e) {
+                    return [
+                        'enabled' => false,
+                        'title' => "We'll be back soon!",
+                    ];
                 }
             },
             'menu' => [

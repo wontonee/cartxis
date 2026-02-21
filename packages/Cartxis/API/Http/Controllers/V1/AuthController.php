@@ -38,14 +38,14 @@ class AuthController extends Controller
         ]);
 
         $token = $user->createToken(
-            $request->device_name ?? config('vortex-api.token.name')
+            $request->device_name ?? config('cartxis-api.token.name')
         )->plainTextToken;
 
         return ApiResponse::success([
             'user' => new UserResource($user),
             'token' => $token,
             'token_type' => 'Bearer',
-            'expires_in' => config('vortex-api.token.expiration') * 60,
+            'expires_in' => config('cartxis-api.token.expiration') * 60,
         ], 'Registration successful. Welcome to Cartxis!', 201);
     }
 
@@ -76,14 +76,14 @@ class AuthController extends Controller
             );
         }
 
-        $tokenName = $request->device_name ?? config('vortex-api.token.name');
+        $tokenName = $request->device_name ?? config('cartxis-api.token.name');
         $token = $user->createToken($tokenName)->plainTextToken;
 
         return ApiResponse::success([
             'user' => new UserResource($user),
             'token' => $token,
             'token_type' => 'Bearer',
-            'expires_in' => config('vortex-api.token.expiration') * 60,
+            'expires_in' => config('cartxis-api.token.expiration') * 60,
         ], 'Login successful');
     }
 
@@ -174,7 +174,7 @@ class AuthController extends Controller
     public function uploadAvatar(Request $request)
     {
         $validator = Validator::make($request->all(), [
-            'avatar' => 'required|image|max:' . config('vortex-api.uploads.avatar.max_size'),
+            'avatar' => 'required|image|max:' . config('cartxis-api.uploads.avatar.max_size'),
         ]);
 
         if ($validator->fails()) {
@@ -264,13 +264,13 @@ class AuthController extends Controller
         
         // Create new token
         $token = $user->createToken(
-            $request->device_name ?? config('vortex-api.token.name')
+            $request->device_name ?? config('cartxis-api.token.name')
         )->plainTextToken;
 
         return ApiResponse::success([
             'token' => $token,
             'token_type' => 'Bearer',
-            'expires_in' => config('vortex-api.token.expiration') * 60,
+            'expires_in' => config('cartxis-api.token.expiration') * 60,
         ], 'Token refreshed successfully');
     }
 }

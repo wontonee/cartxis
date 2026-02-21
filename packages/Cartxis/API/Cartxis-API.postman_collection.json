@@ -1,0 +1,5386 @@
+{
+	"info": {
+		"_postman_id": "cartxis-api-collection",
+		"name": "Cartxis eCommerce API",
+		"description": "Complete API collection for Cartxis eCommerce platform with Flutter app integration",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"auth": {
+		"type": "bearer",
+		"bearer": [
+			{
+				"key": "token",
+				"value": "{{access_token}}",
+				"type": "string"
+			}
+		]
+	},
+	"item": [
+		{
+			"name": "Authentication",
+			"item": [
+				{
+					"name": "Register",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"if (pm.response.code === 201) {",
+									"    var jsonData = pm.response.json();",
+									"    if (jsonData.data && jsonData.data.token) {",
+									"        pm.environment.set('access_token', jsonData.data.token);",
+									"    }",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"Test User\",\n    \"email\": \"test@example.com\",\n    \"password\": \"password123\",\n    \"password_confirmation\": \"password123\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/v1/auth/register",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"auth",
+								"register"
+							]
+						},
+						"description": "Register a new user account. Token is automatically saved to environment."
+					},
+					"response": [
+						{
+							"name": "201 Created",
+							"originalRequest": {
+								"auth": {
+									"type": "noauth"
+								},
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"name\": \"Test User\",\n    \"email\": \"test@example.com\",\n    \"password\": \"password123\",\n    \"password_confirmation\": \"password123\"\n}"
+								},
+								"url": {
+									"raw": "{{base_url}}/api/v1/auth/register",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"api",
+										"v1",
+										"auth",
+										"register"
+									]
+								},
+								"description": "Register a new user account. Token is automatically saved to environment."
+							},
+							"status": "Created",
+							"code": 201,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								}
+							],
+							"cookie": [],
+							"body": "{\n  \"success\": true,\n  \"message\": \"Registration successful\",\n  \"data\": {\n    \"user\": {\n      \"id\": 4,\n      \"name\": \"Saju Gopal\",\n      \"email\": \"saju@example.com\",\n      \"created_at\": \"2026-02-21T09:00:00Z\"\n    },\n    \"access_token\": \"1|abc123tokensample\",\n    \"token_type\": \"Bearer\"\n  }\n}"
+						},
+						{
+							"name": "422 Validation Error",
+							"originalRequest": {
+								"auth": {
+									"type": "noauth"
+								},
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"name\": \"Test User\",\n    \"email\": \"test@example.com\",\n    \"password\": \"password123\",\n    \"password_confirmation\": \"password123\"\n}"
+								},
+								"url": {
+									"raw": "{{base_url}}/api/v1/auth/register",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"api",
+										"v1",
+										"auth",
+										"register"
+									]
+								},
+								"description": "Register a new user account. Token is automatically saved to environment."
+							},
+							"status": "Unprocessable Entity",
+							"code": 422,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								}
+							],
+							"cookie": [],
+							"body": "{\n  \"success\": false,\n  \"message\": \"Validation failed\",\n  \"errors\": {\n    \"email\": [\n      \"The email has already been taken.\"\n    ]\n  }\n}"
+						}
+					]
+				},
+				{
+					"name": "Login",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"if (pm.response.code === 200) {",
+									"    var jsonData = pm.response.json();",
+									"    if (jsonData.data && jsonData.data.token) {",
+									"        pm.environment.set('access_token', jsonData.data.token);",
+									"    }",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"email\": \"test@example.com\",\n    \"password\": \"password123\",\n    \"device_name\": \"postman\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/v1/auth/login",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"auth",
+								"login"
+							]
+						},
+						"description": "Login with existing credentials. Token is automatically saved to environment."
+					},
+					"response": [
+						{
+							"name": "200 OK",
+							"originalRequest": {
+								"auth": {
+									"type": "noauth"
+								},
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"email\": \"test@example.com\",\n    \"password\": \"password123\",\n    \"device_name\": \"postman\"\n}"
+								},
+								"url": {
+									"raw": "{{base_url}}/api/v1/auth/login",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"api",
+										"v1",
+										"auth",
+										"login"
+									]
+								},
+								"description": "Login with existing credentials. Token is automatically saved to environment."
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								}
+							],
+							"cookie": [],
+							"body": "{\n  \"success\": true,\n  \"message\": \"Login successful\",\n  \"data\": {\n    \"user\": {\n      \"id\": 4,\n      \"name\": \"Saju Gopal\",\n      \"email\": \"saju@example.com\"\n    },\n    \"access_token\": \"1|abc123tokensample\",\n    \"token_type\": \"Bearer\"\n  }\n}"
+						},
+						{
+							"name": "401 Invalid Credentials",
+							"originalRequest": {
+								"auth": {
+									"type": "noauth"
+								},
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"email\": \"test@example.com\",\n    \"password\": \"password123\",\n    \"device_name\": \"postman\"\n}"
+								},
+								"url": {
+									"raw": "{{base_url}}/api/v1/auth/login",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"api",
+										"v1",
+										"auth",
+										"login"
+									]
+								},
+								"description": "Login with existing credentials. Token is automatically saved to environment."
+							},
+							"status": "Unauthorized",
+							"code": 401,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								}
+							],
+							"cookie": [],
+							"body": "{\n  \"success\": false,\n  \"message\": \"Invalid credentials\",\n  \"code\": \"INVALID_CREDENTIALS\"\n}"
+						}
+					]
+				},
+				{
+					"name": "Get Profile",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/v1/auth/me",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"auth",
+								"me"
+							]
+						},
+						"description": "Get authenticated user profile"
+					},
+					"response": [
+						{
+							"name": "200 OK",
+							"originalRequest": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{base_url}}/api/v1/auth/me",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"api",
+										"v1",
+										"auth",
+										"me"
+									]
+								},
+								"description": "Get authenticated user profile"
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								}
+							],
+							"cookie": [],
+							"body": "{\n  \"success\": true,\n  \"message\": \"Profile retrieved\",\n  \"data\": {\n    \"id\": 4,\n    \"name\": \"Saju Gopal\",\n    \"email\": \"saju@example.com\",\n    \"phone\": \"9811381218\",\n    \"gender\": \"male\",\n    \"date_of_birth\": \"1990-05-15\",\n    \"avatar\": \"https://example.com/avatars/saju.jpg\",\n    \"email_verified_at\": \"2026-01-01T00:00:00Z\",\n    \"created_at\": \"2026-01-01T00:00:00Z\"\n  }\n}"
+						}
+					]
+				},
+				{
+					"name": "Update Profile",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"Updated Name\",\n    \"email\": \"updated@example.com\",\n    \"phone\": \"+1234567890\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/v1/auth/profile",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"auth",
+								"profile"
+							]
+						},
+						"description": "Update user profile information"
+					},
+					"response": [
+						{
+							"name": "200 OK",
+							"originalRequest": {
+								"method": "PUT",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"name\": \"Updated Name\",\n    \"email\": \"updated@example.com\",\n    \"phone\": \"+1234567890\"\n}"
+								},
+								"url": {
+									"raw": "{{base_url}}/api/v1/auth/profile",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"api",
+										"v1",
+										"auth",
+										"profile"
+									]
+								},
+								"description": "Update user profile information"
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								}
+							],
+							"cookie": [],
+							"body": "{\n  \"success\": true,\n  \"message\": \"Profile updated successfully\",\n  \"data\": {\n    \"id\": 4,\n    \"name\": \"Saju Gopal\",\n    \"phone\": \"9811381218\",\n    \"date_of_birth\": \"1990-05-15\",\n    \"gender\": \"male\",\n    \"avatar\": \"https://example.com/avatars/saju-new.jpg\"\n  }\n}"
+						}
+					]
+				},
+				{
+					"name": "Change Password",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"current_password\": \"OldPass@123\",\n    \"password\": \"NewPass@456\",\n    \"password_confirmation\": \"NewPass@456\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/v1/auth/password/change",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"auth",
+								"password",
+								"change"
+							]
+						},
+						"description": "Change user password"
+					},
+					"response": [
+						{
+							"name": "200 OK",
+							"originalRequest": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"current_password\": \"OldPass@123\",\n    \"password\": \"NewPass@456\",\n    \"password_confirmation\": \"NewPass@456\"\n}"
+								},
+								"url": {
+									"raw": "{{base_url}}/api/v1/auth/password/change",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"api",
+										"v1",
+										"auth",
+										"password",
+										"change"
+									]
+								},
+								"description": "Change user password"
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								}
+							],
+							"cookie": [],
+							"body": "{\n  \"success\": true,\n  \"message\": \"Password changed successfully\"\n}"
+						},
+						{
+							"name": "422 Wrong Current Password",
+							"originalRequest": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"current_password\": \"OldPass@123\",\n    \"password\": \"NewPass@456\",\n    \"password_confirmation\": \"NewPass@456\"\n}"
+								},
+								"url": {
+									"raw": "{{base_url}}/api/v1/auth/password/change",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"api",
+										"v1",
+										"auth",
+										"password",
+										"change"
+									]
+								},
+								"description": "Change user password"
+							},
+							"status": "Unprocessable Entity",
+							"code": 422,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								}
+							],
+							"cookie": [],
+							"body": "{\n  \"success\": false,\n  \"message\": \"Validation failed\",\n  \"errors\": {\n    \"current_password\": [\n      \"The provided password does not match your current password.\"\n    ]\n  }\n}"
+						}
+					]
+				},
+				{
+					"name": "Forgot Password",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"email\": \"test@example.com\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/v1/auth/password/forgot",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"auth",
+								"password",
+								"forgot"
+							]
+						},
+						"description": "Request password reset email"
+					},
+					"response": [
+						{
+							"name": "200 OK",
+							"originalRequest": {
+								"auth": {
+									"type": "noauth"
+								},
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"email\": \"test@example.com\"\n}"
+								},
+								"url": {
+									"raw": "{{base_url}}/api/v1/auth/password/forgot",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"api",
+										"v1",
+										"auth",
+										"password",
+										"forgot"
+									]
+								},
+								"description": "Request password reset email"
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								}
+							],
+							"cookie": [],
+							"body": "{\n  \"success\": true,\n  \"message\": \"Password reset link sent to your email\"\n}"
+						},
+						{
+							"name": "404 Not Found",
+							"originalRequest": {
+								"auth": {
+									"type": "noauth"
+								},
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"email\": \"test@example.com\"\n}"
+								},
+								"url": {
+									"raw": "{{base_url}}/api/v1/auth/password/forgot",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"api",
+										"v1",
+										"auth",
+										"password",
+										"forgot"
+									]
+								},
+								"description": "Request password reset email"
+							},
+							"status": "Not Found",
+							"code": 404,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								}
+							],
+							"cookie": [],
+							"body": "{\n  \"success\": false,\n  \"message\": \"No account found with that email\"\n}"
+						}
+					]
+				},
+				{
+					"name": "Reset Password",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"email\": \"test@example.com\",\n    \"token\": \"reset_token_here\",\n    \"password\": \"newpassword123\",\n    \"password_confirmation\": \"newpassword123\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/v1/auth/password/reset",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"auth",
+								"password",
+								"reset"
+							]
+						},
+						"description": "Reset password with token from email"
+					},
+					"response": [
+						{
+							"name": "200 OK",
+							"originalRequest": {
+								"auth": {
+									"type": "noauth"
+								},
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"email\": \"test@example.com\",\n    \"token\": \"reset_token_here\",\n    \"password\": \"newpassword123\",\n    \"password_confirmation\": \"newpassword123\"\n}"
+								},
+								"url": {
+									"raw": "{{base_url}}/api/v1/auth/password/reset",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"api",
+										"v1",
+										"auth",
+										"password",
+										"reset"
+									]
+								},
+								"description": "Reset password with token from email"
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								}
+							],
+							"cookie": [],
+							"body": "{\n  \"success\": true,\n  \"message\": \"Password reset successfully\"\n}"
+						},
+						{
+							"name": "422 Invalid Token",
+							"originalRequest": {
+								"auth": {
+									"type": "noauth"
+								},
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"email\": \"test@example.com\",\n    \"token\": \"reset_token_here\",\n    \"password\": \"newpassword123\",\n    \"password_confirmation\": \"newpassword123\"\n}"
+								},
+								"url": {
+									"raw": "{{base_url}}/api/v1/auth/password/reset",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"api",
+										"v1",
+										"auth",
+										"password",
+										"reset"
+									]
+								},
+								"description": "Reset password with token from email"
+							},
+							"status": "Unprocessable Entity",
+							"code": 422,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								}
+							],
+							"cookie": [],
+							"body": "{\n  \"success\": false,\n  \"message\": \"Validation failed\",\n  \"errors\": {\n    \"token\": [\n      \"This password reset token is invalid.\"\n    ]\n  }\n}"
+						}
+					]
+				},
+				{
+					"name": "Upload Avatar",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "avatar",
+									"type": "file",
+									"src": []
+								}
+							]
+						},
+						"url": {
+							"raw": "{{base_url}}/api/v1/auth/avatar",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"auth",
+								"avatar"
+							]
+						},
+						"description": "Upload user avatar image"
+					},
+					"response": [
+						{
+							"name": "200 OK",
+							"originalRequest": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "formdata",
+									"formdata": [
+										{
+											"key": "avatar",
+											"type": "file",
+											"src": []
+										}
+									]
+								},
+								"url": {
+									"raw": "{{base_url}}/api/v1/auth/avatar",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"api",
+										"v1",
+										"auth",
+										"avatar"
+									]
+								},
+								"description": "Upload user avatar image"
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								}
+							],
+							"cookie": [],
+							"body": "{\n  \"success\": true,\n  \"message\": \"Avatar uploaded successfully\",\n  \"data\": {\n    \"avatar\": \"https://example.com/avatars/saju-2026.jpg\"\n  }\n}"
+						}
+					]
+				},
+				{
+					"name": "Logout",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/v1/auth/logout",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"auth",
+								"logout"
+							]
+						},
+						"description": "Logout and revoke access token"
+					},
+					"response": [
+						{
+							"name": "200 OK",
+							"originalRequest": {
+								"method": "POST",
+								"header": [],
+								"url": {
+									"raw": "{{base_url}}/api/v1/auth/logout",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"api",
+										"v1",
+										"auth",
+										"logout"
+									]
+								},
+								"description": "Logout and revoke access token"
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								}
+							],
+							"cookie": [],
+							"body": "{\n  \"success\": true,\n  \"message\": \"Logged out successfully\"\n}"
+						}
+					]
+				}
+			],
+			"description": "User authentication and profile management"
+		},
+		{
+			"name": "Products",
+			"item": [
+				{
+					"name": "List Products",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/v1/products?page=1&per_page=20&sort_by=created_at&sort_order=desc",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"products"
+							],
+							"query": [
+								{
+									"key": "page",
+									"value": "1",
+									"description": "Page number"
+								},
+								{
+									"key": "per_page",
+									"value": "20",
+									"description": "Items per page (max: 50)"
+								},
+								{
+									"key": "search",
+									"value": "",
+									"description": "Search by name, SKU, or description",
+									"disabled": true
+								},
+								{
+									"key": "featured",
+									"value": "",
+									"description": "Filter by featured (true/false)",
+									"disabled": true
+								},
+								{
+									"key": "new",
+									"value": "",
+									"description": "Filter by new arrivals (true/false)",
+									"disabled": true
+								},
+								{
+									"key": "on_sale",
+									"value": "",
+									"description": "Filter products on sale (true/false)",
+									"disabled": true
+								},
+								{
+									"key": "category_id",
+									"value": "",
+									"description": "Filter by single category ID",
+									"disabled": true
+								},
+								{
+									"key": "category_ids",
+									"value": "",
+									"description": "Filter by multiple category IDs (comma-separated: 1,2,3)",
+									"disabled": true
+								},
+								{
+									"key": "brand_id",
+									"value": "",
+									"description": "Filter by single brand ID",
+									"disabled": true
+								},
+								{
+									"key": "brand_ids",
+									"value": "",
+									"description": "Filter by multiple brand IDs (comma-separated: 1,2,3)",
+									"disabled": true
+								},
+								{
+									"key": "min_price",
+									"value": "",
+									"description": "Minimum price",
+									"disabled": true
+								},
+								{
+									"key": "max_price",
+									"value": "",
+									"description": "Maximum price",
+									"disabled": true
+								},
+								{
+									"key": "min_rating",
+									"value": "",
+									"description": "Minimum average rating (1-5)",
+									"disabled": true
+								},
+								{
+									"key": "in_stock",
+									"value": "",
+									"description": "Show only in-stock items (true/false)",
+									"disabled": true
+								},
+								{
+									"key": "sort_by",
+									"value": "created_at",
+									"description": "Sort field: price, name, created_at, popularity, rating, discount"
+								},
+								{
+									"key": "sort_order",
+									"value": "desc",
+									"description": "Sort order: asc, desc"
+								}
+							]
+						},
+						"description": "Get paginated list of products with comprehensive filters and sorting options"
+					},
+					"response": [
+						{
+							"name": "200 OK",
+							"originalRequest": {
+								"auth": {
+									"type": "noauth"
+								},
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{base_url}}/api/v1/products?page=1&per_page=20&sort_by=created_at&sort_order=desc",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"api",
+										"v1",
+										"products"
+									],
+									"query": [
+										{
+											"key": "page",
+											"value": "1",
+											"description": "Page number"
+										},
+										{
+											"key": "per_page",
+											"value": "20",
+											"description": "Items per page (max: 50)"
+										},
+										{
+											"key": "search",
+											"value": "",
+											"description": "Search by name, SKU, or description",
+											"disabled": true
+										},
+										{
+											"key": "featured",
+											"value": "",
+											"description": "Filter by featured (true/false)",
+											"disabled": true
+										},
+										{
+											"key": "new",
+											"value": "",
+											"description": "Filter by new arrivals (true/false)",
+											"disabled": true
+										},
+										{
+											"key": "on_sale",
+											"value": "",
+											"description": "Filter products on sale (true/false)",
+											"disabled": true
+										},
+										{
+											"key": "category_id",
+											"value": "",
+											"description": "Filter by single category ID",
+											"disabled": true
+										},
+										{
+											"key": "category_ids",
+											"value": "",
+											"description": "Filter by multiple category IDs (comma-separated: 1,2,3)",
+											"disabled": true
+										},
+										{
+											"key": "brand_id",
+											"value": "",
+											"description": "Filter by single brand ID",
+											"disabled": true
+										},
+										{
+											"key": "brand_ids",
+											"value": "",
+											"description": "Filter by multiple brand IDs (comma-separated: 1,2,3)",
+											"disabled": true
+										},
+										{
+											"key": "min_price",
+											"value": "",
+											"description": "Minimum price",
+											"disabled": true
+										},
+										{
+											"key": "max_price",
+											"value": "",
+											"description": "Maximum price",
+											"disabled": true
+										},
+										{
+											"key": "min_rating",
+											"value": "",
+											"description": "Minimum average rating (1-5)",
+											"disabled": true
+										},
+										{
+											"key": "in_stock",
+											"value": "",
+											"description": "Show only in-stock items (true/false)",
+											"disabled": true
+										},
+										{
+											"key": "sort_by",
+											"value": "created_at",
+											"description": "Sort field: price, name, created_at, popularity, rating, discount"
+										},
+										{
+											"key": "sort_order",
+											"value": "desc",
+											"description": "Sort order: asc, desc"
+										}
+									]
+								},
+								"description": "Get paginated list of products with comprehensive filters and sorting options"
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								}
+							],
+							"cookie": [],
+							"body": "{\n  \"success\": true,\n  \"message\": \"Products retrieved successfully\",\n  \"data\": {\n    \"data\": [\n      {\n        \"id\": 1,\n        \"name\": \"iPhone 15 Pro\",\n        \"slug\": \"iphone-15-pro\",\n        \"price\": 129999.0,\n        \"sale_price\": 119999.0,\n        \"sku\": \"IPH15PRO-128\",\n        \"in_stock\": true,\n        \"thumbnail\": \"https://example.com/images/iphone15.jpg\",\n        \"average_rating\": 4.8,\n        \"reviews_count\": 120\n      },\n      {\n        \"id\": 2,\n        \"name\": \"Samsung Galaxy S24\",\n        \"slug\": \"samsung-galaxy-s24\",\n        \"price\": 89999.0,\n        \"sale_price\": null,\n        \"sku\": \"SAMS24-256\",\n        \"in_stock\": true,\n        \"thumbnail\": \"https://example.com/images/s24.jpg\",\n        \"average_rating\": 4.5,\n        \"reviews_count\": 85\n      }\n    ],\n    \"meta\": {\n      \"current_page\": 1,\n      \"per_page\": 20,\n      \"total\": 150,\n      \"last_page\": 8\n    }\n  }\n}"
+						}
+					]
+				},
+				{
+					"name": "Product Details",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/v1/products/1",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"products",
+								"1"
+							]
+						},
+						"description": "Get detailed information about a specific product"
+					},
+					"response": [
+						{
+							"name": "200 OK",
+							"originalRequest": {
+								"auth": {
+									"type": "noauth"
+								},
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{base_url}}/api/v1/products/1",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"api",
+										"v1",
+										"products",
+										"1"
+									]
+								},
+								"description": "Get detailed information about a specific product"
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								}
+							],
+							"cookie": [],
+							"body": "{\n  \"success\": true,\n  \"message\": \"Product retrieved successfully\",\n  \"data\": {\n    \"id\": 1,\n    \"name\": \"iPhone 15 Pro\",\n    \"slug\": \"iphone-15-pro\",\n    \"description\": \"The most powerful iPhone ever built.\",\n    \"short_description\": \"Pro camera system. A17 Pro chip. Titanium design.\",\n    \"price\": 129999.0,\n    \"sale_price\": 119999.0,\n    \"sku\": \"IPH15PRO-128\",\n    \"in_stock\": true,\n    \"stock_quantity\": 50,\n    \"images\": [\n      {\n        \"id\": 1,\n        \"url\": \"https://example.com/images/iphone15-1.jpg\",\n        \"is_primary\": true\n      }\n    ],\n    \"category\": {\n      \"id\": 3,\n      \"name\": \"Smartphones\",\n      \"slug\": \"smartphones\"\n    },\n    \"brand\": {\n      \"id\": 1,\n      \"name\": \"Apple\"\n    },\n    \"average_rating\": 4.8,\n    \"reviews_count\": 120,\n    \"attributes\": [\n      {\n        \"name\": \"Color\",\n        \"value\": \"Natural Titanium\"\n      },\n      {\n        \"name\": \"Storage\",\n        \"value\": \"128GB\"\n      }\n    ]\n  }\n}"
+						},
+						{
+							"name": "404 Not Found",
+							"originalRequest": {
+								"auth": {
+									"type": "noauth"
+								},
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{base_url}}/api/v1/products/1",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"api",
+										"v1",
+										"products",
+										"1"
+									]
+								},
+								"description": "Get detailed information about a specific product"
+							},
+							"status": "Not Found",
+							"code": 404,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								}
+							],
+							"cookie": [],
+							"body": "{\n  \"success\": false,\n  \"message\": \"Product not found\",\n  \"code\": \"PRODUCT_NOT_FOUND\"\n}"
+						}
+					]
+				},
+				{
+					"name": "Featured Products",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/v1/products/featured?limit=10",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"products",
+								"featured"
+							],
+							"query": [
+								{
+									"key": "limit",
+									"value": "10",
+									"description": "Number of items to return"
+								}
+							]
+						},
+						"description": "Get featured products"
+					},
+					"response": [
+						{
+							"name": "200 OK",
+							"originalRequest": {
+								"auth": {
+									"type": "noauth"
+								},
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{base_url}}/api/v1/products/featured?limit=10",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"api",
+										"v1",
+										"products",
+										"featured"
+									],
+									"query": [
+										{
+											"key": "limit",
+											"value": "10",
+											"description": "Number of items to return"
+										}
+									]
+								},
+								"description": "Get featured products"
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								}
+							],
+							"cookie": [],
+							"body": "{\n  \"success\": true,\n  \"message\": \"Featured products retrieved\",\n  \"data\": [\n    {\n      \"id\": 1,\n      \"name\": \"iPhone 15 Pro\",\n      \"slug\": \"iphone-15-pro\",\n      \"price\": 129999.0,\n      \"sale_price\": 119999.0,\n      \"thumbnail\": \"https://example.com/images/iphone15.jpg\",\n      \"average_rating\": 4.8\n    },\n    {\n      \"id\": 5,\n      \"name\": \"Sony WH-1000XM5\",\n      \"slug\": \"sony-wh-1000xm5\",\n      \"price\": 29990.0,\n      \"sale_price\": 24990.0,\n      \"thumbnail\": \"https://example.com/images/sony-wh.jpg\",\n      \"average_rating\": 4.7\n    }\n  ]\n}"
+						}
+					]
+				},
+				{
+					"name": "On Sale Products",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/v1/products/on-sale?limit=10",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"products",
+								"on-sale"
+							],
+							"query": [
+								{
+									"key": "limit",
+									"value": "10"
+								}
+							]
+						},
+						"description": "Get products currently on sale"
+					},
+					"response": [
+						{
+							"name": "200 OK",
+							"originalRequest": {
+								"auth": {
+									"type": "noauth"
+								},
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{base_url}}/api/v1/products/on-sale?limit=10",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"api",
+										"v1",
+										"products",
+										"on-sale"
+									],
+									"query": [
+										{
+											"key": "limit",
+											"value": "10"
+										}
+									]
+								},
+								"description": "Get products currently on sale"
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								}
+							],
+							"cookie": [],
+							"body": "{\n  \"success\": true,\n  \"message\": \"On-sale products retrieved\",\n  \"data\": {\n    \"data\": [\n      {\n        \"id\": 1,\n        \"name\": \"iPhone 15 Pro\",\n        \"price\": 129999.0,\n        \"sale_price\": 119999.0,\n        \"discount_percent\": 8,\n        \"thumbnail\": \"https://example.com/images/iphone15.jpg\"\n      }\n    ],\n    \"meta\": {\n      \"current_page\": 1,\n      \"per_page\": 20,\n      \"total\": 42,\n      \"last_page\": 3\n    }\n  }\n}"
+						}
+					]
+				},
+				{
+					"name": "New Arrivals",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/v1/products/new-arrivals?limit=10",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"products",
+								"new-arrivals"
+							],
+							"query": [
+								{
+									"key": "limit",
+									"value": "10"
+								}
+							]
+						},
+						"description": "Get recently added products"
+					},
+					"response": [
+						{
+							"name": "200 OK",
+							"originalRequest": {
+								"auth": {
+									"type": "noauth"
+								},
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{base_url}}/api/v1/products/new-arrivals?limit=10",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"api",
+										"v1",
+										"products",
+										"new-arrivals"
+									],
+									"query": [
+										{
+											"key": "limit",
+											"value": "10"
+										}
+									]
+								},
+								"description": "Get recently added products"
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								}
+							],
+							"cookie": [],
+							"body": "{\n  \"success\": true,\n  \"message\": \"New arrivals retrieved\",\n  \"data\": [\n    {\n      \"id\": 10,\n      \"name\": \"OnePlus 12\",\n      \"slug\": \"oneplus-12\",\n      \"price\": 64999.0,\n      \"thumbnail\": \"https://example.com/images/op12.jpg\",\n      \"created_at\": \"2026-02-10T00:00:00Z\"\n    }\n  ]\n}"
+						}
+					]
+				},
+				{
+					"name": "Related Products",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/v1/products/1/related?limit=5",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"products",
+								"1",
+								"related"
+							],
+							"query": [
+								{
+									"key": "limit",
+									"value": "5"
+								}
+							]
+						},
+						"description": "Get products related to a specific product"
+					},
+					"response": [
+						{
+							"name": "200 OK",
+							"originalRequest": {
+								"auth": {
+									"type": "noauth"
+								},
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{base_url}}/api/v1/products/1/related?limit=5",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"api",
+										"v1",
+										"products",
+										"1",
+										"related"
+									],
+									"query": [
+										{
+											"key": "limit",
+											"value": "5"
+										}
+									]
+								},
+								"description": "Get products related to a specific product"
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								}
+							],
+							"cookie": [],
+							"body": "{\n  \"success\": true,\n  \"message\": \"Related products retrieved\",\n  \"data\": [\n    {\n      \"id\": 2,\n      \"name\": \"Samsung Galaxy S24\",\n      \"price\": 89999.0,\n      \"thumbnail\": \"https://example.com/images/s24.jpg\"\n    },\n    {\n      \"id\": 3,\n      \"name\": \"Google Pixel 8\",\n      \"price\": 75999.0,\n      \"thumbnail\": \"https://example.com/images/pixel8.jpg\"\n    }\n  ]\n}"
+						}
+					]
+				},
+				{
+					"name": "Product Reviews",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/v1/products/1/reviews?page=1",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"products",
+								"1",
+								"reviews"
+							],
+							"query": [
+								{
+									"key": "page",
+									"value": "1"
+								}
+							]
+						},
+						"description": "Get reviews for a specific product"
+					},
+					"response": [
+						{
+							"name": "200 OK",
+							"originalRequest": {
+								"auth": {
+									"type": "noauth"
+								},
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{base_url}}/api/v1/products/1/reviews?page=1",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"api",
+										"v1",
+										"products",
+										"1",
+										"reviews"
+									],
+									"query": [
+										{
+											"key": "page",
+											"value": "1"
+										}
+									]
+								},
+								"description": "Get reviews for a specific product"
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								}
+							],
+							"cookie": [],
+							"body": "{\n  \"success\": true,\n  \"message\": \"Reviews retrieved successfully\",\n  \"data\": {\n    \"data\": [\n      {\n        \"id\": 1,\n        \"rating\": 5,\n        \"title\": \"Excellent product!\",\n        \"comment\": \"Best phone I have ever used. Camera is outstanding.\",\n        \"author\": \"John D.\",\n        \"created_at\": \"2026-01-15T10:00:00Z\",\n        \"helpful_votes\": 12\n      }\n    ],\n    \"meta\": {\n      \"current_page\": 1,\n      \"per_page\": 10,\n      \"total\": 120,\n      \"average_rating\": 4.8,\n      \"last_page\": 12\n    }\n  }\n}"
+						}
+					]
+				}
+			],
+			"description": "Product listing, details, and discovery"
+		},
+		{
+			"name": "Categories",
+			"item": [
+				{
+					"name": "List Categories",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/v1/categories",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"categories"
+							],
+							"query": [
+								{
+									"key": "search",
+									"value": "",
+									"description": "Search by category name, slug, or description",
+									"disabled": true
+								},
+								{
+									"key": "parent_id",
+									"value": "",
+									"description": "Filter by parent category ID (null for root categories)",
+									"disabled": true
+								},
+								{
+									"key": "with_product_count",
+									"value": "",
+									"description": "Include product count for each category (true/false)",
+									"disabled": true
+								}
+							]
+						},
+						"description": "Get list of categories with optional search and filters"
+					},
+					"response": [
+						{
+							"name": "200 OK",
+							"originalRequest": {
+								"auth": {
+									"type": "noauth"
+								},
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{base_url}}/api/v1/categories",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"api",
+										"v1",
+										"categories"
+									],
+									"query": [
+										{
+											"key": "search",
+											"value": "",
+											"description": "Search by category name, slug, or description",
+											"disabled": true
+										},
+										{
+											"key": "parent_id",
+											"value": "",
+											"description": "Filter by parent category ID (null for root categories)",
+											"disabled": true
+										},
+										{
+											"key": "with_product_count",
+											"value": "",
+											"description": "Include product count for each category (true/false)",
+											"disabled": true
+										}
+									]
+								},
+								"description": "Get list of categories with optional search and filters"
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								}
+							],
+							"cookie": [],
+							"body": "{\n  \"success\": true,\n  \"message\": \"Categories retrieved\",\n  \"data\": [\n    {\n      \"id\": 1,\n      \"name\": \"Electronics\",\n      \"slug\": \"electronics\",\n      \"image\": \"https://example.com/cat/electronics.jpg\",\n      \"products_count\": 480\n    },\n    {\n      \"id\": 2,\n      \"name\": \"Clothing\",\n      \"slug\": \"clothing\",\n      \"image\": \"https://example.com/cat/clothing.jpg\",\n      \"products_count\": 320\n    }\n  ]\n}"
+						}
+					]
+				},
+				{
+					"name": "Category Tree",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/v1/categories/tree",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"categories",
+								"tree"
+							]
+						},
+						"description": "Get hierarchical category tree"
+					},
+					"response": [
+						{
+							"name": "200 OK",
+							"originalRequest": {
+								"auth": {
+									"type": "noauth"
+								},
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{base_url}}/api/v1/categories/tree",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"api",
+										"v1",
+										"categories",
+										"tree"
+									]
+								},
+								"description": "Get hierarchical category tree"
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								}
+							],
+							"cookie": [],
+							"body": "{\n  \"success\": true,\n  \"message\": \"Category tree retrieved\",\n  \"data\": [\n    {\n      \"id\": 1,\n      \"name\": \"Electronics\",\n      \"slug\": \"electronics\",\n      \"children\": [\n        {\n          \"id\": 3,\n          \"name\": \"Smartphones\",\n          \"slug\": \"smartphones\",\n          \"children\": []\n        },\n        {\n          \"id\": 4,\n          \"name\": \"Laptops\",\n          \"slug\": \"laptops\",\n          \"children\": []\n        }\n      ]\n    },\n    {\n      \"id\": 2,\n      \"name\": \"Clothing\",\n      \"slug\": \"clothing\",\n      \"children\": [\n        {\n          \"id\": 5,\n          \"name\": \"Men\",\n          \"slug\": \"men\",\n          \"children\": []\n        },\n        {\n          \"id\": 6,\n          \"name\": \"Women\",\n          \"slug\": \"women\",\n          \"children\": []\n        }\n      ]\n    }\n  ]\n}"
+						}
+					]
+				},
+				{
+					"name": "Category Details",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/v1/categories/1",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"categories",
+								"1"
+							]
+						},
+						"description": "Get specific category details"
+					},
+					"response": [
+						{
+							"name": "200 OK",
+							"originalRequest": {
+								"auth": {
+									"type": "noauth"
+								},
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{base_url}}/api/v1/categories/1",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"api",
+										"v1",
+										"categories",
+										"1"
+									]
+								},
+								"description": "Get specific category details"
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								}
+							],
+							"cookie": [],
+							"body": "{\n  \"success\": true,\n  \"message\": \"Category retrieved\",\n  \"data\": {\n    \"id\": 1,\n    \"name\": \"Electronics\",\n    \"slug\": \"electronics\",\n    \"description\": \"All electronic items\",\n    \"image\": \"https://example.com/cat/electronics.jpg\",\n    \"products_count\": 480,\n    \"children\": [\n      {\n        \"id\": 3,\n        \"name\": \"Smartphones\"\n      }\n    ]\n  }\n}"
+						}
+					]
+				},
+				{
+					"name": "Category Products",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/v1/categories/1/products?page=1",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"categories",
+								"1",
+								"products"
+							],
+							"query": [
+								{
+									"key": "page",
+									"value": "1"
+								}
+							]
+						},
+						"description": "Get products in a specific category"
+					},
+					"response": [
+						{
+							"name": "200 OK",
+							"originalRequest": {
+								"auth": {
+									"type": "noauth"
+								},
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{base_url}}/api/v1/categories/1/products?page=1",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"api",
+										"v1",
+										"categories",
+										"1",
+										"products"
+									],
+									"query": [
+										{
+											"key": "page",
+											"value": "1"
+										}
+									]
+								},
+								"description": "Get products in a specific category"
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								}
+							],
+							"cookie": [],
+							"body": "{\n  \"success\": true,\n  \"message\": \"Category products retrieved\",\n  \"data\": {\n    \"data\": [\n      {\n        \"id\": 1,\n        \"name\": \"iPhone 15 Pro\",\n        \"price\": 129999.0,\n        \"thumbnail\": \"https://example.com/images/iphone15.jpg\"\n      }\n    ],\n    \"meta\": {\n      \"current_page\": 1,\n      \"per_page\": 20,\n      \"total\": 45,\n      \"last_page\": 3\n    }\n  }\n}"
+						}
+					]
+				}
+			],
+			"description": "Category navigation and product browsing"
+		},
+		{
+			"name": "Banners",
+			"item": [
+				{
+					"name": "List Banners",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/v1/banners?identifier=homepage-hero&limit=10",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"banners"
+							],
+							"query": [
+								{
+									"key": "identifier",
+									"value": "homepage-hero",
+									"description": "Exact CMS block identifier",
+									"disabled": true
+								},
+								{
+									"key": "identifiers",
+									"value": "homepage-hero,electronics-hero-banner",
+									"description": "Comma-separated list of identifiers",
+									"disabled": true
+								},
+								{
+									"key": "limit",
+									"value": "10",
+									"description": "Max items (default 10, max 50)",
+									"disabled": true
+								}
+							]
+						},
+						"description": "List active & scheduled banners (backed by CMS blocks type=banner)"
+					},
+					"response": [
+						{
+							"name": "200 OK",
+							"originalRequest": {
+								"auth": {
+									"type": "noauth"
+								},
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{base_url}}/api/v1/banners?identifier=homepage-hero&limit=10",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"api",
+										"v1",
+										"banners"
+									],
+									"query": [
+										{
+											"key": "identifier",
+											"value": "homepage-hero",
+											"description": "Exact CMS block identifier",
+											"disabled": true
+										},
+										{
+											"key": "identifiers",
+											"value": "homepage-hero,electronics-hero-banner",
+											"description": "Comma-separated list of identifiers",
+											"disabled": true
+										},
+										{
+											"key": "limit",
+											"value": "10",
+											"description": "Max items (default 10, max 50)",
+											"disabled": true
+										}
+									]
+								},
+								"description": "List active & scheduled banners (backed by CMS blocks type=banner)"
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								}
+							],
+							"cookie": [],
+							"body": "{\n  \"success\": true,\n  \"message\": \"Banners retrieved\",\n  \"data\": [\n    {\n      \"id\": 1,\n      \"identifier\": \"homepage-hero\",\n      \"title\": \"Summer Sale\",\n      \"subtitle\": \"Up to 50% OFF on Electronics\",\n      \"image\": \"https://example.com/banners/summer-sale.jpg\",\n      \"mobile_image\": \"https://example.com/banners/summer-sale-mobile.jpg\",\n      \"link\": \"/sale\",\n      \"button_text\": \"Shop Now\",\n      \"is_active\": true,\n      \"starts_at\": \"2026-02-01T00:00:00Z\",\n      \"ends_at\": \"2026-03-31T23:59:59Z\"\n    }\n  ]\n}"
+						}
+					]
+				},
+				{
+					"name": "Get Banner By Identifier",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/v1/banners/homepage-hero",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"banners",
+								"homepage-hero"
+							]
+						},
+						"description": "Fetch a single banner by identifier (403 if not visible)"
+					},
+					"response": [
+						{
+							"name": "200 OK",
+							"originalRequest": {
+								"auth": {
+									"type": "noauth"
+								},
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{base_url}}/api/v1/banners/homepage-hero",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"api",
+										"v1",
+										"banners",
+										"homepage-hero"
+									]
+								},
+								"description": "Fetch a single banner by identifier (403 if not visible)"
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								}
+							],
+							"cookie": [],
+							"body": "{\n  \"success\": true,\n  \"message\": \"Banner retrieved\",\n  \"data\": {\n    \"id\": 1,\n    \"identifier\": \"homepage-hero\",\n    \"title\": \"Summer Sale\",\n    \"image\": \"https://example.com/banners/summer-sale.jpg\",\n    \"link\": \"/sale\",\n    \"button_text\": \"Shop Now\",\n    \"is_active\": true\n  }\n}"
+						},
+						{
+							"name": "404 Not Found",
+							"originalRequest": {
+								"auth": {
+									"type": "noauth"
+								},
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{base_url}}/api/v1/banners/homepage-hero",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"api",
+										"v1",
+										"banners",
+										"homepage-hero"
+									]
+								},
+								"description": "Fetch a single banner by identifier (403 if not visible)"
+							},
+							"status": "Not Found",
+							"code": 404,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								}
+							],
+							"cookie": [],
+							"body": "{\n  \"success\": false,\n  \"message\": \"Banner not found\"\n}"
+						}
+					]
+				}
+			],
+			"description": "Mobile/home banners powered by CMS blocks"
+		},
+		{
+			"name": "Currency",
+			"item": [
+				{
+					"name": "Get Default Currency",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/v1/currency/default",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"currency",
+								"default"
+							]
+						},
+						"description": "Get the default currency for the application with symbol, format, and exchange rate"
+					},
+					"response": [
+						{
+							"name": "200 OK",
+							"originalRequest": {
+								"auth": {
+									"type": "noauth"
+								},
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{base_url}}/api/v1/currency/default",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"api",
+										"v1",
+										"currency",
+										"default"
+									]
+								},
+								"description": "Get the default currency for the application with symbol, format, and exchange rate"
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								}
+							],
+							"cookie": [],
+							"body": "{\n  \"success\": true,\n  \"message\": \"Default currency retrieved\",\n  \"data\": {\n    \"code\": \"INR\",\n    \"name\": \"Indian Rupee\",\n    \"symbol\": \"\\u20b9\",\n    \"exchange_rate\": 1.0,\n    \"decimal_places\": 2,\n    \"format\": \"\\u20b9{amount}\",\n    \"is_default\": true\n  }\n}"
+						}
+					]
+				},
+				{
+					"name": "List All Currencies",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/v1/currency",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"currency"
+							]
+						},
+						"description": "Get all active currencies available in the system"
+					},
+					"response": [
+						{
+							"name": "200 OK",
+							"originalRequest": {
+								"auth": {
+									"type": "noauth"
+								},
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{base_url}}/api/v1/currency",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"api",
+										"v1",
+										"currency"
+									]
+								},
+								"description": "Get all active currencies available in the system"
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								}
+							],
+							"cookie": [],
+							"body": "{\n  \"success\": true,\n  \"message\": \"Currencies retrieved\",\n  \"data\": [\n    {\n      \"code\": \"INR\",\n      \"name\": \"Indian Rupee\",\n      \"symbol\": \"\\u20b9\",\n      \"exchange_rate\": 1.0,\n      \"is_default\": true\n    },\n    {\n      \"code\": \"USD\",\n      \"name\": \"US Dollar\",\n      \"symbol\": \"$\",\n      \"exchange_rate\": 0.012,\n      \"is_default\": false\n    }\n  ]\n}"
+						}
+					]
+				}
+			],
+			"description": "Currency information for mobile app localization and pricing display"
+		},
+		{
+			"name": "Cart",
+			"item": [
+				{
+					"name": "View Cart",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/v1/cart",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"cart"
+							]
+						},
+						"description": "Get current cart contents"
+					},
+					"response": [
+						{
+							"name": "200 OK",
+							"originalRequest": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{base_url}}/api/v1/cart",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"api",
+										"v1",
+										"cart"
+									]
+								},
+								"description": "Get current cart contents"
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								}
+							],
+							"cookie": [],
+							"body": "{\n  \"success\": true,\n  \"message\": \"Cart retrieved\",\n  \"data\": {\n    \"id\": 7,\n    \"items_count\": 2,\n    \"subtotal\": 219998.0,\n    \"items\": [\n      {\n        \"id\": 1,\n        \"product_id\": 1,\n        \"product_name\": \"iPhone 15 Pro\",\n        \"quantity\": 1,\n        \"price\": 119999.0,\n        \"subtotal\": 119999.0,\n        \"thumbnail\": \"https://example.com/images/iphone15.jpg\"\n      },\n      {\n        \"id\": 2,\n        \"product_id\": 2,\n        \"product_name\": \"Samsung Galaxy S24\",\n        \"quantity\": 1,\n        \"price\": 89999.0,\n        \"subtotal\": 89999.0,\n        \"thumbnail\": \"https://example.com/images/s24.jpg\"\n      }\n    ],\n    \"coupon_code\": null,\n    \"discount_amount\": 0\n  }\n}"
+						}
+					]
+				},
+				{
+					"name": "Add to Cart",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"product_id\": 1,\n    \"quantity\": 2\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/v1/cart/add",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"cart",
+								"add"
+							]
+						},
+						"description": "Add product to cart"
+					},
+					"response": [
+						{
+							"name": "200 OK",
+							"originalRequest": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"product_id\": 1,\n    \"quantity\": 2\n}"
+								},
+								"url": {
+									"raw": "{{base_url}}/api/v1/cart/add",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"api",
+										"v1",
+										"cart",
+										"add"
+									]
+								},
+								"description": "Add product to cart"
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								}
+							],
+							"cookie": [],
+							"body": "{\n  \"success\": true,\n  \"message\": \"Product added to cart\",\n  \"data\": {\n    \"cart_id\": 7,\n    \"item_id\": 3,\n    \"product_id\": 1,\n    \"quantity\": 2,\n    \"price\": 119999.0,\n    \"subtotal\": 239998.0,\n    \"cart_total\": 329997.0\n  }\n}"
+						},
+						{
+							"name": "422 Out of Stock",
+							"originalRequest": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"product_id\": 1,\n    \"quantity\": 2\n}"
+								},
+								"url": {
+									"raw": "{{base_url}}/api/v1/cart/add",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"api",
+										"v1",
+										"cart",
+										"add"
+									]
+								},
+								"description": "Add product to cart"
+							},
+							"status": "Unprocessable Entity",
+							"code": 422,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								}
+							],
+							"cookie": [],
+							"body": "{\n  \"success\": false,\n  \"message\": \"Insufficient stock\",\n  \"code\": \"OUT_OF_STOCK\",\n  \"data\": {\n    \"available\": 1,\n    \"requested\": 2\n  }\n}"
+						}
+					]
+				},
+				{
+					"name": "Update Cart Item",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"quantity\": 3\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/v1/cart/items/1",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"cart",
+								"items",
+								"1"
+							]
+						},
+						"description": "Update quantity of cart item"
+					},
+					"response": [
+						{
+							"name": "200 OK",
+							"originalRequest": {
+								"method": "PUT",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"quantity\": 3\n}"
+								},
+								"url": {
+									"raw": "{{base_url}}/api/v1/cart/items/1",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"api",
+										"v1",
+										"cart",
+										"items",
+										"1"
+									]
+								},
+								"description": "Update quantity of cart item"
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								}
+							],
+							"cookie": [],
+							"body": "{\n  \"success\": true,\n  \"message\": \"Cart item updated\",\n  \"data\": {\n    \"item_id\": 1,\n    \"quantity\": 3,\n    \"subtotal\": 359997.0,\n    \"cart_total\": 449996.0\n  }\n}"
+						}
+					]
+				},
+				{
+					"name": "Remove from Cart",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/v1/cart/items/1",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"cart",
+								"items",
+								"1"
+							]
+						},
+						"description": "Remove item from cart"
+					},
+					"response": [
+						{
+							"name": "200 OK",
+							"originalRequest": {
+								"method": "DELETE",
+								"header": [],
+								"url": {
+									"raw": "{{base_url}}/api/v1/cart/items/1",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"api",
+										"v1",
+										"cart",
+										"items",
+										"1"
+									]
+								},
+								"description": "Remove item from cart"
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								}
+							],
+							"cookie": [],
+							"body": "{\n  \"success\": true,\n  \"message\": \"Item removed from cart\",\n  \"data\": {\n    \"cart_total\": 89999.0,\n    \"items_count\": 1\n  }\n}"
+						}
+					]
+				},
+				{
+					"name": "Clear Cart",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/v1/cart/clear",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"cart",
+								"clear"
+							]
+						},
+						"description": "Remove all items from cart"
+					},
+					"response": [
+						{
+							"name": "200 OK",
+							"originalRequest": {
+								"method": "DELETE",
+								"header": [],
+								"url": {
+									"raw": "{{base_url}}/api/v1/cart/clear",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"api",
+										"v1",
+										"cart",
+										"clear"
+									]
+								},
+								"description": "Remove all items from cart"
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								}
+							],
+							"cookie": [],
+							"body": "{\n  \"success\": true,\n  \"message\": \"Cart cleared\",\n  \"data\": {\n    \"items_count\": 0,\n    \"subtotal\": 0\n  }\n}"
+						}
+					]
+				},
+				{
+					"name": "Cart Item Count",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/v1/cart/count",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"cart",
+								"count"
+							]
+						},
+						"description": "Get total number of items in cart"
+					},
+					"response": [
+						{
+							"name": "200 OK",
+							"originalRequest": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{base_url}}/api/v1/cart/count",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"api",
+										"v1",
+										"cart",
+										"count"
+									]
+								},
+								"description": "Get total number of items in cart"
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								}
+							],
+							"cookie": [],
+							"body": "{\n  \"success\": true,\n  \"message\": \"Cart count retrieved\",\n  \"data\": {\n    \"count\": 3,\n    \"unique_items\": 2\n  }\n}"
+						}
+					]
+				},
+				{
+					"name": "Apply Coupon",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"coupon_code\": \"SAVE10\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/v1/cart/apply-coupon",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"cart",
+								"apply-coupon"
+							]
+						},
+						"description": "Apply coupon code to cart"
+					},
+					"response": [
+						{
+							"name": "200 OK",
+							"originalRequest": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"coupon_code\": \"SAVE10\"\n}"
+								},
+								"url": {
+									"raw": "{{base_url}}/api/v1/cart/apply-coupon",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"api",
+										"v1",
+										"cart",
+										"apply-coupon"
+									]
+								},
+								"description": "Apply coupon code to cart"
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								}
+							],
+							"cookie": [],
+							"body": "{\n  \"success\": true,\n  \"message\": \"Coupon applied successfully\",\n  \"data\": {\n    \"coupon_code\": \"SAVE10\",\n    \"discount_type\": \"percentage\",\n    \"discount_value\": 10,\n    \"discount_amount\": 21999.8,\n    \"cart_total\": 197998.2\n  }\n}"
+						},
+						{
+							"name": "400 Invalid Coupon",
+							"originalRequest": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"coupon_code\": \"SAVE10\"\n}"
+								},
+								"url": {
+									"raw": "{{base_url}}/api/v1/cart/apply-coupon",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"api",
+										"v1",
+										"cart",
+										"apply-coupon"
+									]
+								},
+								"description": "Apply coupon code to cart"
+							},
+							"status": "Bad Request",
+							"code": 400,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								}
+							],
+							"cookie": [],
+							"body": "{\n  \"success\": false,\n  \"message\": \"Invalid or expired coupon code\",\n  \"code\": \"INVALID_COUPON\"\n}"
+						}
+					]
+				},
+				{
+					"name": "Remove Coupon",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/v1/cart/remove-coupon",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"cart",
+								"remove-coupon"
+							]
+						},
+						"description": "Remove applied coupon from cart"
+					},
+					"response": [
+						{
+							"name": "200 OK",
+							"originalRequest": {
+								"method": "DELETE",
+								"header": [],
+								"url": {
+									"raw": "{{base_url}}/api/v1/cart/remove-coupon",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"api",
+										"v1",
+										"cart",
+										"remove-coupon"
+									]
+								},
+								"description": "Remove applied coupon from cart"
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								}
+							],
+							"cookie": [],
+							"body": "{\n  \"success\": true,\n  \"message\": \"Coupon removed\",\n  \"data\": {\n    \"cart_total\": 219998.0,\n    \"discount_amount\": 0\n  }\n}"
+						}
+					]
+				}
+			],
+			"description": "Shopping cart management (requires authentication)"
+		},
+		{
+			"name": "Checkout",
+			"item": [
+				{
+					"name": "Initialize Checkout",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/v1/checkout/init",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"checkout",
+								"init"
+							]
+						},
+						"description": "Initialize checkout process and get cart summary"
+					},
+					"response": [
+						{
+							"name": "200 OK",
+							"originalRequest": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{base_url}}/api/v1/checkout/init",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"api",
+										"v1",
+										"checkout",
+										"init"
+									]
+								},
+								"description": "Initialize checkout process and get cart summary"
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								}
+							],
+							"cookie": [],
+							"body": "{\n  \"success\": true,\n  \"message\": \"Checkout initialized successfully\",\n  \"data\": {\n    \"cart\": {\n      \"id\": 7,\n      \"items_count\": 2,\n      \"subtotal\": 219998.0\n    },\n    \"addresses\": [\n      {\n        \"id\": 1,\n        \"label\": \"Home\",\n        \"first_name\": \"Saju\",\n        \"last_name\": \"Gopal\",\n        \"address_line_1\": \"410 C Jaina Tower 1\",\n        \"city\": \"Delhi\",\n        \"state\": \"Delhi\",\n        \"postal_code\": \"110058\",\n        \"country\": \"IN\",\n        \"phone\": \"9811381218\",\n        \"is_default_shipping\": true,\n        \"is_default_billing\": true\n      }\n    ],\n    \"default_shipping_address_id\": 1,\n    \"default_billing_address_id\": 1\n  }\n}"
+						}
+					]
+				},
+				{
+					"name": "Set Shipping Address",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"first_name\": \"John\",\n    \"last_name\": \"Doe\",\n    \"phone\": \"9876543210\",\n    \"address_line_1\": \"123 Main Street\",\n    \"address_line_2\": \"Apt 4B\",\n    \"city\": \"Delhi\",\n    \"state\": \"Delhi\",\n    \"postal_code\": \"110001\",\n    \"country\": \"IN\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/v1/checkout/shipping-address",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"checkout",
+								"shipping-address"
+							]
+						},
+						"description": "Set shipping address for order. REQUIRED before Stripe payment. Can use address_id: 1 for saved address OR provide full address details."
+					},
+					"response": [
+						{
+							"name": "200 OK (Inline Address)",
+							"originalRequest": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"first_name\": \"John\",\n    \"last_name\": \"Doe\",\n    \"phone\": \"9876543210\",\n    \"address_line_1\": \"123 Main Street\",\n    \"address_line_2\": \"Apt 4B\",\n    \"city\": \"Delhi\",\n    \"state\": \"Delhi\",\n    \"postal_code\": \"110001\",\n    \"country\": \"IN\"\n}"
+								},
+								"url": {
+									"raw": "{{base_url}}/api/v1/checkout/shipping-address",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"api",
+										"v1",
+										"checkout",
+										"shipping-address"
+									]
+								},
+								"description": "Set shipping address for order. REQUIRED before Stripe payment. Can use address_id: 1 for saved address OR provide full address details."
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								}
+							],
+							"cookie": [],
+							"body": "{\n  \"success\": true,\n  \"message\": \"Shipping address set successfully\",\n  \"data\": {\n    \"shipping_address\": {\n      \"first_name\": \"Saju\",\n      \"last_name\": \"Gopal\",\n      \"address_line_1\": \"410 C Jaina Tower 1\",\n      \"city\": \"Delhi\",\n      \"state\": \"Delhi\",\n      \"postal_code\": \"110058\",\n      \"country\": \"IN\",\n      \"phone\": \"9811381218\"\n    }\n  }\n}"
+						},
+						{
+							"name": "200 OK (Saved Address ID)",
+							"originalRequest": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"first_name\": \"John\",\n    \"last_name\": \"Doe\",\n    \"phone\": \"9876543210\",\n    \"address_line_1\": \"123 Main Street\",\n    \"address_line_2\": \"Apt 4B\",\n    \"city\": \"Delhi\",\n    \"state\": \"Delhi\",\n    \"postal_code\": \"110001\",\n    \"country\": \"IN\"\n}"
+								},
+								"url": {
+									"raw": "{{base_url}}/api/v1/checkout/shipping-address",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"api",
+										"v1",
+										"checkout",
+										"shipping-address"
+									]
+								},
+								"description": "Set shipping address for order. REQUIRED before Stripe payment. Can use address_id: 1 for saved address OR provide full address details."
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								}
+							],
+							"cookie": [],
+							"body": "{\n  \"success\": true,\n  \"message\": \"Shipping address set successfully\",\n  \"data\": {\n    \"shipping_address\": {\n      \"address_id\": 1\n    }\n  }\n}"
+						}
+					]
+				},
+				{
+					"name": "Set Billing Address",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"same_as_shipping\": false,\n    \"first_name\": \"Jane\",\n    \"last_name\": \"Doe\",\n    \"phone\": \"9876543210\",\n    \"address_line_1\": \"456 Business Street\",\n    \"address_line_2\": \"Suite 200\",\n    \"city\": \"Mumbai\",\n    \"state\": \"Maharashtra\",\n    \"postal_code\": \"400001\",\n    \"country\": \"IN\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/v1/checkout/billing-address",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"checkout",
+								"billing-address"
+							]
+						},
+						"description": "Set billing address for order. Can use address_id: 1 for saved address, same_as_shipping: true, OR provide full address details."
+					},
+					"response": [
+						{
+							"name": "200 OK (Same as Shipping)",
+							"originalRequest": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"same_as_shipping\": false,\n    \"first_name\": \"Jane\",\n    \"last_name\": \"Doe\",\n    \"phone\": \"9876543210\",\n    \"address_line_1\": \"456 Business Street\",\n    \"address_line_2\": \"Suite 200\",\n    \"city\": \"Mumbai\",\n    \"state\": \"Maharashtra\",\n    \"postal_code\": \"400001\",\n    \"country\": \"IN\"\n}"
+								},
+								"url": {
+									"raw": "{{base_url}}/api/v1/checkout/billing-address",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"api",
+										"v1",
+										"checkout",
+										"billing-address"
+									]
+								},
+								"description": "Set billing address for order. Can use address_id: 1 for saved address, same_as_shipping: true, OR provide full address details."
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								}
+							],
+							"cookie": [],
+							"body": "{\n  \"success\": true,\n  \"message\": \"Billing address set successfully\",\n  \"data\": {\n    \"billing_address\": {\n      \"same_as_shipping\": true\n    }\n  }\n}"
+						},
+						{
+							"name": "200 OK (Different Address)",
+							"originalRequest": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"same_as_shipping\": false,\n    \"first_name\": \"Jane\",\n    \"last_name\": \"Doe\",\n    \"phone\": \"9876543210\",\n    \"address_line_1\": \"456 Business Street\",\n    \"address_line_2\": \"Suite 200\",\n    \"city\": \"Mumbai\",\n    \"state\": \"Maharashtra\",\n    \"postal_code\": \"400001\",\n    \"country\": \"IN\"\n}"
+								},
+								"url": {
+									"raw": "{{base_url}}/api/v1/checkout/billing-address",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"api",
+										"v1",
+										"checkout",
+										"billing-address"
+									]
+								},
+								"description": "Set billing address for order. Can use address_id: 1 for saved address, same_as_shipping: true, OR provide full address details."
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								}
+							],
+							"cookie": [],
+							"body": "{\n  \"success\": true,\n  \"message\": \"Billing address set successfully\",\n  \"data\": {\n    \"billing_address\": {\n      \"first_name\": \"Saju\",\n      \"last_name\": \"Gopal\",\n      \"address_line_1\": \"B-12 Connaught Place\",\n      \"city\": \"Delhi\",\n      \"state\": \"Delhi\",\n      \"postal_code\": \"110001\",\n      \"country\": \"IN\"\n    }\n  }\n}"
+						}
+					]
+				},
+				{
+					"name": "Get Shipping Methods",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/v1/checkout/shipping-methods",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"checkout",
+								"shipping-methods"
+							]
+						},
+						"description": "Get available shipping methods"
+					},
+					"response": [
+						{
+							"name": "200 OK",
+							"originalRequest": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{base_url}}/api/v1/checkout/shipping-methods",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"api",
+										"v1",
+										"checkout",
+										"shipping-methods"
+									]
+								},
+								"description": "Get available shipping methods"
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								}
+							],
+							"cookie": [],
+							"body": "{\n  \"success\": true,\n  \"message\": \"Shipping methods retrieved successfully\",\n  \"data\": [\n    {\n      \"id\": 1,\n      \"code\": \"standard\",\n      \"name\": \"Standard Shipping\",\n      \"description\": \"Delivery in 5-7 business days\",\n      \"price\": 49.0,\n      \"currency\": \"INR\"\n    },\n    {\n      \"id\": 2,\n      \"code\": \"express\",\n      \"name\": \"Express Shipping\",\n      \"description\": \"Delivery in 1-2 business days\",\n      \"price\": 149.0,\n      \"currency\": \"INR\"\n    }\n  ]\n}"
+						}
+					]
+				},
+				{
+					"name": "Set Shipping Method",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"shipping_method_code\": \"standard\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/v1/checkout/shipping-method",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"checkout",
+								"shipping-method"
+							]
+						},
+						"description": "Select shipping method"
+					},
+					"response": [
+						{
+							"name": "200 OK",
+							"originalRequest": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"shipping_method_code\": \"standard\"\n}"
+								},
+								"url": {
+									"raw": "{{base_url}}/api/v1/checkout/shipping-method",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"api",
+										"v1",
+										"checkout",
+										"shipping-method"
+									]
+								},
+								"description": "Select shipping method"
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								}
+							],
+							"cookie": [],
+							"body": "{\n  \"success\": true,\n  \"message\": \"Shipping method set successfully\",\n  \"data\": {\n    \"shipping_method\": \"standard\"\n  }\n}"
+						}
+					]
+				},
+				{
+					"name": "Get Payment Methods",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/v1/checkout/payment-methods",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"checkout",
+								"payment-methods"
+							]
+						},
+						"description": "Get available payment methods"
+					},
+					"response": [
+						{
+							"name": "200 OK",
+							"originalRequest": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{base_url}}/api/v1/checkout/payment-methods",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"api",
+										"v1",
+										"checkout",
+										"payment-methods"
+									]
+								},
+								"description": "Get available payment methods"
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								}
+							],
+							"cookie": [],
+							"body": "{\n  \"success\": true,\n  \"message\": \"Payment methods retrieved successfully\",\n  \"data\": [\n    {\n      \"code\": \"razorpay\",\n      \"name\": \"Razorpay\",\n      \"type\": \"online\",\n      \"description\": \"Pay securely via Razorpay\",\n      \"gateway_config\": {\n        \"key_id\": \"rzp_test_XXXXXXXXXX\",\n        \"currency\": \"INR\",\n        \"name\": \"My Store\",\n        \"environment\": \"sandbox\",\n        \"theme_color\": \"#3399cc\"\n      }\n    },\n    {\n      \"code\": \"cod\",\n      \"name\": \"Cash on Delivery\",\n      \"type\": \"offline\",\n      \"description\": \"Pay when you receive your order\"\n    }\n  ]\n}"
+						}
+					]
+				},
+				{
+					"name": "Set Payment Method (Stripe)",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"payment_method_code\": \"stripe\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/v1/checkout/payment-method",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"checkout",
+								"payment-method"
+							]
+						},
+						"description": "Select Stripe payment method. Returns payment_intent with client_secret. NOTE: Set shipping address first for Indian regulations compliance."
+					},
+					"response": [
+						{
+							"name": "200 OK",
+							"originalRequest": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"payment_method_code\": \"stripe\"\n}"
+								},
+								"url": {
+									"raw": "{{base_url}}/api/v1/checkout/payment-method",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"api",
+										"v1",
+										"checkout",
+										"payment-method"
+									]
+								},
+								"description": "Select Stripe payment method. Returns payment_intent with client_secret. NOTE: Set shipping address first for Indian regulations compliance."
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								}
+							],
+							"cookie": [],
+							"body": "{\n  \"success\": true,\n  \"message\": \"Payment method set successfully\",\n  \"data\": {\n    \"payment_method\": \"stripe\",\n    \"name\": \"Stripe\",\n    \"gateway_config\": {\n      \"publishable_key\": \"pk_test_XXXXXXXXXX\",\n      \"currency\": \"INR\",\n      \"client_secret\": \"pi_3OxxxxxXXXXXX_secret_XXXXXXXXXX\",\n      \"payment_intent_id\": \"pi_3OxxxxxXXXXXX\",\n      \"amount\": 24999800,\n      \"status\": \"requires_payment_method\"\n    }\n  }\n}"
+						}
+					]
+				},
+				{
+					"name": "Set Payment Method (Razorpay)",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"payment_method_code\": \"razorpay\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/v1/checkout/payment-method",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"checkout",
+								"payment-method"
+							]
+						},
+						"description": "Select Razorpay payment method"
+					},
+					"response": [
+						{
+							"name": "200 OK",
+							"originalRequest": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"payment_method_code\": \"razorpay\"\n}"
+								},
+								"url": {
+									"raw": "{{base_url}}/api/v1/checkout/payment-method",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"api",
+										"v1",
+										"checkout",
+										"payment-method"
+									]
+								},
+								"description": "Select Razorpay payment method"
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								}
+							],
+							"cookie": [],
+							"body": "{\n  \"success\": true,\n  \"message\": \"Payment method set successfully\",\n  \"data\": {\n    \"payment_method\": \"razorpay\",\n    \"name\": \"Razorpay\",\n    \"type\": \"online\",\n    \"gateway_config\": {\n      \"key_id\": \"rzp_test_XXXXXXXXXX\",\n      \"currency\": \"INR\",\n      \"name\": \"My Store\",\n      \"environment\": \"sandbox\",\n      \"theme_color\": \"#3399cc\"\n    }\n  }\n}"
+						}
+					]
+				},
+				{
+					"name": "Checkout Summary",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/v1/checkout/summary",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"checkout",
+								"summary"
+							]
+						},
+						"description": "Get complete checkout summary before placing order"
+					},
+					"response": [
+						{
+							"name": "200 OK",
+							"originalRequest": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{base_url}}/api/v1/checkout/summary",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"api",
+										"v1",
+										"checkout",
+										"summary"
+									]
+								},
+								"description": "Get complete checkout summary before placing order"
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								}
+							],
+							"cookie": [],
+							"body": "{\n  \"success\": true,\n  \"message\": \"Checkout summary retrieved successfully\",\n  \"data\": {\n    \"subtotal\": 219998.0,\n    \"shipping_cost\": 49.0,\n    \"tax\": 21999.8,\n    \"discount\": 0,\n    \"total\": 242046.8,\n    \"currency\": \"INR\",\n    \"items_count\": 2\n  }\n}"
+						}
+					]
+				},
+				{
+					"name": "Place Order",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"shipping_address_id\": 1,\n    \"payment_method\": \"razorpay\",\n    \"notes\": \"Please deliver between 9 AM - 5 PM\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/v1/checkout/place-order",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"checkout",
+								"place-order"
+							]
+						},
+						"description": "Complete checkout and place order"
+					},
+					"response": [
+						{
+							"name": "201 Order Placed",
+							"originalRequest": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"shipping_address_id\": 1,\n    \"payment_method\": \"razorpay\",\n    \"notes\": \"Please deliver between 9 AM - 5 PM\"\n}"
+								},
+								"url": {
+									"raw": "{{base_url}}/api/v1/checkout/place-order",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"api",
+										"v1",
+										"checkout",
+										"place-order"
+									]
+								},
+								"description": "Complete checkout and place order"
+							},
+							"status": "Created",
+							"code": 201,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								}
+							],
+							"cookie": [],
+							"body": "{\n  \"success\": true,\n  \"message\": \"Order placed successfully\",\n  \"data\": {\n    \"order_id\": 14,\n    \"order_number\": \"ORD-260221-550123\",\n    \"status\": \"pending\",\n    \"total\": 242046.8\n  }\n}"
+						},
+						{
+							"name": "400 Cart Empty",
+							"originalRequest": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"shipping_address_id\": 1,\n    \"payment_method\": \"razorpay\",\n    \"notes\": \"Please deliver between 9 AM - 5 PM\"\n}"
+								},
+								"url": {
+									"raw": "{{base_url}}/api/v1/checkout/place-order",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"api",
+										"v1",
+										"checkout",
+										"place-order"
+									]
+								},
+								"description": "Complete checkout and place order"
+							},
+							"status": "Bad Request",
+							"code": 400,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								}
+							],
+							"cookie": [],
+							"body": "{\n  \"success\": false,\n  \"message\": \"Cart is empty\",\n  \"code\": \"CART_EMPTY\"\n}"
+						},
+						{
+							"name": "400 Invalid Address",
+							"originalRequest": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"shipping_address_id\": 1,\n    \"payment_method\": \"razorpay\",\n    \"notes\": \"Please deliver between 9 AM - 5 PM\"\n}"
+								},
+								"url": {
+									"raw": "{{base_url}}/api/v1/checkout/place-order",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"api",
+										"v1",
+										"checkout",
+										"place-order"
+									]
+								},
+								"description": "Complete checkout and place order"
+							},
+							"status": "Bad Request",
+							"code": 400,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								}
+							],
+							"cookie": [],
+							"body": "{\n  \"success\": false,\n  \"message\": \"Invalid shipping address\",\n  \"code\": \"INVALID_ADDRESS\"\n}"
+						}
+					]
+				}
+			],
+			"description": "Checkout process and order placement (requires authentication)"
+		},
+		{
+			"name": "Customer",
+			"item": [
+				{
+					"name": "Get Profile",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/v1/customer/profile",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"customer",
+								"profile"
+							]
+						},
+						"description": "Get customer profile"
+					},
+					"response": [
+						{
+							"name": "200 OK",
+							"originalRequest": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{base_url}}/api/v1/customer/profile",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"api",
+										"v1",
+										"customer",
+										"profile"
+									]
+								},
+								"description": "Get customer profile"
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								}
+							],
+							"cookie": [],
+							"body": "{\n  \"success\": true,\n  \"message\": \"Profile retrieved\",\n  \"data\": {\n    \"id\": 4,\n    \"name\": \"Saju Gopal\",\n    \"email\": \"saju@example.com\",\n    \"phone\": \"9811381218\",\n    \"gender\": \"male\",\n    \"date_of_birth\": \"1990-05-15\",\n    \"avatar\": \"https://example.com/avatars/saju.jpg\",\n    \"email_verified_at\": \"2026-01-01T00:00:00Z\",\n    \"created_at\": \"2026-01-01T00:00:00Z\"\n  }\n}"
+						}
+					]
+				},
+				{
+					"name": "Update Profile",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "name",
+									"value": "John Doe",
+									"type": "text"
+								},
+								{
+									"key": "phone",
+									"value": "+1234567890",
+									"type": "text"
+								},
+								{
+									"key": "date_of_birth",
+									"value": "1990-01-01",
+									"type": "text"
+								},
+								{
+									"key": "gender",
+									"value": "male",
+									"type": "text",
+									"description": "Options: male, female, other"
+								},
+								{
+									"key": "avatar",
+									"type": "file",
+									"src": [],
+									"description": "Profile photo (jpeg, jpg, png, gif, max 2MB)"
+								},
+								{
+									"key": "_method",
+									"value": "PUT",
+									"type": "text",
+									"description": "Laravel method spoofing for form-data"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{base_url}}/api/v1/customer/profile",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"customer",
+								"profile"
+							]
+						},
+						"description": "Update customer profile including avatar upload. Use multipart/form-data for file upload. All fields are optional."
+					},
+					"response": [
+						{
+							"name": "200 OK",
+							"originalRequest": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "formdata",
+									"formdata": [
+										{
+											"key": "name",
+											"value": "John Doe",
+											"type": "text"
+										},
+										{
+											"key": "phone",
+											"value": "+1234567890",
+											"type": "text"
+										},
+										{
+											"key": "date_of_birth",
+											"value": "1990-01-01",
+											"type": "text"
+										},
+										{
+											"key": "gender",
+											"value": "male",
+											"type": "text",
+											"description": "Options: male, female, other"
+										},
+										{
+											"key": "avatar",
+											"type": "file",
+											"src": [],
+											"description": "Profile photo (jpeg, jpg, png, gif, max 2MB)"
+										},
+										{
+											"key": "_method",
+											"value": "PUT",
+											"type": "text",
+											"description": "Laravel method spoofing for form-data"
+										}
+									]
+								},
+								"url": {
+									"raw": "{{base_url}}/api/v1/customer/profile",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"api",
+										"v1",
+										"customer",
+										"profile"
+									]
+								},
+								"description": "Update customer profile including avatar upload. Use multipart/form-data for file upload. All fields are optional."
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								}
+							],
+							"cookie": [],
+							"body": "{\n  \"success\": true,\n  \"message\": \"Profile updated successfully\",\n  \"data\": {\n    \"id\": 4,\n    \"name\": \"Saju Gopal\",\n    \"phone\": \"9811381218\",\n    \"date_of_birth\": \"1990-05-15\",\n    \"gender\": \"male\",\n    \"avatar\": \"https://example.com/avatars/saju-new.jpg\"\n  }\n}"
+						}
+					]
+				},
+				{
+					"name": "List Addresses",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/v1/customer/addresses",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"customer",
+								"addresses"
+							]
+						},
+						"description": "Get all saved addresses"
+					},
+					"response": [
+						{
+							"name": "200 OK",
+							"originalRequest": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{base_url}}/api/v1/customer/addresses",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"api",
+										"v1",
+										"customer",
+										"addresses"
+									]
+								},
+								"description": "Get all saved addresses"
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								}
+							],
+							"cookie": [],
+							"body": "{\n  \"success\": true,\n  \"message\": \"Addresses retrieved\",\n  \"data\": [\n    {\n      \"id\": 1,\n      \"label\": \"Home\",\n      \"first_name\": \"Saju\",\n      \"last_name\": \"Gopal\",\n      \"address_line_1\": \"410 C Jaina Tower 1\",\n      \"address_line_2\": null,\n      \"city\": \"Delhi\",\n      \"state\": \"Delhi\",\n      \"postal_code\": \"110058\",\n      \"country\": \"IN\",\n      \"phone\": \"9811381218\",\n      \"is_default_shipping\": true,\n      \"is_default_billing\": true\n    },\n    {\n      \"id\": 2,\n      \"label\": \"Office\",\n      \"first_name\": \"Saju\",\n      \"last_name\": \"Gopal\",\n      \"address_line_1\": \"B-12 Connaught Place\",\n      \"address_line_2\": null,\n      \"city\": \"Delhi\",\n      \"state\": \"Delhi\",\n      \"postal_code\": \"110001\",\n      \"country\": \"IN\",\n      \"phone\": \"9811381218\",\n      \"is_default_shipping\": false,\n      \"is_default_billing\": false\n    }\n  ]\n}"
+						}
+					]
+				},
+				{
+					"name": "Add Address",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"first_name\": \"Saju\",\n    \"last_name\": \"Gopal\",\n    \"label\": \"Home\",\n    \"address_line_1\": \"410 C Jaina Tower 1\",\n    \"address_line_2\": \"\",\n    \"city\": \"Delhi\",\n    \"state\": \"Delhi\",\n    \"postal_code\": \"110058\",\n    \"country\": \"IN\",\n    \"phone\": \"9811381218\",\n    \"is_default_shipping\": true,\n    \"is_default_billing\": true\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/v1/customer/addresses",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"customer",
+								"addresses"
+							]
+						},
+						"description": "Add new address"
+					},
+					"response": [
+						{
+							"name": "201 Created",
+							"originalRequest": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"first_name\": \"Saju\",\n    \"last_name\": \"Gopal\",\n    \"label\": \"Home\",\n    \"address_line_1\": \"410 C Jaina Tower 1\",\n    \"address_line_2\": \"\",\n    \"city\": \"Delhi\",\n    \"state\": \"Delhi\",\n    \"postal_code\": \"110058\",\n    \"country\": \"IN\",\n    \"phone\": \"9811381218\",\n    \"is_default_shipping\": true,\n    \"is_default_billing\": true\n}"
+								},
+								"url": {
+									"raw": "{{base_url}}/api/v1/customer/addresses",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"api",
+										"v1",
+										"customer",
+										"addresses"
+									]
+								},
+								"description": "Add new address"
+							},
+							"status": "Created",
+							"code": 201,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								}
+							],
+							"cookie": [],
+							"body": "{\n  \"success\": true,\n  \"message\": \"Address added successfully\",\n  \"data\": {\n    \"id\": 3,\n    \"label\": \"Home\",\n    \"first_name\": \"Saju\",\n    \"last_name\": \"Gopal\",\n    \"address_line_1\": \"410 C Jaina Tower 1\",\n    \"city\": \"Delhi\",\n    \"state\": \"Delhi\",\n    \"postal_code\": \"110058\",\n    \"country\": \"IN\",\n    \"phone\": \"9811381218\",\n    \"is_default_shipping\": true,\n    \"is_default_billing\": true\n  }\n}"
+						}
+					]
+				},
+				{
+					"name": "Update Address",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"address_line_1\": \"456 Oak Avenue\",\n    \"city\": \"Los Angeles\",\n    \"state\": \"CA\",\n    \"postal_code\": \"90001\",\n    \"country\": \"USA\",\n    \"is_default_shipping\": true,\n    \"is_default_billing\": false\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/v1/customer/addresses/1",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"customer",
+								"addresses",
+								"1"
+							]
+						},
+						"description": "Update address. Set is_default_shipping: true or is_default_billing: true to make it default."
+					},
+					"response": [
+						{
+							"name": "200 OK",
+							"originalRequest": {
+								"method": "PUT",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"address_line_1\": \"456 Oak Avenue\",\n    \"city\": \"Los Angeles\",\n    \"state\": \"CA\",\n    \"postal_code\": \"90001\",\n    \"country\": \"USA\",\n    \"is_default_shipping\": true,\n    \"is_default_billing\": false\n}"
+								},
+								"url": {
+									"raw": "{{base_url}}/api/v1/customer/addresses/1",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"api",
+										"v1",
+										"customer",
+										"addresses",
+										"1"
+									]
+								},
+								"description": "Update address. Set is_default_shipping: true or is_default_billing: true to make it default."
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								}
+							],
+							"cookie": [],
+							"body": "{\n  \"success\": true,\n  \"message\": \"Address updated successfully\",\n  \"data\": {\n    \"id\": 1,\n    \"label\": \"Home\",\n    \"address_line_1\": \"410 C Jaina Tower 1\",\n    \"city\": \"Delhi\",\n    \"postal_code\": \"110058\",\n    \"country\": \"IN\",\n    \"is_default_shipping\": true,\n    \"is_default_billing\": true\n  }\n}"
+						}
+					]
+				},
+				{
+					"name": "Delete Address",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/v1/customer/addresses/1",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"customer",
+								"addresses",
+								"1"
+							]
+						},
+						"description": "Delete saved address"
+					},
+					"response": [
+						{
+							"name": "200 OK",
+							"originalRequest": {
+								"method": "DELETE",
+								"header": [],
+								"url": {
+									"raw": "{{base_url}}/api/v1/customer/addresses/1",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"api",
+										"v1",
+										"customer",
+										"addresses",
+										"1"
+									]
+								},
+								"description": "Delete saved address"
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								}
+							],
+							"cookie": [],
+							"body": "{\n  \"success\": true,\n  \"message\": \"Address deleted successfully\"\n}"
+						},
+						{
+							"name": "404 Not Found",
+							"originalRequest": {
+								"method": "DELETE",
+								"header": [],
+								"url": {
+									"raw": "{{base_url}}/api/v1/customer/addresses/1",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"api",
+										"v1",
+										"customer",
+										"addresses",
+										"1"
+									]
+								},
+								"description": "Delete saved address"
+							},
+							"status": "Not Found",
+							"code": 404,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								}
+							],
+							"cookie": [],
+							"body": "{\n  \"success\": false,\n  \"message\": \"Address not found\"\n}"
+						}
+					]
+				}
+			],
+			"description": "Customer profile and address management (requires authentication)"
+		},
+		{
+			"name": "Orders",
+			"item": [
+				{
+					"name": "List Orders",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/v1/customer/orders?page=1",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"customer",
+								"orders"
+							],
+							"query": [
+								{
+									"key": "page",
+									"value": "1"
+								},
+								{
+									"key": "status",
+									"value": "pending",
+									"description": "Filter by status",
+									"disabled": true
+								}
+							]
+						},
+						"description": "Get customer's order history"
+					},
+					"response": [
+						{
+							"name": "200 OK",
+							"originalRequest": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{base_url}}/api/v1/customer/orders?page=1",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"api",
+										"v1",
+										"customer",
+										"orders"
+									],
+									"query": [
+										{
+											"key": "page",
+											"value": "1"
+										},
+										{
+											"key": "status",
+											"value": "pending",
+											"description": "Filter by status",
+											"disabled": true
+										}
+									]
+								},
+								"description": "Get customer's order history"
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								}
+							],
+							"cookie": [],
+							"body": "{\n  \"success\": true,\n  \"message\": \"Orders retrieved successfully\",\n  \"data\": {\n    \"data\": [\n      {\n        \"id\": 12,\n        \"order_number\": \"ORD-260221-166790\",\n        \"status\": \"pending\",\n        \"status_label\": \"Pending\",\n        \"totals\": {\n          \"grand_total\": 242046.8,\n          \"currency\": \"INR\"\n        },\n        \"payment\": {\n          \"method\": \"razorpay\",\n          \"status\": \"pending\"\n        },\n        \"can_cancel\": true,\n        \"ordered_at\": \"2026-02-21T09:46:23Z\"\n      },\n      {\n        \"id\": 11,\n        \"order_number\": \"ORD-260221-991573\",\n        \"status\": \"pending\",\n        \"status_label\": \"Pending\",\n        \"totals\": {\n          \"grand_total\": 136868.7,\n          \"currency\": \"INR\"\n        },\n        \"payment\": {\n          \"method\": \"razorpay\",\n          \"status\": \"pending\"\n        },\n        \"can_cancel\": true,\n        \"ordered_at\": \"2026-02-21T09:20:00Z\"\n      }\n    ],\n    \"meta\": {\n      \"current_page\": 1,\n      \"per_page\": 20,\n      \"total\": 5,\n      \"last_page\": 1\n    }\n  }\n}"
+						}
+					]
+				},
+				{
+					"name": "Order Details",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/v1/customer/orders/1",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"customer",
+								"orders",
+								"1"
+							]
+						},
+						"description": "Get detailed information about specific order"
+					},
+					"response": [
+						{
+							"name": "200 OK",
+							"originalRequest": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{base_url}}/api/v1/customer/orders/1",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"api",
+										"v1",
+										"customer",
+										"orders",
+										"1"
+									]
+								},
+								"description": "Get detailed information about specific order"
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								}
+							],
+							"cookie": [],
+							"body": "{\n  \"success\": true,\n  \"message\": \"Order details retrieved successfully\",\n  \"data\": {\n    \"id\": 12,\n    \"order_number\": \"ORD-260221-166790\",\n    \"status\": \"pending\",\n    \"status_label\": \"Pending\",\n    \"items\": [\n      {\n        \"id\": 1,\n        \"product_id\": 1,\n        \"product\": {\n          \"id\": 1,\n          \"name\": \"iPhone 15 Pro\"\n        },\n        \"quantity\": 1,\n        \"price\": 119999.0,\n        \"subtotal\": 119999.0,\n        \"tax_amount\": 11999.9,\n        \"discount_amount\": 0\n      }\n    ],\n    \"totals\": {\n      \"subtotal\": 219998.0,\n      \"shipping_cost\": 49.0,\n      \"tax\": 21999.8,\n      \"discount\": 0,\n      \"grand_total\": 242046.8,\n      \"currency\": \"INR\"\n    },\n    \"payment\": {\n      \"method\": \"razorpay\",\n      \"method_title\": \"Razorpay\",\n      \"status\": \"pending\"\n    },\n    \"shipping_address\": {\n      \"first_name\": \"Saju\",\n      \"last_name\": \"Gopal\",\n      \"address_line_1\": \"410 C Jaina Tower 1\",\n      \"city\": \"Delhi\",\n      \"postal_code\": \"110058\",\n      \"country\": \"IN\",\n      \"phone\": \"9811381218\"\n    },\n    \"customer_note\": \"Please deliver between 9 AM - 5 PM\",\n    \"coupon_code\": null,\n    \"can_cancel\": true,\n    \"can_reorder\": false,\n    \"ordered_at\": \"2026-02-21T09:46:23Z\"\n  }\n}"
+						},
+						{
+							"name": "404 Not Found",
+							"originalRequest": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{base_url}}/api/v1/customer/orders/1",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"api",
+										"v1",
+										"customer",
+										"orders",
+										"1"
+									]
+								},
+								"description": "Get detailed information about specific order"
+							},
+							"status": "Not Found",
+							"code": 404,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								}
+							],
+							"cookie": [],
+							"body": "{\n  \"success\": false,\n  \"message\": \"Order not found\",\n  \"code\": \"ORDER_NOT_FOUND\"\n}"
+						}
+					]
+				},
+				{
+					"name": "Cancel Order",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"reason\": \"Changed my mind\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/v1/customer/orders/1/cancel",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"customer",
+								"orders",
+								"1",
+								"cancel"
+							]
+						},
+						"description": "Cancel an order"
+					},
+					"response": [
+						{
+							"name": "200 OK",
+							"originalRequest": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"reason\": \"Changed my mind\"\n}"
+								},
+								"url": {
+									"raw": "{{base_url}}/api/v1/customer/orders/1/cancel",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"api",
+										"v1",
+										"customer",
+										"orders",
+										"1",
+										"cancel"
+									]
+								},
+								"description": "Cancel an order"
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								}
+							],
+							"cookie": [],
+							"body": "{\n  \"success\": true,\n  \"message\": \"Order cancelled successfully\",\n  \"data\": {\n    \"id\": 12,\n    \"order_number\": \"ORD-260221-166790\",\n    \"status\": \"cancelled\"\n  }\n}"
+						},
+						{
+							"name": "400 Cannot Cancel",
+							"originalRequest": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"reason\": \"Changed my mind\"\n}"
+								},
+								"url": {
+									"raw": "{{base_url}}/api/v1/customer/orders/1/cancel",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"api",
+										"v1",
+										"customer",
+										"orders",
+										"1",
+										"cancel"
+									]
+								},
+								"description": "Cancel an order"
+							},
+							"status": "Bad Request",
+							"code": 400,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								}
+							],
+							"cookie": [],
+							"body": "{\n  \"success\": false,\n  \"message\": \"Order cannot be cancelled\",\n  \"code\": \"ORDER_CANNOT_BE_CANCELLED\"\n}"
+						}
+					]
+				},
+				{
+					"name": "Download Invoice",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/v1/customer/orders/1/invoice",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"customer",
+								"orders",
+								"1",
+								"invoice"
+							]
+						},
+						"description": "Download order invoice (PDF)"
+					},
+					"response": [
+						{
+							"name": "200 OK",
+							"originalRequest": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{base_url}}/api/v1/customer/orders/1/invoice",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"api",
+										"v1",
+										"customer",
+										"orders",
+										"1",
+										"invoice"
+									]
+								},
+								"description": "Download order invoice (PDF)"
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								}
+							],
+							"cookie": [],
+							"body": "{\n  \"success\": true,\n  \"message\": \"Invoice retrieved successfully\",\n  \"data\": {\n    \"order\": {\n      \"id\": 12,\n      \"order_number\": \"ORD-260221-166790\"\n    },\n    \"invoice_url\": \"https://example.com/api/v1/orders/12/invoice/pdf\"\n  }\n}"
+						}
+					]
+				},
+				{
+					"name": "Track Order",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/v1/customer/orders/1/track",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"customer",
+								"orders",
+								"1",
+								"track"
+							]
+						},
+						"description": "Get order tracking information"
+					},
+					"response": [
+						{
+							"name": "200 OK (Shipped)",
+							"originalRequest": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{base_url}}/api/v1/customer/orders/1/track",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"api",
+										"v1",
+										"customer",
+										"orders",
+										"1",
+										"track"
+									]
+								},
+								"description": "Get order tracking information"
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								}
+							],
+							"cookie": [],
+							"body": "{\n  \"success\": true,\n  \"message\": \"Order tracking information retrieved\",\n  \"data\": {\n    \"order_id\": 12,\n    \"order_number\": \"ORD-260221-166790\",\n    \"status\": \"processing\",\n    \"tracking\": {\n      \"tracking_number\": \"DTDC123456789IN\",\n      \"carrier\": \"DTDC\",\n      \"status\": \"in_transit\",\n      \"shipped_at\": \"2026-02-22T10:00:00Z\",\n      \"estimated_delivery\": \"2026-02-25T18:00:00Z\",\n      \"tracking_url\": \"https://dtdc.com/track/DTDC123456789IN\"\n    }\n  }\n}"
+						},
+						{
+							"name": "200 OK (Not Yet Shipped)",
+							"originalRequest": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{base_url}}/api/v1/customer/orders/1/track",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"api",
+										"v1",
+										"customer",
+										"orders",
+										"1",
+										"track"
+									]
+								},
+								"description": "Get order tracking information"
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								}
+							],
+							"cookie": [],
+							"body": "{\n  \"success\": true,\n  \"message\": \"Order tracking information retrieved\",\n  \"data\": {\n    \"order_id\": 12,\n    \"order_number\": \"ORD-260221-166790\",\n    \"status\": \"pending\",\n    \"tracking\": {}\n  }\n}"
+						}
+					]
+				}
+			],
+			"description": "Order management and tracking (requires authentication)"
+		},
+		{
+			"name": "Wishlist",
+			"item": [
+				{
+					"name": "View Wishlist",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/v1/customer/wishlist",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"customer",
+								"wishlist"
+							]
+						},
+						"description": "Get all wishlist items"
+					},
+					"response": [
+						{
+							"name": "200 OK",
+							"originalRequest": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{base_url}}/api/v1/customer/wishlist",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"api",
+										"v1",
+										"customer",
+										"wishlist"
+									]
+								},
+								"description": "Get all wishlist items"
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								}
+							],
+							"cookie": [],
+							"body": "{\n  \"success\": true,\n  \"message\": \"Wishlist retrieved\",\n  \"data\": [\n    {\n      \"id\": 1,\n      \"product_id\": 3,\n      \"product\": {\n        \"id\": 3,\n        \"name\": \"OnePlus 12\",\n        \"price\": 64999.0,\n        \"in_stock\": true,\n        \"thumbnail\": \"https://example.com/images/op12.jpg\"\n      },\n      \"added_at\": \"2026-02-10T12:00:00Z\"\n    }\n  ]\n}"
+						}
+					]
+				},
+				{
+					"name": "Add to Wishlist",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"product_id\": 1\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/v1/customer/wishlist/add",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"customer",
+								"wishlist",
+								"add"
+							]
+						},
+						"description": "Add product to wishlist"
+					},
+					"response": [
+						{
+							"name": "201 Created",
+							"originalRequest": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"product_id\": 1\n}"
+								},
+								"url": {
+									"raw": "{{base_url}}/api/v1/customer/wishlist/add",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"api",
+										"v1",
+										"customer",
+										"wishlist",
+										"add"
+									]
+								},
+								"description": "Add product to wishlist"
+							},
+							"status": "Created",
+							"code": 201,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								}
+							],
+							"cookie": [],
+							"body": "{\n  \"success\": true,\n  \"message\": \"Product added to wishlist\",\n  \"data\": {\n    \"id\": 2,\n    \"product_id\": 1,\n    \"added_at\": \"2026-02-21T10:00:00Z\"\n  }\n}"
+						},
+						{
+							"name": "409 Already in Wishlist",
+							"originalRequest": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"product_id\": 1\n}"
+								},
+								"url": {
+									"raw": "{{base_url}}/api/v1/customer/wishlist/add",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"api",
+										"v1",
+										"customer",
+										"wishlist",
+										"add"
+									]
+								},
+								"description": "Add product to wishlist"
+							},
+							"status": "Conflict",
+							"code": 409,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								}
+							],
+							"cookie": [],
+							"body": "{\n  \"success\": false,\n  \"message\": \"Product already in wishlist\",\n  \"code\": \"ALREADY_IN_WISHLIST\"\n}"
+						}
+					]
+				},
+				{
+					"name": "Remove from Wishlist",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/v1/customer/wishlist/1",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"customer",
+								"wishlist",
+								"1"
+							]
+						},
+						"description": "Remove item from wishlist"
+					},
+					"response": [
+						{
+							"name": "200 OK",
+							"originalRequest": {
+								"method": "DELETE",
+								"header": [],
+								"url": {
+									"raw": "{{base_url}}/api/v1/customer/wishlist/1",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"api",
+										"v1",
+										"customer",
+										"wishlist",
+										"1"
+									]
+								},
+								"description": "Remove item from wishlist"
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								}
+							],
+							"cookie": [],
+							"body": "{\n  \"success\": true,\n  \"message\": \"Product removed from wishlist\"\n}"
+						}
+					]
+				},
+				{
+					"name": "Move to Cart",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/v1/customer/wishlist/1/move-to-cart",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"customer",
+								"wishlist",
+								"1",
+								"move-to-cart"
+							]
+						},
+						"description": "Move wishlist item to cart"
+					},
+					"response": [
+						{
+							"name": "200 OK",
+							"originalRequest": {
+								"method": "POST",
+								"header": [],
+								"url": {
+									"raw": "{{base_url}}/api/v1/customer/wishlist/1/move-to-cart",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"api",
+										"v1",
+										"customer",
+										"wishlist",
+										"1",
+										"move-to-cart"
+									]
+								},
+								"description": "Move wishlist item to cart"
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								}
+							],
+							"cookie": [],
+							"body": "{\n  \"success\": true,\n  \"message\": \"Product moved to cart\",\n  \"data\": {\n    \"cart_item_id\": 5,\n    \"cart_total\": 306045.8\n  }\n}"
+						}
+					]
+				}
+			],
+			"description": "Wishlist management (requires authentication)"
+		},
+		{
+			"name": "Reviews",
+			"item": [
+				{
+					"name": "Add Review",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"product_id\": 1,\n    \"rating\": 5,\n    \"title\": \"Excellent Product\",\n    \"comment\": \"This product exceeded my expectations. Highly recommended!\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/v1/reviews",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"reviews"
+							]
+						},
+						"description": "Add product review"
+					},
+					"response": [
+						{
+							"name": "201 Created",
+							"originalRequest": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"product_id\": 1,\n    \"rating\": 5,\n    \"title\": \"Excellent Product\",\n    \"comment\": \"This product exceeded my expectations. Highly recommended!\"\n}"
+								},
+								"url": {
+									"raw": "{{base_url}}/api/v1/reviews",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"api",
+										"v1",
+										"reviews"
+									]
+								},
+								"description": "Add product review"
+							},
+							"status": "Created",
+							"code": 201,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								}
+							],
+							"cookie": [],
+							"body": "{\n  \"success\": true,\n  \"message\": \"Review submitted successfully (pending approval)\",\n  \"data\": {\n    \"id\": 45,\n    \"product_id\": 1,\n    \"rating\": 5,\n    \"title\": \"Excellent Product\",\n    \"comment\": \"This product exceeded my expectations. Highly recommended!\",\n    \"status\": \"pending\",\n    \"created_at\": \"2026-02-21T11:00:00Z\"\n  }\n}"
+						}
+					]
+				},
+				{
+					"name": "Update Review",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"rating\": 4,\n    \"title\": \"Good Product\",\n    \"comment\": \"Updated review after more use.\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/v1/reviews/1",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"reviews",
+								"1"
+							]
+						},
+						"description": "Update existing review"
+					},
+					"response": [
+						{
+							"name": "200 OK",
+							"originalRequest": {
+								"method": "PUT",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"rating\": 4,\n    \"title\": \"Good Product\",\n    \"comment\": \"Updated review after more use.\"\n}"
+								},
+								"url": {
+									"raw": "{{base_url}}/api/v1/reviews/1",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"api",
+										"v1",
+										"reviews",
+										"1"
+									]
+								},
+								"description": "Update existing review"
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								}
+							],
+							"cookie": [],
+							"body": "{\n  \"success\": true,\n  \"message\": \"Review updated successfully\",\n  \"data\": {\n    \"id\": 45,\n    \"rating\": 4,\n    \"title\": \"Good Product\",\n    \"comment\": \"Updated review after more use.\",\n    \"status\": \"pending\"\n  }\n}"
+						}
+					]
+				},
+				{
+					"name": "Delete Review",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/v1/reviews/1",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"reviews",
+								"1"
+							]
+						},
+						"description": "Delete review"
+					},
+					"response": [
+						{
+							"name": "200 OK",
+							"originalRequest": {
+								"method": "DELETE",
+								"header": [],
+								"url": {
+									"raw": "{{base_url}}/api/v1/reviews/1",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"api",
+										"v1",
+										"reviews",
+										"1"
+									]
+								},
+								"description": "Delete review"
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								}
+							],
+							"cookie": [],
+							"body": "{\n  \"success\": true,\n  \"message\": \"Review deleted successfully\"\n}"
+						}
+					]
+				},
+				{
+					"name": "Vote on Review",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"vote\": \"helpful\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/v1/reviews/1/vote",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"reviews",
+								"1",
+								"vote"
+							]
+						},
+						"description": "Mark review as helpful or not helpful"
+					},
+					"response": [
+						{
+							"name": "200 OK",
+							"originalRequest": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"vote\": \"helpful\"\n}"
+								},
+								"url": {
+									"raw": "{{base_url}}/api/v1/reviews/1/vote",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"api",
+										"v1",
+										"reviews",
+										"1",
+										"vote"
+									]
+								},
+								"description": "Mark review as helpful or not helpful"
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								}
+							],
+							"cookie": [],
+							"body": "{\n  \"success\": true,\n  \"message\": \"Vote recorded\",\n  \"data\": {\n    \"review_id\": 1,\n    \"vote\": \"helpful\",\n    \"helpful_votes\": 13,\n    \"unhelpful_votes\": 2\n  }\n}"
+						}
+					]
+				}
+			],
+			"description": "Product review management (requires authentication)"
+		},
+		{
+			"name": "Search",
+			"item": [
+				{
+					"name": "Search Products",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/v1/search?q=laptop&category_id=&min_price=&max_price=",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"search"
+							],
+							"query": [
+								{
+									"key": "q",
+									"value": "laptop",
+									"description": "Search query"
+								},
+								{
+									"key": "category_id",
+									"value": "",
+									"description": "Filter by category",
+									"disabled": true
+								},
+								{
+									"key": "min_price",
+									"value": "",
+									"disabled": true
+								},
+								{
+									"key": "max_price",
+									"value": "",
+									"disabled": true
+								}
+							]
+						},
+						"description": "Search products by keyword"
+					},
+					"response": [
+						{
+							"name": "200 OK",
+							"originalRequest": {
+								"auth": {
+									"type": "noauth"
+								},
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{base_url}}/api/v1/search?q=laptop&category_id=&min_price=&max_price=",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"api",
+										"v1",
+										"search"
+									],
+									"query": [
+										{
+											"key": "q",
+											"value": "laptop",
+											"description": "Search query"
+										},
+										{
+											"key": "category_id",
+											"value": "",
+											"description": "Filter by category",
+											"disabled": true
+										},
+										{
+											"key": "min_price",
+											"value": "",
+											"disabled": true
+										},
+										{
+											"key": "max_price",
+											"value": "",
+											"disabled": true
+										}
+									]
+								},
+								"description": "Search products by keyword"
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								}
+							],
+							"cookie": [],
+							"body": "{\n  \"success\": true,\n  \"message\": \"Search results\",\n  \"data\": {\n    \"query\": \"laptop\",\n    \"total\": 24,\n    \"data\": [\n      {\n        \"id\": 10,\n        \"name\": \"MacBook Air M3\",\n        \"slug\": \"macbook-air-m3\",\n        \"price\": 114900.0,\n        \"sale_price\": 104900.0,\n        \"thumbnail\": \"https://example.com/images/macbook-air.jpg\",\n        \"average_rating\": 4.9\n      },\n      {\n        \"id\": 11,\n        \"name\": \"Dell XPS 15\",\n        \"slug\": \"dell-xps-15\",\n        \"price\": 159900.0,\n        \"sale_price\": null,\n        \"thumbnail\": \"https://example.com/images/dell-xps15.jpg\",\n        \"average_rating\": 4.7\n      }\n    ],\n    \"meta\": {\n      \"current_page\": 1,\n      \"per_page\": 20,\n      \"total\": 24,\n      \"last_page\": 2\n    }\n  }\n}"
+						}
+					]
+				},
+				{
+					"name": "Search Suggestions",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/v1/search/suggestions?q=lap",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"search",
+								"suggestions"
+							],
+							"query": [
+								{
+									"key": "q",
+									"value": "lap",
+									"description": "Partial search query"
+								}
+							]
+						},
+						"description": "Get autocomplete search suggestions"
+					},
+					"response": [
+						{
+							"name": "200 OK",
+							"originalRequest": {
+								"auth": {
+									"type": "noauth"
+								},
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{base_url}}/api/v1/search/suggestions?q=lap",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"api",
+										"v1",
+										"search",
+										"suggestions"
+									],
+									"query": [
+										{
+											"key": "q",
+											"value": "lap",
+											"description": "Partial search query"
+										}
+									]
+								},
+								"description": "Get autocomplete search suggestions"
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								}
+							],
+							"cookie": [],
+							"body": "{\n  \"success\": true,\n  \"message\": \"Search suggestions\",\n  \"data\": [\n    {\n      \"type\": \"query\",\n      \"text\": \"laptop\",\n      \"id\": null\n    },\n    {\n      \"type\": \"query\",\n      \"text\": \"laptop stand\",\n      \"id\": null\n    },\n    {\n      \"type\": \"category\",\n      \"text\": \"Laptops\",\n      \"id\": 4\n    },\n    {\n      \"type\": \"product\",\n      \"text\": \"MacBook Air M3\",\n      \"id\": 10\n    }\n  ]\n}"
+						}
+					]
+				}
+			],
+			"description": "Product search and autocomplete"
+		},
+		{
+			"name": "System",
+			"item": [
+				{
+					"name": "API Sync Status",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/v1/system/api-sync/status",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"system",
+								"api-sync",
+								"status"
+							]
+						},
+						"description": "Get current API sync status (authenticated)"
+					},
+					"response": [
+						{
+							"name": "200 OK",
+							"originalRequest": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{base_url}}/api/v1/system/api-sync/status",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"api",
+										"v1",
+										"system",
+										"api-sync",
+										"status"
+									]
+								},
+								"description": "Get current API sync status (authenticated)"
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								}
+							],
+							"cookie": [],
+							"body": "{\n  \"success\": true,\n  \"message\": \"API sync status retrieved\",\n  \"data\": {\n    \"connected\": true,\n    \"sync_enabled\": true,\n    \"last_status\": \"success\",\n    \"last_message\": \"Sync completed successfully\",\n    \"last_sync_at\": \"2026-02-21T11:00:00Z\"\n  }\n}"
+						}
+					]
+				},
+				{
+					"name": "API Sync Heartbeat",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"connected\": true,\n    \"sync_enabled\": true,\n    \"last_status\": \"success\",\n    \"last_message\": \"Sync completed successfully.\",\n    \"last_sync_at\": \"2026-01-19 10:20:00\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/v1/system/api-sync/heartbeat",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"system",
+								"api-sync",
+								"heartbeat"
+							]
+						},
+						"description": "Update API sync connectivity/status from mobile app (authenticated)"
+					},
+					"response": [
+						{
+							"name": "200 OK",
+							"originalRequest": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"connected\": true,\n    \"sync_enabled\": true,\n    \"last_status\": \"success\",\n    \"last_message\": \"Sync completed successfully.\",\n    \"last_sync_at\": \"2026-01-19 10:20:00\"\n}"
+								},
+								"url": {
+									"raw": "{{base_url}}/api/v1/system/api-sync/heartbeat",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"api",
+										"v1",
+										"system",
+										"api-sync",
+										"heartbeat"
+									]
+								},
+								"description": "Update API sync connectivity/status from mobile app (authenticated)"
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								}
+							],
+							"cookie": [],
+							"body": "{\n  \"success\": true,\n  \"message\": \"Heartbeat recorded\",\n  \"data\": {\n    \"status\": \"active\",\n    \"timestamp\": \"2026-02-21T11:08:00Z\"\n  }\n}"
+						}
+					]
+				}
+			],
+			"description": "System connectivity and sync endpoints"
+		}
+	],
+	"variable": [
+		{
+			"key": "base_url",
+			"value": "http://localhost:8000",
+			"type": "string"
+		},
+		{
+			"key": "access_token",
+			"value": "",
+			"type": "string"
+		}
+	]
+}

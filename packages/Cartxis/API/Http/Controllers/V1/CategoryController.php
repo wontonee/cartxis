@@ -104,7 +104,7 @@ class CategoryController extends Controller
             return ApiResponse::notFound('Category not found', 'CATEGORY_NOT_FOUND');
         }
 
-        $perPage = min($request->get('per_page', 20), config('vortex-api.pagination.max_per_page'));
+        $perPage = min($request->get('per_page', 20), config('cartxis-api.pagination.max_per_page'));
 
         // Get all subcategory IDs recursively
         $categoryIds = $this->getAllCategoryIds($category);

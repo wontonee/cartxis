@@ -43,6 +43,7 @@ let notificationPulseTimer: ReturnType<typeof setTimeout> | null = null
 
 // Admin config for logo
 const adminConfig = computed(() => page.props.adminConfig as any)
+const adminMaintenance = computed(() => (page.props as any)?.adminMaintenance as { enabled?: boolean; title?: string } | null)
 
 // Track which parent menus are open
 const openMenus = ref<Set<number>>(new Set())
@@ -178,8 +179,9 @@ const isActive = (item: any) => {
     if (cleanCurrentPath.startsWith(cleanMenuPath + '/')) {
       const remainder = cleanCurrentPath.substring(cleanMenuPath.length + 1)
       // Only match if remainder is a number (resource ID) or standard actions
-      // Don't match other text segments like "groups", "reports", etc.
-      return /^(\d+|create|edit|show)/.test(remainder)
+      // Include nested configure pages such as payment-methods/{type}/configure.
+      // Don't match unrelated sections like "groups", "reports", etc.
+      return /^(\d+|create|edit|show|[^/]+\/configure)(\/|$)/.test(remainder)
     }
     
     return false
@@ -864,6 +866,12 @@ onUnmounted(() => {
               </div>
             </div>
           </div>
+        </div>
+        <div
+          v-if="adminMaintenance?.enabled"
+          class="px-4 sm:px-6 lg:px-8 py-2 bg-amber-50 border-t border-amber-200 text-amber-800 text-sm"
+        >
+          Frontend maintenance mode is active: {{ adminMaintenance?.title || "We'll be back soon!" }}
         </div>
       </header>
 

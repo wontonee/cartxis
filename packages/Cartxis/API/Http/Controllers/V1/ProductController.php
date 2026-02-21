@@ -15,7 +15,7 @@ class ProductController extends Controller
      */
     public function index(Request $request)
     {
-        $perPage = min($request->get('per_page', 20), config('vortex-api.pagination.max_per_page'));
+        $perPage = min($request->get('per_page', 20), config('cartxis-api.pagination.max_per_page'));
         
         $query = Product::query()
             ->where('status', 'enabled')
@@ -176,7 +176,7 @@ class ProductController extends Controller
      */
     public function onSale(Request $request)
     {
-        $perPage = min($request->get('per_page', 20), config('vortex-api.pagination.max_per_page'));
+        $perPage = min($request->get('per_page', 20), config('cartxis-api.pagination.max_per_page'));
 
         $products = Product::query()
             ->where('status', 'enabled')

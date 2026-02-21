@@ -89,7 +89,7 @@ In `app/Http/Kernel.php`:
 5. **Publish Configuration**
 
 ```bash
-php artisan vendor:publish --tag=vortex-api-config
+php artisan vendor:publish --tag=cartxis-api-config
 ```
 
 ## 📝 API Routes
@@ -219,7 +219,7 @@ headers: {
 
 ## ⚙️ Configuration
 
-Edit `config/vortex-api.php`:
+Edit `config/cartxis-api.php`:
 
 ```php
 return [

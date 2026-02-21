@@ -30,9 +30,10 @@ class MaintenanceService
             'system.maintenance_allowed_ips' => json_encode($data['allowed_ips'] ?? []),
             'system.maintenance_contact_email' => $data['contact_email'] ?? '',
         ]);
-        
-        // Put application in maintenance mode
-        $this->executeDown($secret, $data);
+
+        // Ensure app is not in Laravel global maintenance mode.
+        // Frontend-only maintenance is handled by middleware + settings.
+        Artisan::call('up');
         
         // Log the action
         MaintenanceLog::create([
@@ -208,34 +209,6 @@ class MaintenanceService
                 ];
             })
             ->toArray();
-    }
-    
-    /**
-     * Execute Laravel down command
-     */
-    protected function executeDown(string $secret, array $data): void
-    {
-        $params = [
-            '--secret' => $secret,
-            '--retry' => $data['retry_after'] ?? 3600,
-        ];
-        
-        // Add redirect if specified
-        if (isset($data['redirect'])) {
-            $params['--redirect'] = $data['redirect'];
-        }
-        
-        // Add refresh interval if specified
-        if (isset($data['refresh'])) {
-            $params['--refresh'] = $data['refresh'];
-        }
-        
-        // Add status code if specified
-        if (isset($data['status'])) {
-            $params['--status'] = $data['status'];
-        }
-        
-        Artisan::call('down', $params);
     }
     
     /**

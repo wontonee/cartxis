@@ -17,7 +17,7 @@ class ReviewController extends Controller
      */
     public function productReviews(Request $request, $productId)
     {
-        $perPage = min($request->get('per_page', 20), config('vortex-api.pagination.max_per_page'));
+        $perPage = min($request->get('per_page', 20), config('cartxis-api.pagination.max_per_page'));
 
         $product = Product::find($productId);
 
@@ -47,8 +47,8 @@ class ReviewController extends Controller
             'rating' => 'required|integer|min:1|max:5',
             'title' => 'required|string|max:255',
             'comment' => 'required|string|max:1000',
-            'images' => 'nullable|array|max:' . config('vortex-api.uploads.review_images.max_count', 5),
-            'images.*' => 'image|max:' . config('vortex-api.uploads.review_images.max_size', 5120),
+            'images' => 'nullable|array|max:' . config('cartxis-api.uploads.review_images.max_count', 5),
+            'images.*' => 'image|max:' . config('cartxis-api.uploads.review_images.max_size', 5120),
         ]);
 
         if ($validator->fails()) {

@@ -19,12 +19,12 @@ class APIServiceProvider extends ServiceProvider
 
         // Load config
         $this->publishes([
-            __DIR__ . '/../Config/api.php' => config_path('vortex-api.php'),
-        ], 'vortex-api-config');
+            __DIR__ . '/../Config/api.php' => config_path('cartxis-api.php'),
+        ], 'cartxis-api-config');
 
         $this->mergeConfigFrom(
             __DIR__ . '/../Config/api.php',
-            'vortex-api'
+            'cartxis-api'
         );
     }
 

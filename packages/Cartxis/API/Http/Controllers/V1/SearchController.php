@@ -16,7 +16,7 @@ class SearchController extends Controller
     public function search(Request $request)
     {
         $query = $request->get('q', '');
-        $minLength = config('vortex-api.search.min_query_length', 2);
+        $minLength = config('cartxis-api.search.min_query_length', 2);
 
         if (strlen($query) < $minLength) {
             return ApiResponse::error(
@@ -28,8 +28,8 @@ class SearchController extends Controller
         }
 
         $perPage = min(
-            $request->get('per_page', config('vortex-api.search.results_per_page', 20)),
-            config('vortex-api.pagination.max_per_page')
+            $request->get('per_page', config('cartxis-api.search.results_per_page', 20)),
+            config('cartxis-api.pagination.max_per_page')
         );
 
         $products = Product::query()
@@ -54,13 +54,13 @@ class SearchController extends Controller
     public function suggestions(Request $request)
     {
         $query = $request->get('q', '');
-        $minLength = config('vortex-api.search.min_query_length', 2);
+        $minLength = config('cartxis-api.search.min_query_length', 2);
 
         if (strlen($query) < $minLength) {
             return ApiResponse::success([], 'No suggestions');
         }
 
-        $limit = min($request->get('limit', 10), config('vortex-api.search.suggestions_limit', 10));
+        $limit = min($request->get('limit', 10), config('cartxis-api.search.suggestions_limit', 10));
 
         $suggestions = Product::query()
             ->where('status', 'enabled')

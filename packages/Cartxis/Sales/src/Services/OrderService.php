@@ -6,6 +6,7 @@ use Cartxis\Shop\Models\Order;
 use Cartxis\Sales\Models\OrderHistory;
 use Cartxis\Sales\Repositories\OrderRepository;
 use Cartxis\Core\Models\EmailTemplate;
+use Cartxis\Core\Models\EmailConfiguration;
 use Cartxis\Core\Models\Currency;
 use Cartxis\Admin\Services\AdminNotificationService;
 use Illuminate\Support\Facades\DB;
@@ -328,6 +329,17 @@ class OrderService
                 return;
             }
 
+            // Skip if order has no customer email
+            if (empty($order->customer_email)) {
+                return;
+            }
+
+            // Skip if email settings are not configured in Settings -> Email
+            $emailConfig = EmailConfiguration::where('is_active', true)->first();
+            if (!$emailConfig || empty($emailConfig->mail_from_address)) {
+                return;
+            }
+
             $template = EmailTemplate::findByCode($templateCode);
             
             if (!$template || !$template->is_active) {
@@ -394,6 +406,17 @@ class OrderService
 
             // If no specific template for this status, skip email
             if (!$templateCode) {
+                return;
+            }
+
+            // Skip if order has no customer email
+            if (empty($order->customer_email)) {
+                return;
+            }
+
+            // Skip if email settings are not configured in Settings -> Email
+            $emailConfig = EmailConfiguration::where('is_active', true)->first();
+            if (!$emailConfig || empty($emailConfig->mail_from_address)) {
                 return;
             }
 
