@@ -120,6 +120,8 @@ Route::prefix('api/v1')->group(function () {
             Route::post('/payment-method', [CheckoutController::class, 'setPaymentMethod']);
             Route::get('/summary', [CheckoutController::class, 'summary']);
             Route::post('/place-order', [CheckoutController::class, 'placeOrder']);
+            // Unified payment verification — Flutter calls this after any SDK payment completes
+            Route::post('/verify-payment', [CheckoutController::class, 'verifyPayment']);
         });
 
         // Customer Account

@@ -459,26 +459,42 @@ class RazorpayGateway implements PaymentGatewayInterface
     /**
      * Verify payment status for an order.
      */
-    public function verifyPayment(Order $order): bool
+    public function verifyPayment(Order $order, array $data = []): bool
     {
         try {
             $api = $this->getRazorpayApi();
-            $paymentId = $order->payment_gateway_transaction_id;
 
+            // Prefer HMAC signature verification when Flutter passes the three fields
+            $razorpayPaymentId = $data['razorpay_payment_id'] ?? null;
+            $razorpayOrderId   = $data['razorpay_order_id'] ?? null;
+            $razorpaySignature = $data['razorpay_signature'] ?? null;
+
+            if ($razorpayPaymentId && $razorpayOrderId && $razorpaySignature) {
+                $api->utility->verifyPaymentSignature([
+                    'razorpay_order_id'   => $razorpayOrderId,
+                    'razorpay_payment_id' => $razorpayPaymentId,
+                    'razorpay_signature'  => $razorpaySignature,
+                ]);
+                // Signature valid — mark transaction ID
+                $order->update(['payment_gateway_transaction_id' => $razorpayPaymentId]);
+                Log::info('RazorpayGateway: Signature verified', ['order_id' => $order->id]);
+                return true;
+            }
+
+            // Fallback: fetch payment status from Razorpay API
+            $paymentId = $order->payment_gateway_transaction_id;
             if (!$paymentId) {
                 return false;
             }
 
             $payment = $api->payment->fetch($paymentId);
-            
             return $payment->status === 'captured' || $payment->status === 'authorized';
 
         } catch (\Exception $e) {
             Log::error('RazorpayGateway: Payment verification failed', [
                 'order_id' => $order->id,
-                'error' => $e->getMessage(),
+                'error'    => $e->getMessage(),
             ]);
-
             return false;
         }
     }

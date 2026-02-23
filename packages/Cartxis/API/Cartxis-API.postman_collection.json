@@ -3385,6 +3385,216 @@
 					]
 				},
 				{
+					"name": "Set Payment Method (PhonePe)",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"payment_method_code\": \"phonepe\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/v1/checkout/payment-method",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"checkout",
+								"payment-method"
+							]
+						},
+						"description": "Select PhonePe payment method. Returns client_id and environment for Flutter PhonePe SDK initialisation."
+					},
+					"response": [
+						{
+							"name": "200 OK",
+							"originalRequest": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"payment_method_code\": \"phonepe\"\n}"
+								},
+								"url": {
+									"raw": "{{base_url}}/api/v1/checkout/payment-method",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"api",
+										"v1",
+										"checkout",
+										"payment-method"
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								}
+							],
+							"cookie": [],
+							"body": "{\n  \"success\": true,\n  \"message\": \"Payment method set successfully\",\n  \"data\": {\n    \"payment_method\": \"phonepe\",\n    \"name\": \"PhonePe\",\n    \"type\": \"online\",\n    \"gateway_config\": {\n      \"merchant_id\": \"M22TUU3OAID7Z\",\n      \"client_secret\": \"your-client-secret\",\n      \"order_token\": \"eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.example_token\",\n      \"phonepe_order_id\": \"OD-2025XXXXXXXXXX\",\n      \"expires_at\": 1735000000000,\n      \"merchant_order_id\": \"CART_42_1735000000\",\n      \"environment\": \"PRODUCTION\",\n      \"mode\": \"production\",\n      \"currency\": \"INR\"\n    }\n  }\n}"
+						}
+					]
+				},
+				{
+					"name": "Set Payment Method (COD)",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"payment_method_code\": \"cod\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/v1/checkout/payment-method",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"checkout",
+								"payment-method"
+							]
+						},
+						"description": "Select Cash on Delivery as the payment method. No online payment required — customer pays when the order arrives."
+					},
+					"response": [
+						{
+							"name": "200 OK",
+							"originalRequest": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"payment_method_code\": \"cod\"\n}"
+								},
+								"url": {
+									"raw": "{{base_url}}/api/v1/checkout/payment-method",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"api",
+										"v1",
+										"checkout",
+										"payment-method"
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								}
+							],
+							"cookie": [],
+							"body": "{\n  \"success\": true,\n  \"message\": \"Payment method set successfully\",\n  \"data\": {\n    \"payment_method\": \"cod\",\n    \"name\": \"Cash on Delivery\",\n    \"description\": \"Pay when your order arrives\",\n    \"type\": \"cod\",\n    \"instructions\": \"Have the exact amount ready at delivery\"\n  }\n}"
+						}
+					]
+				},
+				{
+					"name": "Set Payment Method (Bank Transfer)",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"payment_method_code\": \"bank_transfer\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/v1/checkout/payment-method",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"checkout",
+								"payment-method"
+							]
+						},
+						"description": "Select Bank Transfer as the payment method. Admin confirms the order after verifying the incoming transfer."
+					},
+					"response": [
+						{
+							"name": "200 OK",
+							"originalRequest": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"payment_method_code\": \"bank_transfer\"\n}"
+								},
+								"url": {
+									"raw": "{{base_url}}/api/v1/checkout/payment-method",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"api",
+										"v1",
+										"checkout",
+										"payment-method"
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								}
+							],
+							"cookie": [],
+							"body": "{\n  \"success\": true,\n  \"message\": \"Payment method set successfully\",\n  \"data\": {\n    \"payment_method\": \"bank_transfer\",\n    \"name\": \"Bank Transfer\",\n    \"description\": \"Transfer funds directly to our bank account\",\n    \"type\": \"bank_transfer\",\n    \"instructions\": \"Transfer the order total to our bank account and upload proof of payment\"\n  }\n}"
+						}
+					]
+				},
+				{
 					"name": "Checkout Summary",
 					"request": {
 						"method": "GET",
@@ -3504,10 +3714,41 @@
 								}
 							],
 							"cookie": [],
-							"body": "{\n  \"success\": true,\n  \"message\": \"Order placed successfully\",\n  \"data\": {\n    \"order_id\": 14,\n    \"order_number\": \"ORD-260221-550123\",\n    \"status\": \"pending\",\n    \"total\": 242046.8\n  }\n}"
+							"body": "{\n  \"success\": true,\n  \"message\": \"Order placed successfully\",\n  \"data\": {\n    \"order_id\": 14,\n    \"order_number\": \"ORD-260221-550123\",\n    \"status\": \"pending\",\n    \"payment_method\": \"razorpay\",\n    \"subtotal\": 124417.0,\n    \"shipping_cost\": 5.0,\n    \"tax\": 12441.7,\n    \"grand_total\": 136863.7,\n    \"currency\": \"INR\",\n    \"currency_symbol\": \"\\u20b9\",\n    \"source_channel\": \"mobile_app\"\n  }\n}"
+						}
+					]
+				},
+				{
+					"name": "Place Order (PhonePe)",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"shipping_address_id\": 1,\n    \"payment_method\": \"phonepe\",\n    \"notes\": \"\"\n}"
 						},
+						"url": {
+							"raw": "{{base_url}}/api/v1/checkout/place-order",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"checkout",
+								"place-order"
+							]
+						},
+						"description": "Place order with PhonePe.\n\n**Full Flutter flow:**\n1. `POST /checkout/payment-method` with `payment_method_code: phonepe` → receive `gateway_config` with `merchant_id`, `client_secret`, `order_token`, `phonepe_order_id`, `environment`\n2. Initialise PhonePe Flutter SDK using those values and launch payment\n3. `POST /checkout/place-order` (this endpoint) → creates the order record\n4. After SDK payment completes → `POST /checkout/verify-payment` with `order_id` + `transaction_id`"
+					},
+					"response": [
 						{
-							"name": "400 Cart Empty",
+							"name": "201 Created (PhonePe)",
 							"originalRequest": {
 								"method": "POST",
 								"header": [
@@ -3518,7 +3759,7 @@
 								],
 								"body": {
 									"mode": "raw",
-									"raw": "{\n    \"shipping_address_id\": 1,\n    \"payment_method\": \"razorpay\",\n    \"notes\": \"Please deliver between 9 AM - 5 PM\"\n}"
+									"raw": "{\n    \"shipping_address_id\": 1,\n    \"payment_method\": \"phonepe\",\n    \"notes\": \"\"\n}"
 								},
 								"url": {
 									"raw": "{{base_url}}/api/v1/checkout/place-order",
@@ -3531,11 +3772,10 @@
 										"checkout",
 										"place-order"
 									]
-								},
-								"description": "Complete checkout and place order"
+								}
 							},
-							"status": "Bad Request",
-							"code": 400,
+							"status": "Created",
+							"code": 201,
 							"_postman_previewlanguage": "json",
 							"header": [
 								{
@@ -3544,10 +3784,41 @@
 								}
 							],
 							"cookie": [],
-							"body": "{\n  \"success\": false,\n  \"message\": \"Cart is empty\",\n  \"code\": \"CART_EMPTY\"\n}"
+							"body": "{\n  \"success\": true,\n  \"message\": \"Order placed successfully\",\n  \"data\": {\n    \"order_id\": 14,\n    \"order_number\": \"ORD-260221-550123\",\n    \"status\": \"pending\",\n    \"payment_method\": \"phonepe\",\n    \"subtotal\": 124417.0,\n    \"shipping_cost\": 5.0,\n    \"tax\": 12441.7,\n    \"grand_total\": 136863.7,\n    \"currency\": \"INR\",\n    \"currency_symbol\": \"\\u20b9\",\n    \"source_channel\": \"mobile_app\"\n  }\n}"
+						}
+					]
+				},
+				{
+					"name": "Place Order (COD)",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"shipping_address_id\": 1,\n    \"payment_method\": \"cod\"\n}"
 						},
+						"url": {
+							"raw": "{{base_url}}/api/v1/checkout/place-order",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"checkout",
+								"place-order"
+							]
+						},
+						"description": "Place a Cash on Delivery order. No pre-payment required — after placing, call verify-payment with just the order_id to confirm."
+					},
+					"response": [
 						{
-							"name": "400 Invalid Address",
+							"name": "201 Created",
 							"originalRequest": {
 								"method": "POST",
 								"header": [
@@ -3558,7 +3829,7 @@
 								],
 								"body": {
 									"mode": "raw",
-									"raw": "{\n    \"shipping_address_id\": 1,\n    \"payment_method\": \"razorpay\",\n    \"notes\": \"Please deliver between 9 AM - 5 PM\"\n}"
+									"raw": "{\n    \"shipping_address_id\": 1,\n    \"payment_method\": \"cod\"\n}"
 								},
 								"url": {
 									"raw": "{{base_url}}/api/v1/checkout/place-order",
@@ -3571,11 +3842,10 @@
 										"checkout",
 										"place-order"
 									]
-								},
-								"description": "Complete checkout and place order"
+								}
 							},
-							"status": "Bad Request",
-							"code": 400,
+							"status": "Created",
+							"code": 201,
 							"_postman_previewlanguage": "json",
 							"header": [
 								{
@@ -3584,7 +3854,342 @@
 								}
 							],
 							"cookie": [],
-							"body": "{\n  \"success\": false,\n  \"message\": \"Invalid shipping address\",\n  \"code\": \"INVALID_ADDRESS\"\n}"
+							"body": "{\n  \"success\": true,\n  \"message\": \"Order placed successfully\",\n  \"data\": {\n    \"order_id\": 15,\n    \"order_number\": \"ORD-260221-550124\",\n    \"status\": \"pending\",\n    \"payment_method\": \"cod\",\n    \"subtotal\": 124417.0,\n    \"shipping_cost\": 5.0,\n    \"tax\": 12441.7,\n    \"grand_total\": 136863.7,\n    \"currency\": \"INR\",\n    \"currency_symbol\": \"₹\",\n    \"source_channel\": \"mobile_app\"\n  }\n}"
+						}
+					]
+				},
+				{
+					"name": "Place Order (Bank Transfer)",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"shipping_address_id\": 1,\n    \"payment_method\": \"bank_transfer\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/v1/checkout/place-order",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"checkout",
+								"place-order"
+							]
+						},
+						"description": "Place a Bank Transfer order. After placing, call verify-payment with just the order_id — the admin will confirm once the transfer is received."
+					},
+					"response": [
+						{
+							"name": "201 Created",
+							"originalRequest": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"shipping_address_id\": 1,\n    \"payment_method\": \"bank_transfer\"\n}"
+								},
+								"url": {
+									"raw": "{{base_url}}/api/v1/checkout/place-order",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"api",
+										"v1",
+										"checkout",
+										"place-order"
+									]
+								}
+							},
+							"status": "Created",
+							"code": 201,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								}
+							],
+							"cookie": [],
+							"body": "{\n  \"success\": true,\n  \"message\": \"Order placed successfully\",\n  \"data\": {\n    \"order_id\": 16,\n    \"order_number\": \"ORD-260221-550125\",\n    \"status\": \"pending\",\n    \"payment_method\": \"bank_transfer\",\n    \"subtotal\": 124417.0,\n    \"shipping_cost\": 5.0,\n    \"tax\": 12441.7,\n    \"grand_total\": 136863.7,\n    \"currency\": \"INR\",\n    \"currency_symbol\": \"₹\",\n    \"source_channel\": \"mobile_app\"\n  }\n}"
+						}
+					]
+				},
+				{
+					"name": "Verify Payment (All Gateways)",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"order_id\": 14,\n\n    \"razorpay_payment_id\": \"pay_XXXXXXXXXX\",\n    \"razorpay_order_id\": \"order_XXXXXXXXXX\",\n    \"razorpay_signature\": \"<hmac_sha256_signature>\",\n\n    \"payment_intent_id\": \"pi_XXXXXXXXXX\",\n\n    \"transaction_id\": \"T2402231234567890\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/v1/checkout/verify-payment",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"checkout",
+								"verify-payment"
+							]
+						},
+						"description": "Unified payment verification endpoint for all gateways. Called by Flutter after any payment SDK completes.\n\nThe gateway is resolved automatically from the `payment_method` stored on the order — you only need `order_id` plus the gateway-specific fields:\n\n**Razorpay** → send `razorpay_payment_id`, `razorpay_order_id`, `razorpay_signature`\n**Stripe** → send `payment_intent_id`\n**PhonePe** → send `transaction_id` (optional — server verifies via PhonePe API)\n**COD** → just send `order_id` — returns success immediately (`payment_status` stays `pending` until admin marks it paid on delivery)\n**Bank Transfer** → just send `order_id` — returns success immediately (`payment_status` stays `pending` until admin confirms receipt)\n\nOmit the fields that don't apply to your gateway. The endpoint is idempotent — calling it on an already-confirmed order returns success."
+					},
+					"response": [
+						{
+							"name": "200 Verified (Razorpay)",
+							"originalRequest": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"order_id\": 14,\n    \"razorpay_payment_id\": \"pay_XXXXXXXXXX\",\n    \"razorpay_order_id\": \"order_XXXXXXXXXX\",\n    \"razorpay_signature\": \"<hmac_sha256_signature>\"\n}"
+								},
+								"url": {
+									"raw": "{{base_url}}/api/v1/checkout/verify-payment",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"api",
+										"v1",
+										"checkout",
+										"verify-payment"
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								}
+							],
+							"cookie": [],
+							"body": "{\n  \"success\": true,\n  \"message\": \"Payment verified successfully\",\n  \"data\": {\n    \"verified\": true,\n    \"payment_status\": \"paid\",\n    \"order_status\": \"processing\",\n    \"order_id\": 14,\n    \"order_number\": \"ORD-260221-550123\"\n  }\n}"
+						},
+						{
+							"name": "200 Verified (Stripe)",
+							"originalRequest": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"order_id\": 14,\n    \"payment_intent_id\": \"pi_XXXXXXXXXX\"\n}"
+								},
+								"url": {
+									"raw": "{{base_url}}/api/v1/checkout/verify-payment",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"api",
+										"v1",
+										"checkout",
+										"verify-payment"
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								}
+							],
+							"cookie": [],
+							"body": "{\n  \"success\": true,\n  \"message\": \"Payment verified successfully\",\n  \"data\": {\n    \"verified\": true,\n    \"payment_status\": \"paid\",\n    \"order_status\": \"processing\",\n    \"order_id\": 14,\n    \"order_number\": \"ORD-260221-550123\"\n  }\n}"
+						},
+						{
+							"name": "200 Verified (PhonePe)",
+							"originalRequest": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"order_id\": 14,\n    \"transaction_id\": \"T2402231234567890\"\n}"
+								},
+								"url": {
+									"raw": "{{base_url}}/api/v1/checkout/verify-payment",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"api",
+										"v1",
+										"checkout",
+										"verify-payment"
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								}
+							],
+							"cookie": [],
+							"body": "{\n  \"success\": true,\n  \"message\": \"Payment verified successfully\",\n  \"data\": {\n    \"verified\": true,\n    \"payment_status\": \"paid\",\n    \"order_status\": \"processing\",\n    \"order_id\": 14,\n    \"order_number\": \"ORD-260221-550123\"\n  }\n}"
+						},
+						{
+							"name": "200 Confirmed (COD)",
+							"originalRequest": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"order_id\": 15\n}"
+								},
+								"url": {
+									"raw": "{{base_url}}/api/v1/checkout/verify-payment",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"api",
+										"v1",
+										"checkout",
+										"verify-payment"
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								}
+							],
+							"cookie": [],
+							"body": "{\n  \"success\": true,\n  \"message\": \"Order confirmed — payment on delivery\",\n  \"data\": {\n    \"verified\": true,\n    \"payment_status\": \"pending\",\n    \"order_status\": \"pending\",\n    \"order_id\": 15,\n    \"order_number\": \"ORD-260221-550124\",\n    \"message\": \"Cash on delivery order confirmed. Payment will be collected upon delivery.\"\n  }\n}"
+						},
+						{
+							"name": "200 Confirmed (Bank Transfer)",
+							"originalRequest": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"order_id\": 16\n}"
+								},
+								"url": {
+									"raw": "{{base_url}}/api/v1/checkout/verify-payment",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"api",
+										"v1",
+										"checkout",
+										"verify-payment"
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								}
+							],
+							"cookie": [],
+							"body": "{\n  \"success\": true,\n  \"message\": \"Order placed — awaiting bank transfer confirmation\",\n  \"data\": {\n    \"verified\": true,\n    \"payment_status\": \"pending\",\n    \"order_status\": \"pending\",\n    \"order_id\": 16,\n    \"order_number\": \"ORD-260221-550125\",\n    \"message\": \"Order placed. Please complete the bank transfer and await confirmation.\"\n  }\n}"
+						},
+						{
+							"name": "402 Payment Not Completed",
+							"originalRequest": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"order_id\": 14\n}"
+								},
+								"url": {
+									"raw": "{{base_url}}/api/v1/checkout/verify-payment",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"api",
+										"v1",
+										"checkout",
+										"verify-payment"
+									]
+								}
+							},
+							"status": "Payment Required",
+							"code": 402,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								}
+							],
+							"cookie": [],
+							"body": "{\n  \"success\": false,\n  \"message\": \"Payment not completed. Please retry or contact support.\",\n  \"error_code\": \"PAYMENT_VERIFY_FAILED\",\n  \"data\": null\n}"
 						}
 					]
 				}

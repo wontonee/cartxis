@@ -50,6 +50,7 @@ class Order extends Model
         'customer_phone',
         'ip_address',
         'user_agent',
+        'source_channel',
     ];
 
     /**

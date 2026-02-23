@@ -24,18 +24,20 @@ class PhonePePaymentMethodSeeder extends Seeder
                 'sort_order' => 7,
                 'instructions' => 'You will be redirected to PhonePe to complete your payment securely.',
                 'configuration' => json_encode([
-                    'client_id' => '',
-                    'client_secret' => '',
-                    'client_version' => 1,
-                    'environment' => 'PRODUCTION',
-                    'callback_username' => '',
-                    'callback_password' => '',
-                    'payment_methods' => [
-                        'upi' => true,
-                        'card' => true,
-                        'netbanking' => true,
-                        'wallet' => true,
-                    ],
+                    'mode'                => 'production',
+                    // Live credentials
+                    'merchant_id'         => '',
+                    'client_id'           => '',
+                    'client_secret'       => '',
+                    'client_version'      => 1,
+                    // Test (UAT) credentials
+                    'test_merchant_id'    => '',
+                    'test_client_id'      => '',
+                    'test_client_secret'  => '',
+                    'test_client_version' => 1,
+                    // Webhook
+                    'callback_username'   => '',
+                    'callback_password'   => '',
                 ]),
                 'created_at' => now(),
                 'updated_at' => now(),
