@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Inertia\Response;
 use Cartxis\Core\Services\SettingService;
+use Illuminate\Support\Facades\Storage;
 
 class GeneralSettingsController extends Controller
 {
@@ -34,7 +35,7 @@ class GeneralSettingsController extends Controller
                 'site_logo' => (string) $this->settingService->get('site_logo', ''),
                 'admin_logo' => (string) $this->settingService->get('admin_logo', ''),
                 'site_favicon' => (string) $this->settingService->get('site_favicon', ''),
-
+                'mobile_auth_logo' => (string) $this->settingService->get('mobile_auth_logo', ''),
                 // SEO Settings
                 'meta_title' => (string) $this->settingService->get('meta_title', ''),
                 'meta_description' => (string) $this->settingService->get('meta_description', ''),
@@ -69,17 +70,42 @@ class GeneralSettingsController extends Controller
             'facebook_pixel_id' => 'nullable|string|max:50',
         ]);
 
+        // Handle logo removals first (before upload blocks)
+        if ($request->input('remove_site_logo') === '1') {
+            $current = $this->settingService->get('site_logo');
+            if ($current) Storage::disk('public')->delete($current);
+            $validated['site_logo'] = '';
+        }
+
+        if ($request->input('remove_admin_logo') === '1') {
+            $current = $this->settingService->get('admin_logo');
+            if ($current) Storage::disk('public')->delete($current);
+            $validated['admin_logo'] = '';
+        }
+
+        if ($request->input('remove_site_favicon') === '1') {
+            $current = $this->settingService->get('site_favicon');
+            if ($current) Storage::disk('public')->delete($current);
+            $validated['site_favicon'] = '';
+        }
+
+        if ($request->input('remove_mobile_auth_logo') === '1') {
+            $current = $this->settingService->get('mobile_auth_logo');
+            if ($current) Storage::disk('public')->delete($current);
+            $validated['mobile_auth_logo'] = '';
+        }
+
         if ($request->hasFile('site_logo')) {
             $logoFile = $request->file('site_logo');
 
             if (is_array($logoFile)) {
                 $request->validate([
-                    'site_logo.*' => 'image|mimes:jpeg,png,jpg,gif,svg|max:5120|dimensions:max_width=600,max_height=200',
+                    'site_logo.*' => 'image|mimes:jpeg,png,jpg,gif,svg|max:5120',
                 ]);
                 $logoFile = $logoFile[0] ?? null;
             } else {
                 $request->validate([
-                    'site_logo' => 'image|mimes:jpeg,png,jpg,gif,svg|max:5120|dimensions:max_width=600,max_height=200',
+                    'site_logo' => 'image|mimes:jpeg,png,jpg,gif,svg|max:5120',
                 ]);
             }
 
@@ -98,12 +124,12 @@ class GeneralSettingsController extends Controller
 
             if (is_array($adminLogoFile)) {
                 $request->validate([
-                    'admin_logo.*' => 'image|mimes:jpeg,png,jpg,gif,svg|max:5120|dimensions:max_width=400,max_height=120',
+                    'admin_logo.*' => 'image|mimes:jpeg,png,jpg,gif,svg|max:5120',
                 ]);
                 $adminLogoFile = $adminLogoFile[0] ?? null;
             } else {
                 $request->validate([
-                    'admin_logo' => 'image|mimes:jpeg,png,jpg,gif,svg|max:5120|dimensions:max_width=400,max_height=120',
+                    'admin_logo' => 'image|mimes:jpeg,png,jpg,gif,svg|max:5120',
                 ]);
             }
 
@@ -122,12 +148,12 @@ class GeneralSettingsController extends Controller
 
             if (is_array($faviconFile)) {
                 $request->validate([
-                    'site_favicon.*' => 'image|mimes:jpeg,png,jpg,gif,svg,ico|max:2048|dimensions:max_width=128,max_height=128',
+                    'site_favicon.*' => 'image|mimes:jpeg,png,jpg,gif,svg,ico|max:2048',
                 ]);
                 $faviconFile = $faviconFile[0] ?? null;
             } else {
                 $request->validate([
-                    'site_favicon' => 'image|mimes:jpeg,png,jpg,gif,svg,ico|max:2048|dimensions:max_width=128,max_height=128',
+                    'site_favicon' => 'image|mimes:jpeg,png,jpg,gif,svg,ico|max:2048',
                 ]);
             }
 
@@ -139,6 +165,30 @@ class GeneralSettingsController extends Controller
                 'site_favicon' => 'string|max:500',
             ]);
             $validated['site_favicon'] = $request->input('site_favicon');
+        }
+
+        if ($request->hasFile('mobile_auth_logo')) {
+            $mobileLogoFile = $request->file('mobile_auth_logo');
+
+            if (is_array($mobileLogoFile)) {
+                $request->validate([
+                    'mobile_auth_logo.*' => 'image|mimes:jpeg,png,jpg,gif,svg|max:5120',
+                ]);
+                $mobileLogoFile = $mobileLogoFile[0] ?? null;
+            } else {
+                $request->validate([
+                    'mobile_auth_logo' => 'image|mimes:jpeg,png,jpg,gif,svg|max:5120',
+                ]);
+            }
+
+            if ($mobileLogoFile) {
+                $validated['mobile_auth_logo'] = $mobileLogoFile->store('settings', 'public');
+            }
+        } elseif ($request->filled('mobile_auth_logo')) {
+            $request->validate([
+                'mobile_auth_logo' => 'string|max:500',
+            ]);
+            $validated['mobile_auth_logo'] = $request->input('mobile_auth_logo');
         }
 
         // Save all settings

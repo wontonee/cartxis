@@ -226,10 +226,10 @@ const remainingSlots = computed(() => props.maxFiles - props.modelValue.length);
         <p class="text-sm text-gray-500 dark:text-gray-400">
           PNG, JPG, GIF up to {{ maxSize }}MB
         </p>
-        <p v-if="remainingSlots > 0" class="text-xs text-gray-400 dark:text-gray-500">
+        <p v-if="maxFiles > 1 && remainingSlots > 0" class="text-xs text-gray-400 dark:text-gray-500">
           {{ remainingSlots }} of {{ maxFiles }} slots available
         </p>
-        <p v-else class="text-xs text-red-500 dark:text-red-400">
+        <p v-else-if="maxFiles > 1 && remainingSlots <= 0" class="text-xs text-red-500 dark:text-red-400">
           Maximum files reached
         </p>
       </div>

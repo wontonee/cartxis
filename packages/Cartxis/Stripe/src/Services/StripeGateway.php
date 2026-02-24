@@ -32,12 +32,30 @@ class StripeGateway implements PaymentGatewayInterface
     }
 
     /**
-     * Get configuration value.
+     * Get configuration value, resolving test/live credentials based on mode.
      */
     protected function getConfig(string $key, mixed $default = null): mixed
     {
         $method = $this->getPaymentMethod();
-        return $method?->getConfigValue($key, $default);
+        if (!$method) return $default;
+
+        // Resolve credential keys based on mode (test vs live)
+        if (in_array($key, ['publishable_key', 'secret_key', 'webhook_secret'])) {
+            $mode = $method->getConfigValue('mode', 'live');
+            if ($mode === 'test') {
+                $testVal = $method->getConfigValue('test_' . $key);
+                if ($testVal) return $testVal;
+            }
+            // Live mode or no test value set — use live key
+            // Also fall back to legacy 'public_key' field name for publishable_key
+            $val = $method->getConfigValue($key);
+            if ($val === null && $key === 'publishable_key') {
+                $val = $method->getConfigValue('public_key', $default);
+            }
+            return $val ?? $default;
+        }
+
+        return $method->getConfigValue($key, $default);
     }
     /**
      * Get the gateway code.
@@ -270,30 +288,56 @@ class StripeGateway implements PaymentGatewayInterface
     /**
      * Verify payment status for an order.
      */
-    public function verifyPayment(Order $order): bool
+    public function verifyPayment(Order $order, array $data = []): bool
     {
         try {
-            $paymentData = json_decode($order->payment_data, true);
-            $sessionId = $paymentData['stripe_session_id'] ?? null;
-
-            if (!$sessionId) {
-                return false;
-            }
-
-            // Set Stripe API key
             $secretKey = $this->getConfig('secret_key');
             Stripe::setApiKey($secretKey);
 
-            $session = Session::retrieve($sessionId);
+            // Flutter path: verify via PaymentIntent ID passed from the SDK
+            $paymentIntentId = $data['payment_intent_id'] ?? null;
 
+            if (!$paymentIntentId) {
+                // Fallback: try order payment_data
+                $paymentData     = is_array($order->payment_data)
+                    ? $order->payment_data
+                    : json_decode($order->payment_data ?? '{}', true);
+                $paymentIntentId = $paymentData['payment_intent_id'] ?? null;
+            }
+
+            if ($paymentIntentId) {
+                $intent = \Stripe\PaymentIntent::retrieve($paymentIntentId);
+                $succeeded = $intent->status === 'succeeded';
+                if ($succeeded) {
+                    $order->update(['payment_gateway_transaction_id' => $paymentIntentId]);
+                }
+                Log::info('StripeGateway: PaymentIntent verify', [
+                    'order_id' => $order->id,
+                    'intent'   => $paymentIntentId,
+                    'status'   => $intent->status,
+                ]);
+                return $succeeded;
+            }
+
+            // Legacy path: Stripe Checkout Session
+            $paymentData = is_array($order->payment_data)
+                ? $order->payment_data
+                : json_decode($order->payment_data ?? '{}', true);
+            $sessionId = $paymentData['stripe_session_id'] ?? null;
+
+            if (!$sessionId) {
+                Log::warning('StripeGateway: no payment_intent_id or session_id', ['order_id' => $order->id]);
+                return false;
+            }
+
+            $session = Session::retrieve($sessionId);
             return $session->payment_status === 'paid';
 
         } catch (ApiErrorException $e) {
             Log::error('Stripe payment verification failed', [
                 'order_id' => $order->id,
-                'error' => $e->getMessage(),
+                'error'    => $e->getMessage(),
             ]);
-
             return false;
         }
     }
@@ -358,25 +402,60 @@ class StripeGateway implements PaymentGatewayInterface
     {
         return [
             [
-                'key' => 'public_key',
-                'label' => 'Publishable Key',
-                'type' => 'text',
+                'key'      => 'mode',
+                'label'    => 'Mode',
+                'type'     => 'select',
                 'required' => true,
-                'help' => 'Your Stripe publishable key (pk_test_... or pk_live_...)',
+                'default'  => 'live',
+                'options'  => [
+                    ['value' => 'live', 'label' => 'Live'],
+                    ['value' => 'test', 'label' => 'Test'],
+                ],
+                'help'     => 'Use Test mode for development; switch to Live for real payments',
+            ],
+            // ── Live credentials ──────────────────────────────────────────
+            [
+                'key'      => 'publishable_key',
+                'label'    => 'Live Publishable Key',
+                'type'     => 'text',
+                'required' => true,
+                'help'     => 'Stripe live publishable key (pk_live_...)',
             ],
             [
-                'key' => 'secret_key',
-                'label' => 'Secret Key',
-                'type' => 'password',
+                'key'      => 'secret_key',
+                'label'    => 'Live Secret Key',
+                'type'     => 'password',
                 'required' => true,
-                'help' => 'Your Stripe secret key (sk_test_... or sk_live_...)',
+                'help'     => 'Stripe live secret key (sk_live_...)',
             ],
             [
-                'key' => 'webhook_secret',
-                'label' => 'Webhook Secret',
-                'type' => 'password',
+                'key'      => 'webhook_secret',
+                'label'    => 'Live Webhook Secret',
+                'type'     => 'password',
                 'required' => false,
-                'help' => 'Your Stripe webhook signing secret (whsec_...)',
+                'help'     => 'Stripe live webhook signing secret (whsec_...)',
+            ],
+            // ── Test credentials ──────────────────────────────────────────
+            [
+                'key'      => 'test_publishable_key',
+                'label'    => 'Test Publishable Key',
+                'type'     => 'text',
+                'required' => false,
+                'help'     => 'Stripe test publishable key (pk_test_...)',
+            ],
+            [
+                'key'      => 'test_secret_key',
+                'label'    => 'Test Secret Key',
+                'type'     => 'password',
+                'required' => false,
+                'help'     => 'Stripe test secret key (sk_test_...)',
+            ],
+            [
+                'key'      => 'test_webhook_secret',
+                'label'    => 'Test Webhook Secret',
+                'type'     => 'password',
+                'required' => false,
+                'help'     => 'Stripe test webhook signing secret (whsec_...)',
             ],
         ];
     }
@@ -386,9 +465,6 @@ class StripeGateway implements PaymentGatewayInterface
      */
     public function isConfigured(): bool
     {
-        $publicKey = $this->getConfig('public_key');
-        $secretKey = $this->getConfig('secret_key');
-
-        return !empty($publicKey) && !empty($secretKey);
+        return !empty($this->getConfig('publishable_key')) && !empty($this->getConfig('secret_key'));
     }
 }

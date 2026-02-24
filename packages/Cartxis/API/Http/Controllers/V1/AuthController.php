@@ -273,4 +273,44 @@ class AuthController extends Controller
             'expires_in' => config('cartxis-api.token.expiration') * 60,
         ], 'Token refreshed successfully');
     }
+
+    /**
+     * Permanently delete the authenticated user's account.
+     *
+     * Requires the user's current password for confirmation.
+     * All tokens are revoked and the avatar file is removed before deletion.
+     */
+    public function deleteAccount(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'password' => 'required|string',
+        ]);
+
+        if ($validator->fails()) {
+            return ApiResponse::validationError($validator);
+        }
+
+        $user = $request->user();
+
+        if (!Hash::check($request->password, $user->password)) {
+            return ApiResponse::error(
+                'Password is incorrect',
+                null,
+                400,
+                'INVALID_PASSWORD'
+            );
+        }
+
+        // Revoke all tokens before deletion
+        $user->tokens()->delete();
+
+        // Remove avatar file from storage
+        if ($user->avatar) {
+            \Storage::disk('public')->delete($user->avatar);
+        }
+
+        $user->delete();
+
+        return ApiResponse::success(null, 'Account deleted successfully');
+    }
 }
