@@ -13,9 +13,18 @@ class AdminUserSeeder extends Seeder
      */
     public function run(): void
     {
-        $name     = env('CARTXIS_ADMIN_NAME', 'Admin');
-        $email    = env('CARTXIS_ADMIN_EMAIL', 'admin@example.com');
-        $password = env('CARTXIS_ADMIN_PASSWORD', 'password');
+        $name     = env('CARTXIS_ADMIN_NAME');
+        $email    = env('CARTXIS_ADMIN_EMAIL');
+        $password = env('CARTXIS_ADMIN_PASSWORD');
+
+        if (empty($email) || empty($password)) {
+            $this->command->error(
+                'Admin credentials are not set. Run `php artisan cartxis:install` to set up Cartxis properly.'
+            );
+            return;
+        }
+
+        $name = $name ?: 'Admin';
 
         User::firstOrCreate(
             ['email' => $email],

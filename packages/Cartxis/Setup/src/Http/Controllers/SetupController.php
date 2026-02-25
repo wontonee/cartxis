@@ -8,14 +8,12 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Hash;
 use Inertia\Inertia;
 use Inertia\Response;
 use Cartxis\Setup\Services\DemoDataService;
 use Cartxis\Core\Models\Country;
 use Cartxis\Core\Services\SettingService;
 use Cartxis\Core\Models\Currency;
-use App\Models\User;
 
 class SetupController extends Controller
 {
@@ -90,8 +88,6 @@ class SetupController extends Controller
         $validated = $request->validate([
             'business_type' => 'required|string',
             'store_name' => 'required|string|max:255',
-            'admin_email' => 'required|email|max:255',
-            'admin_password' => 'nullable|string|min:8|confirmed',
             'contact_phone' => 'nullable|string|max:50',
             'store_address' => 'nullable|string',
             'store_country' => 'required|string|max:100',
@@ -113,37 +109,11 @@ class SetupController extends Controller
                 );
             }
 
-            // Also save to general settings using SettingService (for admin panel)
+            // Save to general settings using SettingService (for admin panel)
             $this->settingService->set('site_name', $validated['store_name'], 'string', 'general');
-            $this->settingService->set('admin_email', $validated['admin_email'], 'string', 'general');
             $this->settingService->set('contact_phone', $validated['contact_phone'] ?? '', 'string', 'general');
             $this->settingService->set('contact_address', $validated['store_address'] ?? '', 'string', 'general');
             $this->settingService->set('store_country', $validated['store_country'], 'string', 'general');
-
-            // Optionally create or update admin user credentials
-            if (!empty($validated['admin_password'])) {
-                $adminUser = User::where('email', $validated['admin_email'])->first();
-
-                if ($adminUser) {
-                    $adminUser->fill([
-                        'name' => $adminUser->name ?: 'Admin User',
-                        'role' => 'admin',
-                        'is_active' => true,
-                        'email_verified_at' => $adminUser->email_verified_at ?? now(),
-                    ]);
-                    $adminUser->password = Hash::make($validated['admin_password']);
-                    $adminUser->save();
-                } else {
-                    User::create([
-                        'name' => 'Admin User',
-                        'email' => $validated['admin_email'],
-                        'password' => Hash::make($validated['admin_password']),
-                        'role' => 'admin',
-                        'is_active' => true,
-                        'email_verified_at' => now(),
-                    ]);
-                }
-            }
 
             $currencyCode = strtoupper($validated['currency']);
             $currencyMeta = $this->getCurrencyMetadata($currencyCode);

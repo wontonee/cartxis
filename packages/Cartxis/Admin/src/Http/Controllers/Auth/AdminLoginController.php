@@ -24,7 +24,7 @@ class AdminLoginController extends Controller
         $storedLogo = $this->settingService->get('admin_logo');
         $adminLogo = $storedLogo
             ? Storage::disk('public')->url($storedLogo)
-            : '/logos/cartxis.png';
+            : '/logos/cartxis-transparent.png';
 
         return Inertia::render('Admin/Auth/Login', [
             'adminLogo' => $adminLogo,
