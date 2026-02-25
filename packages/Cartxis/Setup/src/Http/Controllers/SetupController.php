@@ -12,6 +12,7 @@ use Illuminate\Support\Facades\Hash;
 use Inertia\Inertia;
 use Inertia\Response;
 use Cartxis\Setup\Services\DemoDataService;
+use Cartxis\Core\Models\Country;
 use Cartxis\Core\Services\SettingService;
 use Cartxis\Core\Models\Currency;
 use App\Models\User;
@@ -51,8 +52,33 @@ class SetupController extends Controller
     {
         $businessType = $request->query('type', 'retail');
 
+        $countries = Country::active()->ordered()->get(['name', 'code'])->toArray();
+
+        // Prefer the currencies table (proper names + metadata).
+        // Fall back to countries-derived data on a true first-run before seeding.
+        $currenciesFromTable = Currency::where('is_active', true)
+            ->orderBy('code')
+            ->get(['code', 'name', 'symbol'])
+            ->toArray();
+
+        if (!empty($currenciesFromTable)) {
+            $currencies = $currenciesFromTable;
+        } else {
+            // First-run fallback: derive from countries reference data
+            $currencies = Country::active()
+                ->whereNotNull('currency_code')
+                ->selectRaw('currency_code as code, MIN(currency_symbol) as symbol')
+                ->groupBy('currency_code')
+                ->orderBy('currency_code')
+                ->get()
+                ->map(fn ($r) => ['code' => $r->code, 'name' => $r->code, 'symbol' => $r->symbol])
+                ->toArray();
+        }
+
         return Inertia::render('Setup/BusinessSettings', [
             'businessType' => $businessType,
+            'countries'    => $countries,
+            'currencies'   => $currencies,
         ]);
     }
 
@@ -68,6 +94,7 @@ class SetupController extends Controller
             'admin_password' => 'nullable|string|min:8|confirmed',
             'contact_phone' => 'nullable|string|max:50',
             'store_address' => 'nullable|string',
+            'store_country' => 'required|string|max:100',
             'currency' => 'required|string|max:10',
             'timezone' => 'required|string|max:100',
         ]);
@@ -91,6 +118,7 @@ class SetupController extends Controller
             $this->settingService->set('admin_email', $validated['admin_email'], 'string', 'general');
             $this->settingService->set('contact_phone', $validated['contact_phone'] ?? '', 'string', 'general');
             $this->settingService->set('contact_address', $validated['store_address'] ?? '', 'string', 'general');
+            $this->settingService->set('store_country', $validated['store_country'], 'string', 'general');
 
             // Optionally create or update admin user credentials
             if (!empty($validated['admin_password'])) {
@@ -127,7 +155,7 @@ class SetupController extends Controller
                     'symbol' => $currencyMeta['symbol'],
                     'symbol_position' => $currencyMeta['symbol_position'],
                     'decimal_places' => $currencyMeta['decimal_places'],
-                    'exchange_rate' => 1,
+                    'exchange_rate' => $currencyMeta['exchange_rate'],
                     'is_default' => true,
                     'is_active' => true,
                     'sort_order' => 0,
@@ -229,22 +257,30 @@ class SetupController extends Controller
 
     private function getCurrencyMetadata(string $code): array
     {
-        $defaults = [
-            'USD' => ['name' => 'US Dollar', 'symbol' => '$'],
-            'EUR' => ['name' => 'Euro', 'symbol' => '€'],
-            'GBP' => ['name' => 'British Pound', 'symbol' => '£'],
-            'INR' => ['name' => 'Indian Rupee', 'symbol' => '₹'],
-            'AUD' => ['name' => 'Australian Dollar', 'symbol' => 'A$'],
-            'CAD' => ['name' => 'Canadian Dollar', 'symbol' => 'C$'],
-        ];
+        // Prefer the currencies table — it has full metadata set by the seeder/admin.
+        $currency = Currency::where('code', $code)->first();
 
-        $meta = $defaults[$code] ?? ['name' => $code, 'symbol' => $code];
+        if ($currency) {
+            return [
+                'name'            => $currency->name,
+                'symbol'          => $currency->symbol,
+                'symbol_position' => $currency->symbol_position,
+                'decimal_places'  => $currency->decimal_places,
+                'exchange_rate'   => (float) $currency->exchange_rate,
+            ];
+        }
+
+        // Fallback: derive from countries reference data (first-run before seeding)
+        $country = Country::whereNotNull('currency_code')
+            ->where('currency_code', $code)
+            ->first(['currency_symbol']);
 
         return [
-            'name' => $meta['name'],
-            'symbol' => $meta['symbol'],
+            'name'            => $code,
+            'symbol'          => $country?->currency_symbol ?? $code,
             'symbol_position' => 'before',
-            'decimal_places' => 2,
+            'decimal_places'  => 2,
+            'exchange_rate'   => 1.0,
         ];
     }
 }

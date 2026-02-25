@@ -25,6 +25,7 @@ interface Order {
   discount: number;
   total: number;
   notes?: string;
+  source_channel?: string;
   created_at: string;
   items: Array<{
     id: number;
@@ -194,7 +195,24 @@ const billingAddress = props.order.addresses.find(a => a.type === 'billing');
       <!-- Header -->
       <div class="flex items-center justify-between">
         <div>
-          <h1 class="text-2xl font-bold text-gray-900">Order #{{ order.order_number }}</h1>
+          <div class="flex items-center gap-3">
+            <h1 class="text-2xl font-bold text-gray-900">Order #{{ order.order_number }}</h1>
+            <span
+              v-if="order.source_channel === 'mobile_app'"
+              class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold bg-indigo-100 text-indigo-800"
+            >
+              <svg class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M17 2H7a2 2 0 00-2 2v16a2 2 0 002 2h10a2 2 0 002-2V4a2 2 0 00-2-2zm-5 18a1 1 0 110-2 1 1 0 010 2zm5-4H7V4h10v12z"/>
+              </svg>
+              Mobile App
+            </span>
+            <span
+              v-else-if="order.source_channel && order.source_channel !== 'web'"
+              class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold bg-gray-100 text-gray-700"
+            >
+              {{ order.source_channel }}
+            </span>
+          </div>
           <p class="mt-1 text-sm text-gray-600">{{ formatDate(order.created_at) }}</p>
         </div>
         <div class="flex gap-2">
@@ -286,6 +304,19 @@ const billingAddress = props.order.addresses.find(a => a.type === 'billing');
                 <div class="mt-1 text-sm text-gray-900">{{ order.payment_method }}</div>
                 <div class="text-sm font-medium text-gray-500 mt-3">Shipping Method</div>
                 <div class="mt-1 text-sm text-gray-900">{{ order.shipping_method }}</div>
+                <div class="text-sm font-medium text-gray-500 mt-3">Order Source</div>
+                <div class="mt-1">
+                  <span
+                    v-if="order.source_channel === 'mobile_app'"
+                    class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-semibold bg-indigo-100 text-indigo-800"
+                  >
+                    <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 24 24">
+                      <path d="M17 2H7a2 2 0 00-2 2v16a2 2 0 002 2h10a2 2 0 002-2V4a2 2 0 00-2-2zm-5 18a1 1 0 110-2 1 1 0 010 2zm5-4H7V4h10v12z"/>
+                    </svg>
+                    Mobile App
+                  </span>
+                  <span v-else class="text-sm text-gray-900">{{ order.source_channel || 'Web' }}</span>
+                </div>
                 <div v-if="order.tracking_number" class="text-sm font-medium text-gray-500 mt-3">Tracking Number</div>
                 <div v-if="order.tracking_number" class="mt-1 text-sm text-gray-900">{{ order.tracking_number }}</div>
               </div>

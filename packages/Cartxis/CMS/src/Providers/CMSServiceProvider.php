@@ -18,7 +18,7 @@ class CMSServiceProvider extends ServiceProvider
     {
         // Merge configuration
         $this->mergeConfigFrom(
-            __DIR__ . '/../../config/cms.php',
+            __DIR__ . '/../config/cms.php',
             'cms'
         );
 
@@ -43,7 +43,7 @@ class CMSServiceProvider extends ServiceProvider
 
         // Publish configuration
         $this->publishes([
-            __DIR__ . '/../../config/cms.php' => config_path('cms.php'),
+            __DIR__ . '/../config/cms.php' => config_path('cms.php'),
         ], 'cms-config');
 
         // Register @block Blade directive

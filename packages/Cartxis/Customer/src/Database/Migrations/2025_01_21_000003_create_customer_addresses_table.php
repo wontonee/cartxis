@@ -19,6 +19,7 @@ return new class extends Migration
             
             // Address Type
             $table->enum('type', ['shipping', 'billing'])->default('shipping');
+            $table->string('label', 50)->nullable()->comment('Address label like home, office, etc.');
             
             // Address Fields
             $table->string('first_name', 100);

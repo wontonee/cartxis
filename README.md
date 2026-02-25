@@ -25,6 +25,7 @@ A modern, extensible e-commerce platform built with Laravel 12, Inertia.js, Vue 
 - **Order Processing**: Complete order lifecycle management
 - **Customer Management**: Customer profiles, addresses, and notes
 - **Settings**: Store configuration, payment methods, shipping rates, tax rules
+- **AI Agents**: Create and manage custom AI agents for commerce workflows
 - **Email Templates**: Customizable transactional email templates
 - **CMS**: Content management for pages and blocks
 - **Reports**: Sales, customer, and inventory reporting
@@ -47,12 +48,32 @@ A modern, extensible e-commerce platform built with Laravel 12, Inertia.js, Vue 
 - **Database**: MySQL 8.0+
 - **Extensions**: OpenSSL, PDO, Mbstring, Tokenizer, XML, Ctype, JSON, BCMath
 
-## 🚀 Installation
+## 🚀 Quick Install via Composer
+
+The fastest way to get Cartxis running:
+
+```bash
+composer create-project cartxis/cartxis my-store
+cd my-store
+php artisan cartxis:install
+```
+
+The interactive installer will guide you through:
+- Database configuration (MySQL 8.0+)
+- Admin account setup
+- Running migrations and seeders
+- Building frontend assets (optional)
+
+---
+
+## 🛠️ Installation (Development / Git Clone)
+
+Use this method if you are contributing or developing on Cartxis.
 
 ### 1. Clone the Repository
 
 ```bash
-git clone https://github.com/wontonee/cartxis.git
+git clone https://github.com/cartxis/cartxis.git
 cd cartxis
 ```
 
@@ -101,8 +122,7 @@ php artisan migrate --seed
 ```
 
 This will create all necessary tables and seed initial data including:
-- Admin user (admin@wontonee.com / password)
-- Sample products and categories
+- Admin user (credentials set during `cartxis:install`)
 - Default settings and configurations
 - Payment methods
 - Email templates

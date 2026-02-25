@@ -1,0 +1,49 @@
+{
+    "name": "Dmart Electronics",
+    "slug": "dmart-electronics",
+    "description": "A bold, modern electronics-focused e-commerce theme with vibrant red accents, multi-slider hero, category grids, and dynamic product showcases. Built from the Dmart Tailwind template.",
+    "version": "1.0.0",
+    "author": "Cartxis",
+    "author_url": "https://cartxis.com",
+    "screenshot": "screenshot.png",
+    "is_default": false,
+    "supports": [
+        "widgets",
+        "menus",
+        "custom-logo",
+        "custom-colors",
+        "responsive",
+        "dark-mode"
+    ],
+    "settings": {
+        "colors": {
+            "primary": "#FF4035",
+            "secondary": "#0A111E",
+            "accent": "#FFD43B",
+            "success": "#10b981",
+            "danger": "#ef4444",
+            "warning": "#f59e0b",
+            "info": "#3b82f6"
+        },
+        "typography": {
+            "font_family": "'Jost', sans-serif",
+            "font_size": "16px",
+            "heading_font": "'Albert Sans', sans-serif"
+        },
+        "layout": {
+            "container_width": "1320px",
+            "sidebar_width": "300px",
+            "header_style": "mega",
+            "footer_style": "multi-column"
+        },
+        "features": {
+            "sticky_header": true,
+            "back_to_top": true,
+            "wishlist": true,
+            "quick_view": true,
+            "product_zoom": true,
+            "newsletter_popup": false,
+            "offer_marquee": true
+        }
+    }
+}

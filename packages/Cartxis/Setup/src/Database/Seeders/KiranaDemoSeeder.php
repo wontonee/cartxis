@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Cartxis\Setup\Database\Seeders;
 
+use Cartxis\Core\Models\Currency;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
@@ -11,6 +12,8 @@ use Illuminate\Support\Str;
 
 class KiranaDemoSeeder extends Seeder
 {
+    private ?Currency $defaultCurrency = null;
+
     /**
      * Run the database seeds for Kirana (Grocery) business type
      */
@@ -372,7 +375,7 @@ class KiranaDemoSeeder extends Seeder
                 'sku' => $product['sku'],
                 'slug' => Str::slug($product['name']),
                 'type' => 'simple',
-                'price' => $product['price'],
+                'price' => $this->toStorePrice($product['price']),
                 'description' => $product['description'],
                 'short_description' => $product['short_description'],
                 'status' => 'enabled',
@@ -418,6 +421,43 @@ class KiranaDemoSeeder extends Seeder
                 ]);
             }
         }
+    }
+
+    private function toStorePrice(float $basePrice): float
+    {
+        $currency = $this->getDefaultCurrency();
+        if (! $currency) {
+            return round($basePrice, 2);
+        }
+
+        $exchangeRate = (float) $currency->exchange_rate;
+        $decimalPlaces = max(0, (int) $currency->decimal_places);
+
+        if ($exchangeRate <= 0) {
+            return round($basePrice, $decimalPlaces);
+        }
+
+        return round($basePrice * $exchangeRate, $decimalPlaces);
+    }
+
+    private function getDefaultCurrency(): ?Currency
+    {
+        if ($this->defaultCurrency instanceof Currency) {
+            return $this->defaultCurrency;
+        }
+
+        $this->defaultCurrency = Currency::query()
+            ->where('is_default', true)
+            ->where('is_active', true)
+            ->first();
+
+        if (! $this->defaultCurrency) {
+            $this->defaultCurrency = Currency::query()
+                ->where('is_default', true)
+                ->first();
+        }
+
+        return $this->defaultCurrency;
     }
 
     private function seedPages(): void

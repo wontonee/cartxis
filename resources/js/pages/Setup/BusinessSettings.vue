@@ -119,6 +119,28 @@
 
                     <!-- Currency -->
                     <div>
+                        <label for="store_country" class="block text-sm font-medium text-gray-700 mb-2">
+                            Store Country <span class="text-red-500">*</span>
+                        </label>
+                        <select
+                            id="store_country"
+                            v-model="form.store_country"
+                            required
+                            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900"
+                            :class="{ 'border-red-500': errors.store_country }"
+                        >
+                            <option value="">Select country...</option>
+                            <option
+                                v-for="country in props.countries"
+                                :key="country.code"
+                                :value="country.name"
+                            >{{ country.name }}</option>
+                        </select>
+                        <p v-if="errors.store_country" class="mt-1 text-sm text-red-600">{{ errors.store_country }}</p>
+                    </div>
+
+                    <!-- Currency -->
+                    <div>
                         <label for="currency" class="block text-sm font-medium text-gray-700 mb-2">
                             Currency <span class="text-red-500">*</span>
                         </label>
@@ -128,12 +150,11 @@
                             required
                             class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900"
                         >
-                            <option value="USD">USD - US Dollar ($)</option>
-                            <option value="EUR">EUR - Euro (€)</option>
-                            <option value="GBP">GBP - British Pound (£)</option>
-                            <option value="INR">INR - Indian Rupee (₹)</option>
-                            <option value="AUD">AUD - Australian Dollar (A$)</option>
-                            <option value="CAD">CAD - Canadian Dollar (C$)</option>
+                            <option
+                                v-for="currency in props.currencies"
+                                :key="currency.code"
+                                :value="currency.code"
+                            >{{ currency.code }} — {{ currency.name }} ({{ currency.symbol }})</option>
                         </select>
                     </div>
 
@@ -201,9 +222,11 @@ import { ref, computed } from 'vue';
 import { Head, router } from '@inertiajs/vue3';
 import axios from 'axios';
 
-const props = defineProps({
-    businessType: String,
-});
+const props = defineProps<{
+    businessType?: string;
+    countries: { name: string; code: string }[];
+    currencies: { code: string; symbol: string; name: string }[];
+}>();
 
 const form = ref({
     store_name: '',
@@ -212,7 +235,8 @@ const form = ref({
     admin_password_confirmation: '',
     contact_phone: '',
     store_address: '',
-    currency: 'USD',
+    store_country: '',
+    currency: props.currencies.find(c => c.code === 'USD') ? 'USD' : (props.currencies[0]?.code ?? 'USD'),
     timezone: 'UTC',
 });
 
@@ -222,6 +246,7 @@ const processing = ref(false);
 const isValid = computed(() => {
     return form.value.store_name && 
            form.value.admin_email && 
+           form.value.store_country && 
            form.value.currency && 
            form.value.timezone;
 });

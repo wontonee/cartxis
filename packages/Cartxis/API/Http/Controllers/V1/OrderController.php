@@ -6,7 +6,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Cartxis\API\Helpers\ApiResponse;
 use Cartxis\API\Http\Resources\OrderResource;
-use Cartxis\Sales\Models\Order;
+use Cartxis\Shop\Models\Order;
 
 class OrderController extends Controller
 {
@@ -15,9 +15,9 @@ class OrderController extends Controller
      */
     public function index(Request $request)
     {
-        $perPage = min($request->get('per_page', 20), config('vortex-api.pagination.max_per_page'));
+        $perPage = min($request->get('per_page', 20), config('cartxis-api.pagination.max_per_page'));
 
-        $query = Order::where('customer_id', $request->user()->id)
+        $query = Order::where('user_id', $request->user()->id)
             ->with(['items.product', 'shippingAddress', 'billingAddress']);
 
         // Filter by status
@@ -45,7 +45,7 @@ class OrderController extends Controller
             'shipments',
             'invoices',
         ])
-            ->where('customer_id', $request->user()->id)
+            ->where('user_id', $request->user()->id)
             ->find($id);
 
         if (!$order) {
@@ -63,7 +63,7 @@ class OrderController extends Controller
      */
     public function cancel(Request $request, $id)
     {
-        $order = Order::where('customer_id', $request->user()->id)->find($id);
+        $order = Order::where('user_id', $request->user()->id)->find($id);
 
         if (!$order) {
             return ApiResponse::notFound('Order not found', 'ORDER_NOT_FOUND');
@@ -98,7 +98,7 @@ class OrderController extends Controller
     public function invoice(Request $request, $id)
     {
         $order = Order::with(['items.product', 'shippingAddress', 'billingAddress'])
-            ->where('customer_id', $request->user()->id)
+            ->where('user_id', $request->user()->id)
             ->find($id);
 
         if (!$order) {
@@ -120,7 +120,7 @@ class OrderController extends Controller
     public function track(Request $request, $id)
     {
         $order = Order::with(['shipments.trackingInfo'])
-            ->where('customer_id', $request->user()->id)
+            ->where('user_id', $request->user()->id)
             ->find($id);
 
         if (!$order) {
@@ -143,7 +143,7 @@ class OrderController extends Controller
 
         return ApiResponse::success([
             'order_id' => $order->id,
-            'order_number' => $order->increment_id,
+            'order_number' => $order->order_number,
             'status' => $order->status,
             'tracking' => $trackingInfo,
         ], 'Order tracking information retrieved');

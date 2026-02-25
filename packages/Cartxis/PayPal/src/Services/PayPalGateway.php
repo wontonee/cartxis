@@ -34,11 +34,27 @@ class PayPalGateway implements PaymentGatewayInterface
 
     /**
      * Get configuration value.
+     * For mode-sensitive keys (client_id, client_secret, webhook_id),
+     * resolves to the sandbox-prefixed key when mode is 'sandbox'.
      */
     protected function getConfig(string $key, mixed $default = null): mixed
     {
         $method = $this->getPaymentMethod();
-        return $method?->getConfigValue($key, $default);
+        if (!$method) {
+            return $default;
+        }
+
+        if (in_array($key, ['client_id', 'client_secret', 'webhook_id'])) {
+            $mode = $method->getConfigValue('mode', 'sandbox');
+            if ($mode === 'sandbox') {
+                $sandboxVal = $method->getConfigValue('sandbox_' . $key);
+                if ($sandboxVal) {
+                    return $sandboxVal;
+                }
+            }
+        }
+
+        return $method->getConfigValue($key, $default);
     }
 
     /**
@@ -185,7 +201,7 @@ class PayPalGateway implements PaymentGatewayInterface
 
         try {
             // Get shipping address
-            $shippingAddress = $order->shippingAddress();
+            $shippingAddress = $order->shippingAddress;
 
             $currency = strtoupper($order->currency_code ?? 'USD');
             $parseAmount = static function ($value): float {
@@ -406,20 +422,94 @@ class PayPalGateway implements PaymentGatewayInterface
     }
 
     /**
-     * Verify payment status for an order.
+     * Verify (and if necessary capture) payment for an order.
+     *
+     * For the Flutter mobile flow the order will be in APPROVED state after
+     * the user approves in the WebView.  We capture it here and verify the
+     * COMPLETED status.  Idempotent: if the order is already COMPLETED (e.g.
+     * a webhook arrived first) we simply return true.
+     *
+     * @param Order $order
+     * @param array $data  Optional ['paypal_order_id' => '...'] to override the
+     *                     value stored in payment_gateway_data.
      */
-    public function verifyPayment(Order $order): bool
+    public function verifyPayment(Order $order, array $data = []): bool
     {
         try {
-            $paypalOrderId = $order->payment_gateway_data['paypal_order_id'] ?? null;
+            $paypalOrderId = $data['paypal_order_id']
+                ?? ($order->payment_gateway_data['paypal_order_id'] ?? null);
 
             if (!$paypalOrderId) {
+                Log::warning('PayPalGateway: verifyPayment called with no paypal_order_id', [
+                    'order_id' => $order->id,
+                ]);
                 return false;
             }
 
+            // Fetch current PayPal order status
             $response = $this->apiRequest('GET', "/v2/checkout/orders/{$paypalOrderId}", []);
+            $status   = $response['status'] ?? '';
 
-            return $response['status'] === 'COMPLETED';
+            Log::info('PayPalGateway: verifyPayment status check', [
+                'order_id'        => $order->id,
+                'paypal_order_id' => $paypalOrderId,
+                'status'          => $status,
+            ]);
+
+            if ($status === 'COMPLETED') {
+                // Already captured — idempotent OK
+                return true;
+            }
+
+            if ($status === 'APPROVED') {
+                // Capture the payment now
+                $captureResponse = $this->apiRequest(
+                    'POST',
+                    "/v2/checkout/orders/{$paypalOrderId}/capture",
+                    []
+                );
+
+                $captureStatus = $captureResponse['status'] ?? '';
+
+                Log::info('PayPalGateway: capture result', [
+                    'order_id'        => $order->id,
+                    'paypal_order_id' => $paypalOrderId,
+                    'capture_status'  => $captureStatus,
+                ]);
+
+                if ($captureStatus === 'COMPLETED') {
+                    $capture  = $captureResponse['purchase_units'][0]['payments']['captures'][0] ?? null;
+                    $existing = is_array($order->payment_gateway_data)
+                        ? $order->payment_gateway_data
+                        : [];
+
+                    $order->update([
+                        'payment_gateway_transaction_id' => $capture['id'] ?? $paypalOrderId,
+                        'payment_gateway_data' => array_merge($existing, [
+                            'paypal_order_id' => $paypalOrderId,
+                            'capture_id'      => $capture['id'] ?? null,
+                            'payer_email'     => $captureResponse['payer']['email_address'] ?? null,
+                            'captured_at'     => now()->toISOString(),
+                        ]),
+                    ]);
+
+                    return true;
+                }
+
+                Log::warning('PayPalGateway: capture did not return COMPLETED', [
+                    'order_id'       => $order->id,
+                    'capture_status' => $captureStatus,
+                ]);
+                return false;
+            }
+
+            // CREATED / SAVED / VOIDED etc — not in a capturable state
+            Log::warning('PayPalGateway: order not in capturable state', [
+                'order_id' => $order->id,
+                'status'   => $status,
+            ]);
+            return false;
+
         } catch (\Exception $e) {
             Log::error('PayPalGateway: Payment verification failed', [
                 'order_id' => $order->id,
@@ -534,8 +624,10 @@ class PayPalGateway implements PaymentGatewayInterface
             return false;
         }
 
-        $clientId = $method->getConfigValue('client_id');
-        $clientSecret = $method->getConfigValue('client_secret');
+        // Use getConfig() (mode-aware) so sandbox_client_id / sandbox_client_secret
+        // are resolved correctly when mode = 'sandbox'.
+        $clientId = $this->getConfig('client_id');
+        $clientSecret = $this->getConfig('client_secret');
 
         return !empty($clientId) && !empty($clientSecret);
     }

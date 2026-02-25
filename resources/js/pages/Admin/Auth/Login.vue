@@ -4,6 +4,10 @@ import { ref, computed } from 'vue'
 import '@admin/css/styles.css'
 import admin from '@/routes/admin'
 
+const props = defineProps<{
+    adminLogo: string
+}>()
+
 const form = useForm({
   email: '',
   password: '',
@@ -62,13 +66,8 @@ const submit = () => {
       
       <!-- Top: Logo -->
       <div>
-        <div class="flex items-center gap-3">
-          <div class="w-11 h-11 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-xl flex items-center justify-center shadow-lg shadow-blue-500/20 dark:shadow-blue-500/15">
-            <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
-            </svg>
-          </div>
-          <span class="text-2xl font-bold text-gray-900 dark:text-white">Cartxis</span>
+        <div class="flex items-center">
+          <img :src="props.adminLogo" alt="Cartxis" class="h-12 w-auto object-contain dark:brightness-0 dark:invert" />
         </div>
       </div>
 
@@ -147,13 +146,8 @@ const submit = () => {
         ">
           
           <!-- Mobile Logo -->
-          <div class="lg:hidden flex items-center gap-3 mb-10 justify-center">
-            <div class="w-10 h-10 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-xl flex items-center justify-center shadow-lg shadow-blue-500/20">
-              <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
-              </svg>
-            </div>
-            <span class="text-xl font-bold text-gray-900 dark:text-white">Cartxis</span>
+          <div class="lg:hidden flex items-center justify-center mb-10">
+            <img :src="props.adminLogo" alt="Cartxis" class="h-10 w-auto object-contain dark:brightness-0 dark:invert" />
           </div>
 
           <!-- Header -->

@@ -2,6 +2,7 @@
 import { ref, computed, watch, onMounted, onUnmounted, nextTick } from 'vue'
 import { Link, usePage, router } from '@inertiajs/vue3'
 import admin from '@/routes/admin'
+import axios from '@/lib/axios'
 import Toast from '@/components/Toast.vue'
 import { useMenuIcons } from '@/composables/useMenuIcons'
 import { useAppearance } from '@/composables/useAppearance'
@@ -29,11 +30,20 @@ const { getIcon } = useMenuIcons()
 const sidebarOpen = ref(false)
 const sidebarCollapsed = ref(false)
 const userMenuOpen = ref(false)
+const notificationsOpen = ref(false)
+const notifications = ref<any[]>([])
+const notificationsLoading = ref(false)
+const notificationsUnreadCount = ref<number>(Number((page.props as any)?.adminNotifications?.unread_count ?? 0))
+const hasNotificationPulse = ref(false)
+const latestSeenNotificationId = ref<number | null>(null)
 const hoveredMenuId = ref<number | null>(null)
 const popoverPosition = ref({ top: 0 })
+let notificationPollTimer: ReturnType<typeof setInterval> | null = null
+let notificationPulseTimer: ReturnType<typeof setTimeout> | null = null
 
 // Admin config for logo
 const adminConfig = computed(() => page.props.adminConfig as any)
+const adminMaintenance = computed(() => (page.props as any)?.adminMaintenance as { enabled?: boolean; title?: string } | null)
 
 // Track which parent menus are open
 const openMenus = ref<Set<number>>(new Set())
@@ -146,6 +156,19 @@ const isActive = (item: any) => {
     // Remove trailing slashes for comparison
     const cleanCurrentPath = currentPath.replace(/\/$/, '')
     const cleanMenuPath = menuPath.replace(/\/$/, '')
+
+    // Map extension routes under the Shipping Methods navigation item
+    if (
+      cleanMenuPath === '/admin/settings/shipping-methods' &&
+      (
+        cleanCurrentPath === '/admin/settings/shiprocket' ||
+        cleanCurrentPath.startsWith('/admin/settings/shiprocket/') ||
+        cleanCurrentPath === '/admin/settings/delivery' ||
+        cleanCurrentPath.startsWith('/admin/settings/delivery/')
+      )
+    ) {
+      return true
+    }
     
     // Exact match (most common case)
     if (cleanCurrentPath === cleanMenuPath) return true
@@ -156,8 +179,9 @@ const isActive = (item: any) => {
     if (cleanCurrentPath.startsWith(cleanMenuPath + '/')) {
       const remainder = cleanCurrentPath.substring(cleanMenuPath.length + 1)
       // Only match if remainder is a number (resource ID) or standard actions
-      // Don't match other text segments like "groups", "reports", etc.
-      return /^(\d+|create|edit|show)/.test(remainder)
+      // Include nested configure pages such as payment-methods/{type}/configure.
+      // Don't match unrelated sections like "groups", "reports", etc.
+      return /^(\d+|create|edit|show|[^/]+\/configure)(\/|$)/.test(remainder)
     }
     
     return false
@@ -179,10 +203,10 @@ const hasActiveChild = (item: any): boolean => {
 
 // Initialize open menus based on active routes only
 const initializeOpenMenus = () => {
-  // Clear current state
+  // Reset first so unrelated previously opened menus are closed.
   openMenus.value.clear()
-  
-  // Only open menus that have an active child (current page)
+
+  // Open only menus that have an active child for the current route.
   menuItems.value.forEach((item: any) => {
     if (hasActiveChild(item)) {
       openMenus.value.add(item.id)
@@ -292,6 +316,143 @@ const toggleSidebar = () => {
     saveMenuState()
   }
 }
+
+const fetchNotifications = async (silent = false) => {
+  if (!silent) {
+    notificationsLoading.value = true
+  }
+
+  try {
+    const response = await axios.get('/admin/notifications', {
+      params: {
+        limit: 12,
+      },
+      headers: {
+        Accept: 'application/json',
+      },
+    })
+
+    const payload = response.data || {}
+    notifications.value = payload.notifications || []
+    const latestIncomingId = Number(notifications.value[0]?.id || 0)
+    notificationsUnreadCount.value = Number(payload.unread_count || 0)
+
+    if (latestSeenNotificationId.value === null) {
+      latestSeenNotificationId.value = latestIncomingId || null
+    } else if (latestIncomingId && latestIncomingId !== latestSeenNotificationId.value) {
+      latestSeenNotificationId.value = latestIncomingId
+
+      if (notificationsUnreadCount.value > 0) {
+        hasNotificationPulse.value = true
+
+        if (notificationPulseTimer) {
+          clearTimeout(notificationPulseTimer)
+        }
+
+        notificationPulseTimer = setTimeout(() => {
+          hasNotificationPulse.value = false
+        }, 5000)
+      }
+    }
+  } catch (error) {
+    console.error('Failed to fetch notifications:', error)
+  } finally {
+    if (!silent) {
+      notificationsLoading.value = false
+    }
+  }
+}
+
+const toggleNotifications = async () => {
+  notificationsOpen.value = !notificationsOpen.value
+
+  if (notificationsOpen.value) {
+    userMenuOpen.value = false
+    await fetchNotifications()
+  }
+}
+
+const markNotificationAsRead = async (notificationId: number) => {
+  try {
+    await axios.post(`/admin/notifications/${notificationId}/read`, {}, {
+      headers: {
+        Accept: 'application/json',
+      },
+    })
+
+    notifications.value = notifications.value.map((item) => {
+      if (item.id === notificationId) {
+        return {
+          ...item,
+          read_at: new Date().toISOString(),
+        }
+      }
+
+      return item
+    })
+
+    notificationsUnreadCount.value = Math.max(0, notificationsUnreadCount.value - 1)
+  } catch (error) {
+    console.error('Failed to mark notification as read:', error)
+  }
+}
+
+const markAllNotificationsAsRead = async () => {
+  try {
+    await axios.post('/admin/notifications/mark-all-read', {}, {
+      headers: {
+        Accept: 'application/json',
+      },
+    })
+
+    notifications.value = notifications.value.map((item) => ({
+      ...item,
+      read_at: item.read_at || new Date().toISOString(),
+    }))
+    notificationsUnreadCount.value = 0
+  } catch (error) {
+    console.error('Failed to mark all notifications as read:', error)
+  }
+}
+
+watch(
+  () => (page.props as any)?.adminNotifications?.unread_count,
+  (count) => {
+    if (typeof count === 'number') {
+      notificationsUnreadCount.value = count
+    }
+  }
+)
+
+watch(userMenuOpen, (open) => {
+  if (open) {
+    notificationsOpen.value = false
+  }
+})
+
+watch(notificationsOpen, (open) => {
+  if (open) {
+    userMenuOpen.value = false
+  }
+})
+
+onMounted(() => {
+  fetchNotifications(true)
+
+  notificationPollTimer = setInterval(() => {
+    fetchNotifications(true)
+  }, 30000)
+})
+
+onUnmounted(() => {
+  if (notificationPulseTimer) {
+    clearTimeout(notificationPulseTimer)
+  }
+
+  if (notificationPollTimer) {
+    clearInterval(notificationPollTimer)
+  }
+})
 </script>
 
 <template>
@@ -538,10 +699,102 @@ const toggleSidebar = () => {
               </button>
 
               <!-- Notifications -->
-              <button class="relative text-gray-500 hover:text-gray-600 dark:text-gray-400 dark:hover:text-gray-300">
-                <Bell class="w-5 h-5" />
-                <span class="absolute top-0 right-0 block h-2 w-2 rounded-full bg-red-500 ring-2 ring-white dark:ring-gray-800"></span>
-              </button>
+              <div class="relative">
+                <button
+                  @click="toggleNotifications"
+                  class="relative text-gray-500 hover:text-gray-600 dark:text-gray-400 dark:hover:text-gray-300 transition-transform duration-300"
+                  :class="hasNotificationPulse ? 'animate-bounce text-blue-600 dark:text-blue-400' : ''"
+                  aria-label="Notifications"
+                  title="Notifications"
+                >
+                  <Bell class="w-5 h-5" />
+                  <span
+                    v-if="hasNotificationPulse"
+                    class="absolute -top-1 -right-1 inline-flex h-4 w-4 rounded-full bg-blue-400 opacity-75 animate-ping"
+                  ></span>
+                  <span
+                    v-if="notificationsUnreadCount > 0"
+                    class="absolute -top-1 -right-1 min-w-[16px] h-4 px-1 rounded-full bg-red-500 text-[10px] leading-4 text-white text-center"
+                  >
+                    {{ notificationsUnreadCount > 99 ? '99+' : notificationsUnreadCount }}
+                  </span>
+                </button>
+
+                <Transition
+                  enter-active-class="transition ease-out duration-100"
+                  enter-from-class="transform opacity-0 scale-95"
+                  enter-to-class="transform opacity-100 scale-100"
+                  leave-active-class="transition ease-in duration-75"
+                  leave-from-class="transform opacity-100 scale-100"
+                  leave-to-class="transform opacity-0 scale-95"
+                >
+                  <div
+                    v-show="notificationsOpen"
+                    class="absolute right-0 mt-2 w-96 max-w-[92vw] bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 overflow-hidden z-50"
+                  >
+                    <div class="px-4 py-3 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between">
+                      <p class="text-sm font-semibold text-gray-900 dark:text-white">Notifications</p>
+                      <div class="flex items-center gap-3">
+                        <a
+                          href="/admin/activity-logs"
+                          class="text-xs font-medium text-gray-600 dark:text-gray-300 hover:underline"
+                        >
+                          View logs
+                        </a>
+                        <button
+                          v-if="notificationsUnreadCount > 0"
+                          @click="markAllNotificationsAsRead"
+                          class="text-xs font-medium text-blue-600 dark:text-blue-400 hover:underline"
+                        >
+                          Mark all as read
+                        </button>
+                      </div>
+                    </div>
+
+                    <div v-if="notificationsLoading" class="px-4 py-8 text-sm text-gray-500 dark:text-gray-400 text-center">
+                      Loading notifications...
+                    </div>
+
+                    <div v-else-if="notifications.length === 0" class="px-4 py-8 text-sm text-gray-500 dark:text-gray-400 text-center">
+                      No notifications yet.
+                    </div>
+
+                    <div v-else class="max-h-[360px] overflow-y-auto">
+                      <div
+                        v-for="notification in notifications"
+                        :key="notification.id"
+                        class="px-4 py-3 border-b border-gray-100 dark:border-gray-700/60"
+                        :class="notification.read_at ? 'bg-white dark:bg-gray-800' : 'bg-blue-50/60 dark:bg-blue-900/10'"
+                      >
+                        <div class="flex items-start gap-3">
+                          <div class="mt-1 w-2 h-2 rounded-full" :class="notification.read_at ? 'bg-gray-300 dark:bg-gray-600' : 'bg-blue-500'"></div>
+                          <div class="flex-1 min-w-0">
+                            <p class="text-sm font-medium text-gray-900 dark:text-gray-100 truncate">{{ notification.title }}</p>
+                            <p v-if="notification.message" class="text-xs mt-0.5 text-gray-600 dark:text-gray-300 line-clamp-2">{{ notification.message }}</p>
+                            <p class="text-[11px] mt-1 text-gray-500 dark:text-gray-400">{{ notification.created_at_human }}</p>
+                            <div class="mt-2 flex items-center gap-3">
+                              <a
+                                v-if="notification.action_url"
+                                :href="notification.action_url"
+                                class="text-xs font-medium text-blue-600 dark:text-blue-400 hover:underline"
+                              >
+                                View
+                              </a>
+                              <button
+                                v-if="!notification.read_at"
+                                @click="markNotificationAsRead(notification.id)"
+                                class="text-xs font-medium text-gray-600 dark:text-gray-300 hover:underline"
+                              >
+                                Mark read
+                              </button>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </Transition>
+              </div>
 
               <!-- User Dropdown Menu -->
               <div class="relative">
@@ -613,6 +866,12 @@ const toggleSidebar = () => {
               </div>
             </div>
           </div>
+        </div>
+        <div
+          v-if="adminMaintenance?.enabled"
+          class="px-4 sm:px-6 lg:px-8 py-2 bg-amber-50 border-t border-amber-200 text-amber-800 text-sm"
+        >
+          Frontend maintenance mode is active: {{ adminMaintenance?.title || "We'll be back soon!" }}
         </div>
       </header>
 

@@ -75,7 +75,7 @@ export function useWishlist() {
   const removeFromWishlist = async (wishlistItemId: number) => {
     try {
       loading.value = true
-      const response = await axios.delete(`/account/wishlist/${wishlistItemId}`)
+      const response = await axios.delete(`/account/wishlist/item/${wishlistItemId}`)
 
       if (response.status === 200) {
         wishlistItems.value = wishlistItems.value.filter(item => item.id !== wishlistItemId)
@@ -105,7 +105,7 @@ export function useWishlist() {
   const moveToCart = async (wishlistItemId: number) => {
     try {
       loading.value = true
-      const response = await axios.post(`/account/wishlist/${wishlistItemId}/move-to-cart`)
+      const response = await axios.post(`/account/wishlist/item/${wishlistItemId}/move-to-cart`)
 
       if (response.status === 200) {
         wishlistItems.value = wishlistItems.value.filter(item => item.id !== wishlistItemId)

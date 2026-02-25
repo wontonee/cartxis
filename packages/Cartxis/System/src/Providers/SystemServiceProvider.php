@@ -30,7 +30,7 @@ class SystemServiceProvider extends ServiceProvider
         $this->loadMigrationsFrom(__DIR__ . '/../Database/Migrations');
 
         // Load views
-        $this->loadViewsFrom(__DIR__ . '/../../resources/views', 'system');
+        $this->loadViewsFrom(__DIR__ . '/../resources/views', 'system');
         
         // Register migration commands (always register so they can be called via Artisan::call from web)
         $this->commands([

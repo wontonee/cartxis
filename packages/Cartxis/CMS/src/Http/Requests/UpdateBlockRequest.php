@@ -36,7 +36,6 @@ class UpdateBlockRequest extends FormRequest
             'type' => 'required|in:text,html,banner,promotion,newsletter',
             'content' => 'nullable|string',
             'status' => 'required|in:active,inactive',
-            'channel_id' => 'nullable|exists:channels,id',
             'start_date' => 'nullable|date',
             'end_date' => 'nullable|date|after_or_equal:start_date',
         ];

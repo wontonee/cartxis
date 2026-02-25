@@ -133,10 +133,10 @@ Or add to `config/app.php` (if using older Laravel):
 ### Step 6: Publish Configuration
 
 ```bash
-php artisan vendor:publish --tag=vortex-api-config
+php artisan vendor:publish --tag=cartxis-api-config
 ```
 
-This creates `config/vortex-api.php` with API settings.
+This creates `config/cartxis-api.php` with API settings.
 
 ### Step 7: Configure CORS (Optional)
 
@@ -393,7 +393,7 @@ class CartxisApiClient {
 - Guest users: 60 requests/minute
 - Authenticated users: 300 requests/minute
 - Login endpoint: 5 attempts/minute
-- Customizable in `config/vortex-api.php`
+- Customizable in `config/cartxis-api.php`
 
 ## 🎯 Next Steps
 

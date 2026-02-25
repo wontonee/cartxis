@@ -7,6 +7,8 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use Cartxis\API\Helpers\ApiResponse;
 use Cartxis\API\Http\Resources\ProductResource;
+use Cartxis\Cart\Models\Cart;
+use Cartxis\Cart\Models\CartItem;
 use Cartxis\Customer\Models\Wishlist;
 use Cartxis\Product\Models\Product;
 
@@ -115,9 +117,33 @@ class WishlistController extends Controller
             return ApiResponse::notFound('Wishlist item not found', 'WISHLIST_ITEM_NOT_FOUND');
         }
 
-        // TODO: Add to cart logic
-        // For now, just remove from wishlist
+        $product = $wishlistItem->product;
 
+        if (!$product || $product->status !== 'enabled') {
+            return ApiResponse::error('Product not available', null, 400, 'PRODUCT_UNAVAILABLE');
+        }
+
+        // Add to cart
+        $cart = Cart::firstOrCreate(['user_id' => $user->id]);
+
+        $cartItem = CartItem::where('cart_id', $cart->id)
+            ->where('product_id', $product->id)
+            ->first();
+
+        if ($cartItem) {
+            $cartItem->quantity += 1;
+            $cartItem->price = $product->special_price ?? $product->price;
+            $cartItem->save();
+        } else {
+            CartItem::create([
+                'cart_id'    => $cart->id,
+                'product_id' => $product->id,
+                'quantity'   => 1,
+                'price'      => $product->special_price ?? $product->price,
+            ]);
+        }
+
+        // Remove from wishlist
         $wishlistItem->delete();
 
         return ApiResponse::success(null, 'Product moved to cart');

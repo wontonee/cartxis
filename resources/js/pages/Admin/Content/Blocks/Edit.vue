@@ -93,6 +93,7 @@
                             <option value="banner">Banner - Image with CTA button</option>
                             <option value="promotion">Promotion - Special offer/discount</option>
                             <option value="newsletter">Newsletter - Email signup form</option>
+                            <option value="testimonial">Testimonial - Customer reviews</option>
                         </select>
                         <p v-if="form.errors.type" class="mt-1 text-sm text-red-600">{{ form.errors.type }}</p>
                     </div>
@@ -260,6 +261,89 @@
                                     class="w-full px-3 py-2 border border-gray-300 rounded-lg"
                                     placeholder="e.g., SUMMER2025"
                                 />
+                            </div>
+                        </div>
+
+                        <!-- Testimonial Type -->
+                        <div v-if="form.type === 'testimonial'" class="space-y-6">
+                            <div class="flex items-center justify-between">
+                                <p class="text-sm text-gray-500">Add customer testimonials. Each has a name, role, review text, rating and optional avatar URL.</p>
+                                <button
+                                    type="button"
+                                    @click="addTestimonial"
+                                    class="px-3 py-1.5 text-sm font-medium text-blue-600 bg-blue-50 border border-blue-200 rounded-lg hover:bg-blue-100"
+                                >
+                                    + Add Testimonial
+                                </button>
+                            </div>
+                            <div v-for="(t, idx) in testimonialData" :key="idx" class="p-4 border border-gray-200 rounded-xl space-y-3 relative">
+                                <div class="flex items-center justify-between">
+                                    <span class="text-sm font-semibold text-gray-700">Testimonial #{{ idx + 1 }}</span>
+                                    <button
+                                        v-if="testimonialData.length > 1"
+                                        type="button"
+                                        @click="removeTestimonial(idx)"
+                                        class="text-xs text-red-500 hover:text-red-700"
+                                    >
+                                        Remove
+                                    </button>
+                                </div>
+                                <div class="grid grid-cols-2 gap-3">
+                                    <div>
+                                        <label class="block text-xs font-medium text-gray-600 mb-1">Name *</label>
+                                        <input
+                                            v-model="t.name"
+                                            type="text"
+                                            class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm"
+                                            placeholder="Ronald Richards"
+                                        />
+                                    </div>
+                                    <div>
+                                        <label class="block text-xs font-medium text-gray-600 mb-1">Role / Title</label>
+                                        <input
+                                            v-model="t.role"
+                                            type="text"
+                                            class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm"
+                                            placeholder="Marketing Coordinator"
+                                        />
+                                    </div>
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-medium text-gray-600 mb-1">Review Text *</label>
+                                    <textarea
+                                        v-model="t.text"
+                                        rows="3"
+                                        class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm"
+                                        placeholder="The customer service experience is unmatched..."
+                                    ></textarea>
+                                </div>
+                                <div class="grid grid-cols-2 gap-3">
+                                    <div>
+                                        <label class="block text-xs font-medium text-gray-600 mb-1">Rating (1-5)</label>
+                                        <div class="flex items-center gap-1">
+                                            <button
+                                                v-for="star in 5"
+                                                :key="star"
+                                                type="button"
+                                                @click="t.rating = star"
+                                                class="text-xl transition-colors"
+                                                :class="star <= t.rating ? 'text-yellow-400' : 'text-gray-300'"
+                                            >
+                                                ★
+                                            </button>
+                                            <span class="text-xs text-gray-400 ml-1">{{ t.rating }}/5</span>
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <label class="block text-xs font-medium text-gray-600 mb-1">Avatar URL (optional)</label>
+                                        <input
+                                            v-model="t.avatar"
+                                            type="text"
+                                            class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm"
+                                            placeholder="/images/avatar.jpg"
+                                        />
+                                    </div>
+                                </div>
                             </div>
                         </div>
 
@@ -440,6 +524,18 @@ const newsletterData = reactive({
     action: '/newsletter/subscribe',
 });
 
+const testimonialData = reactive<Array<{ name: string; role: string; text: string; rating: number; avatar: string | null }>>([
+    { name: '', role: '', text: '', rating: 5, avatar: null },
+]);
+
+const addTestimonial = () => {
+    testimonialData.push({ name: '', role: '', text: '', rating: 5, avatar: null });
+};
+
+const removeTestimonial = (idx: number) => {
+    testimonialData.splice(idx, 1);
+};
+
 // Initialize structured data from existing content
 onMounted(() => {
     if (blockData.content_array) {
@@ -449,6 +545,14 @@ onMounted(() => {
             Object.assign(promotionData, blockData.content_array);
         } else if (form.type === 'newsletter') {
             Object.assign(newsletterData, blockData.content_array);
+        } else if (form.type === 'testimonial') {
+            const arr = blockData.content_array?.testimonials || blockData.content_array;
+            if (Array.isArray(arr) && arr.length) {
+                testimonialData.splice(0, testimonialData.length, ...arr.map((t: any) => ({
+                    name: t.name || '', role: t.role || '', text: t.text || '',
+                    rating: t.rating || 5, avatar: t.avatar || null,
+                })));
+            }
         }
     }
 
@@ -496,6 +600,8 @@ watch(() => form.type, (newType) => {
         form.content = JSON.stringify(promotionData);
     } else if (newType === 'newsletter') {
         form.content = JSON.stringify(newsletterData);
+    } else if (newType === 'testimonial') {
+        form.content = JSON.stringify({ testimonials: testimonialData });
     }
 });
 
@@ -515,6 +621,12 @@ watch(promotionData, () => {
 watch(newsletterData, () => {
     if (form.type === 'newsletter') {
         form.content = JSON.stringify(newsletterData);
+    }
+}, { deep: true });
+
+watch(testimonialData, () => {
+    if (form.type === 'testimonial') {
+        form.content = JSON.stringify({ testimonials: testimonialData });
     }
 }, { deep: true });
 

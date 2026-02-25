@@ -4,10 +4,13 @@ namespace Cartxis\API\Http\Controllers\V1;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Validator;
 use Cartxis\API\Helpers\ApiResponse;
 use Cartxis\Cart\Models\Cart;
 use Cartxis\Shop\Models\Order;
+use Cartxis\Shop\Models\OrderItem;
+use Cartxis\Shop\Models\Address;
 use Cartxis\Customer\Models\Customer;
 use Cartxis\Customer\Models\CustomerAddress;
 use Cartxis\Core\Models\PaymentMethod;
@@ -217,8 +220,10 @@ class CheckoutController extends Controller
      */
     public function setPaymentMethod(Request $request)
     {
+        $availableCodes = $this->getAvailablePaymentMethodCodes();
+
         $validator = Validator::make($request->all(), [
-            'payment_method_code' => 'required|string|in:stripe,razorpay,cod',
+            'payment_method_code' => 'required|string|in:' . implode(',', $availableCodes),
         ]);
 
         if ($validator->fails()) {
@@ -246,7 +251,7 @@ class CheckoutController extends Controller
         ];
 
         // Add gateway credentials for mobile app if it's an online payment method
-        if (in_array($request->payment_method_code, ['razorpay', 'stripe', 'paypal'])) {
+        if (in_array($request->payment_method_code, ['razorpay', 'stripe', 'paypal', 'phonepe'])) {
             $response['gateway_config'] = [
                 'key' => $paymentMethod->getConfigValue('api_key') ?? $paymentMethod->getConfigValue('public_key'),
                 'environment' => $paymentMethod->getConfigValue('mode', 'sandbox'),
@@ -261,14 +266,80 @@ class CheckoutController extends Controller
                 $response['gateway_config']['theme_color'] = $paymentMethod->getConfigValue('theme_color', '#3399cc');
             }
 
+            // PhonePe — generate OAuth token + SDK order token for Flutter SDK
+            // Flutter SDK needs merchant_id + order_token + environment, NOT raw credentials.
+            if ($request->payment_method_code === 'phonepe') {
+                $mode = strtolower((string) $paymentMethod->getConfigValue('mode', 'production'));
+                $env  = $mode === 'test' ? 'UAT' : 'PRODUCTION';
+                $defaultCurrency = Currency::getDefault();
+                $merchantId = $paymentMethod->getConfigValue($mode === 'test' ? 'test_merchant_id' : 'merchant_id');
+
+                try {
+                    // Determine amount from cart (in paisa; minimum 100 = ₹1)
+                    $cart = Cart::with('items')->where('user_id', $request->user()->id)->first();
+                    $amountInPaisa  = 100; // PhonePe minimum
+                    $merchantOrderRef = 'CART_' . $request->user()->id . '_' . time();
+
+                    if ($cart && ! $cart->items->isEmpty()) {
+                        $subtotal      = $cart->items->sum(fn ($item) => $item->price * $item->quantity);
+                        $shippingCost  = session('checkout.shipping_cost', 0);
+                        $amountInPaisa = max(100, (int) round(($subtotal + $shippingCost) * 100));
+                    }
+
+                    /** @var \Cartxis\PhonePe\Services\PhonePeGateway $gateway */
+                    $gateway = app(PaymentGatewayManager::class)->get('phonepe');
+
+                    // Step 1 — OAuth token
+                    $authData = $gateway->generateAccessToken();
+
+                    // Step 2 — SDK order token
+                    $orderData = $gateway->createSdkOrderToken(
+                        $authData['access_token'],
+                        $merchantOrderRef,
+                        $amountInPaisa
+                    );
+
+                    $response['gateway_config'] = [
+                        'merchant_id'       => $merchantId,
+                        'order_token'       => $orderData['token'],
+                        'phonepe_order_id'  => $orderData['orderId'],
+                        'expires_at'        => $orderData['expireAt'] ?? null,
+                        'merchant_order_id' => $merchantOrderRef,
+                        'environment'       => $env,
+                        'mode'              => $mode,
+                        'currency'          => $defaultCurrency?->code ?? 'INR',
+                    ];
+                } catch (\Throwable $e) {
+                    Log::error('PhonePe setPaymentMethod: token generation failed', [
+                        'error' => $e->getMessage(),
+                    ]);
+                    return ApiResponse::error(
+                        'Could not initialize PhonePe payment: ' . $e->getMessage(),
+                        null,
+                        502,
+                        'PHONEPE_INIT_FAILED'
+                    );
+                }
+            }
+
             // Add additional Stripe specific config and create payment intent
             if ($request->payment_method_code === 'stripe') {
                 // Get default currency
                 $defaultCurrency = Currency::getDefault();
                 $currencyCode = $defaultCurrency ? $defaultCurrency->code : 'USD';
 
-                $response['gateway_config']['publishable_key'] = $paymentMethod->getConfigValue('publishable_key');
                 $response['gateway_config']['currency'] = $currencyCode;
+
+                // Resolve secret/publishable keys honouring test vs live mode
+                $stripeMode      = $paymentMethod->getConfigValue('mode', 'live');
+                $stripeSecretKey = $stripeMode === 'test'
+                    ? ($paymentMethod->getConfigValue('test_secret_key') ?: $paymentMethod->getConfigValue('secret_key'))
+                    : $paymentMethod->getConfigValue('secret_key');
+                $stripePubKey    = $stripeMode === 'test'
+                    ? ($paymentMethod->getConfigValue('test_publishable_key') ?: $paymentMethod->getConfigValue('publishable_key'))
+                    : $paymentMethod->getConfigValue('publishable_key');
+
+                $response['gateway_config']['publishable_key'] = $stripePubKey;
 
                 // Create Stripe payment intent
                 try {
@@ -281,7 +352,7 @@ class CheckoutController extends Controller
                         $total = $subtotal + $shippingCost;
 
                         // Initialize Stripe with secret key
-                        Stripe::setApiKey($paymentMethod->getConfigValue('secret_key'));
+                        Stripe::setApiKey($stripeSecretKey);
                         
                         // Set API version for consistency
                         Stripe::setApiVersion('2023-10-16');
@@ -481,26 +552,407 @@ class CheckoutController extends Controller
         // 5. Send confirmation email
 
         $order = Order::create([
+            'user_id' => $request->user()->id,
             'customer_id' => $customer->id,
             'order_number' => Order::generateOrderNumber(),
             'status' => 'pending',
             'payment_method' => $request->payment_method,
-            'shipping_address_id' => $request->shipping_address_id,
             'subtotal' => $subtotal,
             'shipping_cost' => $shippingCost,
             'tax' => $tax,
             'total' => $total,
             'notes' => $request->notes,
+            'customer_email' => $customer->email ?? $request->user()->email,
+            'customer_phone' => $shippingAddress->phone ?? null,
+            'source_channel' => 'mobile_app',
         ]);
 
-        // Clear cart
+        // Create order items from cart items
+        foreach ($cart->items as $cartItem) {
+            $product = $cartItem->product;
+            OrderItem::create([
+                'order_id' => $order->id,
+                'product_id' => $cartItem->product_id,
+                'product_sku' => $product?->sku ?? '',
+                'product_name' => $product?->name ?? $cartItem->product_name ?? 'Product',
+                'product_image' => $product?->mainImage?->url ?? null,
+                'quantity' => $cartItem->quantity,
+                'price' => $cartItem->price,
+                'total' => $cartItem->price * $cartItem->quantity,
+                'tax_amount' => 0,
+                'discount_amount' => 0,
+            ]);
+        }
+
+        // Create polymorphic shipping address for the order
+        Address::create([
+            'addressable_type' => Order::class,
+            'addressable_id' => $order->id,
+            'type' => Address::TYPE_SHIPPING,
+            'first_name' => $shippingAddress->first_name,
+            'last_name' => $shippingAddress->last_name,
+            'company' => $shippingAddress->company ?? null,
+            'phone' => $shippingAddress->phone,
+            'email' => $customer->email ?? $request->user()->email,
+            'address_line1' => $shippingAddress->address_line_1,
+            'address_line2' => $shippingAddress->address_line_2 ?? null,
+            'city' => $shippingAddress->city,
+            'state' => $shippingAddress->state,
+            'postal_code' => $shippingAddress->postal_code,
+            'country' => $shippingAddress->country,
+            'is_default' => true,
+        ]);
+
+        // Use shipping address as billing address too
+        Address::create([
+            'addressable_type' => Order::class,
+            'addressable_id' => $order->id,
+            'type' => Address::TYPE_BILLING,
+            'first_name' => $shippingAddress->first_name,
+            'last_name' => $shippingAddress->last_name,
+            'company' => $shippingAddress->company ?? null,
+            'phone' => $shippingAddress->phone,
+            'email' => $customer->email ?? $request->user()->email,
+            'address_line1' => $shippingAddress->address_line_1,
+            'address_line2' => $shippingAddress->address_line_2 ?? null,
+            'city' => $shippingAddress->city,
+            'state' => $shippingAddress->state,
+            'postal_code' => $shippingAddress->postal_code,
+            'country' => $shippingAddress->country,
+            'is_default' => true,
+        ]);
+
+        // Clear cart items after order is created successfully
         $cart->items()->delete();
 
-        return ApiResponse::success([
-            'order_id' => $order->id,
-            'order_number' => $order->order_number ?? $order->id,
-            'status' => $order->status,
-            'total' => $total,
-        ], 'Order placed successfully', 201);
+        $currency = Currency::getDefault();
+
+        $responseData = [
+            'order_id'        => $order->id,
+            'order_number'    => $order->order_number,
+            'status'          => $order->status,
+            'payment_method'  => $order->payment_method,
+            'subtotal'        => (float) $subtotal,
+            'shipping_cost'   => (float) $shippingCost,
+            'tax'             => (float) $tax,
+            'grand_total'     => (float) $total,
+            'currency'        => $currency?->code ?? 'INR',
+            'currency_symbol' => $currency?->symbol ?? '₹',
+        ];
+
+        // Razorpay: create Razorpay order server-side so Flutter SDK gets the order ID
+        if ($order->payment_method === 'razorpay') {
+            try {
+                $gateway = app(PaymentGatewayManager::class)->get('razorpay');
+                if ($gateway && $gateway->isConfigured()) {
+                    $razorpayData = $gateway->processPayment($order);
+                    if (!empty($razorpayData['success']) && isset($razorpayData['payment_data'])) {
+                        $pd = $razorpayData['payment_data'];
+                        $responseData['razorpay_order_id'] = $pd['razorpay_order_id'];
+                        $responseData['razorpay_key_id']   = $pd['razorpay_key_id'];
+                        $responseData['razorpay_amount']   = $pd['amount'];
+                        $responseData['razorpay_currency'] = $pd['currency'] ?? 'INR';
+                    } else {
+                        throw new \Exception($razorpayData['message'] ?? 'Failed to create Razorpay order');
+                    }
+                }
+            } catch (\Exception $e) {
+                \Log::error('Razorpay processPayment failed in placeOrder', [
+                    'order_id' => $order->id,
+                    'error'    => $e->getMessage(),
+                ]);
+                return ApiResponse::error(
+                    'Order placed but Razorpay payment could not be initiated: ' . $e->getMessage(),
+                    ['order_id' => $order->id, 'order_number' => $order->order_number],
+                    502,
+                    'RAZORPAY_INIT_FAILED'
+                );
+            }
+        }
+
+        // PhonePe: initiate transaction server-side so Flutter SDK gets the token
+        if ($order->payment_method === 'phonepe') {
+            try {
+                $gateway = app(PaymentGatewayManager::class)->get('phonepe');
+                if ($gateway && $gateway->isConfigured()) {
+                    $phonePeData = $gateway->initiateForApi($order);
+                    $responseData['phonepe_token']      = $phonePeData['phonepe_token'];
+                    $responseData['phonepe_order_id']   = $phonePeData['phonepe_order_id'];
+                    $responseData['phonepe_expires_at'] = $phonePeData['expires_at'];
+                    $responseData['checksum']           = $phonePeData['checksum'];
+                    $responseData['merchant_id']        = $phonePeData['merchant_id'];
+                }
+            } catch (\Exception $e) {
+                \Log::error('PhonePe initiateForApi failed in placeOrder', [
+                    'order_id' => $order->id,
+                    'error'    => $e->getMessage(),
+                ]);
+                // Order created — return error so Flutter can show a proper message
+                return ApiResponse::error(
+                    'Order placed but PhonePe payment could not be initiated: ' . $e->getMessage(),
+                    ['order_id' => $order->id, 'order_number' => $order->order_number],
+                    502,
+                    'PHONEPE_INIT_FAILED'
+                );
+            }
+        }
+
+        // PayPal: create PayPal Order (v2) so Flutter gets approve_url + paypal_order_id
+        if ($order->payment_method === 'paypal') {
+            try {
+                $gateway = app(PaymentGatewayManager::class)->get('paypal');
+                if (!$gateway) {
+                    throw new \Exception('PayPal gateway not registered. Please contact support.');
+                }
+                if (!$gateway->isConfigured()) {
+                    throw new \Exception('PayPal is not configured. Please add your Client ID and Client Secret in the admin panel under Settings → Payment Methods → PayPal.');
+                }
+                $paypalData = $gateway->processPayment($order);
+                if (!empty($paypalData['success']) && isset($paypalData['payment_data'])) {
+                    $pd = $paypalData['payment_data'];
+                    $responseData['paypal_order_id'] = $pd['paypal_order_id'];
+                    $responseData['approve_url']     = $pd['approve_url'];
+                } else {
+                    throw new \Exception($paypalData['message'] ?? 'Failed to create PayPal order');
+                }
+            } catch (\Exception $e) {
+                \Log::error('PayPal processPayment failed in placeOrder', [
+                    'order_id' => $order->id,
+                    'error'    => $e->getMessage(),
+                ]);
+                return ApiResponse::error(
+                    'PayPal payment could not be initiated: ' . $e->getMessage(),
+                    ['order_id' => $order->id, 'order_number' => $order->order_number],
+                    502,
+                    'PAYPAL_INIT_FAILED'
+                );
+            }
+        }
+
+        return ApiResponse::success($responseData, 'Order placed successfully', 201);
+    }
+
+    /**
+     * Verify PhonePe payment after Flutter SDK completes the transaction.
+     *
+     * Unified payment verification — works for all gateways.
+     * Flutter calls this after any payment SDK returns success.
+     *
+     * POST /api/v1/checkout/verify-payment
+     * Body: { order_id, [razorpay_payment_id, razorpay_order_id, razorpay_signature],
+     *                    [payment_intent_id], [transaction_id] }
+     */
+    public function verifyPayment(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'order_id'            => 'required|integer',
+            'transaction_id'      => 'nullable|string',
+            'razorpay_payment_id' => 'nullable|string',
+            'razorpay_order_id'   => 'nullable|string',
+            'razorpay_signature'  => 'nullable|string',
+            'payment_intent_id'   => 'nullable|string',
+            'paypal_order_id'     => 'nullable|string',
+        ]);
+
+        if ($validator->fails()) {
+            return ApiResponse::error('Validation failed', $validator->errors(), 422);
+        }
+
+        $order = Order::where('id', $request->order_id)
+            ->where('user_id', $request->user()->id)
+            ->first();
+
+        if (!$order) {
+            return ApiResponse::error('Order not found', null, 404);
+        }
+
+        // Already marked paid — idempotent success
+        if ($order->payment_status === Order::PAYMENT_PAID) {
+            return ApiResponse::success([
+                'verified'       => true,
+                'payment_status' => $order->payment_status,
+                'order_status'   => $order->status,
+                'order_id'       => $order->id,
+                'order_number'   => $order->order_number,
+            ], 'Payment already verified');
+        }
+
+        $paymentMethod = $order->payment_method;
+        $existingData  = is_array($order->payment_data)
+            ? $order->payment_data
+            : json_decode($order->payment_data ?? '{}', true);
+
+        try {
+            // ── Razorpay ──────────────────────────────────────────────────────────
+            if ($paymentMethod === 'razorpay') {
+                if (! $request->razorpay_payment_id || ! $request->razorpay_order_id || ! $request->razorpay_signature) {
+                    return ApiResponse::error(
+                        'razorpay_payment_id, razorpay_order_id and razorpay_signature are required for Razorpay verification',
+                        null, 422, 'MISSING_RAZORPAY_FIELDS'
+                    );
+                }
+
+                $gateway = app(PaymentGatewayManager::class)->get('razorpay');
+                if (!$gateway) {
+                    return ApiResponse::error('Razorpay gateway not available', null, 503);
+                }
+
+                $verified = $gateway->verifyPayment($order, [
+                    'razorpay_payment_id' => $request->razorpay_payment_id,
+                    'razorpay_order_id'   => $request->razorpay_order_id,
+                    'razorpay_signature'  => $request->razorpay_signature,
+                ]);
+
+                if ($verified) {
+                    $order->update([
+                        'payment_status' => Order::PAYMENT_PAID,
+                        'status'         => Order::STATUS_PROCESSING,
+                        'payment_data'   => json_encode(array_merge($existingData, [
+                            'razorpay_payment_id' => $request->razorpay_payment_id,
+                            'razorpay_order_id'   => $request->razorpay_order_id,
+                            'razorpay_signature'  => $request->razorpay_signature,
+                            'verified_at'         => now()->toISOString(),
+                        ])),
+                    ]);
+
+                    return ApiResponse::success([
+                        'verified'       => true,
+                        'payment_status' => $order->fresh()->payment_status,
+                        'order_status'   => $order->fresh()->status,
+                        'order_id'       => $order->id,
+                        'order_number'   => $order->order_number,
+                    ], 'Payment verified successfully');
+                }
+
+                return ApiResponse::error('Razorpay signature verification failed.', ['verified' => false], 422);
+            }
+
+            // ── Stripe ────────────────────────────────────────────────────────────
+            if ($paymentMethod === 'stripe') {
+                $gateway = app(PaymentGatewayManager::class)->get('stripe');
+                if (!$gateway) {
+                    return ApiResponse::error('Stripe gateway not available', null, 503);
+                }
+
+                $verified = $gateway->verifyPayment($order, [
+                    'payment_intent_id' => $request->payment_intent_id,
+                ]);
+
+                if ($verified) {
+                    $order->update([
+                        'payment_status' => Order::PAYMENT_PAID,
+                        'status'         => Order::STATUS_PROCESSING,
+                        'payment_data'   => json_encode(array_merge($existingData, [
+                            'payment_intent_id' => $request->payment_intent_id,
+                            'verified_at'       => now()->toISOString(),
+                        ])),
+                    ]);
+
+                    return ApiResponse::success([
+                        'verified'       => true,
+                        'payment_status' => $order->fresh()->payment_status,
+                        'order_status'   => $order->fresh()->status,
+                        'order_id'       => $order->id,
+                        'order_number'   => $order->order_number,
+                    ], 'Payment verified successfully');
+                }
+
+                return ApiResponse::error('Stripe payment verification failed.', ['verified' => false], 422);
+            }
+
+            // ── PhonePe ───────────────────────────────────────────────────────────
+            if ($paymentMethod === 'phonepe') {
+                $gateway = app(PaymentGatewayManager::class)->get('phonepe');
+                if (!$gateway) {
+                    return ApiResponse::error('PhonePe gateway not available', null, 503);
+                }
+
+                $verified = $gateway->verifyPayment($order);
+
+                if ($verified) {
+                    $order->update([
+                        'payment_status' => Order::PAYMENT_PAID,
+                        'status'         => Order::STATUS_PROCESSING,
+                        'payment_data'   => json_encode(array_merge($existingData, [
+                            'transaction_id' => $request->transaction_id,
+                            'verified_at'    => now()->toISOString(),
+                            'verified_via'   => 'flutter_sdk',
+                        ])),
+                    ]);
+
+                    return ApiResponse::success([
+                        'verified'       => true,
+                        'payment_status' => $order->fresh()->payment_status,
+                        'order_status'   => $order->fresh()->status,
+                        'order_id'       => $order->id,
+                        'order_number'   => $order->order_number,
+                    ], 'Payment verified successfully');
+                }
+
+                return ApiResponse::error('Payment not completed on PhonePe. Please retry or contact support.', [
+                    'verified'       => false,
+                    'payment_status' => $order->payment_status,
+                ], 402);
+            }
+
+            // ── PayPal ────────────────────────────────────────────────────────────
+            if ($paymentMethod === 'paypal') {
+                $gateway = app(PaymentGatewayManager::class)->get('paypal');
+                if (!$gateway) {
+                    return ApiResponse::error('PayPal gateway not available', null, 503);
+                }
+
+                // Backend captures the PayPal order and checks COMPLETED status.
+                $paypalOrderId = $request->paypal_order_id
+                    ?? ($order->payment_gateway_data['paypal_order_id'] ?? null);
+
+                $verified = $gateway->verifyPayment($order, [
+                    'paypal_order_id' => $paypalOrderId,
+                ]);
+
+                if ($verified) {
+                    $order->update([
+                        'payment_status' => Order::PAYMENT_PAID,
+                        'status'         => Order::STATUS_PROCESSING,
+                        'payment_data'   => json_encode(array_merge($existingData, [
+                            'paypal_order_id' => $paypalOrderId,
+                            'verified_at'     => now()->toISOString(),
+                        ])),
+                    ]);
+
+                    return ApiResponse::success([
+                        'verified'       => true,
+                        'payment_status' => $order->fresh()->payment_status,
+                        'order_status'   => $order->fresh()->status,
+                        'order_id'       => $order->id,
+                        'order_number'   => $order->order_number,
+                    ], 'Payment verified successfully');
+                }
+
+                return ApiResponse::error('PayPal payment verification failed.', ['verified' => false], 422);
+            }
+
+            // ── COD / Bank Transfer — mark as pending, return success ─────────────
+            if (in_array($paymentMethod, ['cod', 'bank_transfer'])) {
+                return ApiResponse::success([
+                    'verified'       => true,
+                    'payment_status' => $order->payment_status,
+                    'order_status'   => $order->status,
+                    'order_id'       => $order->id,
+                    'order_number'   => $order->order_number,
+                ], 'Order confirmed. Payment pending on delivery/receipt.');
+            }
+
+            return ApiResponse::error("Unsupported payment method: {$paymentMethod}", null, 422);
+
+        } catch (\Exception $e) {
+            \Log::error('verifyPayment failed', [
+                'order_id'       => $order->id,
+                'payment_method' => $paymentMethod,
+                'error'          => $e->getMessage(),
+            ]);
+
+            return ApiResponse::error('Could not verify payment: ' . $e->getMessage(), null, 500);
+        }
     }
 }

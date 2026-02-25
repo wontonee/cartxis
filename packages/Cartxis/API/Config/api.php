@@ -6,7 +6,7 @@ return [
     | API Configuration
     |--------------------------------------------------------------------------
     |
-    | Configuration for Vortex API endpoints used by mobile applications.
+    | Configuration for Cartxis API endpoints used by mobile applications.
     |
     */
 

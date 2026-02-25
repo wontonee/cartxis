@@ -14,16 +14,21 @@ class OrderResource extends JsonResource
      */
     public function toArray($request)
     {
+        $currency = \Cartxis\Core\Models\Currency::getDefault();
+
         return [
             'id' => $this->id,
-            'order_number' => $this->increment_id,
+            'order_number' => $this->order_number,
             'status' => $this->status,
             'status_label' => ucfirst($this->status),
             'items' => $this->whenLoaded('items', fn() => 
                 $this->items->map(fn($item) => [
                     'id' => $item->id,
                     'product_id' => $item->product_id,
-                    'product' => new ProductResource($item->product),
+                    'product' => $item->product ? new ProductResource($item->product) : null,
+                    'sku' => $item->product_sku,
+                    'name' => $item->product_name,
+                    'image' => $item->product_image,
                     'quantity' => $item->quantity,
                     'price' => (float) $item->price,
                     'subtotal' => (float) $item->total,
@@ -32,23 +37,24 @@ class OrderResource extends JsonResource
                 ])
             ),
             'totals' => [
-                'subtotal' => (float) $this->sub_total,
-                'shipping_cost' => (float) ($this->shipping_amount ?? 0),
-                'tax' => (float) ($this->tax_amount ?? 0),
-                'discount' => (float) ($this->discount_amount ?? 0),
-                'grand_total' => (float) $this->grand_total,
-                'currency' => $this->currency_code ?? config('app.currency', 'USD'),
+                'subtotal' => (float) ($this->subtotal ?? 0),
+                'shipping_cost' => (float) ($this->shipping_cost ?? 0),
+                'tax' => (float) ($this->tax ?? 0),
+                'discount' => (float) ($this->discount ?? 0),
+                'grand_total' => (float) ($this->total ?? 0),
+                'currency' => $currency?->code ?? 'INR',
+                'currency_symbol' => $currency?->symbol ?? '₹',
             ],
             'payment' => [
                 'method' => $this->payment_method,
-                'method_title' => $this->payment_method_title,
+                'method_title' => ucwords(str_replace('_', ' ', $this->payment_method ?? '')),
                 'status' => $this->payment_status ?? 'pending',
             ],
             'shipping_address' => $this->whenLoaded('shippingAddress', fn() => 
-                new AddressResource($this->shippingAddress)
+                $this->shippingAddress ? new AddressResource($this->shippingAddress) : null
             ),
             'billing_address' => $this->whenLoaded('billingAddress', fn() => 
-                new AddressResource($this->billingAddress)
+                $this->billingAddress ? new AddressResource($this->billingAddress) : null
             ),
             'shipments' => $this->whenLoaded('shipments', fn() => 
                 $this->shipments->map(fn($shipment) => [
@@ -60,8 +66,7 @@ class OrderResource extends JsonResource
                     'estimated_delivery' => $shipment->estimated_delivery?->toIso8601String(),
                 ])
             ),
-            'customer_note' => $this->customer_note,
-            'coupon_code' => $this->coupon_code,
+            'customer_note' => $this->notes,
             'can_cancel' => in_array($this->status, ['pending', 'processing']),
             'can_reorder' => in_array($this->status, ['completed', 'cancelled']),
             'ordered_at' => $this->created_at?->toIso8601String(),

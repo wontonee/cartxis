@@ -167,7 +167,7 @@ class PayUMoneyGateway implements PaymentGatewayInterface
             }
 
             // Get customer details
-            $billingAddress = $order->billingAddress() ?? $order->shippingAddress();
+            $billingAddress = $order->billingAddress ?? $order->shippingAddress;
             $customer = $order->customer;
 
             if (!$billingAddress) {

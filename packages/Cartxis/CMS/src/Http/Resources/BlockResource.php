@@ -24,7 +24,6 @@ class BlockResource extends JsonResource
             'content' => $this->content,
             'content_array' => $this->content_array,
             'status' => $this->status,
-            'channel_id' => $this->channel_id,
             'start_date' => $this->start_date?->format('Y-m-d H:i:s'),
             'end_date' => $this->end_date?->format('Y-m-d H:i:s'),
             'is_visible' => $this->isVisible(),

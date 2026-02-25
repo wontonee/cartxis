@@ -5,6 +5,7 @@ import AdminLayout from '@/layouts/AdminLayout.vue';
 import TiptapEditor from '@/components/Admin/TiptapEditor.vue';
 import ImageUploader from '@/components/Admin/ImageUploader.vue';
 import * as productRoutes from '@/routes/admin/catalog/products';
+import axios from '@/lib/axios';
 import { useCurrency } from '@/composables/useCurrency';
 
 interface Category {
@@ -53,8 +54,31 @@ interface Props {
 
 const props = defineProps<Props>();
 
+interface PriceComparisonOption {
+  variation: string;
+  source_label: string;
+  price: number;
+  currency: string;
+  details: string;
+}
+
+interface PriceComparisonResponse {
+  options: PriceComparisonOption[];
+  meta?: {
+    store_country?: string;
+    current_price?: number;
+    cost?: number;
+  };
+}
+
 // Active tab
 const activeTab = ref<'general' | 'images' | 'attributes' | 'inventory' | 'seo'>('general');
+
+const showPriceComparisonModal = ref(false);
+const isComparingPrice = ref(false);
+const priceComparisonError = ref<string | null>(null);
+const priceComparisonResult = ref<PriceComparisonResponse | null>(null);
+const selectedComparisonIndex = ref<number | null>(null);
 
 // Images
 const images = ref<File[]>([]);
@@ -154,6 +178,66 @@ const flatCategories = computed(() => {
   return flatten(props.categories);
 });
 
+const selectedPrimaryCategory = computed(() => {
+  const firstCategoryId = form.value.category_ids[0];
+  if (!firstCategoryId) {
+    return '';
+  }
+
+  return flatCategories.value.find(category => category.id === firstCategoryId)?.name || '';
+});
+
+const parseNumericInput = (value: unknown): number => {
+  if (typeof value === 'number') {
+    return Number.isFinite(value) ? value : 0;
+  }
+
+  if (typeof value !== 'string') {
+    return 0;
+  }
+
+  const trimmed = value.trim();
+  if (!trimmed) {
+    return 0;
+  }
+
+  const normalized = trimmed.replace(/,/g, '').replace(/[^0-9.-]/g, '');
+  const parsed = Number(normalized);
+  return Number.isFinite(parsed) ? parsed : 0;
+};
+
+const currentPriceNumber = computed(() => {
+  return parseNumericInput(form.value.price);
+});
+
+const costNumber = computed(() => {
+  return parseNumericInput(form.value.cost);
+});
+
+const selectedComparison = computed(() => {
+  if (!priceComparisonResult.value || selectedComparisonIndex.value === null) {
+    return null;
+  }
+
+  return priceComparisonResult.value.options[selectedComparisonIndex.value] || null;
+});
+
+const selectedPriceProfit = computed(() => {
+  if (!selectedComparison.value || costNumber.value <= 0) {
+    return null;
+  }
+
+  const unitProfit = selectedComparison.value.price - costNumber.value;
+  const margin = selectedComparison.value.price > 0
+    ? (unitProfit / selectedComparison.value.price) * 100
+    : 0;
+
+  return {
+    unitProfit,
+    margin,
+  };
+});
+
 // Toggle category selection
 const toggleCategory = (categoryId: number) => {
   const index = form.value.category_ids.indexOf(categoryId);
@@ -162,6 +246,64 @@ const toggleCategory = (categoryId: number) => {
   } else {
     form.value.category_ids.push(categoryId);
   }
+};
+
+const openPriceComparison = async () => {
+  showPriceComparisonModal.value = true;
+  isComparingPrice.value = true;
+  priceComparisonError.value = null;
+  priceComparisonResult.value = null;
+  selectedComparisonIndex.value = null;
+
+  if (!form.value.name.trim()) {
+    isComparingPrice.value = false;
+    priceComparisonError.value = 'Enter product name before running price comparison.';
+    return;
+  }
+
+  if (!selectedPrimaryCategory.value) {
+    isComparingPrice.value = false;
+    priceComparisonError.value = 'Select at least one category before running price comparison.';
+    return;
+  }
+
+  try {
+    const response = await axios.post('/admin/catalog/products/price-comparison', {
+      product_name: form.value.name,
+      category: selectedPrimaryCategory.value,
+      current_price: currentPriceNumber.value || undefined,
+      cost: costNumber.value || undefined,
+    });
+
+    if (response.data?.success) {
+      const result = response.data.data as PriceComparisonResponse;
+      const options = Array.isArray(result?.options) ? result.options.slice(0, 4) : [];
+
+      priceComparisonResult.value = {
+        ...result,
+        options,
+      };
+
+      if (options.length > 0) {
+        selectedComparisonIndex.value = 0;
+      }
+    } else {
+      priceComparisonError.value = response.data?.message || 'Failed to generate price comparison.';
+    }
+  } catch (error: any) {
+    priceComparisonError.value = error.response?.data?.message || error.message || 'Failed to generate price comparison.';
+  } finally {
+    isComparingPrice.value = false;
+  }
+};
+
+const applySelectedComparisonPrice = () => {
+  if (!selectedComparison.value) {
+    return;
+  }
+
+  form.value.price = selectedComparison.value.price.toFixed(2);
+  showPriceComparisonModal.value = false;
 };
 
 // Submit form
@@ -524,7 +666,16 @@ const saveDraft = () => {
 
             <!-- Inventory & Pricing Tab -->
             <div v-show="activeTab === 'inventory'" class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6">
-              <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-6">Pricing</h3>
+              <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-6">
+                <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Pricing</h3>
+                <button
+                  type="button"
+                  @click="openPriceComparison"
+                  class="inline-flex items-center justify-center px-4 py-2 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors"
+                >
+                  Price Comparison
+                </button>
+              </div>
               
               <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
                 <!-- Price -->
@@ -563,6 +714,13 @@ const saveDraft = () => {
                   </select>
                   <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">Select applicable tax class for this product</p>
                 </div>
+              </div>
+
+              <div v-if="costNumber > 0 && currentPriceNumber > 0" class="mb-8 p-4 rounded-md border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900/20">
+                <p class="text-sm text-gray-700 dark:text-gray-300">
+                  Current unit profit: <span class="font-semibold">{{ currencySymbol }}{{ (currentPriceNumber - costNumber).toFixed(2) }}</span>
+                  ({{ (((currentPriceNumber - costNumber) / currentPriceNumber) * 100).toFixed(2) }}% margin)
+                </p>
               </div>
 
               <div class="border-t border-gray-200 dark:border-gray-700 pt-8 mb-8">
@@ -771,5 +929,126 @@ const saveDraft = () => {
           </div>
       </form>
     </div>
+
+    <Teleport to="body">
+      <Transition
+        enter-active-class="transition duration-200 ease-out"
+        enter-from-class="opacity-0"
+        enter-to-class="opacity-100"
+        leave-active-class="transition duration-200 ease-in"
+        leave-from-class="opacity-100"
+        leave-to-class="opacity-0"
+      >
+        <div
+          v-if="showPriceComparisonModal"
+          class="fixed inset-0 z-50 flex items-start justify-center overflow-y-auto bg-gray-500/75 dark:bg-gray-900/75 p-4 sm:items-center"
+          @click="showPriceComparisonModal = false"
+        >
+          <div class="relative w-full max-w-4xl rounded-lg bg-white shadow-xl dark:bg-gray-800" @click.stop>
+            <div class="flex items-center justify-between border-b border-gray-200 dark:border-gray-700 px-6 py-4">
+              <div>
+                <h2 class="text-lg font-semibold text-gray-900 dark:text-white">Price Comparison</h2>
+                <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                  Select one of 4 market-based price variations to apply.
+                </p>
+              </div>
+              <button
+                type="button"
+                class="rounded-lg p-1 text-gray-400 hover:bg-gray-100 hover:text-gray-600 dark:hover:bg-gray-700 dark:hover:text-gray-300"
+                @click="showPriceComparisonModal = false"
+              >
+                ✕
+              </button>
+            </div>
+
+            <div class="px-6 py-5 max-h-[70vh] overflow-y-auto">
+              <div v-if="isComparingPrice" class="py-10 text-center text-sm text-gray-500 dark:text-gray-400">
+                Generating price comparison...
+              </div>
+
+              <div v-else-if="priceComparisonError" class="rounded-md border border-red-200 dark:border-red-800 bg-red-50 dark:bg-red-900/20 p-4 text-sm text-red-700 dark:text-red-300">
+                {{ priceComparisonError }}
+              </div>
+
+              <div v-else-if="priceComparisonResult && priceComparisonResult.options.length > 0" class="space-y-4">
+                <div class="overflow-x-auto border border-gray-200 dark:border-gray-700 rounded-lg">
+                  <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+                    <thead class="bg-gray-50 dark:bg-gray-900/20">
+                      <tr>
+                        <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">Select</th>
+                        <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">Variation</th>
+                        <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">Source</th>
+                        <th class="px-4 py-3 text-right text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">Price</th>
+                        <th class="px-4 py-3 text-right text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">Current - Suggested</th>
+                        <th class="px-4 py-3 text-right text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">Profit / Unit (Price - Cost)</th>
+                      </tr>
+                    </thead>
+                    <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
+                      <tr
+                        v-for="(option, index) in priceComparisonResult.options"
+                        :key="`${option.variation}-${index}`"
+                        class="hover:bg-gray-50 dark:hover:bg-gray-900/20"
+                      >
+                        <td class="px-4 py-3">
+                          <input
+                            type="radio"
+                            name="price-comparison-option"
+                            :checked="selectedComparisonIndex === index"
+                            @change="selectedComparisonIndex = index"
+                            class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 dark:border-gray-600"
+                          />
+                        </td>
+                        <td class="px-4 py-3 text-sm text-gray-900 dark:text-gray-100 capitalize">{{ option.variation }}</td>
+                        <td class="px-4 py-3 text-sm text-gray-700 dark:text-gray-300">
+                          <div class="font-medium">{{ option.source_label }}</div>
+                          <div class="text-xs text-gray-500 dark:text-gray-400">{{ option.details }}</div>
+                        </td>
+                        <td class="px-4 py-3 text-sm text-right font-semibold text-gray-900 dark:text-gray-100">
+                          {{ currencySymbol }}{{ option.price.toFixed(2) }}
+                        </td>
+                        <td class="px-4 py-3 text-sm text-right" :class="currentPriceNumber - option.price >= 0 ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'">
+                          {{ currentPriceNumber - option.price >= 0 ? '+' : '' }}{{ (currentPriceNumber - option.price).toFixed(2) }}
+                        </td>
+                        <td class="px-4 py-3 text-sm text-right text-gray-900 dark:text-gray-100">
+                          <span v-if="costNumber > 0">{{ currencySymbol }}{{ (option.price - costNumber).toFixed(2) }}</span>
+                          <span v-else class="text-xs text-gray-400 dark:text-gray-500">Add cost to calculate</span>
+                        </td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+
+                <div v-if="selectedComparison && selectedPriceProfit" class="rounded-md border border-green-200 dark:border-green-800 bg-green-50 dark:bg-green-900/20 p-4 text-sm text-green-800 dark:text-green-300">
+                  Selected price profit overview:
+                  <span class="font-semibold ml-1">{{ currencySymbol }}{{ selectedPriceProfit.unitProfit.toFixed(2) }}</span>
+                  per unit ({{ selectedPriceProfit.margin.toFixed(2) }}% margin)
+                </div>
+                <div v-else-if="selectedComparison && costNumber <= 0" class="rounded-md border border-yellow-200 dark:border-yellow-800 bg-yellow-50 dark:bg-yellow-900/20 p-4 text-sm text-yellow-800 dark:text-yellow-300">
+                  Profit / Unit = Selected Price - Product Cost. Enter cost in the Inventory & Pricing section to see margin overview.
+                </div>
+              </div>
+            </div>
+
+            <div class="flex items-center justify-end gap-3 border-t border-gray-200 dark:border-gray-700 px-6 py-4">
+              <button
+                type="button"
+                class="rounded-lg border border-gray-300 dark:border-gray-600 px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700"
+                @click="showPriceComparisonModal = false"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                class="rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                :disabled="selectedComparisonIndex === null"
+                @click="applySelectedComparisonPrice"
+              >
+                Apply Selected Price
+              </button>
+            </div>
+          </div>
+        </div>
+      </Transition>
+    </Teleport>
   </AdminLayout>
 </template>

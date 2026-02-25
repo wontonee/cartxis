@@ -16,8 +16,8 @@ interface ShipmentItem {
       id: number;
       name: string;
       sku: string;
-    };
-  };
+    } | null;
+  } | null;
 }
 
 interface Shipment {
@@ -27,6 +27,18 @@ interface Shipment {
   carrier: string | null;
   tracking_number: string | null;
   tracking_url: string | null;
+  delivery_order_id: string | null;
+  delivery_shipment_id: string | null;
+  delivery_awb_code: string | null;
+  delivery_courier_name: string | null;
+  delivery_status: string | null;
+  delivery_synced_at: string | null;
+  shiprocket_order_id: string | null;
+  shiprocket_shipment_id: string | null;
+  shiprocket_awb_code: string | null;
+  shiprocket_courier_name: string | null;
+  shiprocket_status: string | null;
+  shiprocket_synced_at: string | null;
   shipped_at: string | null;
   delivered_at: string | null;
   notes: string | null;
@@ -142,6 +154,30 @@ function trackPackage() {
   }
 }
 
+function createInShiprocket() {
+  router.post(`/admin/sales/shipments/${props.shipment.id}/shiprocket/create`, {}, {
+    preserveScroll: true,
+  });
+}
+
+function syncShiprocketStatus() {
+  router.post(`/admin/sales/shipments/${props.shipment.id}/shiprocket/sync`, {}, {
+    preserveScroll: true,
+  });
+}
+
+function createInDelivery() {
+  router.post(`/admin/sales/shipments/${props.shipment.id}/delivery/create`, {}, {
+    preserveScroll: true,
+  });
+}
+
+function syncDeliveryStatus() {
+  router.post(`/admin/sales/shipments/${props.shipment.id}/delivery/sync`, {}, {
+    preserveScroll: true,
+  });
+}
+
 const canEdit = ['pending', 'shipped'].includes(props.shipment.status);
 const canCancel = !['delivered', 'cancelled'].includes(props.shipment.status);
 </script>
@@ -149,7 +185,7 @@ const canCancel = !['delivered', 'cancelled'].includes(props.shipment.status);
 <template>
   <Head :title="`Shipment ${shipment.shipment_number}`" />
 
-  <AdminLayout>
+  <AdminLayout :title="`Shipment ${shipment.shipment_number}`">
     <div class="space-y-6">
       <!-- Header -->
       <div class="flex justify-between items-start">
@@ -179,6 +215,34 @@ const canCancel = !['delivered', 'cancelled'].includes(props.shipment.status);
             Update Tracking
           </button>
           <button
+            v-if="!shipment.shiprocket_order_id"
+            @click="createInShiprocket"
+            class="px-4 py-2 bg-cyan-600 text-white rounded-lg hover:bg-cyan-700"
+          >
+            Send to Shiprocket
+          </button>
+          <button
+            v-else
+            @click="syncShiprocketStatus"
+            class="px-4 py-2 bg-teal-600 text-white rounded-lg hover:bg-teal-700"
+          >
+            Sync Shiprocket Status
+          </button>
+          <button
+            v-if="!shipment.delivery_order_id"
+            @click="createInDelivery"
+            class="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700"
+          >
+            Send to Delivery
+          </button>
+          <button
+            v-else
+            @click="syncDeliveryStatus"
+            class="px-4 py-2 bg-violet-600 text-white rounded-lg hover:bg-violet-700"
+          >
+            Sync Delivery Status
+          </button>
+          <button
             v-if="shipment.status !== 'delivered' && shipment.status !== 'cancelled'"
             @click="showUpdateStatusModal = true"
             class="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700"
@@ -193,6 +257,38 @@ const canCancel = !['delivered', 'cancelled'].includes(props.shipment.status);
             Cancel
           </button>
         </div>
+      </div>
+
+      <div
+        v-if="!shipment.shiprocket_order_id"
+        class="bg-cyan-50 border border-cyan-200 rounded-lg p-4 flex items-center justify-between"
+      >
+        <div>
+          <p class="text-sm font-semibold text-cyan-900">Next step: send this shipment to Shiprocket</p>
+          <p class="text-sm text-cyan-800 mt-1">This will create Shiprocket order/shipment and fetch AWB if available.</p>
+        </div>
+        <button
+          @click="createInShiprocket"
+          class="px-4 py-2 bg-cyan-600 text-white rounded-lg hover:bg-cyan-700"
+        >
+          Send to Shiprocket
+        </button>
+      </div>
+
+      <div
+        v-if="!shipment.delivery_order_id"
+        class="bg-indigo-50 border border-indigo-200 rounded-lg p-4 flex items-center justify-between"
+      >
+        <div>
+          <p class="text-sm font-semibold text-indigo-900">Next step: send this shipment to Delivery</p>
+          <p class="text-sm text-indigo-800 mt-1">This will create Delivery order/shipment and fetch AWB if available.</p>
+        </div>
+        <button
+          @click="createInDelivery"
+          class="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700"
+        >
+          Send to Delivery
+        </button>
       </div>
 
       <!-- Status & Info Cards -->
@@ -240,6 +336,22 @@ const canCancel = !['delivered', 'cancelled'].includes(props.shipment.status);
               <div class="text-sm text-gray-600">Tracking Number</div>
               <div class="mt-1 font-medium text-gray-900">{{ shipment.tracking_number || 'Not available' }}</div>
             </div>
+            <div>
+              <div class="text-sm text-gray-600">Shiprocket Status</div>
+              <div class="mt-1 font-medium text-gray-900">{{ shipment.shiprocket_status || 'Not synced' }}</div>
+            </div>
+            <div v-if="shipment.shiprocket_synced_at">
+              <div class="text-sm text-gray-600">Last Synced</div>
+              <div class="mt-1 font-medium text-gray-900">{{ formatDate(shipment.shiprocket_synced_at) }}</div>
+            </div>
+            <div>
+              <div class="text-sm text-gray-600">Delivery Status</div>
+              <div class="mt-1 font-medium text-gray-900">{{ shipment.delivery_status || 'Not synced' }}</div>
+            </div>
+            <div v-if="shipment.delivery_synced_at">
+              <div class="text-sm text-gray-600">Delivery Last Synced</div>
+              <div class="mt-1 font-medium text-gray-900">{{ formatDate(shipment.delivery_synced_at) }}</div>
+            </div>
             <div v-if="shipment.tracking_url">
               <button
                 @click="trackPackage"
@@ -251,8 +363,52 @@ const canCancel = !['delivered', 'cancelled'].includes(props.shipment.status);
           </div>
         </div>
 
-        <!-- Customer Information -->
         <div class="bg-white rounded-lg shadow-sm p-6">
+          <h3 class="text-lg font-semibold text-gray-900 mb-4">Shiprocket Reference</h3>
+          <div class="space-y-3">
+            <div>
+              <div class="text-sm text-gray-600">Shiprocket Order ID</div>
+              <div class="mt-1 font-medium text-gray-900">{{ shipment.shiprocket_order_id || 'Not available' }}</div>
+            </div>
+            <div>
+              <div class="text-sm text-gray-600">Shiprocket Shipment ID</div>
+              <div class="mt-1 font-medium text-gray-900">{{ shipment.shiprocket_shipment_id || 'Not available' }}</div>
+            </div>
+            <div>
+              <div class="text-sm text-gray-600">AWB Code</div>
+              <div class="mt-1 font-medium text-gray-900">{{ shipment.shiprocket_awb_code || 'Not available' }}</div>
+            </div>
+            <div>
+              <div class="text-sm text-gray-600">Shiprocket Courier</div>
+              <div class="mt-1 font-medium text-gray-900">{{ shipment.shiprocket_courier_name || 'Not available' }}</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="bg-white rounded-lg shadow-sm p-6">
+          <h3 class="text-lg font-semibold text-gray-900 mb-4">Delivery Reference</h3>
+          <div class="space-y-3">
+            <div>
+              <div class="text-sm text-gray-600">Delivery Order ID</div>
+              <div class="mt-1 font-medium text-gray-900">{{ shipment.delivery_order_id || 'Not available' }}</div>
+            </div>
+            <div>
+              <div class="text-sm text-gray-600">Delivery Shipment ID</div>
+              <div class="mt-1 font-medium text-gray-900">{{ shipment.delivery_shipment_id || 'Not available' }}</div>
+            </div>
+            <div>
+              <div class="text-sm text-gray-600">Delivery AWB Code</div>
+              <div class="mt-1 font-medium text-gray-900">{{ shipment.delivery_awb_code || 'Not available' }}</div>
+            </div>
+            <div>
+              <div class="text-sm text-gray-600">Delivery Courier</div>
+              <div class="mt-1 font-medium text-gray-900">{{ shipment.delivery_courier_name || 'Not available' }}</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Customer Information -->
+        <div class="bg-white rounded-lg shadow-sm p-6 col-span-2">
           <h3 class="text-lg font-semibold text-gray-900 mb-4">Customer Information</h3>
           <div class="space-y-3">
             <div>
@@ -337,10 +493,10 @@ const canCancel = !['delivered', 'cancelled'].includes(props.shipment.status);
               <tbody class="bg-white divide-y divide-gray-200">
                 <tr v-for="item in shipment.shipment_items" :key="item.id">
                   <td class="px-6 py-4">
-                    <div class="text-sm font-medium text-gray-900">{{ item.order_item.product.name }}</div>
+                    <div class="text-sm font-medium text-gray-900">{{ item.order_item?.product?.name || item.order_item?.product_name || `Item #${item.id}` }}</div>
                   </td>
                   <td class="px-6 py-4 whitespace-nowrap">
-                    <div class="text-sm text-gray-500">{{ item.order_item.product.sku }}</div>
+                    <div class="text-sm text-gray-500">{{ item.order_item?.product?.sku || item.order_item?.sku || 'N/A' }}</div>
                   </td>
                   <td class="px-6 py-4 whitespace-nowrap text-right">
                     <div class="text-sm text-gray-900">{{ item.quantity }}</div>

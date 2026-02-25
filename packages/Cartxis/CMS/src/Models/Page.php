@@ -8,7 +8,6 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Support\Str;
-use Cartxis\Core\Models\Channel;
 use App\Models\User;
 
 class Page extends Model
@@ -31,7 +30,6 @@ class Page extends Model
         'meta_description',
         'meta_keywords',
         'status',
-        'channel_id',
         'created_by',
         'updated_by',
     ];
@@ -75,14 +73,6 @@ class Page extends Model
                 $page->updated_by = auth('admin')->id();
             }
         });
-    }
-
-    /**
-     * Get the channel that owns the page.
-     */
-    public function channel(): BelongsTo
-    {
-        return $this->belongsTo(Channel::class);
     }
 
     /**

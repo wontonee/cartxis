@@ -12,6 +12,7 @@ use Cartxis\Core\Services\PaymentGatewayManager;
 use Cartxis\Sales\Services\InvoiceService;
 use Cartxis\Sales\Services\TransactionService;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Session;
 
 class StripeController extends Controller
 {
@@ -76,8 +77,10 @@ class StripeController extends Controller
             $template = EmailTemplate::findByCode('order_placed');
             
             if ($template) {
-                $shippingAddress = $order->shippingAddress();
-                $customerName = $shippingAddress->first_name . ' ' . $shippingAddress->last_name;
+                $shippingAddress = $order->shippingAddress;
+                $customerName = $shippingAddress
+                    ? trim($shippingAddress->first_name . ' ' . $shippingAddress->last_name)
+                    : ($order->customer_name ?? 'Customer');
                 
                 $template->send($order->customer_email, [
                     'customer_name' => $customerName,
@@ -94,6 +97,9 @@ class StripeController extends Controller
                 'error' => $e->getMessage()
             ]);
         }
+
+        // Keep last order marker for guest success page authorization
+        Session::put('checkout.last_order_id', $order->id);
 
         // Redirect to order success page
         return redirect()->route('shop.checkout.success', ['order' => $order->id])

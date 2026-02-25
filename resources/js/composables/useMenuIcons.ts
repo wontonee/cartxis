@@ -43,6 +43,9 @@ import {
   FileText as DocumentText,
   RefreshCw,
   Save,
+  Palette,
+  Paintbrush,
+  SlidersHorizontal,
 } from 'lucide-vue-next'
 
 export interface IconMap {
@@ -95,6 +98,9 @@ export function useMenuIcons() {
     'document-text': DocumentText,
     'refresh-cw': RefreshCw,
     'save': Save,
+    'palette': Palette,
+    'brush': Paintbrush,
+    'sliders': SlidersHorizontal,
   }
 
   const getIcon = (iconName: string): Component | null => {

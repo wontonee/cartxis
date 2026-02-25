@@ -32,12 +32,25 @@ class RazorpayGateway implements PaymentGatewayInterface
     }
 
     /**
-     * Get configuration value.
+     * Get configuration value, resolving test/production mode for API keys.
      */
     protected function getConfig(string $key, mixed $default = null): mixed
     {
         $method = $this->getPaymentMethod();
-        return $method?->getConfigValue($key, $default);
+        if (!$method) return $default;
+
+        // Resolve key_id / key_secret based on mode (test vs production)
+        if (in_array($key, ['key_id', 'key_secret'])) {
+            $mode = $method->getConfigValue('mode', 'test');
+            if ($mode === 'test') {
+                $testVal = $method->getConfigValue('test_' . $key);
+                if ($testVal) return $testVal;
+            }
+            // In production mode or no test key set, use the live key
+            return $method->getConfigValue($key, $default);
+        }
+
+        return $method->getConfigValue($key, $default);
     }
 
     /**
@@ -48,10 +61,17 @@ class RazorpayGateway implements PaymentGatewayInterface
         if (!$this->razorpay) {
             $keyId = $this->getConfig('key_id');
             $keySecret = $this->getConfig('key_secret');
+            $mode = $this->getPaymentMethod()?->getConfigValue('mode', 'test');
             
             if (!$keyId || !$keySecret) {
                 throw new \Exception('Razorpay API credentials not configured');
             }
+            
+            Log::info('RazorpayGateway: Using credentials', [
+                'mode' => $mode,
+                'key_id' => substr($keyId, 0, 12) . '***',
+                'key_secret_length' => strlen($keySecret),
+            ]);
             
             $this->razorpay = new Api($keyId, $keySecret);
         }
@@ -102,8 +122,10 @@ class RazorpayGateway implements PaymentGatewayInterface
             ]);
 
             // Get shipping address for receipt
-            $shippingAddress = $order->shippingAddress();
-            $customerName = $shippingAddress->first_name . ' ' . $shippingAddress->last_name;
+            $shippingAddress = $order->shippingAddress;
+            $customerName = $shippingAddress
+                ? trim($shippingAddress->first_name . ' ' . $shippingAddress->last_name)
+                : ($order->customer_name ?? 'Customer');
 
             // Create Razorpay Order
             $razorpayOrder = $api->order->create([
@@ -145,7 +167,7 @@ class RazorpayGateway implements PaymentGatewayInterface
                     'prefill' => [
                         'name' => $customerName,
                         'email' => $order->customer_email,
-                        'contact' => $shippingAddress->phone ?? '',
+                        'contact' => $shippingAddress?->phone ?? '',
                     ],
                     'theme' => [
                         'color' => '#3399cc',
@@ -437,26 +459,42 @@ class RazorpayGateway implements PaymentGatewayInterface
     /**
      * Verify payment status for an order.
      */
-    public function verifyPayment(Order $order): bool
+    public function verifyPayment(Order $order, array $data = []): bool
     {
         try {
             $api = $this->getRazorpayApi();
-            $paymentId = $order->payment_gateway_transaction_id;
 
+            // Prefer HMAC signature verification when Flutter passes the three fields
+            $razorpayPaymentId = $data['razorpay_payment_id'] ?? null;
+            $razorpayOrderId   = $data['razorpay_order_id'] ?? null;
+            $razorpaySignature = $data['razorpay_signature'] ?? null;
+
+            if ($razorpayPaymentId && $razorpayOrderId && $razorpaySignature) {
+                $api->utility->verifyPaymentSignature([
+                    'razorpay_order_id'   => $razorpayOrderId,
+                    'razorpay_payment_id' => $razorpayPaymentId,
+                    'razorpay_signature'  => $razorpaySignature,
+                ]);
+                // Signature valid — mark transaction ID
+                $order->update(['payment_gateway_transaction_id' => $razorpayPaymentId]);
+                Log::info('RazorpayGateway: Signature verified', ['order_id' => $order->id]);
+                return true;
+            }
+
+            // Fallback: fetch payment status from Razorpay API
+            $paymentId = $order->payment_gateway_transaction_id;
             if (!$paymentId) {
                 return false;
             }
 
             $payment = $api->payment->fetch($paymentId);
-            
             return $payment->status === 'captured' || $payment->status === 'authorized';
 
         } catch (\Exception $e) {
             Log::error('RazorpayGateway: Payment verification failed', [
                 'order_id' => $order->id,
-                'error' => $e->getMessage(),
+                'error'    => $e->getMessage(),
             ]);
-
             return false;
         }
     }

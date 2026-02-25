@@ -15,6 +15,7 @@ use Cartxis\API\Http\Controllers\V1\SearchController;
 use Cartxis\API\Http\Controllers\V1\CurrencyController;
 use Cartxis\API\Http\Controllers\V1\ApiSyncController;
 use Cartxis\API\Http\Controllers\V1\ProductAiController;
+use Cartxis\API\Http\Controllers\V1\AppSettingsController;
 use Cartxis\API\Http\Middleware\TrackApiSync;
 
 /*
@@ -43,6 +44,9 @@ Route::prefix('api/v1')->group(function () {
         Route::post('/password/forgot', [AuthController::class, 'forgotPassword']);
         Route::post('/password/reset', [AuthController::class, 'resetPassword']);
     });
+
+    // App settings / branding (no auth — needed before login for auth screen logo)
+    Route::get('app/settings', [AppSettingsController::class, 'index']);
 
     // Products (Public browsing)
     Route::prefix('products')->group(function () {
@@ -95,6 +99,7 @@ Route::prefix('api/v1')->group(function () {
             Route::post('/password/change', [AuthController::class, 'changePassword']);
             Route::post('/avatar', [AuthController::class, 'uploadAvatar']);
             Route::post('/refresh', [AuthController::class, 'refreshToken']);
+            Route::delete('/account', [AuthController::class, 'deleteAccount']);
         });
 
         // Cart Management
@@ -120,6 +125,8 @@ Route::prefix('api/v1')->group(function () {
             Route::post('/payment-method', [CheckoutController::class, 'setPaymentMethod']);
             Route::get('/summary', [CheckoutController::class, 'summary']);
             Route::post('/place-order', [CheckoutController::class, 'placeOrder']);
+            // Unified payment verification — Flutter calls this after any SDK payment completes
+            Route::post('/verify-payment', [CheckoutController::class, 'verifyPayment']);
         });
 
         // Customer Account

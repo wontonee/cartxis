@@ -76,9 +76,8 @@ class PayUMoneyController extends Controller
                     ]);
                 });
 
+                Session::put('checkout.last_order_id', $order->id);
                 Session::forget('cart');
-                Session::forget('checkout');
-                Session::forget('checkout.last_order_id');
 
                 return redirect()->route('shop.checkout.success', ['order' => $order->id])
                     ->with('success', 'Payment completed successfully!');

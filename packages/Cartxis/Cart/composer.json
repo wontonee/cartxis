@@ -1,11 +1,11 @@
-{
+﻿{
     "name": "cartxis/cart",
     "description": "Shopping cart functionality for Cartxis E-commerce platform",
     "type": "library",
     "license": "MIT",
     "autoload": {
         "psr-4": {
-            "Cartxis\\Cart\\": ""
+            "Cartxis\\Cart\\": "src/"
         }
     },
     "require": {

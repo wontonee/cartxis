@@ -34,7 +34,6 @@ class BannerResource extends JsonResource
             'title' => $this->title,
             'type' => $this->type,
             'status' => $this->status,
-            'channel_id' => $this->channel_id,
             'start_date' => $this->start_date?->toIso8601String(),
             'end_date' => $this->end_date?->toIso8601String(),
             'is_visible' => $this->isVisible(),

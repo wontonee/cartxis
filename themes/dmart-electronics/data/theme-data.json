@@ -1,0 +1,759 @@
+{
+  "blocks": [
+    {
+      "identifier": "homepage-hero",
+      "title": "Homepage Hero Banner",
+      "type": "banner",
+      "content": "{\"heading\":\"Electric Charging Smart Tea Maker\",\"subheading\":\"59% <span class=\\\"color-text\\\">discount</span> for all items\",\"image\":\"/images/hero-banner.jpg\",\"button_text\":\"Shop Now\",\"button_url\":\"/products\",\"price\":\"125.75\",\"old_price\":\"150.00\",\"colors\":[\"#770215\",\"#E9CF10\",\"#35424B\"]}"
+    },
+    {
+      "identifier": "homepage-hero-2",
+      "title": "Homepage Hero Slide 2",
+      "type": "banner",
+      "content": "{\"heading\":\"Wireless Premium Headphones\",\"subheading\":\"40% <span class=\\\"color-text\\\">discount</span> this week\",\"image\":\"/images/hero-banner.jpg\",\"button_text\":\"View Deals\",\"button_url\":\"/products?sort=discount\",\"price\":\"89.99\",\"colors\":[\"#770215\",\"#E9CF10\",\"#35424B\"]}"
+    },
+    {
+      "identifier": "homepage-deal",
+      "title": "Homepage Deal Section",
+      "type": "html",
+      "content": "{\"title\":\"Deal of the Day\",\"subtitle\":\"Limited Time Offer\",\"discount\":\"30%\",\"end_date\":\"2026-12-31T23:59:59\",\"product_ids\":[1,2,3]}"
+    },
+    {
+      "identifier": "homepage-features",
+      "title": "Homepage Features",
+      "type": "html",
+      "content": "{\"features\":[{\"icon\":\"fa-truck-fast\",\"title\":\"Free Shipping\",\"description\":\"On orders over $50\"},{\"icon\":\"fa-shield-halved\",\"title\":\"Secure Payment\",\"description\":\"100% secure checkout\"},{\"icon\":\"fa-rotate-left\",\"title\":\"Easy Returns\",\"description\":\"30-day return policy\"},{\"icon\":\"fa-headset\",\"title\":\"24/7 Support\",\"description\":\"Dedicated support team\"}]}"
+    },
+    {
+      "identifier": "homepage-testimonials",
+      "title": "Homepage Testimonials",
+      "type": "testimonial",
+      "content": "{\"testimonials\":[{\"name\":\"Ronald Richards\",\"role\":\"Marketing Coordinator\",\"text\":\"One of the most powerful takeaways from this store is the emphasis on quality and customer satisfaction. The products exceeded all my expectations.\",\"rating\":5,\"avatar\":null},{\"name\":\"Dianne Russell\",\"role\":\"Project Manager\",\"text\":\"The customer service experience is unmatched. Quick delivery, excellent packaging, and the product quality exceeded my expectations by far.\",\"rating\":5,\"avatar\":null},{\"name\":\"Jerome Bell\",\"role\":\"Software Engineer\",\"text\":\"This store truly sets the standard for online electronics shopping. From browsing to checkout, every step was seamless and professional.\",\"rating\":5,\"avatar\":null},{\"name\":\"Cameron Williamson\",\"role\":\"UI/UX Designer\",\"text\":\"From the very first purchase, I was impressed by the attention to detail. The product descriptions are accurate and delivery was super fast.\",\"rating\":5,\"avatar\":null}]}"
+    },
+    {
+      "identifier": "homepage-brands",
+      "title": "Homepage Brands",
+      "type": "html",
+      "content": "{\"brands\":[{\"name\":\"Fresh Farms\",\"image\":null},{\"name\":\"Dairy Best\",\"image\":null},{\"name\":\"Bake House\",\"image\":null},{\"name\":\"Green Valley\",\"image\":null},{\"name\":\"Pure Organic\",\"image\":null},{\"name\":\"Home Essentials\",\"image\":null}]}"
+    },
+    {
+      "identifier": "homepage-banner",
+      "title": "Homepage Banner",
+      "type": "banner",
+      "content": "{\"heading\":\"See The Worlds Like Birds\",\"button_text\":\"View All Products\",\"button_url\":\"/products\",\"image\":\"/images/homepage-1/banner-1.png\",\"video_url\":\"\"}"
+    },
+    {
+      "identifier": "homepage-offer-1",
+      "title": "Homepage Offer Card 1",
+      "type": "html",
+      "content": "{\"badge\":\"GET 30% OFF\",\"heading\":\"New power double\",\"button_text\":\"View All\",\"button_url\":\"/products\",\"image\":\"/images/homepage-1/offer-1.png\",\"bg_color\":\"#FFDEDC\"}"
+    },
+    {
+      "identifier": "homepage-offer-2",
+      "title": "Homepage Offer Card 2",
+      "type": "html",
+      "content": "{\"badge\":\"GET 30% OFF\",\"heading\":\"New power double\",\"button_text\":\"View All\",\"button_url\":\"/products\",\"image\":\"/images/homepage-1/offer-2.png\",\"bg_color\":\"#CCD9EB\"}"
+    },
+    {
+      "identifier": "homepage-marquee",
+      "title": "Homepage Marquee Text",
+      "type": "html",
+      "content": "Limited Time Offer: Free Shipping on All Orders Over $50! Shop Our New Electronics Collection Today."
+    },
+    {
+      "identifier": "footer-newsletter",
+      "title": "Footer Newsletter",
+      "type": "newsletter",
+      "content": "{\"heading\":\"Newsletter\",\"description\":\"Sign up to our weekly newsletter to get the latest updates.\",\"placeholder\":\"Enter Email Address\",\"button_text\":\"Subscribe\"}"
+    }
+  ],
+  "menus": {
+    "header": [
+      {
+        "title": "Home",
+        "url": "/",
+        "icon": "fa-house",
+        "order": 1
+      },
+      {
+        "title": "Shop",
+        "url": "/products",
+        "icon": "fa-bag-shopping",
+        "order": 2,
+        "children": [
+          {
+            "title": "All Products",
+            "url": "/products",
+            "order": 1
+          },
+          {
+            "title": "New Arrivals",
+            "url": "/products?sort=newest",
+            "order": 2
+          },
+          {
+            "title": "Best Sellers",
+            "url": "/products?sort=popular",
+            "order": 3
+          },
+          {
+            "title": "On Sale",
+            "url": "/products?sort=discount",
+            "order": 4
+          }
+        ]
+      },
+      {
+        "title": "Pages",
+        "url": "#",
+        "icon": "fa-file",
+        "order": 3,
+        "children": [
+          {
+            "title": "About Us",
+            "url": "/about-us",
+            "order": 1
+          },
+          {
+            "title": "FAQ",
+            "url": "/faqs",
+            "order": 2
+          },
+          {
+            "title": "Privacy Policy",
+            "url": "/privacy-policy",
+            "order": 3
+          },
+          {
+            "title": "Terms & Conditions",
+            "url": "/terms-conditions",
+            "order": 4
+          }
+        ]
+      },
+      {
+        "title": "Contact",
+        "url": "/contact-us",
+        "icon": "fa-envelope",
+        "order": 4
+      }
+    ],
+    "footer": [
+      {
+        "title": "Company",
+        "url": "#",
+        "order": 1,
+        "children": [
+          {
+            "title": "About Us",
+            "url": "/about-us",
+            "order": 1
+          },
+          {
+            "title": "Careers",
+            "url": "/careers",
+            "order": 2
+          },
+          {
+            "title": "Contact",
+            "url": "/contact-us",
+            "order": 3
+          }
+        ]
+      },
+      {
+        "title": "Customer Service",
+        "url": "#",
+        "order": 2,
+        "children": [
+          {
+            "title": "Help Center",
+            "url": "/help",
+            "order": 1
+          },
+          {
+            "title": "Shipping & Returns",
+            "url": "/shipping",
+            "order": 2
+          },
+          {
+            "title": "Track Order",
+            "url": "/track-order",
+            "order": 3
+          }
+        ]
+      }
+    ]
+  },
+  "settings": {
+    "colors.primary_color": "#FF4035",
+    "colors.secondary_color": "#0A111E",
+    "colors.accent_color": "#F9A000",
+    "colors.success_color": "#10b981",
+    "colors.danger_color": "#ef4444",
+    "typography.body_font": "'Jost', sans-serif",
+    "typography.heading_font": "'Albert Sans', sans-serif",
+    "typography.font_size": 16,
+    "layout.container_width": "1320px",
+    "layout.products_per_row": "4",
+    "layout.sidebar_position": "left",
+    "features.sticky_header": true,
+    "features.back_to_top": true,
+    "features.wishlist": true,
+    "features.quick_view": true,
+    "features.product_zoom": true,
+    "features.offer_marquee": true,
+    "features.newsletter_popup": false,
+    "contact.phone": "+208-555-0112",
+    "contact.email": "example@gmail.com",
+    "contact.hours": "Sunday - Fri: 9 AM - 6 PM",
+    "contact.address": "4517 Washington Ave.",
+    "social.facebook": "#",
+    "social.twitter": "#",
+    "social.instagram": "#",
+    "social.linkedin": "#",
+    "social.youtube": "",
+    "homepage.show_hero": true,
+    "homepage.show_categories": true,
+    "homepage.show_best_sellers": true,
+    "homepage.show_featured": true,
+    "homepage.show_testimonials": true,
+    "homepage.show_blog": true
+  },
+  "categories": [
+    {
+      "name": "Smartphones & Tablets",
+      "slug": "smartphones-tablets",
+      "description": "Latest smartphones, tablets and mobile accessories",
+      "status": 1,
+      "sort_order": 1,
+      "show_in_menu": 1
+    },
+    {
+      "name": "Laptops & Computers",
+      "slug": "laptops-computers",
+      "description": "Laptops, desktops, monitors and computer peripherals",
+      "status": 1,
+      "sort_order": 2,
+      "show_in_menu": 1
+    },
+    {
+      "name": "Audio & Headphones",
+      "slug": "audio-headphones",
+      "description": "Headphones, speakers, earbuds and audio equipment",
+      "status": 1,
+      "sort_order": 3,
+      "show_in_menu": 1
+    },
+    {
+      "name": "Cameras & Photography",
+      "slug": "cameras-photography",
+      "description": "Digital cameras, lenses and photography accessories",
+      "status": 1,
+      "sort_order": 4,
+      "show_in_menu": 1
+    },
+    {
+      "name": "TVs & Home Entertainment",
+      "slug": "tvs-home-entertainment",
+      "description": "Smart TVs, soundbars and home theater systems",
+      "status": 1,
+      "sort_order": 5,
+      "show_in_menu": 1
+    },
+    {
+      "name": "Wearables & Smartwatches",
+      "slug": "wearables-smartwatches",
+      "description": "Smartwatches, fitness trackers and wearable tech",
+      "status": 1,
+      "sort_order": 6,
+      "show_in_menu": 1
+    },
+    {
+      "name": "Gaming & Consoles",
+      "slug": "gaming-consoles",
+      "description": "Gaming consoles, controllers and gaming accessories",
+      "status": 1,
+      "sort_order": 7,
+      "show_in_menu": 1
+    },
+    {
+      "name": "Accessories & Cables",
+      "slug": "accessories-cables",
+      "description": "Chargers, cables, cases and tech accessories",
+      "status": 1,
+      "sort_order": 8,
+      "show_in_menu": 1
+    }
+  ],
+  "attributes": [
+    {
+      "code": "color",
+      "name": "Color",
+      "type": "select",
+      "is_required": false,
+      "is_filterable": true,
+      "is_configurable": true,
+      "sort_order": 1,
+      "options": [
+        { "label": "Black", "value": "black", "sort_order": 1 },
+        { "label": "White", "value": "white", "sort_order": 2 },
+        { "label": "Silver", "value": "silver", "sort_order": 3 },
+        { "label": "Blue", "value": "blue", "sort_order": 4 },
+        { "label": "Gold", "value": "gold", "sort_order": 5 },
+        { "label": "Space Gray", "value": "space-gray", "sort_order": 6 },
+        { "label": "Midnight", "value": "midnight", "sort_order": 7 },
+        { "label": "Starlight", "value": "starlight", "sort_order": 8 },
+        { "label": "Red", "value": "red", "sort_order": 9 }
+      ]
+    },
+    {
+      "code": "storage",
+      "name": "Storage",
+      "type": "select",
+      "is_required": false,
+      "is_filterable": true,
+      "is_configurable": true,
+      "sort_order": 2,
+      "options": [
+        { "label": "64 GB", "value": "64gb", "sort_order": 1 },
+        { "label": "128 GB", "value": "128gb", "sort_order": 2 },
+        { "label": "256 GB", "value": "256gb", "sort_order": 3 },
+        { "label": "512 GB", "value": "512gb", "sort_order": 4 },
+        { "label": "1 TB", "value": "1tb", "sort_order": 5 },
+        { "label": "2 TB", "value": "2tb", "sort_order": 6 }
+      ]
+    },
+    {
+      "code": "screen-size",
+      "name": "Screen Size",
+      "type": "select",
+      "is_required": false,
+      "is_filterable": true,
+      "is_configurable": false,
+      "sort_order": 3,
+      "options": [
+        { "label": "6.1 inch", "value": "6-1-inch", "sort_order": 1 },
+        { "label": "6.7 inch", "value": "6-7-inch", "sort_order": 2 },
+        { "label": "6.8 inch", "value": "6-8-inch", "sort_order": 3 },
+        { "label": "14.2 inch", "value": "14-2-inch", "sort_order": 4 },
+        { "label": "15.6 inch", "value": "15-6-inch", "sort_order": 5 },
+        { "label": "41 mm", "value": "41mm", "sort_order": 6 },
+        { "label": "45 mm", "value": "45mm", "sort_order": 7 },
+        { "label": "65 inch", "value": "65-inch", "sort_order": 8 }
+      ]
+    },
+    {
+      "code": "connectivity",
+      "name": "Connectivity",
+      "type": "select",
+      "is_required": false,
+      "is_filterable": true,
+      "is_configurable": false,
+      "sort_order": 4,
+      "options": [
+        { "label": "5G", "value": "5g", "sort_order": 1 },
+        { "label": "Wi-Fi 6E", "value": "wifi-6e", "sort_order": 2 },
+        { "label": "Wi-Fi 7", "value": "wifi-7", "sort_order": 3 },
+        { "label": "Bluetooth 5.3", "value": "bluetooth-5-3", "sort_order": 4 },
+        { "label": "USB-C", "value": "usb-c", "sort_order": 5 },
+        { "label": "Thunderbolt 4", "value": "thunderbolt-4", "sort_order": 6 }
+      ]
+    },
+    {
+      "code": "warranty",
+      "name": "Warranty",
+      "type": "select",
+      "is_required": false,
+      "is_filterable": false,
+      "is_configurable": false,
+      "sort_order": 5,
+      "options": [
+        { "label": "1 Year", "value": "1-year", "sort_order": 1 },
+        { "label": "2 Years", "value": "2-years", "sort_order": 2 },
+        { "label": "3 Years", "value": "3-years", "sort_order": 3 }
+      ]
+    }
+  ],
+  "products": [
+    {
+      "sku": "ELEC-IPH15PM",
+      "name": "iPhone 15 Pro Max",
+      "slug": "iphone-15-pro-max",
+      "short_description": "The most powerful iPhone ever",
+      "description": "<p>The iPhone 15 Pro Max features a titanium design, the A17 Pro chip, a 48MP camera system with a 5x Telephoto zoom, and an Action button. With USB-C connectivity and up to 29 hours of video playback, it redefines what a smartphone can do.</p><ul><li>A17 Pro chip with 6-core GPU</li><li>48MP Main camera with 5x optical zoom</li><li>Titanium design with Ceramic Shield</li><li>Action button for quick access</li><li>USB-C with USB 3 speeds</li></ul>",
+      "price": 1199.0,
+      "special_price": 1099.0,
+      "status": 1,
+      "visibility": 1,
+      "featured": 1,
+      "new": 1,
+      "quantity": 50,
+      "stock_status": 1,
+      "type": "simple",
+      "category_slug": "smartphones-tablets",
+      "images": [
+        { "path": "https://placehold.co/800x800/1a1a2e/ffffff?text=iPhone+15+Pro+Max", "alt_text": "iPhone 15 Pro Max Front View", "position": 1 },
+        { "path": "https://placehold.co/800x800/16213e/ffffff?text=iPhone+15+Back", "alt_text": "iPhone 15 Pro Max Back View", "position": 2 },
+        { "path": "https://placehold.co/800x800/0f3460/ffffff?text=iPhone+15+Side", "alt_text": "iPhone 15 Pro Max Side View", "position": 3 }
+      ],
+      "reviews": [
+        { "reviewer_name": "Michael Chen", "reviewer_email": "michael.c@example.com", "rating": 5, "title": "Best iPhone yet!", "comment": "The titanium design is gorgeous and the camera system blows me away. The 5x zoom is a game-changer for travel photography. Battery life is also excellent.", "status": "approved", "verified_purchase": true },
+        { "reviewer_name": "Sarah Johnson", "reviewer_email": "sarah.j@example.com", "rating": 4, "title": "Great phone, pricey though", "comment": "Amazing performance and camera quality. The action button is more useful than I expected. Only downside is the price tag, but you get what you pay for.", "status": "approved", "verified_purchase": true },
+        { "reviewer_name": "David Park", "reviewer_email": "david.p@example.com", "rating": 5, "title": "Professional quality camera", "comment": "As a photographer, the ProRAW and ProRes capabilities are incredible. The 5x telephoto is razor sharp. This is my daily camera now.", "status": "approved", "verified_purchase": true }
+      ],
+      "attribute_values": [
+        { "attribute_code": "color", "option_value": "space-gray" },
+        { "attribute_code": "storage", "option_value": "256gb" },
+        { "attribute_code": "screen-size", "option_value": "6-7-inch" },
+        { "attribute_code": "connectivity", "option_value": "5g" },
+        { "attribute_code": "warranty", "option_value": "1-year" }
+      ]
+    },
+    {
+      "sku": "ELEC-GS24U",
+      "name": "Samsung Galaxy S24 Ultra",
+      "slug": "samsung-galaxy-s24-ultra",
+      "short_description": "AI-powered smartphone with S Pen",
+      "description": "<p>The Samsung Galaxy S24 Ultra brings Galaxy AI to your fingertips. With a titanium frame, a 200MP camera, the powerful Snapdragon 8 Gen 3 processor, and the integrated S Pen, it is the ultimate productivity and creativity tool.</p><ul><li>Galaxy AI: Circle to Search, Live Translate, Note Assist</li><li>200MP Adaptive Pixel camera sensor</li><li>Titanium frame with flat display</li><li>Built-in S Pen</li><li>QHD+ Dynamic AMOLED 2X display</li></ul>",
+      "price": 1299.0,
+      "special_price": 1199.0,
+      "status": 1,
+      "visibility": 1,
+      "featured": 1,
+      "new": 1,
+      "quantity": 40,
+      "stock_status": 1,
+      "type": "simple",
+      "category_slug": "smartphones-tablets",
+      "images": [
+        { "path": "https://placehold.co/800x800/1a1a2e/ffffff?text=Galaxy+S24+Ultra", "alt_text": "Samsung Galaxy S24 Ultra Front", "position": 1 },
+        { "path": "https://placehold.co/800x800/16213e/ffffff?text=S24+Ultra+Back", "alt_text": "Samsung Galaxy S24 Ultra Back", "position": 2 }
+      ],
+      "reviews": [
+        { "reviewer_name": "James Wilson", "reviewer_email": "james.w@example.com", "rating": 5, "title": "Galaxy AI is incredible", "comment": "Circle to Search is the most useful feature I have ever used on a phone. The camera at 200MP captures insane detail. The S Pen is perfect for quick notes.", "status": "approved", "verified_purchase": true },
+        { "reviewer_name": "Emma Rodriguez", "reviewer_email": "emma.r@example.com", "rating": 4, "title": "Fantastic but heavy", "comment": "Performance is top-tier and the AI features are genuinely useful. The phone is a bit heavy due to the titanium frame but build quality is superb.", "status": "approved", "verified_purchase": true }
+      ],
+      "attribute_values": [
+        { "attribute_code": "color", "option_value": "black" },
+        { "attribute_code": "storage", "option_value": "256gb" },
+        { "attribute_code": "screen-size", "option_value": "6-8-inch" },
+        { "attribute_code": "connectivity", "option_value": "5g" },
+        { "attribute_code": "warranty", "option_value": "1-year" }
+      ]
+    },
+    {
+      "sku": "ELEC-MBP14",
+      "name": "MacBook Pro 14-inch M3 Pro",
+      "slug": "macbook-pro-14-m3-pro",
+      "short_description": "Pro performance meets all-day battery life",
+      "description": "<p>The MacBook Pro 14-inch with M3 Pro chip delivers extraordinary performance for demanding workflows. With up to 18 hours of battery life, a Liquid Retina XDR display, and a pro-level audio system, it is the laptop for professionals.</p><ul><li>M3 Pro chip: 12-core CPU, 18-core GPU</li><li>Up to 36GB unified memory</li><li>Liquid Retina XDR display with ProMotion</li><li>Up to 18 hours of battery life</li><li>Three Thunderbolt 4 ports, HDMI, SD card slot</li></ul>",
+      "price": 1999.0,
+      "special_price": 1849.0,
+      "status": 1,
+      "visibility": 1,
+      "featured": 1,
+      "new": 0,
+      "quantity": 30,
+      "stock_status": 1,
+      "type": "simple",
+      "category_slug": "laptops-computers",
+      "images": [
+        { "path": "https://placehold.co/800x800/2d3436/ffffff?text=MacBook+Pro+14", "alt_text": "MacBook Pro 14-inch M3 Pro Open", "position": 1 },
+        { "path": "https://placehold.co/800x800/636e72/ffffff?text=MacBook+Pro+Closed", "alt_text": "MacBook Pro 14-inch Closed", "position": 2 }
+      ],
+      "reviews": [
+        { "reviewer_name": "Alex Turner", "reviewer_email": "alex.t@example.com", "rating": 5, "title": "Best laptop ever made", "comment": "The M3 Pro is a beast. Compiling code, rendering videos, running multiple VMs - it handles everything without breaking a sweat. Battery life is unreal.", "status": "approved", "verified_purchase": true },
+        { "reviewer_name": "Lisa Wang", "reviewer_email": "lisa.w@example.com", "rating": 5, "title": "Perfect for development", "comment": "As a full-stack developer, this machine is incredible. Docker containers, local databases, browser tabs - zero lag. The display is gorgeous for long coding sessions.", "status": "approved", "verified_purchase": true },
+        { "reviewer_name": "Tom Richards", "reviewer_email": "tom.r@example.com", "rating": 4, "title": "Amazing but expensive", "comment": "There is no denying the performance is phenomenal. The XDR display is stunning for video editing. Just wish the base model came with 36GB RAM.", "status": "approved", "verified_purchase": false }
+      ],
+      "attribute_values": [
+        { "attribute_code": "color", "option_value": "space-gray" },
+        { "attribute_code": "storage", "option_value": "512gb" },
+        { "attribute_code": "screen-size", "option_value": "14-2-inch" },
+        { "attribute_code": "connectivity", "option_value": "thunderbolt-4" },
+        { "attribute_code": "warranty", "option_value": "1-year" }
+      ]
+    },
+    {
+      "sku": "ELEC-DXPS15",
+      "name": "Dell XPS 15",
+      "slug": "dell-xps-15",
+      "short_description": "Stunning OLED display with powerful performance",
+      "description": "<p>The Dell XPS 15 combines a breathtaking 3.5K OLED display with 13th Gen Intel Core processors. Its InfinityEdge display, CNC machined aluminum chassis, and up to 13 hours of battery life make it the perfect blend of style and substance.</p><ul><li>15.6-inch 3.5K OLED InfinityEdge display</li><li>13th Gen Intel Core i7 processor</li><li>NVIDIA GeForce RTX 4050 graphics</li><li>Up to 64GB DDR5 RAM</li><li>Thunderbolt 4 connectivity</li></ul>",
+      "price": 1499.0,
+      "special_price": null,
+      "status": 1,
+      "visibility": 1,
+      "featured": 0,
+      "new": 1,
+      "quantity": 25,
+      "stock_status": 1,
+      "type": "simple",
+      "category_slug": "laptops-computers",
+      "images": [
+        { "path": "https://placehold.co/800x800/2d3436/ffffff?text=Dell+XPS+15", "alt_text": "Dell XPS 15 Front View", "position": 1 },
+        { "path": "https://placehold.co/800x800/636e72/ffffff?text=XPS+15+Side", "alt_text": "Dell XPS 15 Side View", "position": 2 }
+      ],
+      "reviews": [
+        { "reviewer_name": "Kevin Lee", "reviewer_email": "kevin.l@example.com", "rating": 4, "title": "Gorgeous OLED display", "comment": "The OLED screen is absolutely stunning for photo editing and movie watching. Performance is solid for both work and light gaming. Fan noise could be quieter under load.", "status": "approved", "verified_purchase": true },
+        { "reviewer_name": "Anna Martinez", "reviewer_email": "anna.m@example.com", "rating": 4, "title": "Great Windows laptop", "comment": "Build quality rivals MacBooks. The screen is amazing for design work. Wish the webcam was better but overall a fantastic machine.", "status": "approved", "verified_purchase": true }
+      ],
+      "attribute_values": [
+        { "attribute_code": "color", "option_value": "silver" },
+        { "attribute_code": "storage", "option_value": "512gb" },
+        { "attribute_code": "screen-size", "option_value": "15-6-inch" },
+        { "attribute_code": "connectivity", "option_value": "thunderbolt-4" },
+        { "attribute_code": "warranty", "option_value": "2-years" }
+      ]
+    },
+    {
+      "sku": "ELEC-APP2",
+      "name": "Apple AirPods Pro 2",
+      "slug": "apple-airpods-pro-2",
+      "short_description": "Adaptive Audio with Active Noise Cancellation",
+      "description": "<p>AirPods Pro 2 deliver an all-new listening experience with Adaptive Audio, Personalized Spatial Audio, and a USB-C charging case. With up to 2x more Active Noise Cancellation and Transparency mode, they are the most advanced AirPods ever.</p><ul><li>H2 chip for smarter noise cancellation</li><li>Adaptive Audio blends Transparency and ANC</li><li>Personalized Spatial Audio with head tracking</li><li>Touch control on the stem</li><li>Up to 6 hours listening, 30 hours total with case</li></ul>",
+      "price": 249.0,
+      "special_price": 199.0,
+      "status": 1,
+      "visibility": 1,
+      "featured": 1,
+      "new": 0,
+      "quantity": 100,
+      "stock_status": 1,
+      "type": "simple",
+      "category_slug": "audio-headphones",
+      "images": [
+        { "path": "https://placehold.co/800x800/f5f6fa/1a1a2e?text=AirPods+Pro+2", "alt_text": "Apple AirPods Pro 2 with Case", "position": 1 },
+        { "path": "https://placehold.co/800x800/dfe6e9/1a1a2e?text=AirPods+Earbuds", "alt_text": "AirPods Pro 2 Earbuds Close-up", "position": 2 }
+      ],
+      "reviews": [
+        { "reviewer_name": "Rachel Kim", "reviewer_email": "rachel.k@example.com", "rating": 5, "title": "Best earbuds period", "comment": "The noise cancellation is insane - blocks out airplane engine noise completely. Sound quality is rich and detailed. Adaptive Audio is a clever feature.", "status": "approved", "verified_purchase": true },
+        { "reviewer_name": "Chris Brown", "reviewer_email": "chris.b@example.com", "rating": 5, "title": "Worth every penny", "comment": "Upgraded from the original AirPods Pro and the difference is night and day. Better ANC, better sound, better battery. The USB-C case is a welcome change.", "status": "approved", "verified_purchase": true },
+        { "reviewer_name": "Priya Sharma", "reviewer_email": "priya.s@example.com", "rating": 4, "title": "Great but not for small ears", "comment": "Sound quality and ANC are top-notch. Even the smallest tips feel a bit large for my ears after long use. Otherwise, these are fantastic earbuds.", "status": "approved", "verified_purchase": true }
+      ],
+      "attribute_values": [
+        { "attribute_code": "color", "option_value": "white" },
+        { "attribute_code": "connectivity", "option_value": "bluetooth-5-3" },
+        { "attribute_code": "warranty", "option_value": "1-year" }
+      ]
+    },
+    {
+      "sku": "ELEC-SXMW5",
+      "name": "Sony WH-1000XM5",
+      "slug": "sony-wh-1000xm5",
+      "short_description": "Industry-leading noise canceling headphones",
+      "description": "<p>The Sony WH-1000XM5 headphones feature two processors controlling eight microphones for unprecedented noise cancellation. With 30-hour battery life, crystal clear hands-free calling, and a new lightweight design, they set the standard for premium wireless headphones.</p><ul><li>Dual Integrated Processor V1 + QN1</li><li>8 microphones with Auto NC Optimizer</li><li>30mm carbon fiber composite driver</li><li>30-hour battery life, quick charge (3 min = 3 hours)</li><li>Multipoint connection for 2 devices</li></ul>",
+      "price": 399.0,
+      "special_price": 348.0,
+      "status": 1,
+      "visibility": 1,
+      "featured": 1,
+      "new": 0,
+      "quantity": 60,
+      "stock_status": 1,
+      "type": "simple",
+      "category_slug": "audio-headphones",
+      "images": [
+        { "path": "https://placehold.co/800x800/1a1a2e/ffffff?text=Sony+XM5", "alt_text": "Sony WH-1000XM5 Black", "position": 1 },
+        { "path": "https://placehold.co/800x800/f5f6fa/1a1a2e?text=Sony+XM5+Silver", "alt_text": "Sony WH-1000XM5 Silver", "position": 2 }
+      ],
+      "reviews": [
+        { "reviewer_name": "Daniel Foster", "reviewer_email": "daniel.f@example.com", "rating": 5, "title": "ANC king", "comment": "Nothing comes close to the noise cancellation on these. I use them daily in a noisy office and they are a productivity lifesaver. Sound quality is warm and detailed.", "status": "approved", "verified_purchase": true },
+        { "reviewer_name": "Sophie Taylor", "reviewer_email": "sophie.t@example.com", "rating": 4, "title": "Comfortable for long sessions", "comment": "Lighter than the XM4 and more comfortable. Noise cancellation is excellent. I wish they folded flat like the previous model for travel.", "status": "approved", "verified_purchase": true }
+      ],
+      "attribute_values": [
+        { "attribute_code": "color", "option_value": "black" },
+        { "attribute_code": "connectivity", "option_value": "bluetooth-5-3" },
+        { "attribute_code": "warranty", "option_value": "1-year" }
+      ]
+    },
+    {
+      "sku": "ELEC-SA7IV",
+      "name": "Sony A7 IV Mirrorless Camera",
+      "slug": "sony-a7-iv",
+      "short_description": "Full-frame mirrorless camera for creators",
+      "description": "<p>The Sony A7 IV redefines the standard for full-frame cameras with a 33MP Exmor R CMOS sensor, BIONZ XR processor, and real-time Eye AF for both humans and animals. With 4K 60p video, a fully articulating touchscreen, and 10 fps burst shooting, it is built for hybrid creators.</p><ul><li>33MP full-frame Exmor R CMOS sensor</li><li>BIONZ XR processing engine</li><li>Real-time Eye AF for people, animals, and birds</li><li>4K 60fps video with S-Cinetone</li><li>5-axis in-body image stabilization</li></ul>",
+      "price": 2498.0,
+      "special_price": 2298.0,
+      "status": 1,
+      "visibility": 1,
+      "featured": 0,
+      "new": 0,
+      "quantity": 15,
+      "stock_status": 1,
+      "type": "simple",
+      "category_slug": "cameras-photography",
+      "images": [
+        { "path": "https://placehold.co/800x800/2d3436/ffffff?text=Sony+A7+IV", "alt_text": "Sony A7 IV Front View", "position": 1 },
+        { "path": "https://placehold.co/800x800/636e72/ffffff?text=A7IV+Top", "alt_text": "Sony A7 IV Top View", "position": 2 }
+      ],
+      "reviews": [
+        { "reviewer_name": "Mark Stevens", "reviewer_email": "mark.s@example.com", "rating": 5, "title": "The hybrid creator dream", "comment": "This camera handles stills and video equally well. The autofocus is lightning fast and the Eye AF never misses. 4K 60p with S-Cinetone is beautiful out of camera.", "status": "approved", "verified_purchase": true },
+        { "reviewer_name": "Jennifer Adams", "reviewer_email": "jennifer.a@example.com", "rating": 4, "title": "Amazing but learning curve", "comment": "Image quality is stunning and the EVF is bright and clear. Menu system takes some getting used to but once you learn it, this camera is incredibly capable.", "status": "approved", "verified_purchase": true }
+      ],
+      "attribute_values": [
+        { "attribute_code": "color", "option_value": "black" },
+        { "attribute_code": "warranty", "option_value": "2-years" }
+      ]
+    },
+    {
+      "sku": "ELEC-LGOC4",
+      "name": "LG OLED C4 65-inch",
+      "slug": "lg-oled-c4-65",
+      "short_description": "Ultimate cinematic experience with OLED evo",
+      "description": "<p>The LG OLED evo C4 65-inch TV delivers unparalleled picture quality with self-lit OLED pixels, the a9 AI Processor 4K Gen7, and Dolby Vision, Dolby Atmos, and IMAX Enhanced support. With 4 HDMI 2.1 ports, it is the ultimate TV for gamers and movie enthusiasts alike.</p><ul><li>OLED evo panel with infinite contrast</li><li>a9 AI Processor 4K Gen7</li><li>4x HDMI 2.1 (4K @120Hz, VRR, ALLM)</li><li>Dolby Vision IQ, Dolby Atmos, DTS:X</li><li>webOS 24 smart TV platform</li></ul>",
+      "price": 1799.0,
+      "special_price": 1499.0,
+      "status": 1,
+      "visibility": 1,
+      "featured": 1,
+      "new": 1,
+      "quantity": 20,
+      "stock_status": 1,
+      "type": "simple",
+      "category_slug": "tvs-home-entertainment",
+      "images": [
+        { "path": "https://placehold.co/800x800/0c0c0c/ffffff?text=LG+OLED+C4+65", "alt_text": "LG OLED C4 65-inch Front", "position": 1 },
+        { "path": "https://placehold.co/800x800/1a1a2e/ffffff?text=C4+Side+Profile", "alt_text": "LG OLED C4 Side Profile", "position": 2 }
+      ],
+      "reviews": [
+        { "reviewer_name": "Robert Miller", "reviewer_email": "robert.m@example.com", "rating": 5, "title": "Best TV I have ever owned", "comment": "The picture quality is jaw-dropping. Blacks are truly black and colors are incredibly vivid. Gaming at 4K 120Hz on PS5 is silky smooth. Worth every penny.", "status": "approved", "verified_purchase": true },
+        { "reviewer_name": "Karen Hill", "reviewer_email": "karen.h@example.com", "rating": 5, "title": "Movie night perfection", "comment": "Dolby Vision content looks absolutely cinematic. The thin design and minimal bezels make it look like art on the wall. WebOS is smooth and easy to navigate.", "status": "approved", "verified_purchase": true },
+        { "reviewer_name": "Steven Clark", "reviewer_email": "steven.c@example.com", "rating": 4, "title": "Almost perfect", "comment": "Picture quality is world-class. Only slight concern is brightness in a very sunny room compared to high-end LEDs, but in a controlled environment this TV is unbeatable.", "status": "approved", "verified_purchase": false }
+      ],
+      "attribute_values": [
+        { "attribute_code": "color", "option_value": "black" },
+        { "attribute_code": "screen-size", "option_value": "65-inch" },
+        { "attribute_code": "connectivity", "option_value": "wifi-6e" },
+        { "attribute_code": "warranty", "option_value": "2-years" }
+      ]
+    },
+    {
+      "sku": "ELEC-AWS9",
+      "name": "Apple Watch Series 9",
+      "slug": "apple-watch-series-9",
+      "short_description": "Smarter. Brighter. Mightier.",
+      "description": "<p>Apple Watch Series 9 features the new S9 SiP for a magical new way to interact with your watch using Double Tap. With a brighter 2000-nit display, on-device Siri, precise location finding for iPhone, and advanced health monitoring, it is the most capable Apple Watch yet.</p><ul><li>S9 SiP with 4-core Neural Engine</li><li>Double Tap gesture for one-handed control</li><li>Always-On Retina display (2000 nits peak)</li><li>Advanced health monitoring: heart rate, blood oxygen, temperature</li><li>Carbon neutral aluminum models</li></ul>",
+      "price": 399.0,
+      "special_price": 349.0,
+      "status": 1,
+      "visibility": 1,
+      "featured": 1,
+      "new": 1,
+      "quantity": 75,
+      "stock_status": 1,
+      "type": "simple",
+      "category_slug": "wearables-smartwatches",
+      "images": [
+        { "path": "https://placehold.co/800x800/0f3460/ffffff?text=Apple+Watch+9", "alt_text": "Apple Watch Series 9 Midnight", "position": 1 },
+        { "path": "https://placehold.co/800x800/e17055/ffffff?text=Watch+9+Bands", "alt_text": "Apple Watch Series 9 with Sport Band", "position": 2 }
+      ],
+      "reviews": [
+        { "reviewer_name": "Amy Walker", "reviewer_email": "amy.w@example.com", "rating": 5, "title": "Love the Double Tap", "comment": "Double Tap is genuinely useful when my hands are full. The brighter display is noticeable outdoors. Health tracking is comprehensive and accurate.", "status": "approved", "verified_purchase": true },
+        { "reviewer_name": "Jason Wright", "reviewer_email": "jason.w@example.com", "rating": 4, "title": "Great upgrade from Series 7", "comment": "Noticeably faster and the display is much brighter. On-device Siri is snappier. Battery life could still be better but overall a solid smartwatch.", "status": "approved", "verified_purchase": true }
+      ],
+      "attribute_values": [
+        { "attribute_code": "color", "option_value": "midnight" },
+        { "attribute_code": "screen-size", "option_value": "45mm" },
+        { "attribute_code": "connectivity", "option_value": "bluetooth-5-3" },
+        { "attribute_code": "warranty", "option_value": "1-year" }
+      ]
+    },
+    {
+      "sku": "ELEC-PS5S",
+      "name": "PlayStation 5 Slim",
+      "slug": "playstation-5-slim",
+      "short_description": "Slimmer design, stunning gaming",
+      "description": "<p>The PS5 Slim delivers the same incredible gaming experience in a more compact design. With a custom AMD Zen 2 processor, ray tracing support, an ultra-high-speed SSD, and Tempest 3D AudioTech, experience gaming like never before with stunning visuals and near-instant load times.</p><ul><li>Custom AMD Zen 2 CPU + RDNA 2 GPU</li><li>825GB ultra-high-speed SSD</li><li>4K gaming with ray tracing and up to 120fps</li><li>DualSense wireless controller with haptic feedback</li><li>30% smaller than original PS5</li></ul>",
+      "price": 449.0,
+      "special_price": null,
+      "status": 1,
+      "visibility": 1,
+      "featured": 1,
+      "new": 1,
+      "quantity": 35,
+      "stock_status": 1,
+      "type": "simple",
+      "category_slug": "gaming-consoles",
+      "images": [
+        { "path": "https://placehold.co/800x800/1a1a2e/ffffff?text=PS5+Slim", "alt_text": "PlayStation 5 Slim Console", "position": 1 },
+        { "path": "https://placehold.co/800x800/2d3436/ffffff?text=PS5+Controller", "alt_text": "PS5 DualSense Controller", "position": 2 }
+      ],
+      "reviews": [
+        { "reviewer_name": "Ryan Garcia", "reviewer_email": "ryan.g@example.com", "rating": 5, "title": "Next-gen gaming is here", "comment": "The loading times are mind-blowing fast. Ray tracing in Spider-Man 2 looks incredible. The DualSense haptics add so much to the gaming experience.", "status": "approved", "verified_purchase": true },
+        { "reviewer_name": "Emily Thompson", "reviewer_email": "emily.t@example.com", "rating": 4, "title": "Great console, wish for more storage", "comment": "Games look and play amazingly. The slim design is much better for my entertainment center. 825GB fills up fast with modern games though.", "status": "approved", "verified_purchase": true },
+        { "reviewer_name": "Tyler Johnson", "reviewer_email": "tyler.j@example.com", "rating": 5, "title": "Perfect gaming machine", "comment": "Been a PlayStation fan for years and the PS5 Slim is fantastic. Quieter than the original, smaller, and the game library keeps getting better.", "status": "approved", "verified_purchase": true }
+      ],
+      "attribute_values": [
+        { "attribute_code": "color", "option_value": "white" },
+        { "attribute_code": "storage", "option_value": "1tb" },
+        { "attribute_code": "connectivity", "option_value": "wifi-6e" },
+        { "attribute_code": "warranty", "option_value": "1-year" }
+      ]
+    },
+    {
+      "sku": "ELEC-ANK737",
+      "name": "Anker 737 Power Bank",
+      "slug": "anker-737-power-bank",
+      "short_description": "140W portable charger with smart display",
+      "price": 109.0,
+      "special_price": 89.0,
+      "description": "<p>The Anker 737 Power Bank packs a massive 24,000mAh capacity with 140W bi-directional USB-C charging. The smart digital display shows remaining power, estimated charge time, and output wattage in real time.</p><ul><li>24,000mAh capacity</li><li>140W USB-C PD 3.1 output</li><li>Smart digital display</li><li>Charges MacBook Pro to 50% in 30 minutes</li><li>Compact and travel-friendly design</li></ul>",
+      "status": 1,
+      "visibility": 1,
+      "featured": 0,
+      "new": 0,
+      "quantity": 200,
+      "stock_status": 1,
+      "type": "simple",
+      "category_slug": "accessories-cables",
+      "images": [
+        { "path": "https://placehold.co/800x800/2d3436/ffffff?text=Anker+737", "alt_text": "Anker 737 Power Bank", "position": 1 },
+        { "path": "https://placehold.co/800x800/636e72/ffffff?text=Anker+Display", "alt_text": "Anker 737 Smart Display Close-up", "position": 2 }
+      ],
+      "reviews": [
+        { "reviewer_name": "Mike Patterson", "reviewer_email": "mike.p@example.com", "rating": 5, "title": "Best power bank money can buy", "comment": "140W output charges my MacBook Pro fast. The display is really useful for monitoring charge. Heavy but the capacity and speed justify it.", "status": "approved", "verified_purchase": true },
+        { "reviewer_name": "Laura Chen", "reviewer_email": "laura.c@example.com", "rating": 4, "title": "Powerful but bulky", "comment": "Incredible charging speed and capacity. Can charge my laptop and phone simultaneously. It is quite heavy for travel but for the power it delivers, totally worth it.", "status": "approved", "verified_purchase": true }
+      ],
+      "attribute_values": [
+        { "attribute_code": "color", "option_value": "black" },
+        { "attribute_code": "connectivity", "option_value": "usb-c" },
+        { "attribute_code": "warranty", "option_value": "2-years" }
+      ]
+    },
+    {
+      "sku": "ELEC-PX8P",
+      "name": "Google Pixel 8 Pro",
+      "slug": "google-pixel-8-pro",
+      "short_description": "AI-first smartphone with best-in-class camera",
+      "description": "<p>The Pixel 8 Pro is powered by Google Tensor G3 and delivers industry-leading AI features, a pro-level camera system with a 50MP main sensor, and 7 years of OS and security updates. With a 6.7-inch Super Actua display and all-day battery, it combines intelligence with elegance.</p><ul><li>Google Tensor G3 processor</li><li>50MP main + 48MP ultrawide + 48MP telephoto</li><li>AI-powered Magic Eraser, Photo Unblur, Best Take</li><li>7 years of OS and security updates</li><li>Super Actua 6.7\" LTPO OLED, 120Hz</li></ul>",
+      "price": 999.0,
+      "special_price": 899.0,
+      "status": 1,
+      "visibility": 1,
+      "featured": 1,
+      "new": 1,
+      "quantity": 45,
+      "stock_status": 1,
+      "type": "simple",
+      "category_slug": "smartphones-tablets",
+      "images": [
+        { "path": "https://placehold.co/800x800/f5f6fa/1a1a2e?text=Pixel+8+Pro", "alt_text": "Google Pixel 8 Pro Front", "position": 1 },
+        { "path": "https://placehold.co/800x800/dfe6e9/1a1a2e?text=Pixel+8+Back", "alt_text": "Google Pixel 8 Pro Back Camera", "position": 2 },
+        { "path": "https://placehold.co/800x800/b2bec3/1a1a2e?text=Pixel+Box", "alt_text": "Google Pixel 8 Pro in Box", "position": 3 }
+      ],
+      "reviews": [
+        { "reviewer_name": "Nathan Brooks", "reviewer_email": "nathan.b@example.com", "rating": 5, "title": "Camera champion", "comment": "The camera on the Pixel 8 Pro is unmatched. Night Sight is incredible and AI features like Magic Eraser and Best Take are genuinely useful. 7 years of updates is the cherry on top.", "status": "approved", "verified_purchase": true },
+        { "reviewer_name": "Olivia Davis", "reviewer_email": "olivia.d@example.com", "rating": 4, "title": "Pure Android experience", "comment": "Clean software, amazing camera, and Google AI features are genuinely helpful. Battery life is solid but not class-leading. The temperature sensor is a fun addition.", "status": "approved", "verified_purchase": true }
+      ],
+      "attribute_values": [
+        { "attribute_code": "color", "option_value": "blue" },
+        { "attribute_code": "storage", "option_value": "128gb" },
+        { "attribute_code": "screen-size", "option_value": "6-7-inch" },
+        { "attribute_code": "connectivity", "option_value": "5g" },
+        { "attribute_code": "warranty", "option_value": "2-years" }
+      ]
+    }
+  ]
+}

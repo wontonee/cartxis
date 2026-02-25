@@ -1,29 +1,21 @@
 {
     "$schema": "https://getcomposer.org/schema.json",
-    "name": "laravel/vue-starter-kit",
+    "name": "cartxis/cartxis",
     "type": "project",
-    "description": "Cartxis Ecommerce Open Source For Laravel Inertia JS VUE.",
+    "description": "Open source eCommerce for Laravel, Inertia.js and Vue 3.",
     "keywords": [
         "laravel",
-        "framework"
+        "ecommerce",
+        "inertia",
+        "vue",
+        "cartxis"
     ],
+    "homepage": "https://github.com/cartxis/cartxis",
     "license": "MIT",
     "repositories": [
         {
-            "type": "package",
-            "package": {
-                "name": "phonepe/pg-php-sdk-v2",
-                "version": "2.0.0",
-                "dist": {
-                    "url": "https://phonepe.mycloudrepo.io/public/repositories/phonepe-pg-php-sdk/v2-sdk.zip",
-                    "type": "zip"
-                },
-                "autoload": {
-                    "classmap": [
-                        "/"
-                    ]
-                }
-            }
+            "type": "path",
+            "url": "packages/Cartxis/PhonePe/sdk"
         }
     ],
     "require": {
@@ -55,21 +47,24 @@
         "pestphp/pest-plugin-laravel": "^4.0"
     },
     "autoload": {
+        "files": [
+            "packages/Cartxis/Core/src/Helpers/hooks.php"
+        ],
         "psr-4": {
             "App\\": "app/",
             "Database\\Factories\\": "database/factories/",
             "Database\\Seeders\\": "database/seeders/",
-            "Cartxis\\Core\\": "packages/Cartxis/Core/",
-            "Cartxis\\Core\\Database\\Seeders\\": "packages/Cartxis/Core/Database/Seeders/",
-            "Cartxis\\Admin\\": "packages/Cartxis/Admin/",
-            "Cartxis\\Admin\\Database\\Seeders\\": "packages/Cartxis/Admin/Database/Seeders/",
-            "Cartxis\\Product\\": "packages/Cartxis/Product/",
-            "Cartxis\\Product\\Database\\Seeders\\": "packages/Cartxis/Product/Database/Seeders/",
-            "Cartxis\\Cart\\": "packages/Cartxis/Cart/",
-            "Cartxis\\Shop\\": "packages/Cartxis/Shop/",
-            "Cartxis\\Shop\\Database\\Seeders\\": "packages/Cartxis/Shop/Database/Seeders/",
-            "Cartxis\\Settings\\": "packages/Cartxis/Settings/",
-            "Cartxis\\Settings\\Database\\Seeders\\": "packages/Cartxis/Settings/Database/Seeders/",
+            "Cartxis\\Core\\": "packages/Cartxis/Core/src/",
+            "Cartxis\\Core\\Database\\Seeders\\": "packages/Cartxis/Core/src/Database/Seeders/",
+            "Cartxis\\Admin\\": "packages/Cartxis/Admin/src/",
+            "Cartxis\\Admin\\Database\\Seeders\\": "packages/Cartxis/Admin/src/Database/Seeders/",
+            "Cartxis\\Product\\": "packages/Cartxis/Product/src/",
+            "Cartxis\\Product\\Database\\Seeders\\": "packages/Cartxis/Product/src/Database/Seeders/",
+            "Cartxis\\Cart\\": "packages/Cartxis/Cart/src/",
+            "Cartxis\\Shop\\": "packages/Cartxis/Shop/src/",
+            "Cartxis\\Shop\\Database\\Seeders\\": "packages/Cartxis/Shop/src/Database/Seeders/",
+            "Cartxis\\Settings\\": "packages/Cartxis/Settings/src/",
+            "Cartxis\\Settings\\Database\\Seeders\\": "packages/Cartxis/Settings/src/Database/Seeders/",
             "Cartxis\\Stripe\\": "packages/Cartxis/Stripe/src/",
             "Cartxis\\Razorpay\\": "packages/Cartxis/Razorpay/src/",
             "Cartxis\\PayPal\\": "packages/Cartxis/PayPal/src/",
@@ -125,8 +120,7 @@
         ],
         "post-create-project-cmd": [
             "@php artisan key:generate --ansi",
-            "@php -r \"file_exists('database/database.sqlite') || touch('database/database.sqlite');\"",
-            "@php artisan migrate --graceful --ansi"
+            "@php -r \"echo '\\n\\033[0;36m════════════════════════════════════════════════════\\033[0m\\n\\033[0;36m  Cartxis installed! Run: php artisan cartxis:install\\033[0m\\n\\033[0;36m════════════════════════════════════════════════════\\033[0m\\n';\""
         ],
         "pre-package-uninstall": [
             "Illuminate\\Foundation\\ComposerScripts::prePackageUninstall"

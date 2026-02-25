@@ -22,7 +22,6 @@ return new class extends Migration
             $table->text('meta_description')->nullable();
             $table->text('meta_keywords')->nullable();
             $table->enum('status', ['draft', 'published', 'disabled'])->default('draft');
-            $table->unsignedBigInteger('channel_id')->nullable();
             $table->unsignedBigInteger('created_by')->nullable();
             $table->unsignedBigInteger('updated_by')->nullable();
             $table->timestamps();
@@ -31,10 +30,8 @@ return new class extends Migration
             // Indexes
             $table->index('url_key');
             $table->index('status');
-            $table->index('channel_id');
 
             // Foreign keys
-            $table->foreign('channel_id')->references('id')->on('channels')->onDelete('set null');
             $table->foreign('created_by')->references('id')->on('users')->onDelete('set null');
             $table->foreign('updated_by')->references('id')->on('users')->onDelete('set null');
         });

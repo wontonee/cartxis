@@ -18,7 +18,6 @@ class BannerController extends Controller
      * - placement: optional string to filter by identifier prefix (e.g. `home-hero` -> `mobile-home-hero-` when mobile=true)
      * - identifier: exact identifier
      * - identifiers: comma-separated list of identifiers
-     * - channel_id: optional channel filter
      * - limit: max items (default 10, max 50)
      */
     public function index(Request $request)
@@ -33,10 +32,6 @@ class BannerController extends Controller
         $orderedIdentifiers = null;
 
         $mobile = $request->boolean('mobile');
-
-        if ($request->filled('channel_id')) {
-            $query->where('channel_id', $request->get('channel_id'));
-        }
 
         if ($request->filled('identifier')) {
             $query->where('identifier', $request->get('identifier'));
@@ -101,10 +96,6 @@ class BannerController extends Controller
         $query = Block::query()
             ->where('type', 'banner')
             ->where('identifier', $identifier);
-
-        if ($request->filled('channel_id')) {
-            $query->where('channel_id', $request->get('channel_id'));
-        }
 
         $banner = $query->first();
 

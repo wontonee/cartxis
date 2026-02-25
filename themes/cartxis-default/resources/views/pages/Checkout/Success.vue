@@ -37,6 +37,7 @@ interface Order {
   created_at: string;
   items: OrderItem[];
   shipping_address: ShippingAddress | null;
+  is_guest?: boolean;
 }
 
 interface Props {
@@ -170,6 +171,13 @@ const isAuthenticated = computed(() => {
             class="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-medium"
           >
             Continue Shopping
+          </a>
+          <a
+            v-if="order.is_guest"
+            :href="`/checkout/track-order?order_number=${encodeURIComponent(order.order_number)}`"
+            class="px-6 py-3 border border-blue-300 text-blue-700 rounded-lg hover:bg-blue-50 font-medium"
+          >
+            Track Guest Order
           </a>
           <a
             v-if="isAuthenticated"

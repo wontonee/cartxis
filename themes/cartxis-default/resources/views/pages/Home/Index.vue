@@ -65,8 +65,8 @@ interface Props {
 
 const props = defineProps<Props>();
 
-const primaryColor = computed(() => props.theme.settings.primary_color);
-const secondaryColor = computed(() => props.theme.settings.secondary_color);
+const primaryColor = computed(() => props.theme?.settings?.['colors.primary'] ?? props.theme?.settings?.['colors.primary_color'] ?? props.theme?.settings?.primary_color ?? '#3b82f6');
+const secondaryColor = computed(() => props.theme?.settings?.['colors.secondary'] ?? props.theme?.settings?.['colors.secondary_color'] ?? props.theme?.settings?.secondary_color ?? '#8b5cf6');
 
 const buildHeroSlides = () => {
     const slides = props.cmsBlocks?.hero_slides && props.cmsBlocks.hero_slides.length > 0
@@ -235,13 +235,6 @@ const subscribeNewsletter = async () => {
             </div>
         </section>
 
-        <!-- Features Bar -->
-        <section v-if="cmsBlocks?.features" class="bg-white border-y border-gray-200">
-            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-                <div v-html="cmsBlocks.features.content" class="prose max-w-none"></div>
-            </div>
-        </section>
-
         <!-- Categories Showcase -->
                 <!-- Categories Showcase -->
         <section class="py-16 bg-gray-50">
@@ -279,31 +272,6 @@ const subscribeNewsletter = async () => {
                 </div>
                 <div v-else class="text-center text-gray-500 py-12">
                     <p>No categories available yet.</p>
-                </div>
-            </div>
-        </section>
-
-        <!-- Deal of the Day (Only show if CMS block exists) -->
-        <section v-if="cmsBlocks?.deal" class="py-16 bg-white">
-            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                <div class="bg-gradient-to-r from-red-500 to-pink-500 rounded-3xl overflow-hidden shadow-2xl">
-                    <div class="grid md:grid-cols-2 gap-8 items-center p-8 md:p-12">
-                        <div class="text-white">
-                            <span class="inline-block px-4 py-2 bg-white/20 backdrop-blur-sm rounded-full text-sm font-semibold mb-4">
-                                🔥 Deal of the Day
-                            </span>
-                            <h2 class="text-4xl md:text-5xl font-bold mb-4">{{ cmsBlocks.deal.title }}</h2>
-                            <div v-html="cmsBlocks.deal.content" class="text-white prose prose-invert"></div>
-                            <button 
-                                class="mt-6 px-8 py-4 bg-white text-red-500 rounded-full text-lg font-bold hover:bg-gray-100 transition-all hover:scale-105 shadow-lg"
-                            >
-                                Grab This Deal →
-                            </button>
-                        </div>
-                        <div class="flex justify-center">
-                            <div class="text-white text-8xl">🎧</div>
-                        </div>
-                    </div>
                 </div>
             </div>
         </section>
@@ -361,20 +329,6 @@ const subscribeNewsletter = async () => {
                 <div v-else class="text-center text-gray-500 py-12">
                     <p>No featured products available yet.</p>
                 </div>
-            </div>
-        </section>
-
-        <!-- Testimonials Section -->
-        <section v-if="cmsBlocks?.testimonials" class="py-16 bg-gray-50">
-            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                <div v-html="cmsBlocks.testimonials.content" class="prose max-w-none"></div>
-            </div>
-        </section>
-
-        <!-- Brands Section -->
-        <section v-if="cmsBlocks?.brands" class="py-12 bg-white border-y border-gray-200">
-            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                <div v-html="cmsBlocks.brands.content" class="prose max-w-none"></div>
             </div>
         </section>
 

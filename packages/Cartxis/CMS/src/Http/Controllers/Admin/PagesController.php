@@ -28,7 +28,7 @@ class PagesController extends Controller
     public function index(Request $request): Response
     {
         $pages = $this->pageRepository->paginate(
-            $request->only(['search', 'status', 'channel_id', 'sort_by', 'sort_order']),
+            $request->only(['search', 'status', 'sort_by', 'sort_order']),
             $request->input('per_page', 20)
         );
 

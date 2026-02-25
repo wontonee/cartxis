@@ -13,7 +13,7 @@ import ThemeLayout from '../../layouts/ThemeLayout.vue';
 const page = usePage();
 const theme = computed(() => page.props.theme as any);
 const siteConfig = computed(() => page.props.siteConfig as any);
-const primaryColor = computed(() => theme.value?.settings?.primary_color || '#3b82f6');
+const primaryColor = computed(() => theme.value?.settings?.['colors.primary'] || theme.value?.settings?.['colors.primary_color'] || theme.value?.settings?.primary_color || '#3b82f6');
 
 defineProps<{
     status?: string;

@@ -39,18 +39,20 @@ const form = useForm({
   description: props.method.description || '',
   instructions: props.method.instructions || '',
   configuration: {
+    mode: props.method.configuration?.mode || 'production',
+    // Live credentials
+    merchant_id: props.method.configuration?.merchant_id || '',
     client_id: props.method.configuration?.client_id || '',
     client_secret: props.method.configuration?.client_secret || '',
     client_version: props.method.configuration?.client_version || 1,
-     environment: props.method.configuration?.environment || 'PRODUCTION',
+    // Test (UAT) credentials
+    test_merchant_id: props.method.configuration?.test_merchant_id || '',
+    test_client_id: props.method.configuration?.test_client_id || '',
+    test_client_secret: props.method.configuration?.test_client_secret || '',
+    test_client_version: props.method.configuration?.test_client_version || 1,
+    // Webhook
     callback_username: props.method.configuration?.callback_username || '',
     callback_password: props.method.configuration?.callback_password || '',
-    payment_methods: {
-      upi: props.method.configuration?.payment_methods?.upi ?? true,
-      card: props.method.configuration?.payment_methods?.card ?? true,
-      netbanking: props.method.configuration?.payment_methods?.netbanking ?? true,
-      wallet: props.method.configuration?.payment_methods?.wallet ?? true,
-    },
   },
 })
 
@@ -130,9 +132,57 @@ const save = () => {
           </div>
         </div>
 
-        <!-- PhonePe API Keys Section -->
+        <!-- Environment Mode Toggle -->
         <div class="p-6 border-b border-gray-200 dark:border-gray-700">
-          <h2 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">PhonePe API Credentials</h2>
+          <h2 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Environment Mode</h2>
+
+          <div class="flex items-center gap-4 mb-6">
+            <label
+              class="relative flex items-center gap-3 px-4 py-3 border-2 rounded-lg cursor-pointer transition-all"
+              :class="form.configuration.mode === 'test' ? 'border-amber-500 bg-amber-50 dark:bg-amber-900/20' : 'border-gray-200 dark:border-gray-600'"
+            >
+              <input v-model="form.configuration.mode" type="radio" value="test" class="sr-only" />
+              <div class="w-4 h-4 rounded-full border-2 flex items-center justify-center" :class="form.configuration.mode === 'test' ? 'border-amber-500' : 'border-gray-300'">
+                <div v-if="form.configuration.mode === 'test'" class="w-2 h-2 rounded-full bg-amber-500"></div>
+              </div>
+              <div>
+                <div class="text-sm font-semibold" :class="form.configuration.mode === 'test' ? 'text-amber-700 dark:text-amber-400' : 'text-gray-700 dark:text-gray-300'">Test Mode</div>
+                <div class="text-xs text-gray-500">UAT — no real charges</div>
+              </div>
+            </label>
+
+            <label
+              class="relative flex items-center gap-3 px-4 py-3 border-2 rounded-lg cursor-pointer transition-all"
+              :class="form.configuration.mode === 'production' ? 'border-green-500 bg-green-50 dark:bg-green-900/20' : 'border-gray-200 dark:border-gray-600'"
+            >
+              <input v-model="form.configuration.mode" type="radio" value="production" class="sr-only" />
+              <div class="w-4 h-4 rounded-full border-2 flex items-center justify-center" :class="form.configuration.mode === 'production' ? 'border-green-500' : 'border-gray-300'">
+                <div v-if="form.configuration.mode === 'production'" class="w-2 h-2 rounded-full bg-green-500"></div>
+              </div>
+              <div>
+                <div class="text-sm font-semibold" :class="form.configuration.mode === 'production' ? 'text-green-700 dark:text-green-400' : 'text-gray-700 dark:text-gray-300'">Production Mode</div>
+                <div class="text-xs text-gray-500">Live — real transactions</div>
+              </div>
+            </label>
+          </div>
+
+          <div v-if="form.configuration.mode === 'test'" class="bg-amber-50 dark:bg-amber-900/30 border border-amber-200 dark:border-amber-800 rounded-lg p-4">
+            <p class="text-sm text-amber-800 dark:text-amber-200">
+              <strong>&#9888; Test Mode Active:</strong> No real charges will be made. PhonePe will use the UAT environment with your test credentials.
+            </p>
+          </div>
+          <div v-if="form.configuration.mode === 'production'" class="bg-green-50 dark:bg-green-900/30 border border-green-200 dark:border-green-800 rounded-lg p-4">
+            <p class="text-sm text-green-800 dark:text-green-200">
+              <strong>&#10003; Production Mode:</strong> Real charges will be processed via PhonePe's live environment.
+            </p>
+          </div>
+        </div>
+
+        <!-- PhonePe API Credentials -->
+        <div class="p-6 border-b border-gray-200 dark:border-gray-700">
+          <h2 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">
+            {{ form.configuration.mode === 'test' ? 'Test (UAT)' : 'Live' }} API Credentials
+          </h2>
 
           <div class="bg-blue-50 dark:bg-blue-900/30 border border-blue-200 dark:border-blue-800 rounded-lg p-4 mb-4">
             <p class="text-sm text-blue-900 dark:text-blue-200">
@@ -141,67 +191,119 @@ const save = () => {
           </div>
 
           <div class="space-y-4">
-            <!-- Client ID -->
-            <div>
-              <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                Client ID <span class="text-red-500">*</span>
-              </label>
-              <input
-                v-model="form.configuration.client_id"
-                type="text"
-                :class="['w-full px-3 py-2 border rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:ring-2 focus:ring-blue-500 focus:border-transparent font-mono text-sm', errors['configuration.client_id'] ? 'border-red-500' : 'border-gray-300 dark:border-gray-600']"
-                placeholder="Enter your PhonePe Client ID"
-              />
-              <p v-if="errors['configuration.client_id']" class="mt-1 text-sm text-red-600">{{ errors['configuration.client_id'] }}</p>
-              <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">Your PhonePe merchant Client ID</p>
-            </div>
 
-            <!-- Client Secret -->
-            <div>
-              <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                Client Secret <span class="text-red-500">*</span>
-              </label>
-              <input
-                v-model="form.configuration.client_secret"
-                type="password"
-                :class="['w-full px-3 py-2 border rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:ring-2 focus:ring-blue-500 focus:border-transparent font-mono text-sm', errors['configuration.client_secret'] ? 'border-red-500' : 'border-gray-300 dark:border-gray-600']"
-                placeholder="Enter your PhonePe Client Secret"
-              />
-              <p v-if="errors['configuration.client_secret']" class="mt-1 text-sm text-red-600">{{ errors['configuration.client_secret'] }}</p>
-              <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">Keep this secret secure - never share it publicly</p>
-            </div>
-
-            <!-- Client Version -->
-            <div>
-              <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                Client Version <span class="text-red-500">*</span>
-              </label>
-              <input
-                v-model.number="form.configuration.client_version"
-                type="number"
-                min="1"
-                :class="['w-full px-3 py-2 border rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:ring-2 focus:ring-blue-500 focus:border-transparent', errors['configuration.client_version'] ? 'border-red-500' : 'border-gray-300 dark:border-gray-600']"
-                placeholder="1"
-              />
-              <p v-if="errors['configuration.client_version']" class="mt-1 text-sm text-red-600">{{ errors['configuration.client_version'] }}</p>
-              <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">PhonePe API version (usually 1)</p>
-            </div>
-
-              <!-- Environment -->
+            <!-- Test credentials -->
+            <template v-if="form.configuration.mode === 'test'">
               <div>
                 <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                  Environment <span class="text-red-500">*</span>
+                  Test Merchant ID <span class="text-red-500">*</span>
                 </label>
-                <select
-                  v-model="form.configuration.environment"
-                  class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                >
-                  <option value="PRODUCTION">Production</option>
-                  <option value="UAT">UAT (Test)</option>
-                  <option value="STAGE">Stage</option>
-                </select>
-                <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">Use UAT for test credentials; Production for live keys.</p>
+                <input
+                  v-model="form.configuration.test_merchant_id"
+                  type="text"
+                  :class="['w-full px-3 py-2 border rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:ring-2 focus:ring-blue-500 focus:border-transparent font-mono text-sm', errors['configuration.test_merchant_id'] ? 'border-red-500' : 'border-gray-300 dark:border-gray-600']"
+                  placeholder="e.g. M22TUU3OAID7Z"
+                />
+                <p v-if="errors['configuration.test_merchant_id']" class="mt-1 text-sm text-red-600">{{ errors['configuration.test_merchant_id'] }}</p>
+                <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">PhonePe Merchant ID for UAT / test environment</p>
               </div>
+              <div>
+                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                  Test Client ID <span class="text-red-500">*</span>
+                </label>
+                <input
+                  v-model="form.configuration.test_client_id"
+                  type="text"
+                  :class="['w-full px-3 py-2 border rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:ring-2 focus:ring-blue-500 focus:border-transparent font-mono text-sm', errors['configuration.test_client_id'] ? 'border-red-500' : 'border-gray-300 dark:border-gray-600']"
+                  placeholder="Enter your PhonePe Test Client ID"
+                />
+                <p v-if="errors['configuration.test_client_id']" class="mt-1 text-sm text-red-600">{{ errors['configuration.test_client_id'] }}</p>
+              </div>
+              <div>
+                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                  Test Client Secret <span class="text-red-500">*</span>
+                </label>
+                <input
+                  v-model="form.configuration.test_client_secret"
+                  type="password"
+                  :class="['w-full px-3 py-2 border rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:ring-2 focus:ring-blue-500 focus:border-transparent font-mono text-sm', errors['configuration.test_client_secret'] ? 'border-red-500' : 'border-gray-300 dark:border-gray-600']"
+                  placeholder="Enter your PhonePe Test Client Secret"
+                />
+                <p v-if="errors['configuration.test_client_secret']" class="mt-1 text-sm text-red-600">{{ errors['configuration.test_client_secret'] }}</p>
+                <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">Keep this secret secure — never share it publicly</p>
+              </div>
+              <div>
+                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                  Test Client Version <span class="text-red-500">*</span>
+                </label>
+                <input
+                  v-model.number="form.configuration.test_client_version"
+                  type="number"
+                  min="1"
+                  :class="['w-full px-3 py-2 border rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:ring-2 focus:ring-blue-500 focus:border-transparent', errors['configuration.test_client_version'] ? 'border-red-500' : 'border-gray-300 dark:border-gray-600']"
+                  placeholder="1"
+                />
+                <p v-if="errors['configuration.test_client_version']" class="mt-1 text-sm text-red-600">{{ errors['configuration.test_client_version'] }}</p>
+                <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">PhonePe API version for UAT (typically 1)</p>
+              </div>
+            </template>
+
+            <!-- Live credentials -->
+            <template v-else>
+              <div>
+                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                  Live Merchant ID <span class="text-red-500">*</span>
+                </label>
+                <input
+                  v-model="form.configuration.merchant_id"
+                  type="text"
+                  :class="['w-full px-3 py-2 border rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:ring-2 focus:ring-blue-500 focus:border-transparent font-mono text-sm', errors['configuration.merchant_id'] ? 'border-red-500' : 'border-gray-300 dark:border-gray-600']"
+                  placeholder="e.g. M22TUU3OAID7Z"
+                />
+                <p v-if="errors['configuration.merchant_id']" class="mt-1 text-sm text-red-600">{{ errors['configuration.merchant_id'] }}</p>
+                <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">PhonePe Merchant ID for production</p>
+              </div>
+              <div>
+                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                  Live Client ID <span class="text-red-500">*</span>
+                </label>
+                <input
+                  v-model="form.configuration.client_id"
+                  type="text"
+                  :class="['w-full px-3 py-2 border rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:ring-2 focus:ring-blue-500 focus:border-transparent font-mono text-sm', errors['configuration.client_id'] ? 'border-red-500' : 'border-gray-300 dark:border-gray-600']"
+                  placeholder="Enter your PhonePe Live Client ID"
+                />
+                <p v-if="errors['configuration.client_id']" class="mt-1 text-sm text-red-600">{{ errors['configuration.client_id'] }}</p>
+              </div>
+              <div>
+                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                  Live Client Secret <span class="text-red-500">*</span>
+                </label>
+                <input
+                  v-model="form.configuration.client_secret"
+                  type="password"
+                  :class="['w-full px-3 py-2 border rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:ring-2 focus:ring-blue-500 focus:border-transparent font-mono text-sm', errors['configuration.client_secret'] ? 'border-red-500' : 'border-gray-300 dark:border-gray-600']"
+                  placeholder="Enter your PhonePe Live Client Secret"
+                />
+                <p v-if="errors['configuration.client_secret']" class="mt-1 text-sm text-red-600">{{ errors['configuration.client_secret'] }}</p>
+                <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">Keep this secret secure — never share it publicly</p>
+              </div>
+              <div>
+                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                  Live Client Version <span class="text-red-500">*</span>
+                </label>
+                <input
+                  v-model.number="form.configuration.client_version"
+                  type="number"
+                  min="1"
+                  :class="['w-full px-3 py-2 border rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:ring-2 focus:ring-blue-500 focus:border-transparent', errors['configuration.client_version'] ? 'border-red-500' : 'border-gray-300 dark:border-gray-600']"
+                  placeholder="1"
+                />
+                <p v-if="errors['configuration.client_version']" class="mt-1 text-sm text-red-600">{{ errors['configuration.client_version'] }}</p>
+                <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">PhonePe API version for production (typically 1)</p>
+              </div>
+            </template>
+
           </div>
         </div>
 
@@ -243,54 +345,6 @@ const save = () => {
               />
               <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">Password for webhook Basic Authentication</p>
             </div>
-          </div>
-        </div>
-
-        <!-- Payment Methods Section -->
-        <div class="p-6 border-b border-gray-200 dark:border-gray-700">
-          <h2 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Enabled Payment Methods</h2>
-          <p class="text-sm text-gray-600 dark:text-gray-400 mb-4">Select which payment methods to enable for customers</p>
-
-          <div class="space-y-3">
-            <!-- UPI -->
-            <label class="flex items-center">
-              <input
-                v-model="form.configuration.payment_methods.upi"
-                type="checkbox"
-                class="rounded border-gray-300 dark:border-gray-600 text-blue-600 shadow-sm focus:border-blue-300 focus:ring focus:ring-blue-200 focus:ring-opacity-50 dark:bg-gray-700"
-              />
-              <span class="ml-2 text-sm text-gray-700 dark:text-gray-300">UPI (Google Pay, PhonePe, Paytm, etc.)</span>
-            </label>
-
-            <!-- Cards -->
-            <label class="flex items-center">
-              <input
-                v-model="form.configuration.payment_methods.card"
-                type="checkbox"
-                class="rounded border-gray-300 dark:border-gray-600 text-blue-600 shadow-sm focus:border-blue-300 focus:ring focus:ring-blue-200 focus:ring-opacity-50 dark:bg-gray-700"
-              />
-              <span class="ml-2 text-sm text-gray-700 dark:text-gray-300">Credit & Debit Cards (Visa, Mastercard, RuPay)</span>
-            </label>
-
-            <!-- Net Banking -->
-            <label class="flex items-center">
-              <input
-                v-model="form.configuration.payment_methods.netbanking"
-                type="checkbox"
-                class="rounded border-gray-300 dark:border-gray-600 text-blue-600 shadow-sm focus:border-blue-300 focus:ring focus:ring-blue-200 focus:ring-opacity-50 dark:bg-gray-700"
-              />
-              <span class="ml-2 text-sm text-gray-700 dark:text-gray-300">Net Banking (All major Indian banks)</span>
-            </label>
-
-            <!-- Wallet -->
-            <label class="flex items-center">
-              <input
-                v-model="form.configuration.payment_methods.wallet"
-                type="checkbox"
-                class="rounded border-gray-300 dark:border-gray-600 text-blue-600 shadow-sm focus:border-blue-300 focus:ring focus:ring-blue-200 focus:ring-opacity-50 dark:bg-gray-700"
-              />
-              <span class="ml-2 text-sm text-gray-700 dark:text-gray-300">PhonePe Wallet</span>
-            </label>
           </div>
         </div>
 
