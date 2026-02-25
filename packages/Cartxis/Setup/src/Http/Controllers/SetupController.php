@@ -54,13 +54,26 @@ class SetupController extends Controller
 
         $countries = Country::active()->ordered()->get(['name', 'code'])->toArray();
 
-        $currencies = Country::active()
-            ->whereNotNull('currency_code')
-            ->selectRaw('currency_code as code, MIN(currency_symbol) as symbol')
-            ->groupBy('currency_code')
-            ->orderBy('currency_code')
-            ->get()
+        // Prefer the currencies table (proper names + metadata).
+        // Fall back to countries-derived data on a true first-run before seeding.
+        $currenciesFromTable = Currency::where('is_active', true)
+            ->orderBy('code')
+            ->get(['code', 'name', 'symbol'])
             ->toArray();
+
+        if (!empty($currenciesFromTable)) {
+            $currencies = $currenciesFromTable;
+        } else {
+            // First-run fallback: derive from countries reference data
+            $currencies = Country::active()
+                ->whereNotNull('currency_code')
+                ->selectRaw('currency_code as code, MIN(currency_symbol) as symbol')
+                ->groupBy('currency_code')
+                ->orderBy('currency_code')
+                ->get()
+                ->map(fn ($r) => ['code' => $r->code, 'name' => $r->code, 'symbol' => $r->symbol])
+                ->toArray();
+        }
 
         return Inertia::render('Setup/BusinessSettings', [
             'businessType' => $businessType,
@@ -244,18 +257,30 @@ class SetupController extends Controller
 
     private function getCurrencyMetadata(string $code): array
     {
+        // Prefer the currencies table — it has full metadata set by the seeder/admin.
+        $currency = Currency::where('code', $code)->first();
+
+        if ($currency) {
+            return [
+                'name'            => $currency->name,
+                'symbol'          => $currency->symbol,
+                'symbol_position' => $currency->symbol_position,
+                'decimal_places'  => $currency->decimal_places,
+                'exchange_rate'   => (float) $currency->exchange_rate,
+            ];
+        }
+
+        // Fallback: derive from countries reference data (first-run before seeding)
         $country = Country::whereNotNull('currency_code')
             ->where('currency_code', $code)
             ->first(['currency_symbol']);
 
-        $symbol = $country?->currency_symbol ?? $code;
-
         return [
-            'name'           => $code,
-            'symbol'         => $symbol,
+            'name'            => $code,
+            'symbol'          => $country?->currency_symbol ?? $code,
             'symbol_position' => 'before',
-            'decimal_places' => 2,
-            'exchange_rate'  => 1.0,
+            'decimal_places'  => 2,
+            'exchange_rate'   => 1.0,
         ];
     }
 }

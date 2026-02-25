@@ -3,8 +3,10 @@
 namespace Cartxis\Admin\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
+use Cartxis\Core\Services\SettingService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\ValidationException;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -12,12 +14,21 @@ use Illuminate\Http\RedirectResponse;
 
 class AdminLoginController extends Controller
 {
+    public function __construct(private SettingService $settingService) {}
+
     /**
      * Display the admin login view.
      */
     public function create(): Response
     {
-        return Inertia::render('Admin/Auth/Login');
+        $storedLogo = $this->settingService->get('admin_logo');
+        $adminLogo = $storedLogo
+            ? Storage::disk('public')->url($storedLogo)
+            : '/logos/cartxis.png';
+
+        return Inertia::render('Admin/Auth/Login', [
+            'adminLogo' => $adminLogo,
+        ]);
     }
 
     /**

@@ -5,6 +5,7 @@ namespace Cartxis\Settings\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
+use Cartxis\Core\Models\Country;
 use Cartxis\Core\Models\Locale;
 use Cartxis\Core\Models\Currency;
 
@@ -17,10 +18,12 @@ class LocalesController extends Controller
     {
         $locales = Locale::orderBy('sort_order')->orderBy('name')->get();
         $currencies = Currency::orderBy('sort_order')->orderBy('name')->get();
+        $countries = Country::ordered()->get();
 
         return Inertia::render('Admin/Settings/Locales/Index', [
-            'locales' => $locales,
+            'locales'    => $locales,
             'currencies' => $currencies,
+            'countries'  => $countries,
         ]);
     }
 

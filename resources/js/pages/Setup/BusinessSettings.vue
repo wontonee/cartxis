@@ -154,7 +154,7 @@
                                 v-for="currency in props.currencies"
                                 :key="currency.code"
                                 :value="currency.code"
-                            >{{ currency.code }} ({{ currency.symbol }})</option>
+                            >{{ currency.code }} — {{ currency.name }} ({{ currency.symbol }})</option>
                         </select>
                     </div>
 
@@ -225,7 +225,7 @@ import axios from 'axios';
 const props = defineProps<{
     businessType?: string;
     countries: { name: string; code: string }[];
-    currencies: { code: string; symbol: string }[];
+    currencies: { code: string; symbol: string; name: string }[];
 }>();
 
 const form = ref({

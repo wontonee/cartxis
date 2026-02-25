@@ -400,16 +400,6 @@ class AdminMenuSeeder extends Seeder
                 'active' => true,
             ],
             [
-                'key' => 'settings-countries',
-                'title' => 'Countries',
-                'icon' => 'globe',
-                'route' => 'admin.settings.countries.index',
-                'parent_id' => $settingsId,
-                'order' => 3,
-                'location' => 'admin',
-                'active' => true,
-            ],
-            [
                 'key' => 'settings-payment',
                 'title' => 'Payment Methods',
                 'icon' => 'credit-card',

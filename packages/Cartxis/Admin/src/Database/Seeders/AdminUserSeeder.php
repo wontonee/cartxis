@@ -13,20 +13,22 @@ class AdminUserSeeder extends Seeder
      */
     public function run(): void
     {
-        // Create default admin user
+        $name     = env('CARTXIS_ADMIN_NAME', 'Admin');
+        $email    = env('CARTXIS_ADMIN_EMAIL', 'admin@example.com');
+        $password = env('CARTXIS_ADMIN_PASSWORD', 'password');
+
         User::firstOrCreate(
-            ['email' => 'admin@wontonee.com'],
+            ['email' => $email],
             [
-                'name' => 'Admin User',
-                'password' => Hash::make('password'),
-                'role' => 'admin',
-                'is_active' => true,
-                'email_verified_at' => now(),
+                'name'               => $name,
+                'password'           => Hash::make($password),
+                'role'               => 'admin',
+                'is_active'          => true,
+                'email_verified_at'  => now(),
             ]
         );
 
         $this->command->info('Admin user created successfully!');
-        $this->command->info('Email: admin@wontonee.com');
-        $this->command->info('Password: password');
+        $this->command->info('Email: ' . $email);
     }
 }

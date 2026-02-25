@@ -79,6 +79,7 @@ class CoreServiceProvider extends ServiceProvider
 
         if ($this->app->runningInConsole()) {
             $this->commands([
+                \Cartxis\Core\Console\Commands\InstallCommand::class,
                 ExtensionsListCommand::class,
                 ExtensionsSyncCommand::class,
                 ExtensionsInstallCommand::class,

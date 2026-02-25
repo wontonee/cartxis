@@ -1,29 +1,21 @@
 {
     "$schema": "https://getcomposer.org/schema.json",
-    "name": "laravel/vue-starter-kit",
+    "name": "cartxis/cartxis",
     "type": "project",
-    "description": "Cartxis Ecommerce Open Source For Laravel Inertia JS VUE.",
+    "description": "Open source eCommerce for Laravel, Inertia.js and Vue 3.",
     "keywords": [
         "laravel",
-        "framework"
+        "ecommerce",
+        "inertia",
+        "vue",
+        "cartxis"
     ],
+    "homepage": "https://github.com/cartxis/cartxis",
     "license": "MIT",
     "repositories": [
         {
-            "type": "package",
-            "package": {
-                "name": "phonepe/pg-php-sdk-v2",
-                "version": "2.0.0",
-                "dist": {
-                    "url": "https://phonepe.mycloudrepo.io/public/repositories/phonepe-pg-php-sdk/v2-sdk.zip",
-                    "type": "zip"
-                },
-                "autoload": {
-                    "classmap": [
-                        "/"
-                    ]
-                }
-            }
+            "type": "path",
+            "url": "packages/Cartxis/PhonePe/sdk"
         }
     ],
     "require": {
@@ -128,8 +120,7 @@
         ],
         "post-create-project-cmd": [
             "@php artisan key:generate --ansi",
-            "@php -r \"file_exists('database/database.sqlite') || touch('database/database.sqlite');\"",
-            "@php artisan migrate --graceful --ansi"
+            "@php -r \"echo '\\n\\033[0;36m════════════════════════════════════════════════════\\033[0m\\n\\033[0;36m  Cartxis installed! Run: php artisan cartxis:install\\033[0m\\n\\033[0;36m════════════════════════════════════════════════════\\033[0m\\n';\""
         ],
         "pre-package-uninstall": [
             "Illuminate\\Foundation\\ComposerScripts::prePackageUninstall"
