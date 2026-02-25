@@ -1,4 +1,4 @@
-{
+﻿{
   "name": "cartxis/razorpay",
   "description": "Razorpay payment gateway integration for Cartxis",
   "type": "library",

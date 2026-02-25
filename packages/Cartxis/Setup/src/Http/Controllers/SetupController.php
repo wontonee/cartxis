@@ -12,6 +12,7 @@ use Illuminate\Support\Facades\Hash;
 use Inertia\Inertia;
 use Inertia\Response;
 use Cartxis\Setup\Services\DemoDataService;
+use Cartxis\Core\Models\Country;
 use Cartxis\Core\Services\SettingService;
 use Cartxis\Core\Models\Currency;
 use App\Models\User;
@@ -51,8 +52,20 @@ class SetupController extends Controller
     {
         $businessType = $request->query('type', 'retail');
 
+        $countries = Country::active()->ordered()->get(['name', 'code'])->toArray();
+
+        $currencies = Country::active()
+            ->whereNotNull('currency_code')
+            ->selectRaw('currency_code as code, MIN(currency_symbol) as symbol')
+            ->groupBy('currency_code')
+            ->orderBy('currency_code')
+            ->get()
+            ->toArray();
+
         return Inertia::render('Setup/BusinessSettings', [
             'businessType' => $businessType,
+            'countries'    => $countries,
+            'currencies'   => $currencies,
         ]);
     }
 
@@ -231,30 +244,18 @@ class SetupController extends Controller
 
     private function getCurrencyMetadata(string $code): array
     {
-        $defaults = [
-            'USD' => ['name' => 'US Dollar', 'symbol' => '$'],
-            'EUR' => ['name' => 'Euro', 'symbol' => '€'],
-            'GBP' => ['name' => 'British Pound', 'symbol' => '£'],
-            'INR' => ['name' => 'Indian Rupee', 'symbol' => '₹'],
-            'AUD' => ['name' => 'Australian Dollar', 'symbol' => 'A$'],
-            'CAD' => ['name' => 'Canadian Dollar', 'symbol' => 'C$'],
-        ];
+        $country = Country::whereNotNull('currency_code')
+            ->where('currency_code', $code)
+            ->first(['currency_symbol']);
 
-        $meta = $defaults[$code] ?? ['name' => $code, 'symbol' => $code];
+        $symbol = $country?->currency_symbol ?? $code;
 
         return [
-            'name' => $meta['name'],
-            'symbol' => $meta['symbol'],
+            'name'           => $code,
+            'symbol'         => $symbol,
             'symbol_position' => 'before',
             'decimal_places' => 2,
-            'exchange_rate' => [
-                'USD' => 1.0,
-                'EUR' => 0.92,
-                'GBP' => 0.79,
-                'INR' => 83.0,
-                'AUD' => 1.52,
-                'CAD' => 1.36,
-            ][$code] ?? 1.0,
+            'exchange_rate'  => 1.0,
         ];
     }
 }

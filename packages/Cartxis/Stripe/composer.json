@@ -1,4 +1,4 @@
-{
+﻿{
   "name": "cartxis/stripe",
   "description": "Stripe payment gateway extension for Cartxis Commerce",
   "type": "vortex-extension",
