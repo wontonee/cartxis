@@ -19,6 +19,13 @@ class InstallCommand extends Command
     {
         $this->renderWelcomeBanner();
 
+        // Remove any stale Vite dev-server hot file so the app never tries
+        // to load assets from a non-existent Vite dev server.
+        $hotFile = public_path('hot');
+        if (file_exists($hotFile)) {
+            unlink($hotFile);
+        }
+
         // ── Step 1: .env ────────────────────────────────────────────────────
         $this->ensureEnvFile();
 
@@ -133,18 +140,39 @@ class InstallCommand extends Command
 
         $npmBin = $this->detectNodePackageManager();
 
-        if ($npmBin && $this->confirm("Build frontend assets now using {$npmBin}? (requires Node.js)", true)) {
+        if ($npmBin) {
+            $this->line("  Using <fg=cyan>{$npmBin}</fg=cyan> to build frontend assets...");
+
+            // Delete any stale pre-built assets (e.g. from the source repo)
+            // so the new build is guaranteed clean.
+            $buildDir = public_path('build');
+            if (is_dir($buildDir)) {
+                $this->line('  Removing stale build files...');
+                passthru('rm -rf ' . escapeshellarg($buildDir));
+            }
+
             $this->line("  Running {$npmBin} install...");
             passthru("{$npmBin} install");
+            $this->newLine();
             $this->line("  Running {$npmBin} run build...");
             passthru("{$npmBin} run build");
+            $this->newLine();
             $this->line('  <fg=green>✔</fg=green> Frontend assets built');
         } else {
-            $this->line('  Skipped. Run <fg=cyan>npm install && npm run build</fg=cyan> manually when ready.');
+            $this->newLine();
+            $this->line('<fg=red>━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━</fg=red>');
+            $this->line('<fg=red>  ⚠  Node.js / npm not found!</fg=red>');
+            $this->line('<fg=red>━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━</fg=red>');
+            $this->line('  The admin panel and storefront will NOT work until you');
+            $this->line('  build the frontend assets. Once Node.js is installed run:');
+            $this->newLine();
+            $this->line('      <fg=cyan>npm install && npm run build</fg=cyan>');
+            $this->newLine();
         }
 
         // ── Done ─────────────────────────────────────────────────────────────
-        $this->renderSuccessBanner($appUrl, $adminEmail, $adminPassword);
+        $assetsBuilt = $npmBin && file_exists(public_path('build/manifest.json'));
+        $this->renderSuccessBanner($appUrl, $adminEmail, $adminPassword, $assetsBuilt);
 
         return self::SUCCESS;
     }
@@ -170,7 +198,7 @@ class InstallCommand extends Command
         $this->newLine();
     }
 
-    private function renderSuccessBanner(string $appUrl, string $adminEmail, string $adminPassword): void
+    private function renderSuccessBanner(string $appUrl, string $adminEmail, string $adminPassword, bool $assetsBuilt = true): void
     {
         $this->newLine();
         $this->line('<fg=green>════════════════════════════════════════════════════</fg=green>');
@@ -181,6 +209,15 @@ class InstallCommand extends Command
         $this->line('  Email       : <fg=cyan>' . $adminEmail . '</fg=cyan>');
         $this->line('  Password    : <fg=cyan>' . $adminPassword . '</fg=cyan>');
         $this->newLine();
+
+        if (! $assetsBuilt) {
+            $this->line('<fg=yellow>  ⚠  Frontend assets not built.</fg=yellow>');
+            $this->line('<fg=yellow>     The app will not load correctly until you run:</fg=yellow>');
+            $this->newLine();
+            $this->line('       <fg=cyan>npm install && npm run build</fg=cyan>');
+            $this->newLine();
+        }
+
         $this->line('  To start the development server run:');
         $this->line('  <fg=cyan>  composer run dev</fg=cyan>');
         $this->newLine();
