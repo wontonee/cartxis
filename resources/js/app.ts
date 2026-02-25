@@ -1,6 +1,6 @@
 import '../css/app.css';
 
-import { createInertiaApp } from '@inertiajs/vue3';
+import { createInertiaApp, router } from '@inertiajs/vue3';
 import { resolvePageComponent } from 'laravel-vite-plugin/inertia-helpers';
 import type { DefineComponent } from 'vue';
 import { createApp, h } from 'vue';
@@ -45,3 +45,14 @@ createInertiaApp({
 
 // This will set light / dark mode on page load...
 initializeTheme();
+
+// Keep the CSRF token meta tag in sync after every Inertia soft navigation.
+// Without this, navigating between pages leaves the token stale after
+// Laravel regenerates the session (e.g. login/logout), causing 419 errors.
+router.on('navigate', (event) => {
+    const token = (event.detail.page.props as Record<string, unknown>).csrf_token as string | undefined;
+    if (token) {
+        const meta = document.querySelector<HTMLMetaElement>('meta[name="csrf-token"]');
+        if (meta) meta.content = token;
+    }
+});

@@ -9,3 +9,6 @@
 CHANGELOG.md export-ignore
 README.md export-ignore
 .github/workflows/browser-tests.yml export-ignore
+public/build export-ignore
+public/hot export-ignore
+node_modules export-ignore

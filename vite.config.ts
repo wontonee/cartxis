@@ -27,18 +27,6 @@ export default defineConfig({
             },
         }),
     ],
-    server: {
-        host: '0.0.0.0',
-        port: 5173,
-        strictPort: true,
-        hmr: {
-            host: 'cartxis.test',
-        },
-        cors: {
-            origin: ['https://cartxis.test', 'http://cartxis.test'],
-            credentials: true,
-        },
-    },
     resolve: {
         alias: [
             { find: /^@\/Layouts/, replacement: '/resources/js/layouts' },

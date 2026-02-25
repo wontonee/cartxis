@@ -141,6 +141,18 @@
             "php-http/discovery": true
         }
     },
+    "archive": {
+        "exclude": [
+            "/public/build",
+            "/public/hot",
+            "/node_modules",
+            "/.git",
+            "/storage/logs/*.log",
+            "/storage/framework/cache",
+            "/storage/framework/sessions",
+            "/storage/framework/views"
+        ]
+    },
     "minimum-stability": "stable",
     "prefer-stable": true
 }

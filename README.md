@@ -93,9 +93,16 @@ The interactive installer will guide you through:
 - Database configuration (with live connection test)
 - Admin account creation (name, email, and password)
 - Migrations and seeders
-- Building frontend assets (optional)
+- Building frontend assets automatically
 
 Once complete, the installer displays your admin panel URL, email, and password.
+
+> **If you see blank pages or asset errors after the setup wizard**, the frontend build may not have completed yet. Fix it by running:
+> ```bash
+> npm run build
+> # or if you use Yarn:
+> yarn build
+> ```
 
 ---
 
