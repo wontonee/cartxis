@@ -40,55 +40,6 @@
                         <p v-if="errors.store_name" class="mt-1 text-sm text-red-600">{{ errors.store_name }}</p>
                     </div>
 
-                    <!-- Admin Email -->
-                    <div>
-                        <label for="admin_email" class="block text-sm font-medium text-gray-700 mb-2">
-                            Admin Email <span class="text-red-500">*</span>
-                        </label>
-                        <input
-                            id="admin_email"
-                            v-model="form.admin_email"
-                            type="email"
-                            required
-                            placeholder="admin@example.com"
-                            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900"
-                            :class="{ 'border-red-500': errors.admin_email }"
-                        />
-                        <p v-if="errors.admin_email" class="mt-1 text-sm text-red-600">{{ errors.admin_email }}</p>
-                    </div>
-
-                    <!-- Admin Password (Optional) -->
-                    <div>
-                        <label for="admin_password" class="block text-sm font-medium text-gray-700 mb-2">
-                            Admin Password
-                        </label>
-                        <input
-                            id="admin_password"
-                            v-model="form.admin_password"
-                            type="password"
-                            placeholder="Leave blank to keep default admin"
-                            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900"
-                            :class="{ 'border-red-500': errors.admin_password }"
-                        />
-                        <p v-if="errors.admin_password" class="mt-1 text-sm text-red-600">{{ errors.admin_password }}</p>
-                    </div>
-
-                    <!-- Admin Password Confirmation -->
-                    <div>
-                        <label for="admin_password_confirmation" class="block text-sm font-medium text-gray-700 mb-2">
-                            Confirm Admin Password
-                        </label>
-                        <input
-                            id="admin_password_confirmation"
-                            v-model="form.admin_password_confirmation"
-                            type="password"
-                            placeholder="Re-enter admin password"
-                            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900"
-                            :class="{ 'border-red-500': errors.admin_password_confirmation }"
-                        />
-                        <p v-if="errors.admin_password_confirmation" class="mt-1 text-sm text-red-600">{{ errors.admin_password_confirmation }}</p>
-                    </div>
-
                     <!-- Contact Phone -->
                     <div>
                         <label for="contact_phone" class="block text-sm font-medium text-gray-700 mb-2">
@@ -185,7 +136,7 @@
             </div>
 
             <!-- Navigation Buttons -->
-            <div class="flex justify-between mt-8">
+            <div class="flex justify-between px-8 pb-8 mt-4">
                 <button
                     type="button"
                     @click="goBack"
@@ -230,9 +181,6 @@ const props = defineProps<{
 
 const form = ref({
     store_name: '',
-    admin_email: '',
-    admin_password: '',
-    admin_password_confirmation: '',
     contact_phone: '',
     store_address: '',
     store_country: '',
@@ -244,10 +192,9 @@ const errors = ref({});
 const processing = ref(false);
 
 const isValid = computed(() => {
-    return form.value.store_name && 
-           form.value.admin_email && 
-           form.value.store_country && 
-           form.value.currency && 
+    return form.value.store_name &&
+           form.value.store_country &&
+           form.value.currency &&
            form.value.timezone;
 });
 

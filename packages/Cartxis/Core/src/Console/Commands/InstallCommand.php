@@ -98,6 +98,12 @@ class InstallCommand extends Command
         $this->writeEnvValue('CARTXIS_ADMIN_EMAIL', $adminEmail);
         $this->writeEnvValue('CARTXIS_ADMIN_PASSWORD', $adminPassword);
 
+        // Also inject into the current process environment so env() resolves
+        // them immediately (writeEnvValue only updates the .env file on disk).
+        putenv("CARTXIS_ADMIN_NAME={$adminName}");
+        putenv("CARTXIS_ADMIN_EMAIL={$adminEmail}");
+        putenv("CARTXIS_ADMIN_PASSWORD={$adminPassword}");
+
         // ── Step 7: Seed ─────────────────────────────────────────────────────
         $this->newLine();
         $this->line('<fg=yellow>━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━</fg=yellow>');
@@ -109,6 +115,11 @@ class InstallCommand extends Command
         $this->removeEnvValue('CARTXIS_ADMIN_NAME');
         $this->removeEnvValue('CARTXIS_ADMIN_EMAIL');
         $this->removeEnvValue('CARTXIS_ADMIN_PASSWORD');
+
+        // Clear from process environment too
+        putenv('CARTXIS_ADMIN_NAME');
+        putenv('CARTXIS_ADMIN_EMAIL');
+        putenv('CARTXIS_ADMIN_PASSWORD');
 
         // ── Step 8: Storage link ─────────────────────────────────────────────
         $this->newLine();
