@@ -58,17 +58,27 @@ const updatePreferences = () => {
 };
 
 // Delete Account
-// const showDeleteModal = ref(false);
+const showDeleteModal = ref(false);
 const deleteForm = useForm({
   password: '',
 });
 
 const deleteAccount = () => {
-  if (confirm('Are you sure you want to delete your account? This action cannot be undone.')) {
-    deleteForm.delete('/account/profile', {
-      preserveScroll: true,
-    });
-  }
+  showDeleteModal.value = true;
+};
+
+const cancelDelete = () => {
+  showDeleteModal.value = false;
+  deleteForm.reset();
+};
+
+const confirmDelete = () => {
+  deleteForm.delete('/account/profile', {
+    preserveScroll: true,
+    onError: () => {
+      // Keep modal open so user can correct the password
+    },
+  });
 };
 </script>
 
@@ -274,7 +284,8 @@ const deleteAccount = () => {
           <div class="bg-red-50 rounded-lg border border-red-200 p-6">
             <h2 class="text-xl font-semibold text-red-900 mb-4">Danger Zone</h2>
             <p class="text-sm text-red-800 mb-4">
-              Once you delete your account, there is no going back. Please be certain.
+              Once you delete your account, all your personal data will be permanently removed.
+              Your order history will be anonymized but retained for our records.
             </p>
             
             <button
@@ -287,5 +298,58 @@ const deleteAccount = () => {
         </div>
       </div>
     </div>
+
+    <!-- Delete Account Confirmation Modal -->
+    <Teleport to="body">
+      <div
+        v-if="showDeleteModal"
+        class="fixed inset-0 z-50 flex items-center justify-center bg-black/50"
+        @click.self="cancelDelete"
+      >
+        <div class="bg-white rounded-xl shadow-xl w-full max-w-md mx-4 p-6">
+          <h3 class="text-xl font-bold text-red-700 mb-2">Delete Your Account</h3>
+          <p class="text-sm text-gray-700 mb-4">
+            This action is <strong>permanent and irreversible</strong>. Your account, cart,
+            addresses, and wishlist will be deleted. Orders will be anonymized.
+          </p>
+
+          <div class="mb-4">
+            <label for="delete-password" class="block text-sm font-medium text-gray-700 mb-1">
+              Confirm your password
+            </label>
+            <input
+              id="delete-password"
+              v-model="deleteForm.password"
+              type="password"
+              autocomplete="current-password"
+              class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent"
+              :class="{ 'border-red-500': deleteForm.errors.password }"
+              @keyup.enter="confirmDelete"
+            />
+            <p v-if="deleteForm.errors.password" class="mt-1 text-sm text-red-600">
+              {{ deleteForm.errors.password }}
+            </p>
+          </div>
+
+          <div class="flex gap-3 justify-end">
+            <button
+              type="button"
+              @click="cancelDelete"
+              class="px-5 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors"
+            >
+              Cancel
+            </button>
+            <button
+              type="button"
+              :disabled="deleteForm.processing || !deleteForm.password"
+              @click="confirmDelete"
+              class="px-5 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+            >
+              {{ deleteForm.processing ? 'Deleting...' : 'Yes, Delete My Account' }}
+            </button>
+          </div>
+        </div>
+      </div>
+    </Teleport>
   </ThemeLayout>
 </template>

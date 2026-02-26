@@ -86,6 +86,7 @@ Route::group([
         Route::get('/profile', [Cartxis\Shop\Http\Controllers\Account\ProfileController::class, 'show'])->name('profile.show');
         Route::put('/profile', [Cartxis\Shop\Http\Controllers\Account\ProfileController::class, 'update'])->name('profile.update');
         Route::put('/password', [Cartxis\Shop\Http\Controllers\Account\ProfileController::class, 'updatePassword'])->name('password.update');
+        Route::delete('/profile', [Cartxis\Shop\Http\Controllers\Account\ProfileController::class, 'destroy'])->name('profile.destroy');
     });
 
     /*
@@ -104,4 +105,11 @@ Route::group([
         Route::get('/track-order', [Cartxis\Shop\Http\Controllers\Checkout\CheckoutController::class, 'guestTrack'])->name('track');
         Route::post('/track-order', [Cartxis\Shop\Http\Controllers\Checkout\CheckoutController::class, 'guestTrackLookup'])->name('track.lookup');
     });
+
+    /*
+    |--------------------------------------------------------------------------
+    | Account Deletion Info (public — required by Google Play / App Store)
+    |--------------------------------------------------------------------------
+    */
+    Route::get('/account-deletion', [Cartxis\Shop\Http\Controllers\Account\ProfileController::class, 'deletionInfo'])->name('account.deletion');
 });

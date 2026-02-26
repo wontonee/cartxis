@@ -1,7 +1,7 @@
 {
     "$schema": "https://getcomposer.org/schema.json",
     "name": "cartxis/cartxis",
-    "version": "1.0.7",
+    "version": "1.0.8",
     "type": "project",
     "description": "Open source eCommerce for Laravel, Inertia.js and Vue 3.",
     "keywords": [
