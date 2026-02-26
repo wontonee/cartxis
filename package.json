@@ -41,6 +41,7 @@
         "@tiptap/starter-kit": "^3.10.1",
         "@tiptap/vue-3": "^3.10.1",
         "@vueuse/core": "^12.8.2",
+        "axios": "^1.13.5",
         "chart.js": "^4.5.1",
         "class-variance-authority": "^0.7.1",
         "clsx": "^2.1.1",

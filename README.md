@@ -54,6 +54,27 @@ A full **REST API** is available for building a mobile app (iOS & Android):
 
 Native iOS & Android apps are coming soon.
 
+#### 🗑️ Google Play / App Store — Account Deletion URL
+
+Google Play Store (and Apple App Store) require apps that support account creation to provide a **publicly accessible account deletion page** as part of their Data Safety policy.
+
+Cartxis includes this page out of the box. When submitting your app, use the following URL pattern:
+
+```
+https://yourdomain.com/account-deletion
+```
+
+**Example:** `https://shop.example.com/account-deletion`
+
+This page:
+- Is publicly accessible (no login required)
+- Explains step-by-step how users can delete their account from within the app
+- Lists what data is permanently deleted (profile, addresses, wishlist, cart, tokens)
+- Discloses what is retained (anonymized order records for accounting, 7-year minimum)
+- Provides an email contact (`dev@wontonee.com`) for users who cannot log in
+
+In the **Google Play Console → App content → Data safety**, paste this URL in the **"Delete account URL"** field.
+
 ### 🔧 Technical Features
 - **Modular Architecture** — Package-based structure for easy extension
 - **MySQL 8.0+** — Optimised relational database layer

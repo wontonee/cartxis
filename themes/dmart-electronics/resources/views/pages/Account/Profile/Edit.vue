@@ -2,7 +2,7 @@
 import { Head, useForm, usePage } from '@inertiajs/vue3';
 import ThemeLayout from '../../../layouts/ThemeLayout.vue';
 import Breadcrumb from '../../../components/Breadcrumb.vue';
-import { User, Mail, Lock, Check } from 'lucide-vue-next';
+import { User, Mail, Lock, Check, TriangleAlert } from 'lucide-vue-next';
 import { ref } from 'vue';
 
 interface Props {
@@ -35,6 +35,18 @@ const updatePassword = () => {
     passwordForm.put('/account/password', {
         onSuccess: () => passwordForm.reset(),
         onFinish: () => passwordForm.reset('current_password'),
+    });
+};
+
+// Delete Account
+const showDeleteModal = ref(false);
+const deleteForm = useForm({ password: '' });
+
+const deleteAccount = () => { showDeleteModal.value = true; };
+const cancelDelete = () => { showDeleteModal.value = false; deleteForm.reset(); };
+const confirmDelete = () => {
+    deleteForm.delete('/account/profile', {
+        onError: () => { /* keep modal open on wrong password */ },
     });
 };
 
@@ -93,7 +105,7 @@ const breadcrumbs = [
                 </div>
 
                 <!-- Change Password -->
-                <div class="border rounded-2xl p-6">
+                <div class="border rounded-2xl p-6 mb-6">
                     <h3 class="font-bold mb-5 flex items-center gap-2 font-title">
                         <Lock class="w-5 h-5 text-theme-1" /> Change Password
                     </h3>
@@ -117,8 +129,70 @@ const breadcrumbs = [
                         </button>
                     </form>
                 </div>
+
+                <!-- Danger Zone -->
+                <div class="border border-red-200 bg-red-50 rounded-2xl p-6">
+                    <h3 class="font-bold mb-2 flex items-center gap-2 font-title text-red-700">
+                        <TriangleAlert class="w-5 h-5" /> Danger Zone
+                    </h3>
+                    <p class="text-sm text-red-700 mb-4">
+                        Once you delete your account, all personal data is permanently removed.
+                        Orders will be anonymized but retained for our records.
+                    </p>
+                    <button @click="deleteAccount" class="px-5 py-2.5 bg-red-600 hover:bg-red-700 text-white text-sm font-semibold rounded-xl transition-colors">
+                        Delete My Account
+                    </button>
+                </div>
             </div>
         </section>
+
+        <!-- Delete Account Confirmation Modal -->
+        <Teleport to="body">
+            <div
+                v-if="showDeleteModal"
+                class="fixed inset-0 z-50 flex items-center justify-center bg-black/50"
+                @click.self="cancelDelete"
+            >
+                <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md mx-4 p-6">
+                    <h3 class="text-lg font-extrabold text-red-700 font-title mb-2">Delete Your Account</h3>
+                    <p class="text-sm text-gray-600 mb-5">
+                        This is <strong>permanent and irreversible</strong>. Your cart, addresses,
+                        and wishlist will be deleted. Orders will be anonymized.
+                    </p>
+
+                    <div class="mb-5">
+                        <label class="block text-sm font-semibold mb-1.5">Confirm your password</label>
+                        <input
+                            v-model="deleteForm.password"
+                            type="password"
+                            autocomplete="current-password"
+                            class="w-full px-4 py-3 border rounded-xl text-sm focus:border-red-400 focus:ring-0"
+                            :class="{ 'border-red-500': deleteForm.errors.password }"
+                            @keyup.enter="confirmDelete"
+                        />
+                        <p v-if="deleteForm.errors.password" class="text-red-500 text-xs mt-1">{{ deleteForm.errors.password }}</p>
+                    </div>
+
+                    <div class="flex gap-3 justify-end">
+                        <button
+                            type="button"
+                            @click="cancelDelete"
+                            class="px-5 py-2.5 border rounded-xl text-sm font-semibold text-gray-700 hover:bg-gray-50 transition-colors"
+                        >
+                            Cancel
+                        </button>
+                        <button
+                            type="button"
+                            :disabled="deleteForm.processing || !deleteForm.password"
+                            @click="confirmDelete"
+                            class="px-5 py-2.5 bg-red-600 hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed text-white text-sm font-semibold rounded-xl transition-colors"
+                        >
+                            {{ deleteForm.processing ? 'Deleting...' : 'Yes, Delete My Account' }}
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </Teleport>
     </ThemeLayout>
 </template>
 

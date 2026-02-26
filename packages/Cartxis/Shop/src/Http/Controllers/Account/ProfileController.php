@@ -7,6 +7,10 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rules\Password;
 use Cartxis\Shop\Http\Controllers\Controller;
 use Cartxis\Core\Services\ThemeViewResolver;
+use Cartxis\Core\Services\SettingService;
+use Cartxis\Cart\Models\Cart;
+use Cartxis\Shop\Models\Order;
+use Cartxis\Customer\Models\Customer;
 
 class ProfileController extends Controller
 {
@@ -103,7 +107,33 @@ class ProfileController extends Controller
     }
 
     /**
-     * Delete the user's account.
+     * Public account-deletion info page (no auth required).
+     * Required by Google Play Store / Apple App Store data-safety policies.
+     */
+    public function deletionInfo()
+    {
+        $settings = app(SettingService::class);
+        $appUrl = rtrim(config('app.url'), '/');
+
+        // Use support_email from admin settings, fall back to admin_email,
+        // then fall back to the hardcoded support address.
+        $supportEmail = $settings->get('support_email')
+            ?: $settings->get('admin_email')
+            ?: 'dev@wontonee.com';
+
+        return $this->themeResolver->inertia('Account/DeletionInfo', [
+            'appName'      => config('app.name'),
+            'supportEmail' => $supportEmail,
+            'appUrl'       => $appUrl,
+        ]);
+    }
+
+    /**
+     * Delete the user's account and associated data.
+     *
+     * Orders are anonymized (kept for business records), all other personal
+     * data (cart, addresses, wishlist, customer profile, API tokens) is
+     * permanently deleted.
      */
     public function destroy(Request $request)
     {
@@ -112,16 +142,38 @@ class ProfileController extends Controller
         ]);
 
         $user = auth()->user();
+        $userId = $user->id;
 
-        // Logout the user
+        // 1. Anonymize orders — keep for accounting/legal records but remove PII
+        //    Note: customer_id is auto-nullified by FK nullOnDelete when customer is deleted
+        Order::where('user_id', $userId)->update([
+            'user_id'        => null,
+            'customer_email' => null,
+            'customer_phone' => null,
+        ]);
+
+        // 2. Delete cart
+        Cart::where('user_id', $userId)->delete();
+
+        // 3. Delete customer profile and related data (addresses + wishlist)
+        $customer = Customer::where('user_id', $userId)->first();
+        if ($customer) {
+            $customer->wishlists()->delete();
+            $customer->addresses()->delete();
+            $customer->delete();
+        }
+
+        // 4. Revoke all API tokens (Sanctum)
+        $user->tokens()->delete();
+
+        // 5. Log out and destroy session before deleting the user row
         auth()->logout();
-
-        // Delete the user account
-        $user->delete();
-
         $request->session()->invalidate();
         $request->session()->regenerateToken();
 
-        return redirect('/')->with('success', 'Your account has been deleted.');
+        // 6. Permanently delete the user
+        $user->delete();
+
+        return redirect('/')->with('success', 'Your account has been permanently deleted.');
     }
 }
