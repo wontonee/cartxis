@@ -24,6 +24,7 @@ use Cartxis\Sales\Database\Seeders\CreditMemoEmailTemplatesSeeder;
 use Cartxis\Sales\Database\Seeders\ShipmentEmailTemplatesSeeder;
 use Cartxis\Settings\Database\Seeders\AiSettingsSeeder;
 use Cartxis\UIEditor\Database\Seeders\UIEditorSnippetsSeeder;
+use Cartxis\UIEditor\Database\Seeders\GlobalRegionSeeder;
 
 class DatabaseSeeder extends Seeder
 {
@@ -73,6 +74,7 @@ class DatabaseSeeder extends Seeder
 
             // UIEditor Package Seeders
             UIEditorSnippetsSeeder::class,
+            GlobalRegionSeeder::class,
         ]);
     }
 }

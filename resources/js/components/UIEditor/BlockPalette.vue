@@ -128,120 +128,27 @@ function switchTab(tab: 'blocks' | 'saved' | 'snippets' | 'regions') {
   if (tab === 'regions') loadRegions()
 }
 
-// ── Built-in Snippets ──────────────────────────────────────────────────────
-interface BuiltinSnippet {
-  id: string
-  name: string
-  description: string
-  icon: string
-  layout_data: Record<string, unknown>
+// ── Built-in Snippets (loaded from DB via store) ─────────────────────────
+const snippetsLoading = ref(false)
+
+async function loadSnippets() {
+  if (store.snippets.length > 0) return
+  snippetsLoading.value = true
+  await store.fetchSnippets()
+  snippetsLoading.value = false
 }
 
-const builtinSnippets: BuiltinSnippet[] = [
-  {
-    id: 'hero-dark',
-    name: 'Hero — Dark',
-    description: 'Full-width dark hero with CTA',
-    icon: 'image',
-    layout_data: {
-      id: 'section', type: 'section',
-      settings: { background_color: '#0f172a', padding_top: 80, padding_bottom: 80, full_width: true },
-      columns: [{ id: 'col1', width: 12, settings: {}, blocks: [
-        { id: 'b1', type: 'hero', settings: { headline: 'Welcome Back', subheading: 'Discover new arrivals and exclusive deals.', cta_text: 'Shop Now', cta_url: '/products', height: 480 } }
-      ]}]
-    }
-  },
-  {
-    id: 'features-4col',
-    name: 'Features — 4 Column',
-    description: 'Four icon boxes in a row',
-    icon: 'layout-grid',
-    layout_data: {
-      id: 'section', type: 'section',
-      settings: { background_color: '#f8fafc', padding_top: 48, padding_bottom: 48, full_width: false },
-      columns: [
-        { id: 'c1', width: 3, settings: {}, blocks: [{ id: 'b1', type: 'icon_box', settings: { icon: 'truck',      icon_color: '#2563eb', title: 'Free Shipping',   description: 'On orders over $50.',            align: 'center' } }] },
-        { id: 'c2', width: 3, settings: {}, blocks: [{ id: 'b2', type: 'icon_box', settings: { icon: 'shield',     icon_color: '#16a34a', title: 'Secure Payment', description: '100% encrypted.',              align: 'center' } }] },
-        { id: 'c3', width: 3, settings: {}, blocks: [{ id: 'b3', type: 'icon_box', settings: { icon: 'refresh-cw', icon_color: '#d97706', title: 'Easy Returns',   description: '30-day hassle-free returns.',   align: 'center' } }] },
-        { id: 'c4', width: 3, settings: {}, blocks: [{ id: 'b4', type: 'icon_box', settings: { icon: 'headphones', icon_color: '#7c3aed', title: '24/7 Support',   description: 'Always here to help.',          align: 'center' } }] },
-      ]
-    }
-  },
-  {
-    id: 'newsletter-split',
-    name: 'Newsletter — Split',
-    description: 'Dark newsletter with email form',
-    icon: 'mail',
-    layout_data: {
-      id: 'section', type: 'section',
-      settings: { background_color: '#0f172a', padding_top: 0, padding_bottom: 0, full_width: true },
-      columns: [{ id: 'col1', width: 12, settings: {}, blocks: [
-        { id: 'b1', type: 'newsletter', settings: { bg_color: '#0f172a', layout: 'split', title: 'Join Thousands of Happy Shoppers', cta_text: 'Subscribe Free' } }
-      ]}]
-    }
-  },
-  {
-    id: 'testimonials-3col',
-    name: 'Testimonials — 3 Column',
-    description: 'Three customer review cards',
-    icon: 'message-square',
-    layout_data: {
-      id: 'section', type: 'section',
-      settings: { background_color: '#ffffff', padding_top: 64, padding_bottom: 64, full_width: false },
-      columns: [{ id: 'col1', width: 12, settings: {}, blocks: [
-        { id: 'b1', type: 'heading', settings: { level: 'h2', text: 'What Our Customers Say', align: 'center', color: '#111827' } },
-        { id: 'b2', type: 'spacer',  settings: { height: 32 } },
-        { id: 'b3', type: 'testimonials', settings: { items: [
-          { author: 'Sarah M.', text: 'Absolutely love this store! Outstanding quality and lightning-fast delivery.', rating: 5 },
-          { author: 'James K.', text: "Best online shopping experience I've had. Accurate descriptions, top notch service.", rating: 5 },
-          { author: 'Emily R.', text: 'Great prices, huge selection, and beautiful packaging. Highly recommended!', rating: 5 },
-        ]}}
-      ]}]
-    }
-  },
-  {
-    id: 'cta-centered',
-    name: 'CTA — Centered Banner',
-    description: 'Blue centred call-to-action',
-    icon: 'mouse-pointer',
-    layout_data: {
-      id: 'section', type: 'section',
-      settings: { background_color: '#2563eb', padding_top: 64, padding_bottom: 64, full_width: false },
-      columns: [{ id: 'col1', width: 12, settings: {}, blocks: [
-        { id: 'b1', type: 'heading', settings: { level: 'h2', text: 'Ready to Shop?', align: 'center', color: '#ffffff' } },
-        { id: 'b2', type: 'text',    settings: { content: '<p style="text-align:center;color:rgba(255,255,255,0.8)">Browse thousands of products at unbeatable prices.</p>' } },
-        { id: 'b3', type: 'spacer',  settings: { height: 16 } },
-        { id: 'b4', type: 'button',  settings: { text: 'Shop Now', url: '/products', align: 'center', style: 'solid', bg_color: '#ffffff', text_color: '#1d4ed8' } },
-      ]}]
-    }
-  },
-  {
-    id: 'why-us-dark',
-    name: 'Why Us — Dark 3 Column',
-    description: 'Dark section with benefit icons',
-    icon: 'zap',
-    layout_data: {
-      id: 'section', type: 'section',
-      settings: { background_color: '#0f172a', padding_top: 64, padding_bottom: 64, full_width: false },
-      columns: [
-        { id: 'c1', width: 4, settings: {}, blocks: [{ id: 'b1', type: 'icon_box', settings: { icon: 'star',       icon_color: '#f59e0b', icon_size: 40, title: 'Premium Quality', description: 'Every item is quality-checked before it ships.', align: 'center', title_color: '#ffffff', desc_color: 'rgba(255,255,255,0.55)' } }] },
-        { id: 'c2', width: 4, settings: {}, blocks: [{ id: 'b2', type: 'icon_box', settings: { icon: 'zap',        icon_color: '#38bdf8', icon_size: 40, title: 'Fast Delivery',   description: 'Same-day shipping on orders placed before 12pm.', align: 'center', title_color: '#ffffff', desc_color: 'rgba(255,255,255,0.55)' } }] },
-        { id: 'c3', width: 4, settings: {}, blocks: [{ id: 'b3', type: 'icon_box', settings: { icon: 'heart',      icon_color: '#f43f5e', icon_size: 40, title: 'Customer Love',  description: 'Over 50,000 happy customers and counting.',     align: 'center', title_color: '#ffffff', desc_color: 'rgba(255,255,255,0.55)' } }] },
-      ]
-    }
-  },
-]
 
 const snippetSearch = ref('')
 const filteredSnippets = computed(() => {
   const q = snippetSearch.value.toLowerCase()
-  if (!q) return builtinSnippets
-  return builtinSnippets.filter(s =>
-    s.name.toLowerCase().includes(q) || s.description.toLowerCase().includes(q)
+  if (!q) return store.snippets
+  return store.snippets.filter(s =>
+    s.name.toLowerCase().includes(q) || (s.description ?? '').toLowerCase().includes(q)
   )
 })
 
-function addSnippet(snippet: import('@/Stores/uiEditorStore').SavedBlockItem) {
+function addSnippet(snippet: SavedBlockItem) {
   store.addSectionFromTemplate(snippet.layout_data)
 }
 
@@ -365,7 +272,7 @@ onMounted(() => loadSaved())
         <span
           v-if="tab === 'snippets'"
           class="ml-1 inline-flex items-center justify-center w-4 h-4 rounded-full bg-violet-100 dark:bg-violet-900/40 text-violet-600 dark:text-violet-400 text-[10px] font-bold"
-        >{{ builtinSnippets.length }}</span>
+        >{{ store.snippets.length || '…' }}</span>
         <span
           v-if="tab === 'saved' && store.savedBlocks.length > 0"
           class="ml-1 inline-flex items-center justify-center w-4 h-4 rounded-full bg-blue-100 dark:bg-blue-900/40 text-blue-600 dark:text-blue-400 text-[10px] font-bold"
