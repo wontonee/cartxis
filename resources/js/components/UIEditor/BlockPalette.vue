@@ -123,6 +123,7 @@ function endDrag() {
 
 function switchTab(tab: 'blocks' | 'saved' | 'snippets' | 'regions') {
   activeTab.value = tab
+  if (tab === 'snippets') loadSnippets()
   if (tab === 'saved') loadSaved()
   if (tab === 'regions') loadRegions()
 }
@@ -240,7 +241,7 @@ const filteredSnippets = computed(() => {
   )
 })
 
-function addSnippet(snippet: BuiltinSnippet) {
+function addSnippet(snippet: import('@/Stores/uiEditorStore').SavedBlockItem) {
   store.addSectionFromTemplate(snippet.layout_data)
 }
 
@@ -466,7 +467,14 @@ onMounted(() => loadSaved())
         </div>
       </div>
 
-      <div class="flex-1 overflow-y-auto">
+        <div class="flex-1 overflow-y-auto">
+        <div v-if="snippetsLoading" class="flex items-center justify-center py-12">
+          <svg class="animate-spin w-5 h-5 text-violet-500" fill="none" viewBox="0 0 24 24">
+            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" />
+            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z" />
+          </svg>
+        </div>
+        <template v-else>
         <p class="px-3 pt-3 pb-1 text-xs font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wider">Built-in</p>
         <div class="px-2 pb-2 space-y-1">
           <div
@@ -476,7 +484,7 @@ onMounted(() => loadSaved())
             @click="addSnippet(snippet)"
           >
             <svg class="w-4 h-4 flex-shrink-0 text-violet-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" :d="getIconPath(snippet.icon)" />
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 5a1 1 0 011-1h14a1 1 0 011 1v3a1 1 0 01-1 1H5a1 1 0 01-1-1V5zM4 13a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H5a1 1 0 01-1-1v-6zM16 13a1 1 0 011-1h2a1 1 0 011 1v6a1 1 0 01-1 1h-2a1 1 0 01-1-1v-6z" />
             </svg>
             <div class="flex-1 min-w-0">
               <p class="text-xs font-medium text-gray-800 dark:text-gray-200 truncate">{{ snippet.name }}</p>
@@ -508,6 +516,7 @@ onMounted(() => loadSaved())
               </div>
             </div>
           </div>
+        </template>
         </template>
       </div>
     </template>

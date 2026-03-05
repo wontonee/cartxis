@@ -17,12 +17,14 @@ class SavedBlock extends Model
         'name',
         'description',
         'type',
+        'is_builtin',
         'layout_data',
         'thumbnail',
         'created_by',
     ];
 
     protected $casts = [
+        'is_builtin'  => 'boolean',
         'layout_data' => 'array',
         'created_at'  => 'datetime',
         'updated_at'  => 'datetime',

@@ -41,7 +41,10 @@ Route::middleware(['web', 'auth:admin'])->prefix('admin')->name('admin.')->group
         Route::get('/products/search', [ProductsSearchController::class, 'index'])
             ->name('products.search');
 
-        // ── Saved Blocks (Reusable components) ───────────────────────────────
+        // ── Built-in Snippets (seeded, read-only) ────────────────────────────
+        Route::get('snippets', [SavedBlocksController::class, 'snippets'])->name('snippets');
+
+        // ── Saved Blocks (user-created reusables) ─────────────────────────────
         Route::prefix('saved-blocks')->name('saved-blocks.')->group(function () {
             Route::get('/',        [SavedBlocksController::class, 'index'])  ->name('index');
             Route::post('/',       [SavedBlocksController::class, 'store'])  ->name('store');

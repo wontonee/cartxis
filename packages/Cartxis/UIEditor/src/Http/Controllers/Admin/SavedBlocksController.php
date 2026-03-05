@@ -12,14 +12,28 @@ use Cartxis\UIEditor\Models\SavedBlock;
 class SavedBlocksController extends Controller
 {
     /**
+     * GET /admin/uieditor/snippets
+     * Return built-in (seeded) snippets.
+     */
+    public function snippets(): JsonResponse
+    {
+        $snippets = SavedBlock::where('is_builtin', true)
+            ->orderBy('name')
+            ->get(['id', 'name', 'description', 'type', 'layout_data', 'is_builtin', 'created_at']);
+
+        return response()->json($snippets);
+    }
+
+    /**
      * GET /admin/uieditor/saved-blocks
-     * Return all saved blocks as JSON array.
+     * Return user-created saved blocks (not built-in).
      */
     public function index(): JsonResponse
     {
-        $blocks = SavedBlock::orderBy('type')
+        $blocks = SavedBlock::where('is_builtin', false)
+            ->orderBy('type')
             ->orderBy('name')
-            ->get(['id', 'name', 'description', 'type', 'layout_data', 'created_at']);
+            ->get(['id', 'name', 'description', 'type', 'layout_data', 'is_builtin', 'created_at']);
 
         return response()->json($blocks);
     }
