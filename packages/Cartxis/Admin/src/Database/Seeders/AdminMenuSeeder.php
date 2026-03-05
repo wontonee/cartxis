@@ -313,6 +313,16 @@ class AdminMenuSeeder extends Seeder
                 'location' => 'admin',
                 'active' => false,
             ],
+            [
+                'key' => 'content-global-regions',
+                'title' => 'Reusable Sections',
+                'icon' => 'layout-template',
+                'route' => 'admin.uieditor.regions.index',
+                'parent_id' => $contentId,
+                'order' => 6,
+                'location' => 'admin',
+                'active' => true,
+            ],
 
             // Reports Children
             [

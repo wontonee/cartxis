@@ -1,13 +1,13 @@
 <template>
-    <AdminLayout title="Blocks">
-        <Head title="Blocks" />
+    <AdminLayout title="Snippets">
+        <Head title="Snippets" />
 
         <div class="p-6 space-y-6">
             <!-- Header -->
             <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                 <div>
-                    <h1 class="text-2xl font-bold text-gray-900 dark:text-white">Content Blocks</h1>
-                    <p class="mt-1 text-sm text-gray-600 dark:text-gray-400">Manage reusable content blocks for your store</p>
+                    <h1 class="text-2xl font-bold text-gray-900 dark:text-white">Snippets</h1>
+                    <p class="mt-1 text-sm text-gray-600 dark:text-gray-400">Manage reusable content snippets for your store</p>
                 </div>
                 <Link
                     :href="blockRoutes.create.url()"

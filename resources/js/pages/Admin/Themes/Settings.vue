@@ -77,7 +77,7 @@ const goBack = () => {
 </script>
 
 <template>
-  <AdminLayout>
+  <AdminLayout :title="`${theme.name} Settings`">
     <Head :title="`${theme.name} Settings`" />
 
     <div class="py-8">

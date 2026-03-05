@@ -1,6 +1,6 @@
 ## How to use this template
 
-1. Copy the folder `extension/templates/payment-gateway/` to `extensions/<your-extension>/`.
+1. Copy the folder `extension/templates/payment-gateway/` to `extension/<your-extension>/`.
 2. Update `extension.json`:
    - `code`, `name`, `author`, `provider`
 3. Update namespaces in PHP files:

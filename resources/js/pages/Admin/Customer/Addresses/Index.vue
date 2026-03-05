@@ -70,7 +70,7 @@ function setDefaultBilling(id: number) {
 </script>
 
 <template>
-  <AdminLayout>
+  <AdminLayout title="Customer Addresses">
     <Head title="Addresses" />
 
     <div class="p-6">

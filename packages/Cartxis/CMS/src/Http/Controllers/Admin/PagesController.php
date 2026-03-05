@@ -58,8 +58,8 @@ class PagesController extends Controller
             $page = $this->pageService->create($request->validated());
 
             return redirect()
-                ->route('admin.content.pages.index')
-                ->with('success', 'Page created successfully.');
+                ->route('admin.uieditor.pages.editor', $page)
+                ->with('success', 'Page created — now design it with the block editor.');
         } catch (\Exception $e) {
             return back()
                 ->withInput()
@@ -69,14 +69,11 @@ class PagesController extends Controller
 
     /**
      * Show the form for editing the specified page.
+     * Redirects to the UIEditor (visual block editor).
      */
-    public function edit(Page $page): Response
+    public function edit(Page $page): RedirectResponse
     {
-        $page->load(['creator', 'updater']);
-        
-        return Inertia::render('Admin/Content/Pages/Edit', [
-            'page' => PageResource::make($page)->resolve(),
-        ]);
+        return redirect()->route('admin.uieditor.pages.editor', $page);
     }
 
     /**

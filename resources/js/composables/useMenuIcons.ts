@@ -1,6 +1,8 @@
 import { Component } from 'vue'
 import {
   LayoutDashboard,
+  Layout,
+  Monitor,
   ShoppingBag,
   ShoppingCart,
   User,
@@ -10,6 +12,8 @@ import {
   BarChart3,
   Settings,
   Package,
+  LayoutTemplate,
+  MessageCircle,
   FolderTree,
   ListChecks,
   Tag,
@@ -101,6 +105,10 @@ export function useMenuIcons() {
     'palette': Palette,
     'brush': Paintbrush,
     'sliders': SlidersHorizontal,
+    'message-circle': MessageCircle,
+    'layout': Layout,
+    'monitor': Monitor,
+    'layout-template': LayoutTemplate,
   }
 
   const getIcon = (iconName: string): Component | null => {

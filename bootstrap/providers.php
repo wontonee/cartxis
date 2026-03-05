@@ -18,6 +18,7 @@ return [
     Cartxis\Customer\Providers\CustomerServiceProvider::class,
     Cartxis\Setup\Providers\SetupServiceProvider::class,  // Must be before CMS to prevent catch-all route conflict
     Cartxis\CMS\Providers\CMSServiceProvider::class,
+    Cartxis\UIEditor\Providers\UIEditorServiceProvider::class,
     Cartxis\System\Providers\SystemServiceProvider::class,
     Cartxis\Reports\ReportsServiceProvider::class,
     Cartxis\Marketing\MarketingServiceProvider::class,

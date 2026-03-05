@@ -1,7 +1,7 @@
 <template>
   <Head title="Edit Shipping Method" />
 
-  <AdminLayout>
+  <AdminLayout title="Edit Shipping Method">
     <div class="space-y-6">
       <!-- Header -->
       <div class="flex items-center justify-between">

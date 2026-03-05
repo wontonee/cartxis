@@ -113,7 +113,7 @@ function cancel() {
 <template>
   <Head title="Create Shipment" />
 
-  <AdminLayout>
+  <AdminLayout title="Create Shipment">
     <div class="space-y-6">
       <!-- Header -->
       <div>

@@ -3,6 +3,7 @@
 namespace Cartxis\Core\Providers;
 
 use Illuminate\Support\ServiceProvider;
+use Cartxis\Core\Console\Commands\ExtensionMakeCommand;
 use Cartxis\Core\Console\Commands\ExtensionsActivateCommand;
 use Cartxis\Core\Console\Commands\ExtensionsDeactivateCommand;
 use Cartxis\Core\Console\Commands\ExtensionsInstallCommand;
@@ -82,6 +83,7 @@ class CoreServiceProvider extends ServiceProvider
                 \Cartxis\Core\Console\Commands\InstallCommand::class,
                 ExtensionsListCommand::class,
                 ExtensionsSyncCommand::class,
+                ExtensionMakeCommand::class,
                 ExtensionsInstallCommand::class,
                 ExtensionsUninstallCommand::class,
                 ExtensionsActivateCommand::class,

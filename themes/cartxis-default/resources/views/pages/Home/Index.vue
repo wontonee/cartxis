@@ -2,6 +2,7 @@
 import { Head } from '@inertiajs/vue3';
 import { computed, ref } from 'vue';
 import ThemeLayout from '../../layouts/ThemeLayout.vue';
+import UIBlockRenderer from '@/components/UIEditor/UIBlockRenderer.vue';
 
 interface Category {
     id: number;
@@ -61,9 +62,11 @@ interface Props {
         url: string;
         description: string;
     };
+    layoutData?: Record<string, unknown> | null;
 }
 
 const props = defineProps<Props>();
+const hasLayout = computed(() => !!(props.layoutData?.sections && (props.layoutData.sections as unknown[]).length));
 
 const primaryColor = computed(() => props.theme?.settings?.['colors.primary'] ?? props.theme?.settings?.['colors.primary_color'] ?? props.theme?.settings?.primary_color ?? '#3b82f6');
 const secondaryColor = computed(() => props.theme?.settings?.['colors.secondary'] ?? props.theme?.settings?.['colors.secondary_color'] ?? props.theme?.settings?.secondary_color ?? '#8b5cf6');
@@ -176,7 +179,12 @@ const subscribeNewsletter = async () => {
 <template>
     <ThemeLayout>
         <Head :title="`${siteConfig.name} - Premium E-Commerce Store`" />
-        
+
+        <!-- Visual Editor layout overrides the homepage when published -->
+        <template v-if="hasLayout">
+            <UIBlockRenderer :layout="layoutData" :editor-mode="false" />
+        </template>
+        <template v-else>
         <!-- Hero Slider -->
         <section class="relative h-[500px] md:h-[600px] overflow-hidden">
             <div class="absolute inset-0">
@@ -366,6 +374,7 @@ const subscribeNewsletter = async () => {
             </div>
         </section>
 
+        </template><!-- /v-else -->
     </ThemeLayout>
 </template>
 

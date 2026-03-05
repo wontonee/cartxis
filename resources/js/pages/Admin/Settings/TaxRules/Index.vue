@@ -1,7 +1,7 @@
 <template>
   <Head title="Tax Rules" />
 
-  <AdminLayout>
+  <AdminLayout title="Tax Rules">
     <div class="space-y-6">
       <!-- Header -->
       <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">

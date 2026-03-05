@@ -78,6 +78,7 @@ Route::prefix('admin')->name('admin.')->middleware(['web'])->group(function () {
             Route::put('/{slug}/settings', [ThemeController::class, 'updateSettings'])->name('settings.update');
             Route::delete('/{slug}', [ThemeController::class, 'destroy'])->name('destroy');
             Route::post('/{slug}/import-data', [ThemeController::class, 'importData'])->name('import-data');
+            Route::post('/{slug}/import-layout', [ThemeController::class, 'importLayout'])->name('import-layout');
             Route::post('/{slug}/screenshot', [ThemeController::class, 'uploadScreenshot'])->name('screenshot');
             Route::post('/upload', [ThemeController::class, 'upload'])->name('upload');
         });

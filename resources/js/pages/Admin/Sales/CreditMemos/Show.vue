@@ -69,7 +69,7 @@ const viewInvoice = () => {
 <template>
   <Head :title="`Credit Memo ${creditMemo.credit_memo_number}`" />
 
-  <AdminLayout>
+  <AdminLayout :title="`Credit Memo ${creditMemo.credit_memo_number}`">
     <div class="space-y-6">
       <!-- Header -->
       <div class="flex items-center justify-between">

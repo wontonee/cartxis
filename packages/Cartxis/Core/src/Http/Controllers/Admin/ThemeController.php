@@ -5,6 +5,8 @@ namespace Cartxis\Core\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use Cartxis\Core\Services\ThemeService;
 use Cartxis\Core\Models\Theme;
+use Cartxis\UIEditor\Services\LayoutService;
+use Cartxis\UIEditor\Models\PageLayout;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Illuminate\Support\Facades\Validator;
@@ -23,11 +25,13 @@ use Cartxis\Core\Models\Currency;
 class ThemeController extends Controller
 {
     protected ThemeService $themeService;
+    protected LayoutService $layoutService;
     protected ?Currency $defaultCurrency = null;
 
-    public function __construct(ThemeService $themeService)
+    public function __construct(ThemeService $themeService, LayoutService $layoutService)
     {
         $this->themeService = $themeService;
+        $this->layoutService = $layoutService;
     }
 
     /**
@@ -40,18 +44,25 @@ class ThemeController extends Controller
 
         $themes = Theme::all()->map(function ($theme) {
             $config = $theme->getConfig();
+            $dataPath = $theme->getPath() . '/data/theme-data.json';
+            $hasDemoLayout = false;
+            if (file_exists($dataPath)) {
+                $themeData = json_decode(file_get_contents($dataPath), true);
+                $hasDemoLayout = !empty($themeData['homepage']);
+            }
             return [
-                'id' => $theme->id,
-                'name' => $theme->name,
-                'slug' => $theme->slug,
-                'description' => $theme->description,
-                'version' => $theme->version,
-                'author' => $theme->author,
-                'screenshot' => $this->resolveThemeScreenshotUrl($theme),
-                'is_active' => $theme->is_active,
-                'is_default' => $theme->is_default,
-                'exists' => $theme->exists(),
-                'supports' => $config['supports'] ?? [],
+                'id'            => $theme->id,
+                'name'          => $theme->name,
+                'slug'          => $theme->slug,
+                'description'   => $theme->description,
+                'version'       => $theme->version,
+                'author'        => $theme->author,
+                'screenshot'    => $this->resolveThemeScreenshotUrl($theme),
+                'is_active'     => $theme->is_active,
+                'is_default'    => $theme->is_default,
+                'exists'        => $theme->exists(),
+                'supports'      => $config['supports'] ?? [],
+                'hasDemoLayout' => $hasDemoLayout,
             ];
         });
 
@@ -319,6 +330,43 @@ class ThemeController extends Controller
             return back()->with('success', 'Theme data imported successfully! ' . implode(', ', $parts) . ' have been updated.');
         } catch (\Exception $e) {
             return back()->with('error', 'Failed to import theme data: ' . $e->getMessage());
+        }
+    }
+
+    /**
+     * Import a pre-built UIEditor homepage layout from the theme's data/theme-data.json.
+     * The JSON must have a "homepage" key containing a valid UIEditor layout object.
+     */
+    public function importLayout(Request $request, string $slug)
+    {
+        $theme = Theme::where('slug', $slug)->firstOrFail();
+
+        $dataPath = $theme->getPath() . '/data/theme-data.json';
+
+        if (!file_exists($dataPath)) {
+            return back()->with('error', 'No demo data file found for this theme.');
+        }
+
+        $themeData = json_decode(file_get_contents($dataPath), true);
+
+        if (empty($themeData['homepage'])) {
+            return back()->with('error', 'No homepage layout found in theme demo data.');
+        }
+
+        $layoutData = $themeData['homepage'];
+
+        // Validate basic structure
+        if (empty($layoutData['version']) || !isset($layoutData['sections'])) {
+            return back()->with('error', 'Invalid layout format in theme demo data.');
+        }
+
+        try {
+            // Homepage layout uses TYPE_HOMEPAGE with null page_id
+            $this->layoutService->saveDraft($layoutData, PageLayout::TYPE_HOMEPAGE, null);
+
+            return back()->with('success', 'Homepage demo layout imported. Open the Pages list, edit the Homepage, and click Publish to make it live.');
+        } catch (\Exception $e) {
+            return back()->with('error', 'Failed to import layout: ' . $e->getMessage());
         }
     }
 

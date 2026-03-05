@@ -273,7 +273,7 @@ function cancel() {
 </script>
 
 <template>
-  <AdminLayout>
+  <AdminLayout title="New Address">
     <Head title="New Address" />
 
     <div class="p-6">

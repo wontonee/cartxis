@@ -219,6 +219,7 @@ Channel, Currency, EmailConfiguration, EmailTemplate, Extension, Locale, MenuIte
 
 | Command | Purpose |
 |---------|---------|
+| `cartxis:extension:make` | Scaffold a new filesystem extension from template (interactive or fast mode) |
 | `cartxis:extensions:list` | List all discovered extensions |
 | `cartxis:extensions:sync` | Sync filesystem extensions to database |
 | `cartxis:extensions:install` | Install an extension |
@@ -946,12 +947,32 @@ composer test
 
 | Command | Purpose |
 |---------|---------|
+| `php artisan cartxis:extension:make --interactive` | Scaffold a new extension (guided prompts) |
+| `php artisan cartxis:extension:make {name} --code={code}` | Scaffold a new extension (fast mode) |
 | `php artisan cartxis:extensions:list` | Show all discovered extensions |
 | `php artisan cartxis:extensions:sync` | Sync filesystem to database |
 | `php artisan cartxis:extensions:install {code}` | Install an extension |
 | `php artisan cartxis:extensions:activate {code}` | Activate an extension |
 | `php artisan cartxis:extensions:deactivate {code}` | Deactivate an extension |
 | `php artisan cartxis:extensions:uninstall {code}` | Remove an extension |
+
+**`cartxis:extension:make` usage:**
+
+```bash
+# Interactive — step-by-step prompts for template, name, code, vendor, author
+php artisan cartxis:extension:make --interactive
+
+# Fast mode — all values supplied up front, no prompts
+php artisan cartxis:extension:make "My Extension" --code=my-extension
+
+# Full options
+php artisan cartxis:extension:make "My Extension" \
+    --code=my-extension \
+    --template=payment-gateway \
+    --vendor=MyVendor \
+    --author="My Company" \
+    --author-url="https://mycompany.com"
+```
 
 ---
 

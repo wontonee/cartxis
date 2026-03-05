@@ -29,11 +29,12 @@ Route::middleware(['web', 'auth:admin'])->prefix('admin')->name('admin.')->group
         Route::prefix('media')->name('media.')->group(function () {
             Route::get('/', [MediaController::class, 'index'])->name('index');
             Route::post('/upload', [MediaController::class, 'upload'])->name('upload');
+            Route::post('/upload-json', [MediaController::class, 'uploadJson'])->name('upload-json');
+            Route::post('/bulk-action', [MediaController::class, 'bulkAction'])->name('bulk-action');
+            Route::get('/picker', [MediaController::class, 'picker'])->name('picker');
             Route::get('/{media}', [MediaController::class, 'show'])->name('show');
             Route::put('/{media}', [MediaController::class, 'update'])->name('update');
             Route::delete('/{media}', [MediaController::class, 'destroy'])->name('destroy');
-            Route::post('/bulk-action', [MediaController::class, 'bulkAction'])->name('bulk-action');
-            Route::get('/picker', [MediaController::class, 'picker'])->name('picker');
         });
 
         // Media Folders

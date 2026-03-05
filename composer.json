@@ -74,6 +74,7 @@
             "Cartxis\\Sales\\": "packages/Cartxis/Sales/src/",
             "Cartxis\\Customer\\": "packages/Cartxis/Customer/src/",
             "Cartxis\\CMS\\": "packages/Cartxis/CMS/src/",
+            "Cartxis\\UIEditor\\": "packages/Cartxis/UIEditor/src/",
             "Cartxis\\System\\": "packages/Cartxis/System/src/",
             "Cartxis\\Reports\\": "packages/Cartxis/Reports/src/",
             "Cartxis\\Marketing\\": "packages/Cartxis/Marketing/src/",

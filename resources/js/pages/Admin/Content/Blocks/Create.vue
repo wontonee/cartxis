@@ -1,5 +1,5 @@
 <template>
-    <AdminLayout>
+    <AdminLayout title="Create Block">
         <Head title="Create Block" />
 
         <div class="p-6">

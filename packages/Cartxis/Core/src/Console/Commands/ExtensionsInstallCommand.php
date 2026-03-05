@@ -11,7 +11,7 @@ class ExtensionsInstallCommand extends Command
 
     protected $aliases = ['vortex:extensions:install'];
 
-    protected $description = 'Install a discovered filesystem extension (from the /extensions directory).';
+    protected $description = 'Install a discovered filesystem extension (from the /extension directory).';
 
     public function handle(ExtensionService $extensions): int
     {

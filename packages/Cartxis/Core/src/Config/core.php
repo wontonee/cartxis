@@ -9,7 +9,7 @@ return [
     | This value determines the directory where extensions are stored.
     |
     */
-    'extensions_path' => base_path('extensions'),
+    'extensions_path' => base_path('extension'),
 
     /*
     |--------------------------------------------------------------------------

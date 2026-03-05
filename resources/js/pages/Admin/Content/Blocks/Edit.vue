@@ -1,5 +1,5 @@
 <template>
-    <AdminLayout>
+    <AdminLayout :title="`Edit Block: ${blockData?.title || 'Edit Block'}`">
         <Head :title="`Edit Block: ${blockData.title}`" />
 
         <div class="p-6">

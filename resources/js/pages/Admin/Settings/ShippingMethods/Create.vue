@@ -43,7 +43,7 @@ const submit = () => {
 <template>
   <Head title="Create Shipping Method" />
 
-  <AdminLayout>
+  <AdminLayout title="Create Shipping Method">
     <div class="space-y-6">
       <!-- Header -->
       <div class="flex items-center justify-between">

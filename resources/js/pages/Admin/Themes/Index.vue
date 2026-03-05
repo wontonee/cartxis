@@ -19,6 +19,7 @@ interface Theme {
   is_default: boolean;
   exists: boolean;
   supports: string[];
+  hasDemoLayout: boolean;
 }
 
 interface Props {
@@ -34,6 +35,22 @@ const themeFileInput = ref<HTMLInputElement | null>(null);
 
 const activeTheme = computed(() => props.themes.find(t => t.is_active));
 const otherThemes = computed(() => props.themes.filter(t => !t.is_active));
+
+const importingLayout = ref<Record<string, boolean>>({});
+
+const importDemoLayout = (slug: string) => {
+  if (importingLayout.value[slug]) return;
+  if (!confirm('This will import the demo homepage layout and replace any existing draft. Continue?')) return;
+  importingLayout.value[slug] = true;
+  router.post(
+    `/admin/appearance/themes/${slug}/import-layout`,
+    {},
+    {
+      preserveScroll: true,
+      onFinish: () => { importingLayout.value[slug] = false; },
+    }
+  );
+};
 
 const activateTheme = (slug: string) => {
   if (processing.value[slug]) return;
@@ -200,6 +217,22 @@ const uploadTheme = (event: Event) => {
                 >
                   <Settings class="w-4 h-4 mr-2" />
                   Customize
+                </button>
+                <button
+                  v-if="activeTheme.hasDemoLayout"
+                  @click="importDemoLayout(activeTheme.slug)"
+                  :disabled="importingLayout[activeTheme.slug]"
+                  class="inline-flex items-center px-5 py-2.5 border border-gray-300 text-sm font-medium rounded-lg text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-300 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                  title="Import pre-built homepage layout"
+                >
+                  <svg v-if="importingLayout[activeTheme.slug]" class="animate-spin w-4 h-4 mr-2" fill="none" viewBox="0 0 24 24">
+                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>
+                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/>
+                  </svg>
+                  <svg v-else class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
+                  </svg>
+                  {{ importingLayout[activeTheme.slug] ? 'Importing...' : 'Import Demo Layout' }}
                 </button>
               </div>
             </div>
