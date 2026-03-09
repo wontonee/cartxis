@@ -22,6 +22,11 @@ return new class extends Migration
             
             $table->index(['product_id', 'position']);
         });
+
+        // Now that product_images exists, add the FK on products.main_image_id
+        Schema::table('products', function (Blueprint $table) {
+            $table->foreign('main_image_id')->references('id')->on('product_images')->nullOnDelete();
+        });
     }
 
     /**
@@ -29,6 +34,10 @@ return new class extends Migration
      */
     public function down(): void
     {
+        Schema::table('products', function (Blueprint $table) {
+            $table->dropForeign(['main_image_id']);
+        });
+
         Schema::dropIfExists('product_images');
     }
 };

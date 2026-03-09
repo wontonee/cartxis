@@ -18,6 +18,7 @@
 # /themes/dmart-electronics/*
 /test-screenshots
 /_backup
+/resources/admin/media
 /vendor
 .DS_Store
 /.playwright-mcp

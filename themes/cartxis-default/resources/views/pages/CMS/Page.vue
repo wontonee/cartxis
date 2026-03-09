@@ -45,16 +45,6 @@ const hasLayout = computed(() => !!(props.layoutData?.sections && (props.layoutD
         </Head>
 
         <div class="bg-gray-50 min-h-screen">
-            <!-- Page Header -->
-            <div class="bg-white border-b border-gray-200">
-                <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-                    <h1 class="text-4xl font-bold text-gray-900">{{ page.title }}</h1>
-                    <p v-if="page.updated_at" class="text-sm text-gray-500 mt-2">
-                        Last updated: {{ page.updated_at }}
-                    </p>
-                </div>
-            </div>
-
             <!-- Page Content -->
             <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
                 <!-- Visual Editor layout takes priority when published -->

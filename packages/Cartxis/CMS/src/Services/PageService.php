@@ -104,6 +104,28 @@ class PageService
     }
 
     /**
+     * Duplicate a page as a draft copy.
+     */
+    public function duplicate(Page $page): Page
+    {
+        return DB::transaction(function () use ($page) {
+            $baseSlug = $page->url_key . '-copy';
+            $uniqueSlug = $this->generateUniqueSlug('Copy of ' . $page->title, $baseSlug);
+
+            $newPage = $page->replicate();
+            $newPage->title = 'Copy of ' . $page->title;
+            $newPage->url_key = $uniqueSlug;
+            $newPage->status = 'draft';
+            $newPage->is_homepage = false;
+            $newPage->created_by = auth()->id();
+            $newPage->updated_by = auth()->id();
+            $newPage->save();
+
+            return $newPage;
+        });
+    }
+
+    /**
      * Bulk update status.
      */
     public function bulkUpdateStatus(array $ids, string $status): int

@@ -5,7 +5,7 @@
     "version": "1.0.0",
     "author": "Cartxis Team",
     "author_url": "https://cartxis-commerce.com",
-    "screenshot": "screenshot.png",
+    "screenshot": null,
     "is_default": true,
     "supports": [
         "widgets",

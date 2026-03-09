@@ -34,13 +34,11 @@ const acceptString = computed(() => props.acceptedTypes.join(','));
 
 // Methods
 const openFileDialog = () => {
-    console.log('openFileDialog triggered, fileInput:', fileInput.value);
     fileInput.value?.click();
 };
 
 const handleFileSelect = (event: Event) => {
     const target = event.target as HTMLInputElement;
-    console.log('handleFileSelect triggered, files:', target.files);
     if (target.files) {
         addFiles(Array.from(target.files));
     }
@@ -50,8 +48,6 @@ const handleFileSelect = (event: Event) => {
 
 const handleDrop = (event: DragEvent) => {
     isDragging.value = false;
-    console.log('handleDrop triggered');
-    
     if (event.dataTransfer?.files) {
         addFiles(Array.from(event.dataTransfer.files));
     }
@@ -67,7 +63,6 @@ const handleDragLeave = () => {
 };
 
 const addFiles = (files: File[]) => {
-    console.log('addFiles called with:', files.length, 'files');
     errors.value = [];
     const validFiles: File[] = [];
     
@@ -96,7 +91,6 @@ const addFiles = (files: File[]) => {
         validFiles.push(file);
     });
     
-    console.log('Valid files:', validFiles.length);
     selectedFiles.value = [...selectedFiles.value, ...validFiles];
 };
 

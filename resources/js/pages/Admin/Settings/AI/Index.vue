@@ -363,7 +363,7 @@ const save = () => {
                   <h3 class="text-lg font-semibold text-gray-900 dark:text-white">AI Providers</h3>
                   <p class="text-sm text-gray-500 dark:text-gray-400">Configure connections to LLM services.</p>
                 </div>
-                <button type="button" @click="addProvider" class="inline-flex items-center px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-sm font-medium transition-colors shadow-sm">
+                <button type="button" @click="addProvider" class="inline-flex items-center px-4 py-2 bg-blue-600 border border-transparent rounded-lg font-semibold text-xs text-white uppercase tracking-widest hover:bg-blue-700 focus:bg-blue-700 active:bg-blue-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition ease-in-out duration-150">
                   <Plus class="w-4 h-4 mr-2" />
                   Add Provider
                 </button>
@@ -449,7 +449,7 @@ const save = () => {
                   <h3 class="text-lg font-semibold text-gray-900 dark:text-white">AI Models</h3>
                   <p class="text-sm text-gray-500 dark:text-gray-400">Map available models to providers.</p>
                 </div>
-                <button type="button" @click="addModel" class="inline-flex items-center px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-sm font-medium transition-colors shadow-sm">
+                <button type="button" @click="addModel" class="inline-flex items-center px-4 py-2 bg-blue-600 border border-transparent rounded-lg font-semibold text-xs text-white uppercase tracking-widest hover:bg-blue-700 focus:bg-blue-700 active:bg-blue-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition ease-in-out duration-150">
                   <Plus class="w-4 h-4 mr-2" />
                   Add Model
                 </button>
@@ -517,7 +517,7 @@ const save = () => {
                   <h3 class="text-lg font-semibold text-gray-900 dark:text-white">AI Agents</h3>
                   <p class="text-sm text-gray-500 dark:text-gray-400">Configure specialize agents for specific tasks.</p>
                 </div>
-                <button type="button" @click="addAgent" class="inline-flex items-center px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-sm font-medium transition-colors shadow-sm">
+                <button type="button" @click="addAgent" class="inline-flex items-center px-4 py-2 bg-blue-600 border border-transparent rounded-lg font-semibold text-xs text-white uppercase tracking-widest hover:bg-blue-700 focus:bg-blue-700 active:bg-blue-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition ease-in-out duration-150">
                   <Plus class="w-4 h-4 mr-2" />
                   Add Agent
                 </button>
@@ -596,7 +596,7 @@ const save = () => {
              <button
               type="submit"
               :disabled="form.processing"
-              class="inline-flex items-center px-6 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-medium text-sm transition-all shadow-sm disabled:opacity-70 disabled:cursor-not-allowed"
+              class="inline-flex items-center px-4 py-2 bg-blue-600 border border-transparent rounded-lg font-semibold text-xs text-white uppercase tracking-widest hover:bg-blue-700 focus:bg-blue-700 active:bg-blue-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition ease-in-out duration-150 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               <Save v-if="!form.processing" class="w-4 h-4 mr-2" />
               <div v-else class="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent mr-2"></div>

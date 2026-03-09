@@ -142,6 +142,22 @@ class PagesController extends Controller
     }
 
     /**
+     * Duplicate the specified page.
+     */
+    public function duplicate(Page $page): RedirectResponse
+    {
+        try {
+            $newPage = $this->pageService->duplicate($page);
+
+            return redirect()
+                ->route('admin.uieditor.pages.editor', $newPage)
+                ->with('success', 'Page duplicated successfully. You are now editing the copy.');
+        } catch (\Exception $e) {
+            return back()->with('error', 'Failed to duplicate page: ' . $e->getMessage());
+        }
+    }
+
+    /**
      * Check if URL key is available.
      */
     public function checkSlug(Request $request)

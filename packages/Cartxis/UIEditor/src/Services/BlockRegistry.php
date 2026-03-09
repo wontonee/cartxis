@@ -231,7 +231,15 @@ class BlockRegistry
             'label'    => 'Products Grid',
             'icon'     => 'shopping-bag',
             'category' => 'commerce',
-            'defaults' => ['product_ids' => [], 'columns' => 4, 'show_price' => true, 'show_cart' => true, 'limit' => 8],
+            'defaults' => ['source' => 'featured', 'product_ids' => [], 'columns' => 4, 'show_price' => true, 'show_cart' => true, 'limit' => 8],
+        ]);
+
+        $this->register([
+            'type'     => 'categories_grid',
+            'label'    => 'Categories Grid',
+            'icon'     => 'layout-grid',
+            'category' => 'commerce',
+            'defaults' => ['columns' => 4, 'limit' => 8, 'show_count' => true],
         ]);
 
         $this->register([
@@ -377,6 +385,52 @@ class BlockRegistry
                 'region_name'   => '',
                 'region_type'   => 'section',
                 'region_status' => 'draft',
+            ],
+        ]);
+
+        // ── Blog blocks ───────────────────────────────────────────────────────
+        $this->register([
+            'type'     => 'blog_posts_grid',
+            'label'    => 'Blog Posts Grid',
+            'icon'     => 'newspaper',
+            'category' => 'content',
+            'defaults' => [
+                'title'         => 'Latest Posts',
+                'count'         => 6,
+                'columns'       => 3,
+                'show_excerpt'  => true,
+                'show_author'   => true,
+                'show_date'     => true,
+                'show_category' => true,
+                'show_image'    => true,
+                'category_id'   => null,
+            ],
+        ]);
+
+        $this->register([
+            'type'     => 'author_card',
+            'label'    => 'Author Card',
+            'icon'     => 'user-circle',
+            'category' => 'content',
+            'defaults' => [
+                'name'         => 'Author Name',
+                'role'         => 'Content Writer',
+                'bio'          => 'Short author biography.',
+                'avatar_url'   => null,
+                'social_links' => [],
+            ],
+        ]);
+
+        $this->register([
+            'type'     => 'share_buttons',
+            'label'    => 'Share Buttons',
+            'icon'     => 'share-2',
+            'category' => 'content',
+            'defaults' => [
+                'title'    => 'Share this article',
+                'networks' => ['twitter', 'facebook', 'linkedin', 'whatsapp'],
+                'align'    => 'center',
+                'style'    => 'icon_text',
             ],
         ]);
     }

@@ -21,7 +21,8 @@ class GlobalRegionSeeder extends Seeder
                 'slug'        => 'main-header',
                 'description' => 'Site-wide header with logo, navigation and cart.',
                 'region_type' => 'header',
-                'status'      => 'draft',
+                'status'      => 'published',
+                'published_at' => now(),
                 'layout_data' => json_encode([
                     'version'  => '1.0',
                     'sections' => [
@@ -62,7 +63,8 @@ class GlobalRegionSeeder extends Seeder
                 'slug'        => 'main-footer',
                 'description' => 'Site-wide footer with links, newsletter and copyright.',
                 'region_type' => 'footer',
-                'status'      => 'draft',
+                'status'      => 'published',
+                'published_at' => now(),
                 'layout_data' => json_encode([
                     'version'  => '1.0',
                     'sections' => [

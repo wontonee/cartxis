@@ -462,13 +462,25 @@ onUnmounted(() => {
       :class="[
         'fixed inset-y-0 left-0 z-50 transform transition-all duration-200 ease-in-out flex flex-col',
         'bg-gradient-to-b from-slate-900 via-slate-900 to-slate-950 dark:from-slate-950 dark:via-slate-950 dark:to-black',
-        'border-r border-slate-800/50',
+        'border-r border-slate-700',
         sidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0',
         sidebarCollapsed ? 'w-[72px]' : 'w-[260px]'
       ]"
     >
+      <!-- Edge toggle button (desktop only) -->
+      <button
+        @click="toggleSidebar"
+        class="hidden lg:flex absolute top-[22px] -right-3 z-10 items-center justify-center w-6 h-6 rounded-full bg-slate-800 border border-slate-600 text-slate-300 hover:text-white hover:bg-slate-700 shadow-md transition-all"
+      >
+        <ChevronLeft v-if="!sidebarCollapsed" class="w-3 h-3" />
+        <ChevronRight v-if="sidebarCollapsed" class="w-3 h-3" />
+      </button>
+
       <!-- Logo -->
-      <div class="flex items-center justify-between h-16 border-b border-white/[0.06]" :class="sidebarCollapsed ? 'px-3' : 'px-5'">
+      <div
+        class="flex items-center h-16 border-b border-white/[0.06]"
+        :class="sidebarCollapsed ? 'px-3 justify-center' : 'px-5'"
+      >
         <Link :href="admin.dashboard.url()" class="flex items-center gap-3 min-w-0">
           <template v-if="adminConfig?.logo && !sidebarCollapsed">
             <img :src="`/storage/${adminConfig.logo}`" :alt="adminConfig?.site_name || 'Admin'" class="h-8 object-contain" />
@@ -480,16 +492,6 @@ onUnmounted(() => {
             <span v-if="!sidebarCollapsed" class="text-white font-semibold text-lg truncate transition-opacity duration-200">{{ adminConfig?.site_name || 'Cartxis' }}</span>
           </template>
         </Link>
-        
-        <!-- Desktop Toggle Button -->
-        <button
-          @click="toggleSidebar"
-          class="hidden lg:flex items-center justify-center w-7 h-7 rounded-lg text-slate-500 hover:text-white hover:bg-white/[0.06] transition-all"
-          :class="sidebarCollapsed && 'mx-auto'"
-        >
-          <ChevronLeft v-if="!sidebarCollapsed" class="w-4 h-4" />
-          <ChevronRight v-if="sidebarCollapsed" class="w-4 h-4" />
-        </button>
       </div>
 
       <!-- Navigation -->

@@ -174,7 +174,55 @@
                 ]
             },
             {
-                "id": "sec_demo_products",
+                "id": "sec_demo_categories",
+                "type": "section",
+                "settings": {
+                    "background_color": "#f9fafb",
+                    "background_image": null,
+                    "padding_top": 64,
+                    "padding_bottom": 64,
+                    "full_width": false
+                },
+                "columns": [
+                    {
+                        "id": "col_demo_categories",
+                        "width": 12,
+                        "settings": {
+                            "padding": 16,
+                            "align": "left"
+                        },
+                        "blocks": [
+                            {
+                                "id": "blk_cat_h",
+                                "type": "heading",
+                                "settings": {
+                                    "level": "h2",
+                                    "text": "Shop by Category",
+                                    "align": "center",
+                                    "color": "#111827"
+                                }
+                            },
+                            {
+                                "id": "blk_cat_sub",
+                                "type": "text",
+                                "settings": {
+                                    "content": "<p style='text-align:center;color:#6b7280;margin-bottom:32px;'>Explore our wide range of product categories</p>"
+                                }
+                            },
+                            {
+                                "id": "blk_categories",
+                                "type": "categories_grid",
+                                "settings": {
+                                    "columns": 4,
+                                    "limit": 8,
+                                    "show_count": true
+                                }
+                            }
+                        ]
+                    }
+                ]
+            },
+            {
                 "type": "section",
                 "settings": {
                     "background_color": "#ffffff",
@@ -213,6 +261,7 @@
                                 "id": "blk_products",
                                 "type": "products_grid",
                                 "settings": {
+                                    "source": "featured",
                                     "product_ids": [],
                                     "columns": 4,
                                     "show_price": true,

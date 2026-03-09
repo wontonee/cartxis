@@ -9,362 +9,129 @@ class StorefrontMenuSeeder extends Seeder
 {
     /**
      * Run the database seeds.
+     * Uses upsert keyed on (key, location) so this seeder is safe to re-run.
      */
     public function run(): void
     {
-        // Create Header Menu Items
         $this->createHeaderMenu();
-        
-        // Create Footer Menu Items
         $this->createFooterMenu();
-        
-        // Create Mobile Menu Items
         $this->createMobileMenu();
+    }
+
+    /** Upsert a single menu record; returns its ID. */
+    private function upsert(array $match, array $data): int
+    {
+        $existing = DB::table('menu_items')->where($match)->first();
+
+        if ($existing) {
+            DB::table('menu_items')
+                ->where('id', $existing->id)
+                ->update(array_merge($data, ['updated_at' => now()]));
+            return $existing->id;
+        }
+
+        return DB::table('menu_items')->insertGetId(
+            array_merge($match, $data, ['created_at' => now(), 'updated_at' => now()])
+        );
     }
 
     private function createHeaderMenu(): void
     {
-        // Create parent menu items for header
-        $shopId = DB::table('menu_items')->insertGetId([
-            'title' => 'Shop',
-            'key' => 'shop',
-            'icon' => 'shopping-bag',
-            'route' => null,
-            'url' => '/products',
-            'location' => 'storefront',
-            'menu_type' => 'header',
-            'parent_id' => null,
-            'order' => 1,
-            'active' => true,
-            'created_at' => now(),
-            'updated_at' => now(),
-        ]);
+        $this->upsert(
+            ['key' => 'shop', 'location' => 'storefront'],
+            ['title' => 'Shop', 'icon' => 'shopping-bag', 'route' => null, 'url' => '/products', 'menu_type' => 'header', 'parent_id' => null, 'order' => 1, 'active' => true]
+        );
 
-        $categoriesId = DB::table('menu_items')->insertGetId([
-            'title' => 'Categories',
-            'key' => 'categories',
-            'icon' => 'folder-tree',
-            'route' => null,
-            'url' => '#',
-            'location' => 'storefront',
-            'menu_type' => 'header',
-            'parent_id' => null,
-            'order' => 2,
-            'active' => true,
-            'created_at' => now(),
-            'updated_at' => now(),
-        ]);
+        $categoriesId = $this->upsert(
+            ['key' => 'categories', 'location' => 'storefront'],
+            ['title' => 'Categories', 'icon' => 'folder-tree', 'route' => null, 'url' => '#', 'menu_type' => 'header', 'parent_id' => null, 'order' => 2, 'active' => true]
+        );
 
-        // Add category sub-items (these would be dynamically loaded from actual categories)
-        DB::table('menu_items')->insert([
-            [
-                'title' => 'Electronics',
-                'key' => 'category-electronics',
-                'icon' => null,
-                'route' => null,
-                'url' => '/category/electronics',
-                'location' => 'storefront',
-                'menu_type' => 'header',
-                'parent_id' => $categoriesId,
-                'order' => 1,
-                'active' => true,
-                'created_at' => now(),
-                'updated_at' => now(),
-            ],
-            [
-                'title' => 'Clothing',
-                'key' => 'category-clothing',
-                'icon' => null,
-                'route' => null,
-                'url' => '/category/clothing',
-                'location' => 'storefront',
-                'menu_type' => 'header',
-                'parent_id' => $categoriesId,
-                'order' => 2,
-                'active' => true,
-                'created_at' => now(),
-                'updated_at' => now(),
-            ],
-            [
-                'title' => 'Home & Garden',
-                'key' => 'category-home',
-                'icon' => null,
-                'route' => null,
-                'url' => '/category/home-garden',
-                'location' => 'storefront',
-                'menu_type' => 'header',
-                'parent_id' => $categoriesId,
-                'order' => 3,
-                'active' => true,
-                'created_at' => now(),
-                'updated_at' => now(),
-            ],
-        ]);
+        foreach ([
+            ['key' => 'category-electronics', 'title' => 'Electronics',  'url' => '/category/electronics', 'order' => 1],
+            ['key' => 'category-clothing',    'title' => 'Clothing',      'url' => '/category/clothing',    'order' => 2],
+            ['key' => 'category-home',        'title' => 'Home & Garden', 'url' => '/category/home-garden', 'order' => 3],
+        ] as $cat) {
+            $this->upsert(
+                ['key' => $cat['key'], 'location' => 'storefront'],
+                ['title' => $cat['title'], 'icon' => null, 'route' => null, 'url' => $cat['url'], 'menu_type' => 'header', 'parent_id' => $categoriesId, 'order' => $cat['order'], 'active' => true]
+            );
+        }
 
-        DB::table('menu_items')->insert([
-            [
-                'title' => 'Deals',
-                'key' => 'deals',
-                'icon' => 'percent',
-                'route' => null,
-                'url' => '/deals',
-                'location' => 'storefront',
-                'menu_type' => 'header',
-                'parent_id' => null,
-                'order' => 3,
-                'active' => true,
-                'created_at' => now(),
-                'updated_at' => now(),
-            ],
-            [
-                'title' => 'About',
-                'key' => 'about',
-                'icon' => null,
-                'route' => null,
-                'url' => '/about',
-                'location' => 'storefront',
-                'menu_type' => 'header',
-                'parent_id' => null,
-                'order' => 4,
-                'active' => true,
-                'created_at' => now(),
-                'updated_at' => now(),
-            ],
-        ]);
+        $this->upsert(
+            ['key' => 'deals', 'location' => 'storefront'],
+            ['title' => 'Deals', 'icon' => 'percent', 'route' => null, 'url' => '/deals', 'menu_type' => 'header', 'parent_id' => null, 'order' => 3, 'active' => true]
+        );
+
+        $this->upsert(
+            ['key' => 'about', 'location' => 'storefront'],
+            ['title' => 'About', 'icon' => null, 'route' => null, 'url' => '/about-us', 'menu_type' => 'header', 'parent_id' => null, 'order' => 4, 'active' => true]
+        );
     }
 
     private function createFooterMenu(): void
     {
-        // Company section
-        $companyId = DB::table('menu_items')->insertGetId([
-            'title' => 'Company',
-            'key' => 'footer-company',
-            'icon' => null,
-            'route' => null,
-            'url' => '#',
-            'location' => 'storefront',
-            'menu_type' => 'footer',
-            'parent_id' => null,
-            'order' => 1,
-            'active' => true,
-            'created_at' => now(),
-            'updated_at' => now(),
-        ]);
+        $companyId = $this->upsert(
+            ['key' => 'footer-company', 'location' => 'storefront'],
+            ['title' => 'Company', 'icon' => null, 'route' => null, 'url' => '#', 'menu_type' => 'footer', 'parent_id' => null, 'order' => 1, 'active' => true]
+        );
 
-        DB::table('menu_items')->insert([
-            [
-                'title' => 'About Us',
-                'key' => 'footer-about',
-                'icon' => null,
-                'route' => null,
-                'url' => '/about',
-                'location' => 'storefront',
-                'menu_type' => 'footer',
-                'parent_id' => $companyId,
-                'order' => 1,
-                'active' => true,
-                'created_at' => now(),
-                'updated_at' => now(),
-            ],
-            [
-                'title' => 'Careers',
-                'key' => 'footer-careers',
-                'icon' => null,
-                'route' => null,
-                'url' => '/careers',
-                'location' => 'storefront',
-                'menu_type' => 'footer',
-                'parent_id' => $companyId,
-                'order' => 2,
-                'active' => true,
-                'created_at' => now(),
-                'updated_at' => now(),
-            ],
-            [
-                'title' => 'Contact',
-                'key' => 'footer-contact',
-                'icon' => null,
-                'route' => null,
-                'url' => '/contact',
-                'location' => 'storefront',
-                'menu_type' => 'footer',
-                'parent_id' => $companyId,
-                'order' => 3,
-                'active' => true,
-                'created_at' => now(),
-                'updated_at' => now(),
-            ],
-        ]);
+        foreach ([
+            ['key' => 'footer-about',   'title' => 'About Us',   'url' => '/about-us',   'order' => 1],
+            ['key' => 'footer-careers', 'title' => 'Careers',    'url' => '/careers',    'order' => 2],
+            ['key' => 'footer-contact', 'title' => 'Contact Us', 'url' => '/contact-us', 'order' => 3],
+        ] as $item) {
+            $this->upsert(
+                ['key' => $item['key'], 'location' => 'storefront'],
+                ['title' => $item['title'], 'icon' => null, 'route' => null, 'url' => $item['url'], 'menu_type' => 'footer', 'parent_id' => $companyId, 'order' => $item['order'], 'active' => true]
+            );
+        }
 
-        // Customer Service section
-        $serviceId = DB::table('menu_items')->insertGetId([
-            'title' => 'Customer Service',
-            'key' => 'footer-service',
-            'icon' => null,
-            'route' => null,
-            'url' => '#',
-            'location' => 'storefront',
-            'menu_type' => 'footer',
-            'parent_id' => null,
-            'order' => 2,
-            'active' => true,
-            'created_at' => now(),
-            'updated_at' => now(),
-        ]);
+        $serviceId = $this->upsert(
+            ['key' => 'footer-service', 'location' => 'storefront'],
+            ['title' => 'Customer Service', 'icon' => null, 'route' => null, 'url' => '#', 'menu_type' => 'footer', 'parent_id' => null, 'order' => 2, 'active' => true]
+        );
 
-        DB::table('menu_items')->insert([
-            [
-                'title' => 'Help Center',
-                'key' => 'footer-help',
-                'icon' => null,
-                'route' => null,
-                'url' => '/help',
-                'location' => 'storefront',
-                'menu_type' => 'footer',
-                'parent_id' => $serviceId,
-                'order' => 1,
-                'active' => true,
-                'created_at' => now(),
-                'updated_at' => now(),
-            ],
-            [
-                'title' => 'Shipping & Returns',
-                'key' => 'footer-shipping',
-                'icon' => null,
-                'route' => null,
-                'url' => '/shipping',
-                'location' => 'storefront',
-                'menu_type' => 'footer',
-                'parent_id' => $serviceId,
-                'order' => 2,
-                'active' => true,
-                'created_at' => now(),
-                'updated_at' => now(),
-            ],
-            [
-                'title' => 'Track Order',
-                'key' => 'footer-track',
-                'icon' => null,
-                'route' => null,
-                'url' => '/track-order',
-                'location' => 'storefront',
-                'menu_type' => 'footer',
-                'parent_id' => $serviceId,
-                'order' => 3,
-                'active' => true,
-                'created_at' => now(),
-                'updated_at' => now(),
-            ],
-        ]);
+        foreach ([
+            ['key' => 'footer-help',     'title' => 'Help Center',        'url' => '/help',                  'order' => 1],
+            ['key' => 'footer-shipping', 'title' => 'Shipping & Returns',  'url' => '/shipping-and-returns',  'order' => 2],
+            ['key' => 'footer-track',    'title' => 'Track Order',         'url' => '/checkout/track-order',  'order' => 3],
+            ['key' => 'footer-faq',      'title' => 'FAQ',                 'url' => '/faq',                   'order' => 4],
+        ] as $item) {
+            $this->upsert(
+                ['key' => $item['key'], 'location' => 'storefront'],
+                ['title' => $item['title'], 'icon' => null, 'route' => null, 'url' => $item['url'], 'menu_type' => 'footer', 'parent_id' => $serviceId, 'order' => $item['order'], 'active' => true]
+            );
+        }
 
-        // Legal section
-        $legalId = DB::table('menu_items')->insertGetId([
-            'title' => 'Legal',
-            'key' => 'footer-legal',
-            'icon' => null,
-            'route' => null,
-            'url' => '#',
-            'location' => 'storefront',
-            'menu_type' => 'footer',
-            'parent_id' => null,
-            'order' => 3,
-            'active' => true,
-            'created_at' => now(),
-            'updated_at' => now(),
-        ]);
+        $legalId = $this->upsert(
+            ['key' => 'footer-legal', 'location' => 'storefront'],
+            ['title' => 'Legal', 'icon' => null, 'route' => null, 'url' => '#', 'menu_type' => 'footer', 'parent_id' => null, 'order' => 3, 'active' => true]
+        );
 
-        DB::table('menu_items')->insert([
-            [
-                'title' => 'Privacy Policy',
-                'key' => 'footer-privacy',
-                'icon' => null,
-                'route' => null,
-                'url' => '/privacy',
-                'location' => 'storefront',
-                'menu_type' => 'footer',
-                'parent_id' => $legalId,
-                'order' => 1,
-                'active' => true,
-                'created_at' => now(),
-                'updated_at' => now(),
-            ],
-            [
-                'title' => 'Terms of Service',
-                'key' => 'footer-terms',
-                'icon' => null,
-                'route' => null,
-                'url' => '/terms',
-                'location' => 'storefront',
-                'menu_type' => 'footer',
-                'parent_id' => $legalId,
-                'order' => 2,
-                'active' => true,
-                'created_at' => now(),
-                'updated_at' => now(),
-            ],
-        ]);
+        foreach ([
+            ['key' => 'footer-privacy', 'title' => 'Privacy Policy',  'url' => '/privacy-policy',       'order' => 1],
+            ['key' => 'footer-terms',   'title' => 'Terms of Service', 'url' => '/terms-and-conditions', 'order' => 2],
+        ] as $item) {
+            $this->upsert(
+                ['key' => $item['key'], 'location' => 'storefront'],
+                ['title' => $item['title'], 'icon' => null, 'route' => null, 'url' => $item['url'], 'menu_type' => 'footer', 'parent_id' => $legalId, 'order' => $item['order'], 'active' => true]
+            );
+        }
     }
 
     private function createMobileMenu(): void
     {
-        // Mobile menu - simplified version
-        DB::table('menu_items')->insert([
-            [
-                'title' => 'Shop All',
-                'key' => 'mobile-shop',
-                'icon' => 'shopping-bag',
-                'route' => null,
-                'url' => '/products',
-                'location' => 'storefront',
-                'menu_type' => 'mobile',
-                'parent_id' => null,
-                'order' => 1,
-                'active' => true,
-                'created_at' => now(),
-                'updated_at' => now(),
-            ],
-            [
-                'title' => 'Deals',
-                'key' => 'mobile-deals',
-                'icon' => 'percent',
-                'route' => null,
-                'url' => '/deals',
-                'location' => 'storefront',
-                'menu_type' => 'mobile',
-                'parent_id' => null,
-                'order' => 2,
-                'active' => true,
-                'created_at' => now(),
-                'updated_at' => now(),
-            ],
-            [
-                'title' => 'Account',
-                'key' => 'mobile-account',
-                'icon' => 'users',
-                'route' => null,
-                'url' => '/account',
-                'location' => 'storefront',
-                'menu_type' => 'mobile',
-                'parent_id' => null,
-                'order' => 3,
-                'active' => true,
-                'created_at' => now(),
-                'updated_at' => now(),
-            ],
-            [
-                'title' => 'Help',
-                'key' => 'mobile-help',
-                'icon' => 'help-circle',
-                'route' => null,
-                'url' => '/help',
-                'location' => 'storefront',
-                'menu_type' => 'mobile',
-                'parent_id' => null,
-                'order' => 4,
-                'active' => true,
-                'created_at' => now(),
-                'updated_at' => now(),
-            ],
-        ]);
+        foreach ([
+            ['key' => 'mobile-shop',    'title' => 'Shop All', 'icon' => 'shopping-bag', 'url' => '/products', 'order' => 1],
+            ['key' => 'mobile-deals',   'title' => 'Deals',    'icon' => 'percent',      'url' => '/deals',    'order' => 2],
+            ['key' => 'mobile-account', 'title' => 'Account',  'icon' => 'users',        'url' => '/account',  'order' => 3],
+            ['key' => 'mobile-help',    'title' => 'Help',     'icon' => 'help-circle',  'url' => '/help',     'order' => 4],
+        ] as $item) {
+            $this->upsert(
+                ['key' => $item['key'], 'location' => 'storefront'],
+                ['title' => $item['title'], 'icon' => $item['icon'], 'route' => null, 'url' => $item['url'], 'menu_type' => 'mobile', 'parent_id' => null, 'order' => $item['order'], 'active' => true]
+            );
+        }
     }
 }

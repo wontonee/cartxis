@@ -80,7 +80,8 @@
             "Cartxis\\Marketing\\": "packages/Cartxis/Marketing/src/",
             "Cartxis\\API\\": "packages/Cartxis/API/",
             "Cartxis\\Setup\\": "packages/Cartxis/Setup/src/",
-            "Cartxis\\Setup\\Database\\Seeders\\": "packages/Cartxis/Setup/src/Database/Seeders/"
+            "Cartxis\\Setup\\Database\\Seeders\\": "packages/Cartxis/Setup/src/Database/Seeders/",
+            "Cartxis\\Blog\\": "packages/Cartxis/Blog/src/"
         }
     },
     "autoload-dev": {

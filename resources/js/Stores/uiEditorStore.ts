@@ -140,10 +140,7 @@ export const useUiEditorStore = defineStore('uiEditor', () => {
   const unpublishUrl = ref('')
   const previewUrl = ref('')
 
-// ── Built-in Snippets (seeded, from DB)
-  const snippets = ref<SavedBlockItem[]>([])
-
-  // ── Saved Blocks (user-created reusables)
+// ── Saved Blocks (user-created reusables)
   const savedBlocks = ref<SavedBlockItem[]>([])
 
   // ── Native drag from palette
@@ -414,14 +411,6 @@ export const useUiEditorStore = defineStore('uiEditor', () => {
 
   // ── Saved Blocks library ───────────────────────────────────────────────────
 
-  async function fetchSnippets() {
-    try {
-      const res = await axios.get('/admin/uieditor/snippets')
-      snippets.value = res.data
-    } catch {
-      // silently ignore — non-critical
-    }
-  }
 
   async function fetchSavedBlocks() {
     try {
@@ -488,7 +477,6 @@ export const useUiEditorStore = defineStore('uiEditor', () => {
     pageSettings, isPageSettingsOpen, isSettingsSaving, settingsError,
     saveUrl, publishUrl, unpublishUrl, previewUrl,
     blockTypes,
-    snippets,
     savedBlocks,
     draggingBlockType,
     // actions
@@ -502,6 +490,6 @@ export const useUiEditorStore = defineStore('uiEditor', () => {
     findBlock, findSection,
     triggerSave, triggerPublish, triggerUnpublish,
     setBlockTypes,
-    fetchSnippets, fetchSavedBlocks, saveToLibrary, deleteFromLibrary, addSectionFromTemplate,
+    fetchSavedBlocks, saveToLibrary, deleteFromLibrary, addSectionFromTemplate,
   }
 })

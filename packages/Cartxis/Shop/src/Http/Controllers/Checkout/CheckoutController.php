@@ -20,6 +20,8 @@ use Cartxis\Core\Services\SettingService;
 use Cartxis\Core\Services\PaymentGatewayManager;
 use Cartxis\Sales\Services\InvoiceService;
 use Cartxis\Sales\Services\TransactionService;
+use Cartxis\UIEditor\Services\LayoutService;
+use Cartxis\CMS\Models\Page;
 use Illuminate\Support\Facades\Session;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
@@ -34,6 +36,7 @@ class CheckoutController extends Controller
     protected PaymentGatewayManager $gatewayManager;
     protected InvoiceService $invoiceService;
     protected TransactionService $transactionService;
+    protected LayoutService $layoutService;
 
     public function __construct(
         CartTaxCalculator $taxCalculator,
@@ -43,7 +46,8 @@ class CheckoutController extends Controller
         SettingService $settingService,
         PaymentGatewayManager $gatewayManager,
         InvoiceService $invoiceService,
-        TransactionService $transactionService
+        TransactionService $transactionService,
+        LayoutService $layoutService
     ) {
         $this->taxCalculator = $taxCalculator;
         $this->shippingCalculator = $shippingCalculator;
@@ -53,6 +57,7 @@ class CheckoutController extends Controller
         $this->gatewayManager = $gatewayManager;
         $this->invoiceService = $invoiceService;
         $this->transactionService = $transactionService;
+        $this->layoutService = $layoutService;
     }
 
     /**
@@ -548,11 +553,15 @@ class CheckoutController extends Controller
     {
         $prefilledOrderNumber = trim((string) $request->query('order_number', ''));
 
+        $trackPage = Page::where('url_key', 'track-order')->where('status', 'published')->first();
+        $layoutData = $trackPage ? $this->layoutService->getPublishedForPage($trackPage)?->layout_data : null;
+
         return Inertia::render($this->themeResolver->resolve('Checkout/GuestTrack'), [
             'lookup' => [
                 'order_number' => $prefilledOrderNumber,
             ],
             'trackedOrder' => null,
+            'layoutData'   => $layoutData,
         ]);
     }
 
@@ -567,6 +576,9 @@ class CheckoutController extends Controller
 
         $orderNumber = ltrim(trim((string) $validated['order_number']), '#');
 
+        $trackPage   = Page::where('url_key', 'track-order')->where('status', 'published')->first();
+        $layoutData  = $trackPage ? $this->layoutService->getPublishedForPage($trackPage)?->layout_data : null;
+
         $order = Order::with(['items', 'shippingAddress'])
             ->where('order_number', $orderNumber)
             ->whereNull('user_id')
@@ -578,6 +590,7 @@ class CheckoutController extends Controller
                     'order_number' => $validated['order_number'],
                 ],
                 'trackedOrder' => null,
+                'layoutData'   => $layoutData,
                 'error' => 'Guest order not found. Please check your order ID.',
             ]);
         }
@@ -586,6 +599,7 @@ class CheckoutController extends Controller
             'lookup' => [
                 'order_number' => $validated['order_number'],
             ],
+            'layoutData'   => $layoutData,
             'trackedOrder' => [
                 'id' => $order->id,
                 'order_number' => $order->order_number,

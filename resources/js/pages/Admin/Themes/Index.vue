@@ -2,9 +2,9 @@
 import { ref, computed } from 'vue';
 import { Head, router, usePage } from '@inertiajs/vue3';
 import AdminLayout from '@/layouts/AdminLayout.vue';
-import { 
-  Trash2, Settings, Power, CheckCircle, Eye, 
-  AlertTriangle, Monitor, Plus, Package 
+import {
+  Trash2, Settings, Power, CheckCircle, Eye,
+  AlertTriangle, Monitor, Plus, Package, LayoutTemplate, Wand2, ChevronRight,
 } from 'lucide-vue-next';
 
 interface Theme {
@@ -24,6 +24,7 @@ interface Theme {
 
 interface Props {
   themes: Theme[];
+  hasPublishedLayout: boolean;
 }
 
 const props = defineProps<Props>();
@@ -171,8 +172,11 @@ const uploadTheme = (event: Event) => {
                   :alt="activeTheme.name"
                   class="w-full h-full object-cover object-top transition-transform duration-700 group-hover:scale-105"
                 />
-                <div v-else class="w-full h-full flex items-center justify-center bg-gray-50">
-                  <Monitor class="w-16 h-16 text-gray-300" />
+                <div v-else class="w-full h-full flex flex-col items-center justify-center bg-gradient-to-br from-blue-600 to-indigo-700 gap-3">
+                  <div class="w-16 h-16 rounded-2xl bg-white/20 flex items-center justify-center">
+                    <Monitor class="w-9 h-9 text-white/80" />
+                  </div>
+                  <span class="text-white font-bold text-lg tracking-wide">{{ activeTheme.name }}</span>
                 </div>
                 <div class="absolute top-4 left-4">
                   <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-green-500 text-white shadow-sm ring-2 ring-white">
@@ -218,21 +222,30 @@ const uploadTheme = (event: Event) => {
                   <Settings class="w-4 h-4 mr-2" />
                   Customize
                 </button>
+                <!-- Layout is live → link to page builder -->
+                <a
+                  v-if="activeTheme.hasDemoLayout && hasPublishedLayout"
+                  href="/admin/content/pages"
+                  class="inline-flex items-center gap-2 px-5 py-2.5 border border-green-300 text-sm font-medium rounded-lg text-green-700 bg-green-50 hover:bg-green-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-400 transition-colors"
+                >
+                  <Wand2 class="w-4 h-4" />
+                  Open Page Builder
+                  <ChevronRight class="w-3.5 h-3.5 opacity-60" />
+                </a>
+                <!-- No layout yet → import button -->
                 <button
-                  v-if="activeTheme.hasDemoLayout"
+                  v-else-if="activeTheme.hasDemoLayout && !hasPublishedLayout"
                   @click="importDemoLayout(activeTheme.slug)"
                   :disabled="importingLayout[activeTheme.slug]"
-                  class="inline-flex items-center px-5 py-2.5 border border-gray-300 text-sm font-medium rounded-lg text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-300 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                  class="inline-flex items-center gap-2 px-5 py-2.5 border border-gray-300 text-sm font-medium rounded-lg text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-300 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                   title="Import pre-built homepage layout"
                 >
-                  <svg v-if="importingLayout[activeTheme.slug]" class="animate-spin w-4 h-4 mr-2" fill="none" viewBox="0 0 24 24">
+                  <svg v-if="importingLayout[activeTheme.slug]" class="animate-spin w-4 h-4" fill="none" viewBox="0 0 24 24">
                     <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>
                     <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/>
                   </svg>
-                  <svg v-else class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
-                  </svg>
-                  {{ importingLayout[activeTheme.slug] ? 'Importing...' : 'Import Demo Layout' }}
+                  <LayoutTemplate v-else class="w-4 h-4" />
+                  {{ importingLayout[activeTheme.slug] ? 'Importing…' : 'Import Demo Layout' }}
                 </button>
               </div>
             </div>

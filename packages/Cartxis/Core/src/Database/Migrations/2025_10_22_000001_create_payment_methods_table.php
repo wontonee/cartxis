@@ -20,7 +20,7 @@ return new class extends Migration
             $table->text('description')->nullable();
             
             // Type and status
-            $table->enum('type', ['cod', 'bank_transfer', 'stripe', 'paypal', 'other'])->default('cod');
+            $table->enum('type', ['cod', 'bank_transfer', 'stripe', 'paypal', 'razorpay', 'phonepe', 'payumoney', 'other'])->default('cod');
             $table->boolean('is_active')->default(true);
             $table->boolean('is_default')->default(false);
             

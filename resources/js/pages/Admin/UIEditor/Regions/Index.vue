@@ -118,9 +118,9 @@ const regionTypes: { value: RegionType; label: string }[] = [
         </div>
         <button
           @click="openCreate"
-          class="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-xl hover:bg-blue-700 transition-colors shadow-sm"
+          class="inline-flex items-center px-4 py-2 bg-blue-600 border border-transparent rounded-lg font-semibold text-xs text-white uppercase tracking-widest hover:bg-blue-700 focus:bg-blue-700 active:bg-blue-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition ease-in-out duration-150"
         >
-          <Plus class="w-4 h-4" />
+          <Plus class="w-4 h-4 mr-2" />
           New Section
         </button>
       </div>
@@ -137,9 +137,9 @@ const regionTypes: { value: RegionType; label: string }[] = [
         </p>
         <button
           @click="openCreate"
-          class="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-xl hover:bg-blue-700 transition-colors shadow-sm"
+          class="inline-flex items-center px-4 py-2 bg-blue-600 border border-transparent rounded-lg font-semibold text-xs text-white uppercase tracking-widest hover:bg-blue-700 focus:bg-blue-700 active:bg-blue-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition ease-in-out duration-150"
         >
-          <Plus class="w-4 h-4" />
+          <Plus class="w-4 h-4 mr-2" />
           Create First Section
         </button>
       </div>
@@ -271,14 +271,14 @@ const regionTypes: { value: RegionType; label: string }[] = [
             <div class="px-6 py-4 border-t border-gray-100 dark:border-gray-800 flex items-center justify-end gap-3">
               <button
                 @click="showCreate = false"
-                class="px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition"
+                class="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition"
               >
                 Cancel
               </button>
               <button
                 @click="submitCreate"
                 :disabled="creating || !form.name.trim()"
-                class="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-xl hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition shadow-sm"
+                class="inline-flex items-center px-4 py-2 bg-blue-600 border border-transparent rounded-lg font-semibold text-xs text-white uppercase tracking-widest hover:bg-blue-700 focus:bg-blue-700 active:bg-blue-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition ease-in-out duration-150 disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 <span v-if="creating">Creating…</span>
                 <span v-else>Create &amp; Edit Layout</span>
@@ -308,7 +308,7 @@ const regionTypes: { value: RegionType; label: string }[] = [
               "<strong class="text-gray-700 dark:text-gray-200">{{ confirmDelete?.name }}</strong>" will be permanently deleted. Any pages that reference this section will show a placeholder.
             </p>
             <div class="flex justify-end gap-3">
-              <button @click="confirmDelete = null" class="px-4 py-2 text-sm text-gray-600 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition">Cancel</button>
+              <button @click="confirmDelete = null" class="px-4 py-2 text-sm font-medium text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition">Cancel</button>
               <button
                 @click="doDelete"
                 :disabled="deleting"

@@ -16,7 +16,7 @@ const props = defineProps<{
 
 const store = useUiEditorStore()
 const search = ref('')
-const activeTab = ref<'blocks' | 'saved' | 'snippets' | 'regions'>('blocks')
+const activeTab = ref<'blocks' | 'saved' | 'regions'>('blocks')
 const savedLoading = ref(false)
 const deletingId = ref<number | null>(null)
 
@@ -121,35 +121,10 @@ function endDrag() {
   store.setDraggingBlockType(null)
 }
 
-function switchTab(tab: 'blocks' | 'saved' | 'snippets' | 'regions') {
+function switchTab(tab: 'blocks' | 'saved' | 'regions') {
   activeTab.value = tab
-  if (tab === 'snippets') loadSnippets()
   if (tab === 'saved') loadSaved()
   if (tab === 'regions') loadRegions()
-}
-
-// ── Built-in Snippets (loaded from DB via store) ─────────────────────────
-const snippetsLoading = ref(false)
-
-async function loadSnippets() {
-  if (store.snippets.length > 0) return
-  snippetsLoading.value = true
-  await store.fetchSnippets()
-  snippetsLoading.value = false
-}
-
-
-const snippetSearch = ref('')
-const filteredSnippets = computed(() => {
-  const q = snippetSearch.value.toLowerCase()
-  if (!q) return store.snippets
-  return store.snippets.filter(s =>
-    s.name.toLowerCase().includes(q) || (s.description ?? '').toLowerCase().includes(q)
-  )
-})
-
-function addSnippet(snippet: SavedBlockItem) {
-  store.addSectionFromTemplate(snippet.layout_data)
 }
 
 // ── Saved tab ──────────────────────────────────────────────────────────────
@@ -257,7 +232,7 @@ onMounted(() => loadSaved())
     <!-- Tab bar -->
     <div class="flex border-b border-gray-200 dark:border-gray-700">
       <button
-        v-for="tab in (['blocks', 'snippets', 'saved', 'regions'] as const)"
+        v-for="tab in (['blocks', 'saved', 'regions'] as const)"
         :key="tab"
         type="button"
         :class="[
@@ -268,11 +243,7 @@ onMounted(() => loadSaved())
         ]"
         @click="switchTab(tab)"
       >
-        {{ tab === 'blocks' ? 'Blocks' : tab === 'snippets' ? 'Snippets' : tab === 'saved' ? 'Saved' : 'Sections' }}
-        <span
-          v-if="tab === 'snippets'"
-          class="ml-1 inline-flex items-center justify-center w-4 h-4 rounded-full bg-violet-100 dark:bg-violet-900/40 text-violet-600 dark:text-violet-400 text-[10px] font-bold"
-        >{{ store.snippets.length || '…' }}</span>
+        {{ tab === 'blocks' ? 'Blocks' : tab === 'saved' ? 'Saved' : 'Sections' }}
         <span
           v-if="tab === 'saved' && store.savedBlocks.length > 0"
           class="ml-1 inline-flex items-center justify-center w-4 h-4 rounded-full bg-blue-100 dark:bg-blue-900/40 text-blue-600 dark:text-blue-400 text-[10px] font-bold"
@@ -354,77 +325,6 @@ onMounted(() => loadSaved())
         <p v-if="Object.keys(grouped).length === 0" class="text-xs text-gray-400 dark:text-gray-500 text-center py-6">
           No blocks match "{{ search }}"
         </p>
-      </div>
-    </template>
-
-    <!-- ── SNIPPETS TAB ──────────────────────────────────────────────────── -->
-    <template v-else-if="activeTab === 'snippets'">
-      <!-- Search -->
-      <div class="p-3 border-b border-gray-200 dark:border-gray-700">
-        <div class="relative">
-          <svg class="absolute left-2.5 top-2.5 w-3.5 h-3.5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-          </svg>
-          <input
-            v-model="snippetSearch"
-            type="text"
-            placeholder="Search snippets…"
-            class="w-full pl-8 pr-3 py-1.5 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-gray-50 dark:bg-gray-800 text-gray-900 dark:text-white placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-          />
-        </div>
-      </div>
-
-        <div class="flex-1 overflow-y-auto">
-        <div v-if="snippetsLoading" class="flex items-center justify-center py-12">
-          <svg class="animate-spin w-5 h-5 text-violet-500" fill="none" viewBox="0 0 24 24">
-            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" />
-            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z" />
-          </svg>
-        </div>
-        <template v-else>
-        <p class="px-3 pt-3 pb-1 text-xs font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wider">Built-in</p>
-        <div class="px-2 pb-2 space-y-1">
-          <div
-            v-for="snippet in filteredSnippets"
-            :key="snippet.id"
-            class="group flex items-center gap-2 px-2.5 py-2.5 rounded-lg bg-gray-50 dark:bg-gray-800 hover:bg-violet-50 dark:hover:bg-violet-900/20 transition-colors cursor-pointer"
-            @click="addSnippet(snippet)"
-          >
-            <svg class="w-4 h-4 flex-shrink-0 text-violet-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 5a1 1 0 011-1h14a1 1 0 011 1v3a1 1 0 01-1 1H5a1 1 0 01-1-1V5zM4 13a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H5a1 1 0 01-1-1v-6zM16 13a1 1 0 011-1h2a1 1 0 011 1v6a1 1 0 01-1 1h-2a1 1 0 01-1-1v-6z" />
-            </svg>
-            <div class="flex-1 min-w-0">
-              <p class="text-xs font-medium text-gray-800 dark:text-gray-200 truncate">{{ snippet.name }}</p>
-              <p class="text-[10px] text-gray-400 truncate">{{ snippet.description }}</p>
-            </div>
-            <svg class="w-3.5 h-3.5 text-violet-400 opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
-            </svg>
-          </div>
-          <p v-if="filteredSnippets.length === 0" class="text-xs text-gray-400 text-center py-4">No snippets match "{{ snippetSearch }}"</p>
-        </div>
-
-        <!-- User saved below built-ins -->
-        <template v-if="store.savedBlocks.length > 0">
-          <p class="px-3 pt-2 pb-1 text-xs font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wider border-t border-gray-200 dark:border-gray-700 mt-2">My Saved</p>
-          <div class="px-2 pb-3 space-y-1">
-            <div
-              v-for="item in store.savedBlocks"
-              :key="item.id"
-              class="group flex items-center gap-2 px-2.5 py-2.5 rounded-lg bg-gray-50 dark:bg-gray-800 hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors cursor-pointer"
-              @click="item.type === 'section' ? addSectionToCanvas(item) : undefined"
-            >
-              <svg class="w-4 h-4 flex-shrink-0 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z" />
-              </svg>
-              <div class="flex-1 min-w-0">
-                <p class="text-xs font-medium text-gray-800 dark:text-gray-200 truncate">{{ item.name }}</p>
-                <p v-if="item.description" class="text-[10px] text-gray-400 truncate">{{ item.description }}</p>
-              </div>
-            </div>
-          </div>
-        </template>
-        </template>
       </div>
     </template>
 

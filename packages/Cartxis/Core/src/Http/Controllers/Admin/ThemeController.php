@@ -42,6 +42,8 @@ class ThemeController extends Controller
         // Discover new themes from filesystem
         $this->themeService->discover();
 
+        $hasPublishedLayout = PageLayout::homepage()->published()->exists();
+
         $themes = Theme::all()->map(function ($theme) {
             $config = $theme->getConfig();
             $dataPath = $theme->getPath() . '/data/theme-data.json';
@@ -68,6 +70,7 @@ class ThemeController extends Controller
 
         return Inertia::render('Admin/Themes/Index', [
             'themes' => $themes,
+            'hasPublishedLayout' => $hasPublishedLayout,
         ]);
     }
 
@@ -92,10 +95,13 @@ class ThemeController extends Controller
         $currentSettings = $this->flattenSettings($theme->settings ?? []);
         $hasThemeData = file_exists($theme->getPath() . '/data/theme-data.json');
         $hasProductData = false;
+        $hasDemoLayout = false;
         if ($hasThemeData) {
             $themeData = json_decode(file_get_contents($theme->getPath() . '/data/theme-data.json'), true);
             $hasProductData = !empty($themeData['categories']) || !empty($themeData['products']);
+            $hasDemoLayout = !empty($themeData['homepage']);
         }
+        $hasPublishedLayout = PageLayout::homepage()->published()->exists();
 
         return Inertia::render('Admin/Appearance/Index', [
             'theme' => [
@@ -112,6 +118,8 @@ class ThemeController extends Controller
             'settings' => $currentSettings,
             'hasThemeData' => $hasThemeData,
             'hasProductData' => $hasProductData,
+            'hasDemoLayout' => $hasDemoLayout,
+            'hasPublishedLayout' => $hasPublishedLayout,
         ]);
     }
 
@@ -361,10 +369,11 @@ class ThemeController extends Controller
         }
 
         try {
-            // Homepage layout uses TYPE_HOMEPAGE with null page_id
-            $this->layoutService->saveDraft($layoutData, PageLayout::TYPE_HOMEPAGE, null);
+            // Homepage layout uses TYPE_HOMEPAGE with null page_id — save and immediately publish
+            $layout = $this->layoutService->saveDraft($layoutData, PageLayout::TYPE_HOMEPAGE, null);
+            $this->layoutService->publish($layout);
 
-            return back()->with('success', 'Homepage demo layout imported. Open the Pages list, edit the Homepage, and click Publish to make it live.');
+            return back()->with('success', 'Homepage demo layout imported and published successfully!');
         } catch (\Exception $e) {
             return back()->with('error', 'Failed to import layout: ' . $e->getMessage());
         }

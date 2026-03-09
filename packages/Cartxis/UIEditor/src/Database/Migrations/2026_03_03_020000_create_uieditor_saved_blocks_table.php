@@ -14,6 +14,8 @@ return new class extends Migration
             $table->string('description')->nullable();
             $table->enum('type', ['section', 'block'])->default('section')
                 ->comment('section = full row with columns; block = single content block');
+            $table->boolean('is_builtin')->default(false)
+                ->comment('true = shipped with the system (seeded); false = created by user');
             $table->longText('layout_data')
                 ->comment('JSON: section object or single block object');
             $table->string('thumbnail')->nullable()

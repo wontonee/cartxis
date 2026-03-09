@@ -283,6 +283,13 @@
                                                 <Edit class="w-4 h-4" />
                                             </Link>
                                             <button
+                                                @click="duplicatePage(page)"
+                                                class="p-2 text-gray-400 hover:text-green-600 hover:bg-green-50 dark:hover:bg-green-900/20 rounded-lg transition-colors"
+                                                title="Duplicate Page"
+                                            >
+                                                <Copy class="w-4 h-4" />
+                                            </button>
+                                            <button
                                                 v-if="!page.is_homepage"
                                                 @click="deletePage(page)"
                                                 class="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors"
@@ -373,6 +380,7 @@ import {
     X,
     ExternalLink,
     Edit,
+    Copy,
     Trash2,
     Check,
     MinusCircle,
@@ -474,6 +482,10 @@ const deletePage = (page: Page) => {
     if (!confirm(`Are you sure you want to delete "${page.title}"?`)) return;
 
     router.delete(pageRoutes.destroy({ page: page.id }).url);
+};
+
+const duplicatePage = (page: Page) => {
+    router.post(pageRoutes.duplicate({ page: page.id }).url);
 };
 
 const statusClass = (status: string) => {

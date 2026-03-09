@@ -1,5 +1,6 @@
 <script setup lang="ts">
-import { defineAsyncComponent } from 'vue'
+import { defineAsyncComponent, computed } from 'vue'
+import { usePage } from '@inertiajs/vue3'
 
 interface Block   { id: string; type: string; settings: Record<string, unknown> }
 interface Column  { id: string; width: number; settings: Record<string, unknown>; blocks: Block[] }
@@ -11,15 +12,27 @@ const props = defineProps<{
   editorMode?: boolean
 }>()
 
+const page = usePage()
+
+// Active theme slug from Inertia shared props (set by ShareFrontendData middleware)
+const themeSlug = computed(() => (page.props as any).theme?.slug as string | null ?? null)
+
 function toPascal(str: string): string {
   return str.split(/[-_]/).map(w => w.charAt(0).toUpperCase() + w.slice(1)).join('')
 }
+
 function blockComponent(type: string) {
-  return defineAsyncComponent(() =>
-    import(`./blocks/${toPascal(type)}Block.vue`).catch(() =>
-      import('./blocks/TextBlock.vue') // fallback
-    )
-  )
+  const slug   = themeSlug.value
+  const pascal = toPascal(type)
+
+  return defineAsyncComponent(() => {
+    // 1. Try the active theme's override first
+    // 2. Fall back to the shared block library
+    // 3. Final fallback: TextBlock (never a blank crash)
+    const shared   = () => import(`./blocks/${pascal}Block.vue`).catch(() => import('./blocks/TextBlock.vue'))
+    if (!slug) return shared()
+    return import(`@themes/${slug}/blocks/${pascal}Block.vue`).catch(shared)
+  })
 }
 
 function sectionStyle(section: Section): Record<string, string> {

@@ -10,41 +10,13 @@ use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Inertia\Response;
 use Cartxis\UIEditor\Models\PageLayout;
-use Cartxis\UIEditor\Services\BlockRegistry;
 use Cartxis\UIEditor\Services\LayoutService;
 
 class HomepageEditorController extends Controller
 {
     public function __construct(
         protected LayoutService $layoutService,
-        protected BlockRegistry $blockRegistry
     ) {}
-
-    /**
-     * Open the full-screen visual editor for the homepage.
-     */
-    public function show(): Response
-    {
-        $layout = $this->layoutService->getHomepage();
-
-        return Inertia::render('Admin/UIEditor/Editor', [
-            'page'         => [
-                'id'     => null,
-                'title'  => 'Homepage',
-                'url'    => '/',
-                'status' => 'published',
-            ],
-            'pageType'     => PageLayout::TYPE_HOMEPAGE,
-            'layoutData'   => $layout?->layout_data ?? $this->layoutService->emptyLayout(),
-            'layoutStatus' => $layout?->status,
-            'publishedAt'  => $layout?->published_at?->toIso8601String(),
-            'blockTypes'   => array_values($this->blockRegistry->all()),
-            'saveUrl'      => route('admin.uieditor.homepage.save'),
-            'publishUrl'   => route('admin.uieditor.homepage.publish'),
-            'unpublishUrl' => route('admin.uieditor.homepage.unpublish'),
-            'previewUrl'   => route('admin.uieditor.homepage.preview'),
-        ]);
-    }
 
     /**
      * Save the homepage layout as a draft.

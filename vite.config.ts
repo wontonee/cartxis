@@ -9,7 +9,6 @@ export default defineConfig({
         laravel({
             input: [
                 'resources/js/app.ts',
-                'resources/admin/css/styles.css',
             ],
             ssr: 'resources/js/ssr.ts',
             refresh: true,
@@ -29,7 +28,6 @@ export default defineConfig({
     ],
     resolve: {
         alias: [
-            { find: /^@\/Layouts/, replacement: '/resources/js/layouts' },
             { find: '@admin', replacement: '/resources/admin' },
             { find: '@themes', replacement: '/themes' },
             { find: '@', replacement: '/resources/js' },

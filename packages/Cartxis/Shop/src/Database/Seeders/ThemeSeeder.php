@@ -5,6 +5,7 @@ namespace Cartxis\Shop\Database\Seeders;
 use Illuminate\Database\Seeder;
 use Cartxis\Core\Models\Theme;
 use Cartxis\UIEditor\Models\PageLayout;
+use Cartxis\UIEditor\Database\Seeders\UIEditorPageSeeder;
 
 class ThemeSeeder extends Seeder
 {
@@ -71,5 +72,8 @@ class ThemeSeeder extends Seeder
         ]);
 
         $this->command->info('  ↳ Homepage layout seeded and published (' . count($homepageData['sections'] ?? []) . ' sections).');
+
+        // ── 3. CMS page UIEditor layouts (theme-specific defaults) ─────────
+        $this->call(UIEditorPageSeeder::class);
     }
 }
