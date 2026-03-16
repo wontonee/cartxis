@@ -18,7 +18,8 @@ import {
   UserCircle,
   Settings,
   Sun,
-  Moon
+  Moon,
+  Store
 } from 'lucide-vue-next'
 
 defineProps<{
@@ -700,8 +701,20 @@ onUnmounted(() => {
                 <Search class="w-5 h-5" />
               </button>
 
+              <!-- Visit Store -->
+              <a
+                href="/"
+                target="_blank"
+                rel="noopener noreferrer"
+                class="text-gray-500 hover:text-gray-600 dark:text-gray-400 dark:hover:text-gray-300"
+                aria-label="Visit store"
+                title="Visit Store"
+              >
+                <Store class="w-5 h-5" />
+              </a>
+
               <!-- Notifications -->
-              <div class="relative">
+              <div class="relative flex items-center">
                 <button
                   @click="toggleNotifications"
                   class="relative text-gray-500 hover:text-gray-600 dark:text-gray-400 dark:hover:text-gray-300 transition-transform duration-300"
@@ -732,7 +745,7 @@ onUnmounted(() => {
                 >
                   <div
                     v-show="notificationsOpen"
-                    class="absolute right-0 mt-2 w-96 max-w-[92vw] bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 overflow-hidden z-50"
+                    class="absolute right-0 top-full mt-2 w-96 max-w-[92vw] bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 overflow-hidden z-50"
                   >
                     <div class="px-4 py-3 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between">
                       <p class="text-sm font-semibold text-gray-900 dark:text-white">Notifications</p>

@@ -10,12 +10,15 @@
 /resources/js/routes
 /resources/js/wayfinder
 /specificationandtask
+/specification
 /extension/cartxis-saleschat
+/.github/agents/*
+/.github/copilot/*
 /example-shop
 /Agent-Mac
 /design
 /templates-design
-# /themes/dmart-electronics/*
+/themes/dmart-electronics
 /test-screenshots
 /_backup
 /resources/admin/media

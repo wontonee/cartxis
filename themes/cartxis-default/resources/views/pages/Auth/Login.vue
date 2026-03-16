@@ -7,8 +7,8 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Form, Head, usePage } from '@inertiajs/vue3';
-import { LoaderCircle } from 'lucide-vue-next';
-import { computed } from 'vue';
+import { Eye, EyeOff, LoaderCircle } from 'lucide-vue-next';
+import { computed, ref } from 'vue';
 import ThemeLayout from '../../layouts/ThemeLayout.vue';
 
 const page = usePage();
@@ -20,6 +20,8 @@ defineProps<{
     status?: string;
     canResetPassword: boolean;
 }>();
+
+const showPassword = ref(false);
 </script>
 
 <template>
@@ -88,14 +90,26 @@ defineProps<{
                                     Forgot password?
                                 </TextLink>
                             </div>
-                            <Input
-                                id="password"
-                                type="password"
-                                name="password"
-                                required
-                                autocomplete="current-password"
-                                class="w-full"
-                            />
+                            <div class="relative">
+                                <Input
+                                    id="password"
+                                    :type="showPassword ? 'text' : 'password'"
+                                    name="password"
+                                    required
+                                    autocomplete="current-password"
+                                    class="w-full pr-10"
+                                />
+                                <button
+                                    type="button"
+                                    tabindex="-1"
+                                    :aria-label="showPassword ? 'Hide password' : 'Show password'"
+                                    class="absolute inset-y-0 right-0 flex items-center pr-3 text-gray-400 hover:text-gray-600"
+                                    @click="showPassword = !showPassword"
+                                >
+                                    <EyeOff v-if="showPassword" class="h-4 w-4" />
+                                    <Eye v-else class="h-4 w-4" />
+                                </button>
+                            </div>
                             <InputError :message="errors.password" />
                         </div>
 
