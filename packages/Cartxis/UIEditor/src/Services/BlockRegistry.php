@@ -433,6 +433,49 @@ class BlockRegistry
                 'style'    => 'icon_text',
             ],
         ]);
+
+        $this->register([
+            'type'     => 'post_featured',
+            'label'    => 'Post Featured',
+            'icon'     => 'star',
+            'category' => 'content',
+            'defaults' => [
+                'section_title' => 'Featured Post',
+                'category_id'   => null,
+                'show_excerpt'  => true,
+                'min_height'    => 400,
+            ],
+        ]);
+
+        $this->register([
+            'type'     => 'post_list',
+            'label'    => 'Post List',
+            'icon'     => 'align-left',
+            'category' => 'content',
+            'defaults' => [
+                'title'          => 'Latest Posts',
+                'count'          => 5,
+                'show_thumbnail' => true,
+                'show_date'      => true,
+                'show_category'  => true,
+                'show_excerpt'   => true,
+                'category_id'    => null,
+            ],
+        ]);
+
+        $this->register([
+            'type'     => 'post_carousel',
+            'label'    => 'Post Carousel',
+            'icon'     => 'layout-grid',
+            'category' => 'content',
+            'defaults' => [
+                'title'         => 'More Posts',
+                'count'         => 6,
+                'show_date'     => true,
+                'show_category' => true,
+                'category_id'   => null,
+            ],
+        ]);
     }
 
     /**

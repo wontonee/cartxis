@@ -6,11 +6,14 @@ namespace Cartxis\Blog\Http\Controllers;
 
 use Cartxis\Blog\Models\BlogCategory;
 use Cartxis\Blog\Models\BlogPost;
+use Cartxis\Core\Services\ThemeViewResolver;
 use Inertia\Inertia;
 use Inertia\Response;
 
 class BlogController
 {
+    public function __construct(private ThemeViewResolver $themeResolver) {}
+
     public function index(): Response
     {
         $posts = BlogPost::published()
@@ -23,7 +26,7 @@ class BlogController
             ->orderBy('name')
             ->get();
 
-        return Inertia::render('Blog/Index', [
+        return Inertia::render($this->themeResolver->resolve('Blog/Index'), [
             'posts'      => $posts,
             'categories' => $categories,
         ]);
@@ -45,7 +48,7 @@ class BlogController
             ->limit(3)
             ->get();
 
-        return Inertia::render('Blog/Show', [
+        return Inertia::render($this->themeResolver->resolve('Blog/Show'), [
             'post'    => $post,
             'related' => $related,
         ]);

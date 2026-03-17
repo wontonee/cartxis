@@ -23,7 +23,9 @@ interface Post {
 interface PaginatedPosts {
     data: Post[];
     links: { url: string | null; label: string; active: boolean }[];
-    meta: { current_page: number; last_page: number; total: number };
+    current_page: number;
+    last_page: number;
+    total: number;
 }
 
 defineProps<{
@@ -115,7 +117,7 @@ const formatDate = (date: string) =>
                         </div>
 
                         <!-- Pagination -->
-                        <div v-if="posts.meta.last_page > 1" class="mt-8 flex justify-center gap-1">
+                        <div v-if="posts.last_page > 1" class="mt-8 flex justify-center gap-1">
                             <template v-for="link in posts.links" :key="link.label">
                                 <Link
                                     v-if="link.url"
@@ -141,7 +143,7 @@ const formatDate = (date: string) =>
                                 <li>
                                     <Link href="/blog" class="flex items-center justify-between text-sm text-gray-700 hover:text-blue-600 transition-colors py-1">
                                         <span>All Posts</span>
-                                        <span class="text-gray-400 text-xs">{{ posts.meta.total }}</span>
+                                        <span class="text-gray-400 text-xs">{{ posts.total }}</span>
                                     </Link>
                                 </li>
                                 <li v-for="cat in categories" :key="cat.id">

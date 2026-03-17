@@ -393,6 +393,9 @@ onUnmounted(() => {
                         <Link href="/deals" class="text-gray-700 hover:text-gray-900 transition-colors">
                             Deals
                         </Link>
+                        <Link href="/blog" class="text-gray-700 hover:text-gray-900 transition-colors">
+                            Blog
+                        </Link>
                         <Link href="/about-us" class="text-gray-700 hover:text-gray-900 transition-colors">
                             About
                         </Link>

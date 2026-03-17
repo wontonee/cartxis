@@ -19,11 +19,11 @@ Route::group([
         $categoryId = $request->get('category_id');
 
         $posts = BlogPost::published()
-            ->with(['category:id,name,slug'])
+            ->with(['category:id,name,slug', 'creator:id,name'])
             ->when($categoryId, fn ($q) => $q->where('blog_category_id', $categoryId))
             ->orderByDesc('published_at')
             ->limit($limit)
-            ->get(['id', 'title', 'slug', 'excerpt', 'featured_image', 'blog_category_id', 'published_at', 'author_name']);
+            ->get(['id', 'title', 'slug', 'excerpt', 'featured_image', 'blog_category_id', 'published_at', 'created_by']);
 
         return response()->json(['data' => $posts]);
     })->name('posts.index');
