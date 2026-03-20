@@ -8,6 +8,7 @@ use Cartxis\Blog\Models\BlogPost;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Str;
+use Mews\Purifier\Facades\Purifier;
 
 class BlogService
 {
@@ -21,6 +22,10 @@ class BlogService
 
             if ($data['status'] === 'published' && empty($data['published_at'])) {
                 $data['published_at'] = now();
+            }
+
+            if (isset($data['content'])) {
+                $data['content'] = Purifier::clean($data['content']);
             }
 
             return BlogPost::create($data);
@@ -40,6 +45,10 @@ class BlogService
 
             if ($data['status'] === 'published' && $post->status !== 'published' && empty($data['published_at'])) {
                 $data['published_at'] = now();
+            }
+
+            if (isset($data['content'])) {
+                $data['content'] = Purifier::clean($data['content']);
             }
 
             $post->update($data);

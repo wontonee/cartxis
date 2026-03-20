@@ -8,6 +8,7 @@ use Cartxis\CMS\Models\Page;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Str;
+use Mews\Purifier\Facades\Purifier;
 
 class PageService
 {
@@ -22,6 +23,10 @@ class PageService
                 $data['title'],
                 $data['url_key'] ?? null
             );
+
+            if (isset($data['content'])) {
+                $data['content'] = Purifier::clean($data['content']);
+            }
 
             return Page::create($data);
         });
@@ -40,6 +45,10 @@ class PageService
                     $data['url_key'] ?? null,
                     $page->id
                 );
+            }
+
+            if (isset($data['content'])) {
+                $data['content'] = Purifier::clean($data['content']);
             }
 
             $page->update($data);

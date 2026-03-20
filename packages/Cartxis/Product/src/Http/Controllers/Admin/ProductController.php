@@ -11,6 +11,7 @@ use Cartxis\Core\Services\SettingService;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Inertia\Response;
+use Mews\Purifier\Facades\Purifier;
 
 class ProductController extends Controller
 {
@@ -135,6 +136,13 @@ class ProductController extends Controller
         $categoryIds = $validated['category_ids'] ?? [];
         $attributeValues = $validated['attribute_values'] ?? [];
         unset($validated['category_ids'], $validated['attribute_values']);
+
+        if (isset($validated['description'])) {
+            $validated['description'] = Purifier::clean($validated['description']);
+        }
+        if (isset($validated['short_description'])) {
+            $validated['short_description'] = Purifier::clean($validated['short_description']);
+        }
 
         $product = Product::create($validated);
 
@@ -262,6 +270,13 @@ class ProductController extends Controller
         // Track inventory changes
         $oldQuantity = $product->quantity;
         $newQuantity = $validated['quantity'];
+
+        if (isset($validated['description'])) {
+            $validated['description'] = Purifier::clean($validated['description']);
+        }
+        if (isset($validated['short_description'])) {
+            $validated['short_description'] = Purifier::clean($validated['short_description']);
+        }
 
         $product->update($validated);
 

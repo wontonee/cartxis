@@ -139,6 +139,10 @@ class InstallCommand extends Command
         $this->line('<fg=yellow>━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━</fg=yellow>');
 
         $npmBin = $this->detectNodePackageManager();
+        // Ensure the binary name is from the known-good allowlist before passing to shell
+        if (!in_array($npmBin, ['pnpm', 'yarn', 'npm'], true)) {
+            $npmBin = null;
+        }
 
         if ($npmBin) {
             $this->line("  Using <fg=cyan>{$npmBin}</fg=cyan> to build frontend assets...");

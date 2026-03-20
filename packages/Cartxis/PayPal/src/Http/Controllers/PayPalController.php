@@ -111,8 +111,11 @@ class PayPalController extends Controller
     public function webhook(Request $request)
     {
         try {
-            // PayPal webhook signature verification would go here
-            // For now, we'll just log the webhook data
+            // PayPal webhook signature verification is not yet implemented.
+            // Reject all inbound requests until proper SDK-based verification is added
+            // to prevent forged payment-capture events marking orders as paid.
+            Log::warning('PayPal webhook: signature verification not implemented — request rejected');
+            return response()->json(['status' => 'not_implemented'], 400);
 
             $event = $request->input('event_type');
             $resource = $request->input('resource', []);

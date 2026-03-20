@@ -101,4 +101,79 @@ class PayUMoneyController extends Controller
                 ->with('error', 'Payment processing failed. Please try again.');
         }
     }
+
+    /**
+     * Handle PayUMoney IPN (server-to-server webhook) notification.
+     * PayUMoney posts the same hash-signed payload directly to this endpoint.
+     * Hash algorithm: SHA-512 over reverse field sequence
+     * (salt|status|udf10...udf1|email|firstname|productinfo|amount|txnid|key)
+     */
+    public function webhook(Request $request)
+    {
+        try {
+            $gateway = $this->gatewayManager->get('payumoney');
+
+            if (!$gateway) {
+                Log::error('PayUMoney: Gateway not found for IPN webhook');
+                return response()->json(['status' => 'error'], 500);
+            }
+
+            // handleCallback() performs SHA-512 hash verification before processing
+            $result = $gateway->handleCallback($request->all());
+
+            if ($result['success']) {
+                $order = Order::find($result['order_id']);
+
+                if ($order) {
+                    DB::transaction(function () use ($order, $result) {
+                        // Idempotent — skip if already paid (redirect callback may have arrived first)
+                        if ($order->payment_status === 'paid') {
+                            return;
+                        }
+
+                        $invoice = $this->invoiceService->createFromOrderIfMissing($order);
+
+                        $this->transactionService->createPaymentIfMissing($order, [
+                            'payment_method' => 'payumoney',
+                            'gateway'        => 'payumoney',
+                            'gateway_transaction_id' => $result['transaction_id'],
+                            'amount'         => $order->total,
+                            'status'         => 'completed',
+                            'response_data'  => $result['response_data'] ?? null,
+                            'notes'          => 'Payment confirmed via PayUMoney IPN webhook',
+                            'invoice_id'     => $invoice?->id,
+                        ]);
+
+                        $order->update([
+                            'status'         => 'processing',
+                            'payment_status' => 'paid',
+                            'payment_gateway_data' => array_merge(
+                                $order->payment_gateway_data ?? [],
+                                $result['response_data'] ?? []
+                            ),
+                        ]);
+                    });
+                }
+
+                Log::info('PayUMoney: IPN webhook processed successfully', [
+                    'order_id' => $result['order_id'] ?? null,
+                ]);
+
+                return response()->json(['status' => 'ok']);
+            }
+
+            Log::warning('PayUMoney: IPN webhook hash verification failed', [
+                'message' => $result['message'] ?? 'unknown',
+            ]);
+
+            return response()->json(['status' => 'invalid_hash'], 400);
+
+        } catch (\Exception $e) {
+            Log::error('PayUMoney: IPN webhook error', [
+                'error' => $e->getMessage(),
+            ]);
+
+            return response()->json(['status' => 'error'], 500);
+        }
+    }
 }

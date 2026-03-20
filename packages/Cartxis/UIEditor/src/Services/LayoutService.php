@@ -7,6 +7,7 @@ namespace Cartxis\UIEditor\Services;
 use Cartxis\UIEditor\Models\PageLayout;
 use Cartxis\UIEditor\Repositories\LayoutRepository;
 use Cartxis\CMS\Models\Page;
+use Mews\Purifier\Facades\Purifier;
 
 class LayoutService
 {
@@ -60,6 +61,8 @@ class LayoutService
             default                   => null,
         };
 
+        $layoutData = $this->sanitizeLayoutBlocks($layoutData);
+
         $payload = [
             'layout_data' => $layoutData,
             'status'      => PageLayout::STATUS_DRAFT,
@@ -106,5 +109,72 @@ class LayoutService
             'version'  => '1.0',
             'sections' => [],
         ];
+    }
+
+    /**
+     * Sanitize HTML content in UIEditor block settings to prevent stored XSS.
+     * Walks the layout structure and cleans `content` fields for block types
+     * that render raw HTML on the storefront via v-html.
+     */
+    private function sanitizeLayoutBlocks(array $layoutData): array
+    {
+        if (empty($layoutData['sections']) || !is_array($layoutData['sections'])) {
+            return $layoutData;
+        }
+
+        foreach ($layoutData['sections'] as $si => $section) {
+            if (!empty($section['blocks']) && is_array($section['blocks'])) {
+                foreach ($section['blocks'] as $bi => $block) {
+                    $layoutData['sections'][$si]['blocks'][$bi] = $this->sanitizeBlock($block);
+                }
+            }
+            // Handle column-based layouts where blocks live inside columns
+            if (!empty($section['columns']) && is_array($section['columns'])) {
+                foreach ($section['columns'] as $ci => $column) {
+                    if (!empty($column['blocks']) && is_array($column['blocks'])) {
+                        foreach ($column['blocks'] as $bi => $block) {
+                            $layoutData['sections'][$si]['columns'][$ci]['blocks'][$bi] = $this->sanitizeBlock($block);
+                        }
+                    }
+                }
+            }
+        }
+
+        return $layoutData;
+    }
+
+    private function sanitizeBlock(array $block): array
+    {
+        $settings = $block['settings'] ?? [];
+
+        switch ($block['type'] ?? '') {
+            case 'html':
+            case 'text':
+                if (isset($settings['content'])) {
+                    $settings['content'] = Purifier::clean($settings['content']);
+                }
+                break;
+            case 'tabs':
+                if (!empty($settings['tabs']) && is_array($settings['tabs'])) {
+                    foreach ($settings['tabs'] as $ti => $tab) {
+                        if (isset($tab['content'])) {
+                            $settings['tabs'][$ti]['content'] = Purifier::clean($tab['content']);
+                        }
+                    }
+                }
+                break;
+            case 'accordion':
+                if (!empty($settings['items']) && is_array($settings['items'])) {
+                    foreach ($settings['items'] as $ii => $item) {
+                        if (isset($item['content'])) {
+                            $settings['items'][$ii]['content'] = Purifier::clean($item['content']);
+                        }
+                    }
+                }
+                break;
+        }
+
+        $block['settings'] = $settings;
+        return $block;
     }
 }

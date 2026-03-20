@@ -98,7 +98,6 @@ class StripeGateway implements PaymentGatewayInterface
             
             Log::info('StripeGateway: Retrieved secret key', [
                 'has_key' => !empty($secretKey),
-                'key_length' => $secretKey ? strlen($secretKey) : 0,
             ]);
             
             if (!$secretKey) {

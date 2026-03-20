@@ -109,7 +109,7 @@ Route::prefix('api/v1')->group(function () {
             Route::put('/items/{id}', [CartController::class, 'update']);
             Route::delete('/items/{id}', [CartController::class, 'remove']);
             Route::delete('/clear', [CartController::class, 'clear']);
-            Route::post('/apply-coupon', [CartController::class, 'applyCoupon']);
+            Route::post('/apply-coupon', [CartController::class, 'applyCoupon'])->middleware('throttle:20,1');
             Route::delete('/remove-coupon', [CartController::class, 'removeCoupon']);
             Route::get('/count', [CartController::class, 'count']);
         });

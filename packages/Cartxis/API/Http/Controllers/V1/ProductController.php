@@ -98,7 +98,10 @@ class ProductController extends Controller
         // Sorting
         $sortBy = $request->get('sort_by', 'created_at');
         $sortOrder = $request->get('sort_order', 'desc');
-        
+        if (!in_array(strtolower($sortOrder), ['asc', 'desc'])) {
+            $sortOrder = 'desc';
+        }
+
         $allowedSorts = ['price', 'name', 'created_at', 'popularity', 'rating', 'discount'];
         if (in_array($sortBy, $allowedSorts)) {
             if ($sortBy === 'popularity') {

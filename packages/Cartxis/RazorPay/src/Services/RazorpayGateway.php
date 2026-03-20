@@ -255,7 +255,7 @@ class RazorpayGateway implements PaymentGatewayInterface
     /**
      * Handle webhook from Razorpay.
      */
-    public function handleWebhook(array $payload, string $signature): bool
+    public function handleWebhook(string $rawBody, string $signature): bool
     {
         try {
             $webhookSecret = $this->getConfig('webhook_secret');
@@ -265,14 +265,15 @@ class RazorpayGateway implements PaymentGatewayInterface
                 return false;
             }
 
-            // Verify webhook signature
-            $expectedSignature = hash_hmac('sha256', json_encode($payload), $webhookSecret);
+            // Verify webhook signature against the raw request body (not re-encoded array)
+            $expectedSignature = hash_hmac('sha256', $rawBody, $webhookSecret);
             
-            if ($signature !== $expectedSignature) {
+            if (!hash_equals($expectedSignature, $signature)) {
                 Log::error('RazorpayGateway: Webhook signature verification failed');
                 return false;
             }
 
+            $payload = json_decode($rawBody, true);
             $event = $payload['event'] ?? null;
             $paymentEntity = $payload['payload']['payment']['entity'] ?? null;
 
