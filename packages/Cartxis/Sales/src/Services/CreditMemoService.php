@@ -10,6 +10,7 @@ use Cartxis\Shop\Models\OrderItem;
 use Cartxis\Core\Models\EmailTemplate;
 use Cartxis\Core\Models\Currency;
 use Cartxis\Product\Models\Product;
+use Cartxis\Core\Services\PaymentGatewayManager;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
@@ -17,10 +18,12 @@ use Illuminate\Support\Facades\Auth;
 class CreditMemoService
 {
     protected CreditMemoRepository $repository;
+    protected PaymentGatewayManager $gatewayManager;
 
-    public function __construct(CreditMemoRepository $repository)
+    public function __construct(CreditMemoRepository $repository, PaymentGatewayManager $gatewayManager)
     {
         $this->repository = $repository;
+        $this->gatewayManager = $gatewayManager;
     }
 
     /**
@@ -182,10 +185,12 @@ class CreditMemoService
 
         DB::beginTransaction();
         try {
-            // TODO: Implement actual payment gateway refund
-            // This would integrate with Stripe, PayPal, Razorpay, etc.
-            // For now, we'll just mark it as processed
-            
+            $order = $creditMemo->order;
+            $refundResult = $this->gatewayManager->refund($order, $creditMemo->grand_total, 'Credit memo #' . $creditMemo->id);
+            if (!($refundResult['success'] ?? false)) {
+                throw new \Exception($refundResult['error'] ?? 'Payment gateway refund failed');
+            }
+
             $creditMemo->update([
                 'refund_status' => 'processed',
                 'refunded_at' => now(),

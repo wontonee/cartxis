@@ -123,7 +123,6 @@ const submit = () => {
   form.put(attributeRoutes.update(props.attribute.id).url, {
     preserveScroll: true,
     onError: (errors) => {
-      console.error('Validation errors:', errors);
       // Scroll to first error
       const firstErrorField = Object.keys(errors)[0];
       const element = document.querySelector(`[name="${firstErrorField}"]`);

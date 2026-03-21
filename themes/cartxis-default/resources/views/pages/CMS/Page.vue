@@ -1,6 +1,8 @@
 <script setup lang="ts">
+import { computed } from 'vue';
 import { Head } from '@inertiajs/vue3';
 import ThemeLayout from '../../layouts/ThemeLayout.vue';
+import UIBlockRenderer from '@/components/UIEditor/UIBlockRenderer.vue';
 
 interface Props {
     page: {
@@ -27,9 +29,11 @@ interface Props {
         url: string;
         description: string;
     };
+    layoutData?: Record<string, unknown> | null;
 }
 
-defineProps<Props>();
+const props = defineProps<Props>();
+const hasLayout = computed(() => !!(props.layoutData?.sections && (props.layoutData.sections as unknown[]).length));
 </script>
 
 <template>
@@ -41,20 +45,15 @@ defineProps<Props>();
         </Head>
 
         <div class="bg-gray-50 min-h-screen">
-            <!-- Page Header -->
-            <div class="bg-white border-b border-gray-200">
-                <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-                    <h1 class="text-4xl font-bold text-gray-900">{{ page.title }}</h1>
-                    <p v-if="page.updated_at" class="text-sm text-gray-500 mt-2">
-                        Last updated: {{ page.updated_at }}
-                    </p>
-                </div>
-            </div>
-
             <!-- Page Content -->
             <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-                <div class="bg-white rounded-lg shadow-sm p-8">
-                    <div 
+                <!-- Visual Editor layout takes priority when published -->
+                <template v-if="hasLayout">
+                    <UIBlockRenderer :layout="layoutData" :editor-mode="false" />
+                </template>
+                <template v-else>
+                    <div class="bg-white rounded-lg shadow-sm p-8">
+                        <div 
                         v-html="page.content" 
                         class="prose prose-lg max-w-none
                                prose-headings:text-gray-900 
@@ -71,6 +70,7 @@ defineProps<Props>();
                                prose-blockquote:pl-4 prose-blockquote:italic prose-blockquote:text-gray-600"
                     ></div>
                 </div>
+                </template>
             </div>
         </div>
     </ThemeLayout>

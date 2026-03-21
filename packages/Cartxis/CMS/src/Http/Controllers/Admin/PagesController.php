@@ -58,8 +58,8 @@ class PagesController extends Controller
             $page = $this->pageService->create($request->validated());
 
             return redirect()
-                ->route('admin.content.pages.index')
-                ->with('success', 'Page created successfully.');
+                ->route('admin.uieditor.pages.editor', $page)
+                ->with('success', 'Page created — now design it with the block editor.');
         } catch (\Exception $e) {
             return back()
                 ->withInput()
@@ -69,14 +69,11 @@ class PagesController extends Controller
 
     /**
      * Show the form for editing the specified page.
+     * Redirects to the UIEditor (visual block editor).
      */
-    public function edit(Page $page): Response
+    public function edit(Page $page): RedirectResponse
     {
-        $page->load(['creator', 'updater']);
-        
-        return Inertia::render('Admin/Content/Pages/Edit', [
-            'page' => PageResource::make($page)->resolve(),
-        ]);
+        return redirect()->route('admin.uieditor.pages.editor', $page);
     }
 
     /**
@@ -142,6 +139,22 @@ class PagesController extends Controller
     public function preview(Page $page): RedirectResponse
     {
         return redirect()->route('page.show', ['slug' => $page->url_key]);
+    }
+
+    /**
+     * Duplicate the specified page.
+     */
+    public function duplicate(Page $page): RedirectResponse
+    {
+        try {
+            $newPage = $this->pageService->duplicate($page);
+
+            return redirect()
+                ->route('admin.uieditor.pages.editor', $newPage)
+                ->with('success', 'Page duplicated successfully. You are now editing the copy.');
+        } catch (\Exception $e) {
+            return back()->with('error', 'Failed to duplicate page: ' . $e->getMessage());
+        }
     }
 
     /**

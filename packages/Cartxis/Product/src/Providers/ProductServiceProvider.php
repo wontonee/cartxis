@@ -26,7 +26,6 @@ class ProductServiceProvider extends ServiceProvider
 
         // Load routes
         $this->loadRoutesFrom(__DIR__ . '/../Routes/admin.php');
-        $this->loadRoutesFrom(__DIR__ . '/../Routes/web.php');
 
         // Load views
         $this->loadViewsFrom(__DIR__ . '/../Resources/views', 'product');

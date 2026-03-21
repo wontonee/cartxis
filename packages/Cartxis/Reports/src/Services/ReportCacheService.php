@@ -50,7 +50,7 @@ class ReportCacheService
     protected function getCacheKey(string $reportType, array $filters): string
     {
         $prefix = config('reports.cache.prefix');
-        $hash = md5(json_encode($filters));
+        $hash = hash('sha256', json_encode($filters));
         
         return "{$prefix}{$reportType}_{$hash}";
     }

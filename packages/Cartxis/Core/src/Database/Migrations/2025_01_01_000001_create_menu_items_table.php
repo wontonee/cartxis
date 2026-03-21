@@ -24,8 +24,10 @@ return new class extends Migration
                 ->comment('Parent menu item ID');
             $table->integer('order')->default(0)->comment('Sorting order');
             $table->string('permission')->nullable()->comment('Required permission');
-            $table->enum('location', ['admin', 'shop'])->default('admin')
-                ->comment('Where to display: admin or shop');
+            $table->enum('location', ['admin', 'shop', 'storefront'])->default('admin')
+                ->comment('Where to display: admin, shop, or storefront');
+            $table->string('menu_type', 50)->nullable()
+                ->comment('header, footer, mobile, etc.');
             $table->boolean('active')->default(true)->comment('Enable/disable menu item');
             $table->json('meta')->nullable()->comment('Extra data: badge, tooltip, etc.');
             $table->string('extension_code')->nullable()->comment('Extension that owns this menu');
@@ -35,6 +37,7 @@ return new class extends Migration
             $table->index(['location', 'active', 'order']);
             $table->index('parent_id');
             $table->index('extension_code');
+            $table->index('menu_type');
         });
     }
 

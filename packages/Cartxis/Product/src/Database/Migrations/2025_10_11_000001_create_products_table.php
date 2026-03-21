@@ -13,6 +13,8 @@ return new class extends Migration
     {
         Schema::create('products', function (Blueprint $table) {
             $table->id();
+            $table->unsignedBigInteger('main_image_id')->nullable()
+                ->comment('FK to product_images added after that table is created');
             $table->string('sku')->unique();
             $table->string('name');
             $table->string('slug')->unique();
@@ -21,6 +23,8 @@ return new class extends Migration
             
             // Pricing
             $table->decimal('price', 12, 4)->default(0);
+            $table->unsignedBigInteger('tax_class_id')->nullable()
+                ->comment('FK to tax_classes added after that table is created');
             $table->decimal('cost', 12, 4)->nullable();
             $table->decimal('special_price', 12, 4)->nullable();
             $table->date('special_price_from')->nullable();
@@ -41,7 +45,7 @@ return new class extends Migration
             $table->integer('notify_stock_qty')->default(5);
             
             // Product Type & Configuration
-            $table->enum('type', ['simple', 'configurable', 'virtual', 'downloadable'])->default('simple');
+            $table->enum('type', ['simple', 'configurable', 'virtual', 'downloadable', 'grouped', 'bundle'])->default('simple');
             $table->string('weight')->nullable();
             $table->string('length')->nullable();
             $table->string('width')->nullable();
@@ -68,6 +72,7 @@ return new class extends Migration
             $table->index('featured');
             $table->index('new');
             $table->index(['status', 'visibility']);
+            $table->index('tax_class_id');
         });
     }
 

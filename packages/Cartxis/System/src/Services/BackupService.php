@@ -125,6 +125,11 @@ class BackupService
     protected function isMysqldumpAvailable(): bool
     {
         $binary = config('database.connections.mysql.dump.dump_binary_path', '');
+        // Validate the configured path — only allow filesystem-safe characters to prevent command injection
+        if ($binary && !preg_match('#^[a-zA-Z0-9/_\-\.]+$#', $binary)) {
+            Log::warning('BackupService: invalid dump_binary_path in config — using default mysqldump');
+            $binary = '';
+        }
         $cmd    = $binary ? rtrim($binary, '/') . '/mysqldump' : 'mysqldump';
 
         // Silence stderr; just check exit code

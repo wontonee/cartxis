@@ -16,13 +16,17 @@ class SalesReportRepository
     {
         $query = $this->buildBaseQuery($startDate, $endDate, $filters);
         
+        // Statuses that represent captured/paid revenue
+        $revenueStatuses = ['processing', 'shipped', 'delivered', 'completed'];
+        $revenueStatusList = implode('", "', $revenueStatuses);
+
         // Current period statistics
-        $currentStats = $query->selectRaw('
+        $currentStats = $query->selectRaw("
             COUNT(*) as order_count,
-            SUM(CASE WHEN status = "completed" THEN total ELSE 0 END) as total_revenue,
-            SUM(CASE WHEN status = "refunded" THEN total ELSE 0 END) as refunded_amount,
-            AVG(CASE WHEN status = "completed" THEN total ELSE NULL END) as avg_order_value
-        ')->first();
+            SUM(CASE WHEN status IN (\"$revenueStatusList\") THEN total ELSE 0 END) as total_revenue,
+            SUM(CASE WHEN status = 'refunded' THEN total ELSE 0 END) as refunded_amount,
+            AVG(CASE WHEN status IN (\"$revenueStatusList\") THEN total ELSE NULL END) as avg_order_value
+        ")->first();
         
         // Previous period for comparison
         $periodDiff = $startDate->diffInDays($endDate);
@@ -30,7 +34,7 @@ class SalesReportRepository
         $previousEnd = $startDate->copy()->subDay();
         
         $previousRevenue = Order::whereBetween('created_at', [$previousStart, $previousEnd])
-            ->where('status', 'completed')
+            ->whereIn('status', $revenueStatuses)
             ->sum('total');
         
         // Calculate growth
@@ -63,7 +67,7 @@ class SalesReportRepository
         };
         
         $results = Order::whereBetween('created_at', [$startDate, $endDate])
-            ->where('status', 'completed')
+            ->whereIn('status', ['processing', 'shipped', 'delivered', 'completed'])
             ->selectRaw("
                 DATE_FORMAT(created_at, '{$dateFormat}') as date_group,
                 SUM(total) as revenue,
@@ -152,7 +156,7 @@ class SalesReportRepository
     public function getPaymentMethodsDistribution(Carbon $startDate, Carbon $endDate): array
     {
         $results = Order::whereBetween('created_at', [$startDate, $endDate])
-            ->where('status', 'completed')
+            ->whereIn('status', ['processing', 'shipped', 'delivered', 'completed'])
             ->selectRaw('
                 payment_method,
                 COUNT(*) as order_count,

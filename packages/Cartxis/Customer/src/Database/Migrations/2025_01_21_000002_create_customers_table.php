@@ -13,9 +13,10 @@ return new class extends Migration
     {
         Schema::create('customers', function (Blueprint $table) {
             $table->id();
+            $table->unsignedBigInteger('user_id')->nullable();
             $table->string('first_name', 100);
             $table->string('last_name', 100);
-            $table->string('email', 150)->unique();
+            $table->string('email', 150);
             $table->string('phone', 20)->nullable();
             $table->date('date_of_birth')->nullable();
             $table->enum('gender', ['male', 'female', 'other'])->nullable();
@@ -25,6 +26,7 @@ return new class extends Migration
             
             // Customer Group
             $table->foreignId('customer_group_id')
+                ->nullable()
                 ->constrained('customer_groups')
                 ->onDelete('restrict');
             
@@ -34,6 +36,8 @@ return new class extends Migration
             
             // Status and Flags
             $table->boolean('is_active')->default(true);
+            $table->boolean('is_guest')->default(false)
+                ->comment('Whether this is a guest customer (checkout without registration)');
             $table->boolean('is_verified')->default(false);
             $table->boolean('newsletter_subscribed')->default(false);
             
@@ -50,11 +54,15 @@ return new class extends Migration
             $table->softDeletes();
             $table->timestamps();
 
-            // Indexes
+            // Foreign keys and indexes
+            $table->foreign('user_id')->references('id')->on('users')->onDelete('set null');
+            $table->index('user_id');
             $table->index('customer_group_id');
             $table->index('is_active');
+            $table->index('is_guest');
             $table->index('created_at');
             $table->index(['first_name', 'last_name']);
+            $table->unique(['email', 'is_guest'], 'customers_email_is_guest_unique');
         });
         
         // Add fulltext index only for MySQL (not supported in SQLite used for testing)

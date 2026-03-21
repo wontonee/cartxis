@@ -43,6 +43,11 @@
         @inertiaHead
     </head>
     <body class="font-sans antialiased">
-        @inertia
-    </body>
+        @inertia        @php
+            if (app()->bound('vortex.hook')) {
+                ob_start();
+                app('vortex.hook')->doAction('storefront.body.end');
+                echo ob_get_clean();
+            }
+        @endphp    </body>
 </html>

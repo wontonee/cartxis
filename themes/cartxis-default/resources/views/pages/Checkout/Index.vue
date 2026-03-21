@@ -28,6 +28,8 @@ interface ShippingOption {
 
 interface CartSummary {
   subtotal: number;
+  discount?: number;
+  coupon?: { code: string; discount_amount: number } | null;
   taxes: {
     breakdown: Array<{ name: string; amount: number }>;
     total: number;
@@ -191,7 +193,6 @@ const selectShipping = (shippingId: number) => {
 
 const submitGatewayForm = (paymentData: any) => {
   if (!paymentData?.action_url || !paymentData?.params) {
-    console.error('Missing PayUMoney form data');
     processing.value = false;
     return;
   }
@@ -214,8 +215,6 @@ const submitGatewayForm = (paymentData: any) => {
 
 // Generic payment gateway handler - works with any gateway extension
 const initiatePaymentGateway = (paymentResponse: any) => {
-  console.log('Initiating payment gateway with response:', paymentResponse);
-  
   const paymentData = paymentResponse.payment_data;
   const gatewayType = paymentResponse.gateway_type || 'frontend_integration';
 
@@ -236,11 +235,9 @@ const initiatePaymentGateway = (paymentResponse: any) => {
         script.id = scriptId;
         script.src = paymentData.script_url;
         script.onload = () => {
-          console.log('Payment gateway script loaded');
           openPaymentModal(paymentData);
         };
         script.onerror = () => {
-          console.error('Failed to load payment gateway script');
           processing.value = false;
         };
         document.body.appendChild(script);
@@ -255,8 +252,6 @@ const initiatePaymentGateway = (paymentResponse: any) => {
 };
 
 const openPaymentModal = (paymentData: any) => {
-  console.log('Opening payment modal for:', paymentData.gateway_code || 'unknown gateway');
-  
   // Razorpay integration
   if (paymentData.razorpay_order_id && (window as any).Razorpay) {
     const options = {
@@ -269,14 +264,12 @@ const openPaymentModal = (paymentData: any) => {
       prefill: paymentData.prefill,
       theme: paymentData.theme,
       handler: function (response: any) {
-        console.log('Payment successful:', response);
         // Redirect to callback URL with payment details
         const params = new URLSearchParams(response).toString();
         window.location.href = paymentData.callback_url + '?' + params;
       },
       modal: {
         ondismiss: function() {
-          console.log('Payment modal dismissed');
           processing.value = false;
           if (paymentData.cancel_url) {
             window.location.href = paymentData.cancel_url;
@@ -293,7 +286,6 @@ const openPaymentModal = (paymentData: any) => {
     stripe.redirectToCheckout({ sessionId: paymentData.stripe_session_id })
       .then((result: any) => {
         if (result.error) {
-          console.error('Stripe error:', result.error.message);
           processing.value = false;
         }
       });
@@ -301,16 +293,13 @@ const openPaymentModal = (paymentData: any) => {
   // Add more gateway integrations here as plugins are added
   // PayPal, Square, etc.
   else {
-    console.error('Unsupported payment gateway or missing configuration');
     processing.value = false;
   }
 };
 
 // Watch for payment response in flash data
 watch(() => page.props.flash, (flash: any) => {
-  console.log('Flash watcher triggered:', flash);
   if (flash?.payment_response) {
-    console.log('Payment response detected in flash:', flash.payment_response);
     if (flash.payment_response.success && flash.payment_response.payment_data) {
       if (flash.payment_response.gateway_type === 'redirect') {
         const redirectUrl = flash.payment_response.redirect_url
@@ -326,7 +315,6 @@ watch(() => page.props.flash, (flash: any) => {
         return;
       }
 
-      console.log('Initiating payment gateway integration');
       initiatePaymentGateway(flash.payment_response);
     }
   }
@@ -434,23 +422,18 @@ const submitOrder = () => {
     preserveState: true,
     preserveScroll: true,
     onSuccess: () => {
-      console.log('Checkout success, checking for gateway response');
-      
       // Use nextTick to ensure page props are updated
       nextTick(() => {
         // Check if there's a redirect URL in flash data (for hosted payment pages)
         const redirectUrl = page.props.flash?.redirect_url;
-        console.log('Redirect URL from flash:', redirectUrl);
         
         if (redirectUrl) {
-          console.log('Redirecting to payment gateway hosted page');
           window.location.href = redirectUrl;
           return;
         }
         
         // Check if there's payment data for frontend integration (modal-based)
         const paymentResponse = page.props.flash?.payment_response;
-        console.log('Payment response from flash:', paymentResponse);
         
         if (paymentResponse && paymentResponse.success && paymentResponse.payment_data) {
           if (paymentResponse.gateway_type === 'redirect') {
@@ -467,13 +450,11 @@ const submitOrder = () => {
             return;
           }
 
-          console.log('Initiating frontend payment integration');
           initiatePaymentGateway(paymentResponse);
         }
       });
     },
     onError: (errors) => {
-      console.log('Checkout validation errors:', errors);
       processing.value = false;
     },
     onFinish: () => {
@@ -956,6 +937,11 @@ const submitOrder = () => {
               <div class="flex justify-between text-sm">
                 <span>Tax</span>
                 <span>{{ formatPrice(cartSummary.taxes.total) }}</span>
+              </div>
+
+              <div v-if="cartSummary.discount && cartSummary.discount > 0" class="flex justify-between text-sm text-green-600">
+                <span>Discount{{ cartSummary.coupon?.code ? ` (${cartSummary.coupon.code})` : '' }}</span>
+                <span>- {{ formatPrice(cartSummary.discount) }}</span>
               </div>
               
               <div class="border-t pt-2 flex justify-between text-lg font-bold">

@@ -96,7 +96,6 @@ class OrderService
      *
      * @param Order $order
      * @param string $newPaymentStatus
-                        'order_total' => $this->formatCurrency($order->total),
      * @return bool
      */
     public function updatePaymentStatus(
@@ -376,15 +375,6 @@ class OrderService
      * @param Order $order
      * @param string $oldPaymentStatus
      * @param string $newPaymentStatus
-
-    protected function formatCurrency(float $amount): string
-    {
-        $currency = Currency::getDefault();
-
-        return $currency
-            ? $currency->format($amount)
-            : '$' . number_format($amount, 2);
-    }
      * @return void
      */
     protected function sendPaymentStatusEmail(
@@ -447,6 +437,21 @@ class OrderService
                 'error' => $e->getMessage()
             ]);
         }
+    }
+
+    /**
+     * Format a monetary amount using the default store currency.
+     *
+     * @param float $amount
+     * @return string
+     */
+    protected function formatCurrency(float $amount): string
+    {
+        $currency = Currency::getDefault();
+
+        return $currency
+            ? $currency->format($amount)
+            : '$' . number_format($amount, 2);
     }
 
     /**

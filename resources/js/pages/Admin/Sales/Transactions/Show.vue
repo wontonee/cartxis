@@ -87,7 +87,7 @@ const formatJson = (data: any) => {
 </script>
 
 <template>
-  <AdminLayout>
+  <AdminLayout title="Transaction Details">
     <div class="container-fluid">
       <!-- Header -->
       <div class="flex items-center justify-between mb-6">

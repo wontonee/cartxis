@@ -92,6 +92,18 @@ const props = defineProps<Props>();
 
 const { formatPrice } = useCurrency();
 
+const paymentMethodLabels: Record<string, string> = {
+  cod: 'Cash on Delivery',
+  bank_transfer: 'Bank Transfer',
+  stripe: 'Stripe',
+  razorpay: 'Razorpay',
+  phonepe: 'PhonePe',
+  paypal: 'PayPal',
+  payumoney: 'PayUMoney',
+};
+const paymentMethodLabel = (code: string) =>
+  paymentMethodLabels[code] ?? code;
+
 const activeTab = ref('overview');
 const showStatusModal = ref(false);
 const showPaymentModal = ref(false);
@@ -301,7 +313,7 @@ const billingAddress = props.order.addresses.find(a => a.type === 'billing');
               </div>
               <div>
                 <div class="text-sm font-medium text-gray-500">Payment Method</div>
-                <div class="mt-1 text-sm text-gray-900">{{ order.payment_method }}</div>
+                <div class="mt-1 text-sm text-gray-900">{{ paymentMethodLabel(order.payment_method) }}</div>
                 <div class="text-sm font-medium text-gray-500 mt-3">Shipping Method</div>
                 <div class="mt-1 text-sm text-gray-900">{{ order.shipping_method }}</div>
                 <div class="text-sm font-medium text-gray-500 mt-3">Order Source</div>

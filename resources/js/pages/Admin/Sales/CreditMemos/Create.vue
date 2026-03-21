@@ -120,8 +120,7 @@ const submit = () => {
     onSuccess: () => {
       // Redirect handled by controller
     },
-    onError: (errors) => {
-      console.error('Form errors:', errors);
+    onError: () => {
     },
   });
 };
@@ -142,7 +141,7 @@ const formatDate = (date: string) => {
 <template>
   <Head title="Create Credit Memo" />
 
-  <AdminLayout>
+  <AdminLayout title="Create Credit Memo">
     <div class="space-y-6">
       <!-- Header -->
       <div>

@@ -9,6 +9,7 @@ use Cartxis\API\Helpers\ApiResponse;
 use Cartxis\API\Http\Resources\CartResource;
 use Cartxis\Cart\Models\Cart;
 use Cartxis\Cart\Models\CartItem;
+use Cartxis\Marketing\Services\CouponService;
 use Cartxis\Product\Models\Product;
 
 class CartController extends Controller
@@ -180,11 +181,25 @@ class CartController extends Controller
             return ApiResponse::error('Cart is empty', null, 400, 'CART_EMPTY');
         }
 
-        // TODO: Implement coupon validation and application logic
-        // For now, return success
+        // Validate and apply coupon
+        $couponService = app(CouponService::class);
+        $cartTotal = $cart->items->sum(fn($item) => $item->price * $item->quantity);
+        $result = $couponService->validate(
+            $request->coupon_code,
+            $request->user()->id,
+            $cartTotal,
+            $cart->items
+        );
+
+        if (!$result['valid']) {
+            return ApiResponse::error($result['message'], null, 422, 'INVALID_COUPON');
+        }
+
+        $applied = $couponService->apply($result['coupon'], $cartTotal, $cart->items);
+
         $cart->update([
             'coupon_code' => $request->coupon_code,
-            // 'discount_amount' => $calculatedDiscount,
+            'discount_amount' => $applied['discount_amount'],
         ]);
 
         $cart->load(['items.product.images', 'items.product.brand']);

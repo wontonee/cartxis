@@ -8,6 +8,7 @@ use Inertia\Inertia;
 use Cartxis\Core\Models\Theme;
 use Cartxis\Shop\Repositories\CategoryRepository;
 use Cartxis\Core\Services\SettingService;
+use Cartxis\UIEditor\Models\GlobalRegion;
 
 class ShareFrontendData
 {
@@ -88,6 +89,31 @@ class ShareFrontendData
                 } catch (\Exception $e) {
                     // Silent fail during migrations
                 }
+                return null;
+            },
+
+            // Published global regions (header / footer)
+            'headerRegion' => function () {
+                try {
+                    $region = GlobalRegion::where('slug', 'main-header')
+                        ->where('status', 'published')
+                        ->first();
+                    if ($region && $region->published_layout_data) {
+                        return $region->published_layout_data;
+                    }
+                } catch (\Exception $e) {}
+                return null;
+            },
+
+            'footerRegion' => function () {
+                try {
+                    $region = GlobalRegion::where('slug', 'main-footer')
+                        ->where('status', 'published')
+                        ->first();
+                    if ($region && $region->published_layout_data) {
+                        return $region->published_layout_data;
+                    }
+                } catch (\Exception $e) {}
                 return null;
             },
         ];

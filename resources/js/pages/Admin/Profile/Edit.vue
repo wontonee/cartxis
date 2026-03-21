@@ -53,7 +53,7 @@ const submit = () => {
 </script>
 
 <template>
-    <AdminLayout>
+    <AdminLayout title="Profile Settings">
         <Head title="Profile Settings" />
 
         <div class="max-w-4xl">

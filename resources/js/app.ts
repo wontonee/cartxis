@@ -14,24 +14,34 @@ const pinia = createPinia();
 createInertiaApp({
     title: (title) => (title ? `${title} - ${appName}` : appName),
     resolve: (name) => {
-        // Check if it's a theme component (e.g., "themes/cartxis-default/pages/Home")
+        // Extension pages (e.g. "Extensions/SalesChat/Settings") — resolved from
+        // extension/*/src/Resources/js/pages/**/*.vue so that premium extensions
+        // stay completely self-contained and never pollute the main app source.
+        if (name.startsWith('Extensions/')) {
+            const componentPath = name.slice('Extensions/'.length) // e.g. "SalesChat/Settings"
+            const pages = import.meta.glob<DefineComponent>('../../extension/*/src/Resources/js/pages/**/*.vue')
+            const entry = Object.entries(pages).find(([key]) => key.endsWith(`/pages/${componentPath}.vue`))
+            if (entry) return entry[1]()
+            throw new Error(`Extension page not found: ${name}`)
+        }
+
+        // Theme pages (e.g. "themes/cartxis-default/pages/Home")
         if (name.startsWith('themes/')) {
-            // Extract theme slug and component path
-            const parts = name.split('/');
-            const themeSlug = parts[1]; // e.g., "cartxis-default"
-            const componentPath = parts.slice(2).join('/'); // e.g., "pages/Home"
-            
+            const parts = name.split('/')
+            const themeSlug    = parts[1]                   // e.g. "cartxis-default"
+            const componentPath = parts.slice(2).join('/') // e.g. "pages/Home"
+
             return resolvePageComponent(
                 `../../themes/${themeSlug}/resources/views/${componentPath}.vue`,
                 import.meta.glob<DefineComponent>('../../themes/**/resources/views/**/*.vue'),
-            );
+            )
         }
-        
-        // Default to pages directory
+
+        // Default — main app pages directory
         return resolvePageComponent(
             `./pages/${name}.vue`,
             import.meta.glob<DefineComponent>('./pages/**/*.vue'),
-        );
+        )
     },
     setup({ el, App, props, plugin }) {
         createApp({ render: () => h(App, props) })

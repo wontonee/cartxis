@@ -75,18 +75,7 @@
                         </p>
                     </div>
 
-                    <!-- Content Editor -->
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                            Content <span class="text-red-500">*</span>
-                        </label>
-                        <TipTapEditor
-                            v-model="form.content"
-                            placeholder="Write your page content here..."
-                            :show-character-count="true"
-                        />
-                        <p v-if="form.errors.content" class="mt-1 text-sm text-red-600">{{ form.errors.content }}</p>
-                    </div>
+                    <!-- Content Editor removed — layout is built in the UIEditor after creation -->
 
                     <!-- SEO Meta Fields -->
                     <div class="border-t border-gray-200 dark:border-gray-700 pt-6">
@@ -210,9 +199,8 @@
 
 <script setup lang="ts">
 import { ref, computed } from 'vue';
-import { Head, Link, useForm, router } from '@inertiajs/vue3';
+import { Head, Link, useForm } from '@inertiajs/vue3';
 import AdminLayout from '@/layouts/AdminLayout.vue';
-import TipTapEditor from '@/components/Admin/CMS/TipTapEditor.vue';
 import { useDebounceFn } from '@vueuse/core';
 import * as pageRoutes from '@/routes/admin/content/pages';
 import axios from 'axios';
@@ -220,7 +208,6 @@ import axios from 'axios';
 const form = useForm({
     title: '',
     url_key: '',
-    content: '',
     meta_title: '',
     meta_description: '',
     meta_keywords: '',

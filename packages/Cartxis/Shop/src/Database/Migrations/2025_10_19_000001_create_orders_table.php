@@ -14,6 +14,9 @@ return new class extends Migration
         Schema::create('orders', function (Blueprint $table) {
             $table->id();
             $table->foreignId('user_id')->nullable()->constrained()->nullOnDelete();
+            $table->foreignId('customer_id')->nullable()
+                ->constrained('customers')->nullOnDelete()
+                ->comment('Link to customer record (for both registered and guest customers)');
             $table->string('order_number')->unique();
             $table->string('status')->default('pending')->index();
             $table->string('payment_status')->default('pending')->index();
@@ -24,9 +27,11 @@ return new class extends Migration
             $table->decimal('shipping_cost', 10, 2)->default(0);
             $table->decimal('discount', 10, 2)->default(0);
             $table->decimal('total', 10, 2)->default(0);
+            $table->decimal('total_refunded', 12, 2)->default(0.00);
             
             // Payment & Shipping
             $table->string('payment_method')->nullable();
+            $table->json('payment_data')->nullable();
             $table->string('shipping_method')->nullable();
             $table->string('tracking_number')->nullable();
             
@@ -38,6 +43,7 @@ return new class extends Migration
             $table->text('notes')->nullable();
             $table->string('ip_address', 45)->nullable();
             $table->text('user_agent')->nullable();
+            $table->string('source_channel', 50)->default('web');
             
             $table->softDeletes();
             $table->timestamps();
@@ -45,6 +51,8 @@ return new class extends Migration
             // Indexes
             $table->index('order_number');
             $table->index('created_at');
+            $table->index('customer_id');
+            $table->index('source_channel');
         });
     }
 

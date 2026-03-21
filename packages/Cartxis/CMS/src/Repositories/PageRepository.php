@@ -62,10 +62,10 @@ class PageRepository
             $query->where('status', $filters['status']);
         }
 
-        // Sorting
+        // Sorting — homepage always floats to the top
         $sortBy = $filters['sort_by'] ?? 'created_at';
         $sortOrder = $filters['sort_order'] ?? 'desc';
-        $query->orderBy($sortBy, $sortOrder);
+        $query->orderByRaw('is_homepage DESC')->orderBy($sortBy, $sortOrder);
 
         return $query->paginate($perPage);
     }

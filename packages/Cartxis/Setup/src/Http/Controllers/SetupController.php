@@ -14,6 +14,8 @@ use Cartxis\Setup\Services\DemoDataService;
 use Cartxis\Core\Models\Country;
 use Cartxis\Core\Services\SettingService;
 use Cartxis\Core\Models\Currency;
+use Cartxis\UIEditor\Models\PageLayout;
+use Cartxis\UIEditor\Services\LayoutService;
 
 class SetupController extends Controller
 {
@@ -174,6 +176,17 @@ class SetupController extends Controller
             );
 
             if ($result['success']) {
+                // Also seed the homepage layout from the default theme if not already published
+                $themeDataPath = base_path('themes/cartxis-default/data/theme-data.json');
+                if (file_exists($themeDataPath)) {
+                    $themeData = json_decode(file_get_contents($themeDataPath), true);
+                    if (!empty($themeData['homepage']) && !PageLayout::homepage()->published()->exists()) {
+                        $layoutService = app(LayoutService::class);
+                        $layout = $layoutService->saveDraft($themeData['homepage'], PageLayout::TYPE_HOMEPAGE, null);
+                        $layoutService->publish($layout);
+                    }
+                }
+
                 return response()->json([
                     'success' => true,
                     'message' => $result['message'],

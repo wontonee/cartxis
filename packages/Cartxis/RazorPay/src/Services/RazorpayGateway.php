@@ -67,12 +67,6 @@ class RazorpayGateway implements PaymentGatewayInterface
                 throw new \Exception('Razorpay API credentials not configured');
             }
             
-            Log::info('RazorpayGateway: Using credentials', [
-                'mode' => $mode,
-                'key_id' => substr($keyId, 0, 12) . '***',
-                'key_secret_length' => strlen($keySecret),
-            ]);
-            
             $this->razorpay = new Api($keyId, $keySecret);
         }
 
@@ -109,17 +103,8 @@ class RazorpayGateway implements PaymentGatewayInterface
      */
     public function processPayment(Order $order, array $data = [])
     {
-        Log::info('RazorpayGateway: processPayment called', [
-            'order_id' => $order->id,
-            'order_number' => $order->order_number,
-        ]);
-        
         try {
             $api = $this->getRazorpayApi();
-            
-            Log::info('RazorpayGateway: API initialized', [
-                'order_id' => $order->id,
-            ]);
 
             // Get shipping address for receipt
             $shippingAddress = $order->shippingAddress;
@@ -138,11 +123,6 @@ class RazorpayGateway implements PaymentGatewayInterface
                     'customer_name' => $customerName,
                     'customer_email' => $order->customer_email,
                 ]
-            ]);
-
-            Log::info('RazorpayGateway: Order created', [
-                'razorpay_order_id' => $razorpayOrder['id'],
-                'order_id' => $order->id,
             ]);
 
             // Update order with Razorpay order ID
@@ -255,7 +235,7 @@ class RazorpayGateway implements PaymentGatewayInterface
     /**
      * Handle webhook from Razorpay.
      */
-    public function handleWebhook(array $payload, string $signature): bool
+    public function handleWebhook(string $rawBody, string $signature): bool
     {
         try {
             $webhookSecret = $this->getConfig('webhook_secret');
@@ -265,14 +245,15 @@ class RazorpayGateway implements PaymentGatewayInterface
                 return false;
             }
 
-            // Verify webhook signature
-            $expectedSignature = hash_hmac('sha256', json_encode($payload), $webhookSecret);
+            // Verify webhook signature against the raw request body (not re-encoded array)
+            $expectedSignature = hash_hmac('sha256', $rawBody, $webhookSecret);
             
-            if ($signature !== $expectedSignature) {
+            if (!hash_equals($expectedSignature, $signature)) {
                 Log::error('RazorpayGateway: Webhook signature verification failed');
                 return false;
             }
 
+            $payload = json_decode($rawBody, true);
             $event = $payload['event'] ?? null;
             $paymentEntity = $payload['payload']['payment']['entity'] ?? null;
 
@@ -477,7 +458,6 @@ class RazorpayGateway implements PaymentGatewayInterface
                 ]);
                 // Signature valid — mark transaction ID
                 $order->update(['payment_gateway_transaction_id' => $razorpayPaymentId]);
-                Log::info('RazorpayGateway: Signature verified', ['order_id' => $order->id]);
                 return true;
             }
 

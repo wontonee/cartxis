@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import { Head, useForm } from '@inertiajs/vue3'
 import { ref, computed } from 'vue'
-import '@admin/css/styles.css'
 import admin from '@/routes/admin'
 
 const props = defineProps<{

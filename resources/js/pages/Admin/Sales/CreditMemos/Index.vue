@@ -90,8 +90,7 @@ const clearFilters = () => {
 };
 
 const sortTable = (field: string) => {
-  // If your backend supports sorting, implement this
-  console.log('Sort by', field);
+  // TODO: implement backend sorting
 };
 
 const toggleRow = (id: number) => {

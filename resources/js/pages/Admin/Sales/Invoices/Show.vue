@@ -148,7 +148,7 @@ function goToOrder() {
 <template>
   <Head :title="`Invoice ${invoice.invoice_number}`" />
 
-  <AdminLayout>
+  <AdminLayout :title="`Invoice ${invoice.invoice_number}`">
     <div class="space-y-6">
       <!-- Header -->
       <div class="flex justify-between items-start">

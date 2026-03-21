@@ -33,7 +33,7 @@ class PageRequest extends FormRequest
                 'regex:/^[a-z0-9-]+$/',
                 Rule::unique('pages', 'url_key')->ignore($pageId),
             ],
-            'content' => 'required|string',
+            'content' => 'nullable|string',
             'meta_title' => 'nullable|string|max:255',
             'meta_description' => 'nullable|string|max:500',
             'meta_keywords' => 'nullable|string|max:500',

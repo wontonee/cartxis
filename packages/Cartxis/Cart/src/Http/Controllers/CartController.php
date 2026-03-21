@@ -40,6 +40,10 @@ class CartController extends Controller
         // Calculate subtotal
         $subtotal = collect($items)->sum(fn($item) => $item['price'] * $item['quantity']);
         
+        // Apply coupon discount if any
+        $couponData = Session::get('cart_coupon');
+        $discountAmount = $couponData['discount_amount'] ?? 0;
+        
         // Customer address (TODO: get from user profile or session)
         $customerAddress = [];
         
@@ -57,12 +61,14 @@ class CartController extends Controller
         
         // Calculate grand total
         $taxTotal = $taxResult['total'];
-        $grandTotal = $subtotal + $taxTotal + $shippingCost;
+        $grandTotal = $subtotal + $taxTotal + $shippingCost - $discountAmount;
         
         return Inertia::render($this->themeResolver->resolve('Cart/Index'), [
             'pageTitle' => 'Shopping Cart',
             'cartSummary' => [
                 'subtotal' => round($subtotal, 2),
+                'discount' => round($discountAmount, 2),
+                'coupon' => $couponData,
                 'taxes' => [
                     'breakdown' => $taxResult['breakdown'],
                     'total' => round($taxTotal, 2),
@@ -72,7 +78,7 @@ class CartController extends Controller
                     'selected' => $selectedShipping,
                     'cost' => round($shippingCost, 2),
                 ],
-                'total' => round($grandTotal, 2),
+                'total' => round(max(0, $grandTotal), 2),
             ],
         ]);
     }

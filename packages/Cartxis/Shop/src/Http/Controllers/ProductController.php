@@ -63,6 +63,7 @@ class ProductController extends Controller
             'price_max' => $request->input('price_max'),
             'rating' => $request->input('rating'),
             'in_stock' => $request->input('in_stock'),
+            'on_sale' => $request->boolean('on_sale') ?: null,
         ];
 
         // Get products with filters applied

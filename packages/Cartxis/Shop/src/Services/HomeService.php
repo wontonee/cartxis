@@ -164,13 +164,17 @@ class HomeService extends ShopService
                         ];
                     });
                 
+                // Convert to plain arrays before caching so appended attributes
+                // (image, in_stock, etc.) are computed now, not after deserialization.
+                $toProductArray = fn ($collection) => $collection->map(fn ($p) => $p->toArray())->values();
+
                 return [
                     'featured_products' => config('shop.homepage.show_featured_products', true)
-                        ? $this->productRepository->getFeaturedProducts($featuredCount)
+                        ? $toProductArray($this->productRepository->getFeaturedProducts($featuredCount))
                         : collect([]),
                     
                     'new_products' => config('shop.homepage.show_new_products', true)
-                        ? $this->productRepository->getNewProducts($featuredCount)
+                        ? $toProductArray($this->productRepository->getNewProducts($featuredCount))
                         : collect([]),
                     
                     'categories' => $categories,

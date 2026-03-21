@@ -10,6 +10,14 @@
                     <p class="mt-1 text-sm text-gray-600 dark:text-gray-400">Update "{{ page.title }}" content page</p>
                 </div>
                 <div class="flex gap-2">
+                    <!-- Block Editor button -->
+                    <a
+                        :href="`/admin/uieditor/pages/${page.id}/editor`"
+                        class="flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-indigo-600 rounded-lg hover:bg-indigo-700 transition-colors"
+                    >
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 5a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1H5a1 1 0 01-1-1V5zM14 5a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1h-4a1 1 0 01-1-1V5zM4 15a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1H5a1 1 0 01-1-1v-4zM14 15a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1h-4a1 1 0 01-1-1v-4z"/></svg>
+                        Block Editor
+                    </a>
                     <a
                         :href="page.url"
                         target="_blank"
@@ -34,7 +42,21 @@
             </div>
 
             <!-- Info Banner -->
-            <div class="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4">
+            <div v-if="page.is_homepage" class="bg-indigo-50 dark:bg-indigo-900/20 border border-indigo-200 dark:border-indigo-800 rounded-lg p-4">
+                <div class="flex gap-3">
+                    <svg class="w-5 h-5 text-indigo-600 dark:text-indigo-400 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
+                    </svg>
+                    <div class="flex-1">
+                        <h4 class="text-sm font-medium text-indigo-900 dark:text-indigo-200">Homepage</h4>
+                        <div class="mt-1 text-xs text-indigo-700 dark:text-indigo-300 space-y-1">
+                            <p>This is your store homepage. Use the <strong>Block Editor</strong> button above to design the page layout with drag-and-drop blocks.</p>
+                            <p>The URL key is fixed to <strong>home</strong> and cannot be changed.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div v-else class="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4">
                 <div class="flex gap-3">
                     <svg class="w-5 h-5 text-blue-600 dark:text-blue-400 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -75,7 +97,17 @@
                         <label for="url_key" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                             URL Key <span class="text-red-500">*</span>
                         </label>
-                        <div class="flex gap-2">
+                        <div v-if="page.is_homepage" class="flex gap-2">
+                            <div class="flex-1">
+                                <input
+                                    v-model="form.url_key"
+                                    type="text"
+                                    disabled
+                                    class="w-full px-3 py-2 border border-gray-200 rounded-lg bg-gray-100 dark:bg-gray-700/50 dark:border-gray-600 dark:text-gray-400 text-gray-500 cursor-not-allowed"
+                                />
+                            </div>
+                        </div>
+                        <div v-else class="flex gap-2">
                                                         <div class="flex-1">
                                 <input
                                     v-model="form.url_key"
@@ -98,7 +130,8 @@
                             </button>
                         </div>
                         <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">
-                            Lowercase letters, numbers, and hyphens only. Will be: {{ previewUrl }}
+                            <span v-if="page.is_homepage">The homepage URL key is fixed and cannot be changed.</span>
+                            <span v-else>Lowercase letters, numbers, and hyphens only. Will be: {{ previewUrl }}</span>
                         </p>
                     </div>
 
@@ -214,6 +247,7 @@
                     <div class="flex gap-3">
                         <button
                             type="button"
+                            v-if="!page.is_homepage"
                             @click="deletePage"
                             class="px-4 py-2 text-sm font-medium text-red-600 bg-white border border-red-300 rounded-lg hover:bg-red-50 transition-colors dark:bg-gray-600 dark:border-red-500 dark:hover:bg-red-600 dark:hover:text-white"
                             :disabled="form.processing"

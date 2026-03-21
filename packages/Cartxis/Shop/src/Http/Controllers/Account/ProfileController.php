@@ -99,9 +99,8 @@ class ProfileController extends Controller
             'promotional_emails' => ['boolean'],
         ]);
 
-        // Store preferences in user meta or separate table
-        // For now, we'll just return success
-        // TODO: Implement user preferences storage
+        Customer::where('user_id', auth()->id())
+            ->update(['newsletter_subscribed' => $validated['newsletter_subscribed'] ?? false]);
 
         return back()->with('success', 'Email preferences updated successfully.');
     }

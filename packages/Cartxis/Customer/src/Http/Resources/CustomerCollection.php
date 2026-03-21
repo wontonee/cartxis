@@ -51,6 +51,15 @@ class CustomerCollection extends ResourceCollection
                 'to' => $this->resource->lastItem(),
                 'total' => $this->resource->total(),
             ],
+            // Flat fields for Vue template compatibility (mirrors LengthAwarePaginator JSON)
+            'current_page' => $this->resource->currentPage(),
+            'from' => $this->resource->firstItem(),
+            'last_page' => $this->resource->lastPage(),
+            'per_page' => $this->resource->perPage(),
+            'to' => $this->resource->lastItem(),
+            'total' => $this->resource->total(),
+            'prev_page_url' => $this->resource->previousPageUrl(),
+            'next_page_url' => $this->resource->nextPageUrl(),
         ];
     }
 }

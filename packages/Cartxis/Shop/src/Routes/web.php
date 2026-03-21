@@ -99,8 +99,8 @@ Route::group([
         'as' => 'shop.checkout.'
     ], function () {
         Route::get('/', [Cartxis\Shop\Http\Controllers\Checkout\CheckoutController::class, 'index'])->name('index');
-        Route::post('/', [Cartxis\Shop\Http\Controllers\Checkout\CheckoutController::class, 'store'])->name('store');
-        Route::post('/shipping', [Cartxis\Shop\Http\Controllers\Checkout\CheckoutController::class, 'updateShipping'])->name('shipping.update');
+        Route::post('/', [Cartxis\Shop\Http\Controllers\Checkout\CheckoutController::class, 'store'])->middleware('throttle:10,1')->name('store');
+        Route::post('/shipping', [Cartxis\Shop\Http\Controllers\Checkout\CheckoutController::class, 'updateShipping'])->middleware('throttle:20,1')->name('shipping.update');
         Route::get('/success/{order}', [Cartxis\Shop\Http\Controllers\Checkout\CheckoutController::class, 'success'])->name('success');
         Route::get('/track-order', [Cartxis\Shop\Http\Controllers\Checkout\CheckoutController::class, 'guestTrack'])->name('track');
         Route::post('/track-order', [Cartxis\Shop\Http\Controllers\Checkout\CheckoutController::class, 'guestTrackLookup'])->name('track.lookup');

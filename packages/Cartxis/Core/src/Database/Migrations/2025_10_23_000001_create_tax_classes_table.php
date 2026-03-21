@@ -19,10 +19,19 @@ return new class extends Migration
             $table->index('code');
             $table->index('is_default');
         });
+
+        // Now that tax_classes exists, add the FK on products.tax_class_id
+        Schema::table('products', function (Blueprint $table) {
+            $table->foreign('tax_class_id')->references('id')->on('tax_classes')->onDelete('set null');
+        });
     }
 
     public function down(): void
     {
+        Schema::table('products', function (Blueprint $table) {
+            $table->dropForeign(['tax_class_id']);
+        });
+
         Schema::dropIfExists('tax_classes');
     }
 };

@@ -125,7 +125,7 @@ function cancel() {
 <template>
   <Head :title="`Edit Shipment ${shipment.shipment_number}`" />
 
-  <AdminLayout>
+  <AdminLayout :title="`Edit Shipment ${shipment.shipment_number}`">
     <div class="space-y-6">
       <!-- Header -->
       <div>

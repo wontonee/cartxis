@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue';
-import { router, usePage, Link } from '@inertiajs/vue3';
+import { router, usePage, Link, Head } from '@inertiajs/vue3';
 import AdminLayout from '@/layouts/AdminLayout.vue';
 import { Input } from '@/components/ui/input';
 import {

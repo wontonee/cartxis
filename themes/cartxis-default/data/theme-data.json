@@ -1,0 +1,363 @@
+{
+    "homepage": {
+        "version": "1.0",
+        "sections": [
+            {
+                "id": "sec_demo_slider",
+                "type": "section",
+                "settings": {
+                    "background_color": "#000000",
+                    "background_image": null,
+                    "padding_top": 0,
+                    "padding_bottom": 0,
+                    "full_width": true
+                },
+                "columns": [
+                    {
+                        "id": "col_demo_slider",
+                        "width": 12,
+                        "settings": {
+                            "padding": 0,
+                            "align": "center"
+                        },
+                        "blocks": [
+                            {
+                                "id": "blk_demo_slider",
+                                "type": "slider",
+                                "settings": {
+                                    "height": 560,
+                                    "autoplay": true,
+                                    "interval": 5000,
+                                    "slides": [
+                                        {
+                                            "id": "s1",
+                                            "image": "",
+                                            "grad_from": "#1e3a5f",
+                                            "grad_to": "#0ea5e9",
+                                            "badge": "New Arrivals",
+                                            "headline": "Summer Collection 2026",
+                                            "subheading": "Discover amazing products at unbeatable prices. Quality you can trust, delivered to your door.",
+                                            "cta_text": "Shop Now",
+                                            "cta_url": "/products",
+                                            "text_align": "center"
+                                        },
+                                        {
+                                            "id": "s2",
+                                            "image": "",
+                                            "grad_from": "#7c3aed",
+                                            "grad_to": "#ec4899",
+                                            "badge": "Exclusive Deals",
+                                            "headline": "Up to 50% Off",
+                                            "subheading": "Limited-time offers on our best-selling products. Don't miss out on these incredible deals.",
+                                            "cta_text": "View Deals",
+                                            "cta_url": "/products",
+                                            "text_align": "center"
+                                        },
+                                        {
+                                            "id": "s3",
+                                            "image": "",
+                                            "grad_from": "#064e3b",
+                                            "grad_to": "#0d9488",
+                                            "badge": "Free Shipping",
+                                            "headline": "Free Delivery on All Orders",
+                                            "subheading": "Shop with confidence. Free shipping on every order, easy returns and 24/7 customer support.",
+                                            "cta_text": "Start Shopping",
+                                            "cta_url": "/products",
+                                            "text_align": "center"
+                                        }
+                                    ]
+                                }
+                            }
+                        ]
+                    }
+                ]
+            },
+            {
+                "id": "sec_demo_features",
+                "type": "section",
+                "settings": {
+                    "background_color": "#f9fafb",
+                    "background_image": null,
+                    "padding_top": 56,
+                    "padding_bottom": 56,
+                    "full_width": false
+                },
+                "columns": [
+                    {
+                        "id": "col_demo_feat1",
+                        "width": 3,
+                        "settings": {
+                            "padding": 16,
+                            "align": "center"
+                        },
+                        "blocks": [
+                            {
+                                "id": "blk_demo_feat1",
+                                "type": "icon_box",
+                                "settings": {
+                                    "icon": "truck",
+                                    "icon_color": "#2563eb",
+                                    "icon_size": 36,
+                                    "title": "Free Shipping",
+                                    "description": "Free shipping on all orders over $50. Fast, reliable delivery straight to your door.",
+                                    "align": "center"
+                                }
+                            }
+                        ]
+                    },
+                    {
+                        "id": "col_demo_feat2",
+                        "width": 3,
+                        "settings": {
+                            "padding": 16,
+                            "align": "center"
+                        },
+                        "blocks": [
+                            {
+                                "id": "blk_demo_feat2",
+                                "type": "icon_box",
+                                "settings": {
+                                    "icon": "shield",
+                                    "icon_color": "#16a34a",
+                                    "icon_size": 36,
+                                    "title": "Secure Payment",
+                                    "description": "Your payment information is always protected with industry-standard encryption.",
+                                    "align": "center"
+                                }
+                            }
+                        ]
+                    },
+                    {
+                        "id": "col_demo_feat3",
+                        "width": 3,
+                        "settings": {
+                            "padding": 16,
+                            "align": "center"
+                        },
+                        "blocks": [
+                            {
+                                "id": "blk_demo_feat3",
+                                "type": "icon_box",
+                                "settings": {
+                                    "icon": "refresh-cw",
+                                    "icon_color": "#d97706",
+                                    "icon_size": 36,
+                                    "title": "Easy Returns",
+                                    "description": "Not satisfied? Return any item within 30 days for a full refund, no questions asked.",
+                                    "align": "center"
+                                }
+                            }
+                        ]
+                    },
+                    {
+                        "id": "col_demo_feat4",
+                        "width": 3,
+                        "settings": {
+                            "padding": 16,
+                            "align": "center"
+                        },
+                        "blocks": [
+                            {
+                                "id": "blk_demo_feat4",
+                                "type": "icon_box",
+                                "settings": {
+                                    "icon": "headphones",
+                                    "icon_color": "#7c3aed",
+                                    "icon_size": 36,
+                                    "title": "24/7 Support",
+                                    "description": "Our dedicated support team is available around the clock to help you with any questions.",
+                                    "align": "center"
+                                }
+                            }
+                        ]
+                    }
+                ]
+            },
+            {
+                "id": "sec_demo_categories",
+                "type": "section",
+                "settings": {
+                    "background_color": "#f9fafb",
+                    "background_image": null,
+                    "padding_top": 64,
+                    "padding_bottom": 64,
+                    "full_width": false
+                },
+                "columns": [
+                    {
+                        "id": "col_demo_categories",
+                        "width": 12,
+                        "settings": {
+                            "padding": 16,
+                            "align": "left"
+                        },
+                        "blocks": [
+                            {
+                                "id": "blk_cat_h",
+                                "type": "heading",
+                                "settings": {
+                                    "level": "h2",
+                                    "text": "Shop by Category",
+                                    "align": "center",
+                                    "color": "#111827"
+                                }
+                            },
+                            {
+                                "id": "blk_cat_sub",
+                                "type": "text",
+                                "settings": {
+                                    "content": "<p style='text-align:center;color:#6b7280;margin-bottom:32px;'>Explore our wide range of product categories</p>"
+                                }
+                            },
+                            {
+                                "id": "blk_categories",
+                                "type": "categories_grid",
+                                "settings": {
+                                    "columns": 4,
+                                    "limit": 8,
+                                    "show_count": true
+                                }
+                            }
+                        ]
+                    }
+                ]
+            },
+            {
+                "type": "section",
+                "settings": {
+                    "background_color": "#ffffff",
+                    "background_image": null,
+                    "padding_top": 64,
+                    "padding_bottom": 64,
+                    "full_width": false
+                },
+                "columns": [
+                    {
+                        "id": "col_demo_products",
+                        "width": 12,
+                        "settings": {
+                            "padding": 16,
+                            "align": "left"
+                        },
+                        "blocks": [
+                            {
+                                "id": "blk_prod_h",
+                                "type": "heading",
+                                "settings": {
+                                    "level": "h2",
+                                    "text": "Featured Products",
+                                    "align": "center",
+                                    "color": "#111827"
+                                }
+                            },
+                            {
+                                "id": "blk_prod_sub",
+                                "type": "text",
+                                "settings": {
+                                    "content": "<p style='text-align:center;color:#6b7280;margin-bottom:32px;'>Handpicked products our customers love most</p>"
+                                }
+                            },
+                            {
+                                "id": "blk_products",
+                                "type": "products_grid",
+                                "settings": {
+                                    "source": "featured",
+                                    "product_ids": [],
+                                    "columns": 4,
+                                    "show_price": true,
+                                    "show_cart": true,
+                                    "limit": 8
+                                }
+                            }
+                        ]
+                    }
+                ]
+            },
+            {
+                "id": "sec_demo_newsletter",
+                "type": "section",
+                "settings": {
+                    "background_color": "#0f172a",
+                    "background_image": null,
+                    "padding_top": 0,
+                    "padding_bottom": 0,
+                    "full_width": true
+                },
+                "columns": [
+                    {
+                        "id": "col_demo_nl",
+                        "width": 12,
+                        "settings": {
+                            "padding": 0,
+                            "align": "center"
+                        },
+                        "blocks": [
+                            {
+                                "id": "blk_newsletter",
+                                "type": "newsletter",
+                                "settings": {
+                                    "bg_color": "#0f172a",
+                                    "layout": "split",
+                                    "title": "Join Thousands of Happy Shoppers",
+                                    "cta_text": "Subscribe Free"
+                                }
+                            }
+                        ]
+                    }
+                ]
+            },
+            {
+                "id": "sec_demo_cta",
+                "type": "section",
+                "settings": {
+                    "background_color": "#1e3a5f",
+                    "background_image": null,
+                    "padding_top": 80,
+                    "padding_bottom": 80,
+                    "full_width": true
+                },
+                "columns": [
+                    {
+                        "id": "col_demo_cta",
+                        "width": 12,
+                        "settings": {
+                            "padding": 24,
+                            "align": "center"
+                        },
+                        "blocks": [
+                            {
+                                "id": "blk_cta_h",
+                                "type": "heading",
+                                "settings": {
+                                    "level": "h2",
+                                    "text": "Join Thousands of Happy Customers",
+                                    "align": "center",
+                                    "color": "#ffffff"
+                                }
+                            },
+                            {
+                                "id": "blk_cta_t",
+                                "type": "text",
+                                "settings": {
+                                    "content": "<p style='text-align:center;color:#cbd5e1;'>Sign up today and get 10% off your first order.</p>"
+                                }
+                            },
+                            {
+                                "id": "blk_cta_btn",
+                                "type": "button",
+                                "settings": {
+                                    "text": "Browse All Products",
+                                    "url": "/products",
+                                    "align": "center",
+                                    "style": "solid",
+                                    "bg_color": "#3b82f6",
+                                    "text_color": "#ffffff"
+                                }
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    }
+}

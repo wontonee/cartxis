@@ -153,6 +153,35 @@ class MediaController extends Controller
     }
 
     /**
+     * Upload a single file via AJAX and return JSON (used by UI Editor media picker)
+     */
+    public function uploadJson(Request $request): JsonResponse
+    {
+        $request->validate([
+            'file'      => 'required|file|max:' . config('cms.media.max_file_size', 10240),
+            'folder_id' => 'nullable|exists:media_folders,id',
+        ]);
+
+        try {
+            $mediaFile = $this->mediaService->upload(
+                $request->file('file'),
+                $request->input('folder_id'),
+                []
+            );
+
+            return response()->json([
+                'success' => true,
+                'file'    => new MediaFileResource($mediaFile),
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => $e->getMessage(),
+            ], 422);
+        }
+    }
+
+    /**
      * Get files for media picker
      */
     public function picker(Request $request): JsonResponse
