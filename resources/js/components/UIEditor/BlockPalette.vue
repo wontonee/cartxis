@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed, ref, onMounted } from 'vue'
-import { useUiEditorStore } from '@/stores/uiEditorStore'
-import type { SavedBlockItem } from '@/stores/uiEditorStore'
+import { useUiEditorStore } from '@/Stores/uiEditorStore'
+import type { SavedBlockItem } from '@/Stores/uiEditorStore'
 import axios from 'axios'
 
 const props = defineProps<{

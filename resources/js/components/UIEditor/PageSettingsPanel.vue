@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref, watch, onMounted, onBeforeUnmount } from 'vue'
-import { useUiEditorStore } from '@/stores/uiEditorStore'
-import type { PageSettingsData } from '@/stores/uiEditorStore'
+import { useUiEditorStore } from '@/Stores/uiEditorStore'
+import type { PageSettingsData } from '@/Stores/uiEditorStore'
 import axios from 'axios'
 
 const store = useUiEditorStore()

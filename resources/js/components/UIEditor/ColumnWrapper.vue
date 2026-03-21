@@ -1,8 +1,8 @@
 <script setup lang="ts">
 import { computed, nextTick, ref } from 'vue'
 import draggable from 'vuedraggable'
-import { useUiEditorStore } from '@/stores/uiEditorStore'
-import type { Section, Column, Block } from '@/stores/uiEditorStore'
+import { useUiEditorStore } from '@/Stores/uiEditorStore'
+import type { Section, Column, Block } from '@/Stores/uiEditorStore'
 import BlockWrapper from './BlockWrapper.vue'
 
 const props = defineProps<{ section: Section; column: Column }>()

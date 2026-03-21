@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed } from 'vue'
-import type { PreviewMode } from '@/stores/uiEditorStore'
+import type { PreviewMode } from '@/Stores/uiEditorStore'
 
 const props = defineProps<{
   mode: PreviewMode

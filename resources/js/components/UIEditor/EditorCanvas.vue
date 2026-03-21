@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue'
 import draggable from 'vuedraggable'
-import { useUiEditorStore } from '@/stores/uiEditorStore'
+import { useUiEditorStore } from '@/Stores/uiEditorStore'
 import SectionWrapper from './SectionWrapper.vue'
 
 const store = useUiEditorStore()

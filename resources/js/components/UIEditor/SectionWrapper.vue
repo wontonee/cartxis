@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue'
-import { useUiEditorStore } from '@/stores/uiEditorStore'
-import type { Section } from '@/stores/uiEditorStore'
+import { useUiEditorStore } from '@/Stores/uiEditorStore'
+import type { Section } from '@/Stores/uiEditorStore'
 import ColumnWrapper from './ColumnWrapper.vue'
 
 const props = defineProps<{ section: Section; index: number }>()

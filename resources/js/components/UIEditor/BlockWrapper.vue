@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed, defineAsyncComponent, markRaw, ref } from 'vue'
-import { useUiEditorStore } from '@/stores/uiEditorStore'
-import type { Section, Column, Block } from '@/stores/uiEditorStore'
+import { useUiEditorStore } from '@/Stores/uiEditorStore'
+import type { Section, Column, Block } from '@/Stores/uiEditorStore'
 
 const props = defineProps<{ section: Section; column: Column; block: Block }>()
 const store  = useUiEditorStore()

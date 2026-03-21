@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { onMounted, computed, ref, onBeforeUnmount } from 'vue'
-import { useUiEditorStore } from '@/stores/uiEditorStore'
-import type { PageSettingsData } from '@/stores/uiEditorStore'
+import { useUiEditorStore } from '@/Stores/uiEditorStore'
+import type { PageSettingsData } from '@/Stores/uiEditorStore'
 import PreviewSwitcher from '@/components/UIEditor/PreviewSwitcher.vue'
 import PublishControls from '@/components/UIEditor/PublishControls.vue'
 import DeviceFrame from '@/components/UIEditor/DeviceFrame.vue'

@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed, defineAsyncComponent, markRaw } from 'vue'
-import { useUiEditorStore } from '@/stores/uiEditorStore'
+import { useUiEditorStore } from '@/Stores/uiEditorStore'
 
 const props = defineProps<{
   floating?: boolean

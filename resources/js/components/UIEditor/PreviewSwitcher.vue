@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed } from 'vue'
-import { useUiEditorStore } from '@/stores/uiEditorStore'
-import type { PreviewMode } from '@/stores/uiEditorStore'
+import { useUiEditorStore } from '@/Stores/uiEditorStore'
+import type { PreviewMode } from '@/Stores/uiEditorStore'
 
 const store = useUiEditorStore()
 
