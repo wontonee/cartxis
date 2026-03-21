@@ -29,7 +29,7 @@ A modern, extensible eCommerce platform built with **Laravel 12**, **Inertia.js*
 - **Settings** — Store configuration, payment methods, shipping rates, and tax rules
 - **AI Agents** — Create and manage custom AI agents for commerce workflows
 - **Email Templates** — Customizable transactional email templates
-- **CMS** — Content management for pages and blocks
+- **CMS & UI Editor** — Visual drag-and-drop page builder with 32+ block types, global regions, reusable saved blocks, and responsive live preview
 - **Reports** — Sales, customer, and inventory reporting
 - **Maintenance Mode** — Built-in maintenance banner and system controls
 
@@ -250,6 +250,7 @@ packages/Cartxis/
 ├── Cart/           # Shopping cart management
 ├── CMS/            # Content pages and blocks
 ├── Core/           # Core utilities, installer command, service providers
+├── UIEditor/       # Visual drag-and-drop page builder
 ├── Customer/       # Customer profiles and authentication
 ├── Marketing/      # Promotions, coupons, and tools
 ├── PayPal/         # PayPal payment integration
@@ -265,6 +266,58 @@ packages/Cartxis/
 ├── Stripe/         # Stripe payment integration
 └── System/         # System health and utilities
 ```
+
+---
+
+## 🖌️ Visual Page Builder (UI Editor)
+
+Cartxis ships with a powerful visual drag-and-drop page builder that lets you design storefront pages and reusable regions without writing code.
+
+### Pages
+
+Manage CMS pages and your store's homepage through a full visual editing workflow:
+
+- **Create** — Start from a blank canvas or insert saved block templates
+- **Edit** — Drag and drop sections, columns, and blocks to build layouts
+- **Draft / Publish** — Changes stay in draft until explicitly published; auto-saves every 3 seconds
+- **Unpublish** — Revert any page to draft, removing it from the live storefront instantly
+- **Live Preview** — Preview pages at Desktop (full width), Tablet (768 px), and Mobile (390 px) breakpoints inside a real theme iframe
+
+### Layout Hierarchy
+
+Layouts are a three-level tree stored as JSON:
+
+```
+Page → Sections → Columns → Blocks
+```
+
+- **Sections** — Full-width rows with configurable background colour, padding, and full-width toggle
+- **Columns** — Responsive 12-column grid; presets: 1, 2, 3, 4 columns · 2/3+1/3 · 1/3+2/3
+- **Blocks** — Content units dropped into columns; each block type has its own settings panel
+
+### 32 Built-in Block Types
+
+| Category | Block Types |
+|----------|-------------|
+| Layout | `spacer`, `divider` |
+| Text & Content | `heading`, `text`, `image`, `button`, `video`, `form`, `table`, `card`, `html`, `code`, `accordion`, `tabs`, `icon_box`, `counter`, `social_links`, `author_card`, `share_buttons` |
+| Commerce | `hero`, `slider`, `products_grid`, `categories_grid`, `newsletter`, `pricing`, `testimonials` |
+| Blog | `post_featured`, `post_list`, `post_carousel`, `blog_posts_grid` |
+| Regions | `global_region` |
+
+### Global Regions
+
+Create reusable layout areas (header, footer, sidebar, banner, section) that are embedded into any page via the `global_region` block. Updating a global region propagates instantly to every page that references it.
+
+**Default seeded regions:** Main Header and Main Footer.
+
+### Saved (Reusable) Blocks
+
+Save any section or individual block as a reusable template. Saved blocks appear in the block palette under the **Saved** tab and can be inserted into any page — ideal for promotional banners, CTA strips, or complex product grids you want to maintain consistently.
+
+### Theme Integration
+
+The `UIBlockRenderer` Vue component is shared across all themes. When a published layout exists for a page, it is rendered visually via the block renderer; if no published layout exists the platform falls back gracefully to raw HTML, preserving backward compatibility.
 
 ---
 
@@ -398,7 +451,7 @@ For billing, licensing, or partnership enquiries, contact us at **dev@wontonee.c
 - [x] Reviews
 - [x] Newsletter
 - [x] Multi-payment gateway (Stripe, Razorpay, PayPal, PhonePe, PayUMoney)
-- [x] CMS — pages and content blocks
+- [x] CMS — pages, content blocks, and visual page builder (UI Editor with 32+ block types, global regions, saved blocks, live preview)
 - [x] Media management
 - [x] Email templates (customizable transactional emails)
 - [x] Reports — sales, customer, and inventory
