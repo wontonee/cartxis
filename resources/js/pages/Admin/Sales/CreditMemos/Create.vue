@@ -12,7 +12,7 @@ interface Props {
 }
 
 const props = defineProps<Props>();
-const { formatPrice } = useCurrency();
+const { formatPrice, getSymbol } = useCurrency();
 
 const selectedOrder = ref<Order | undefined>(props.order);
 const refundItems = ref<RefundableItem[]>(props.refundableItems || []);
@@ -325,7 +325,7 @@ const formatDate = (date: string) => {
             <div>
               <label class="block text-sm font-medium text-gray-700 mb-2">Shipping Refund</label>
               <div class="relative">
-                <span class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500">₹</span>
+                <span class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500">{{ getSymbol() }}</span>
                 <input
                   v-model.number="form.shipping_refund"
                   type="number"
@@ -345,7 +345,7 @@ const formatDate = (date: string) => {
             <div>
               <label class="block text-sm font-medium text-gray-700 mb-2">Adjustment Amount</label>
               <div class="relative">
-                <span class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500">₹</span>
+                <span class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500">{{ getSymbol() }}</span>
                 <input
                   v-model.number="form.adjustment_amount"
                   type="number"

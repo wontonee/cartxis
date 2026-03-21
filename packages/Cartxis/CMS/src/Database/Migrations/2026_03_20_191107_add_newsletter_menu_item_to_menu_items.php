@@ -15,6 +15,13 @@ return new class extends Migration
             ->where('location', 'admin')
             ->value('id');
 
+        // On a fresh install migrations run before seeders, so the marketing
+        // parent may not exist yet. Skip insertion here — MarketingMenuSeeder
+        // will create this item with the correct parent_id.
+        if (! $marketingId) {
+            return;
+        }
+
         DB::table('menu_items')->updateOrInsert(
             ['key' => 'marketing-newsletters', 'location' => 'admin'],
             [

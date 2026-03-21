@@ -5,6 +5,7 @@ import Pagination from '@/components/Admin/Pagination.vue';
 import ConfirmDeleteModal from '@/components/Admin/ConfirmDeleteModal.vue';
 import { ref, computed } from 'vue';
 import { debounce } from 'lodash';
+import { useCurrency } from '@/composables/useCurrency';
 import {
   Users,
   UserCheck,
@@ -85,6 +86,7 @@ interface Props {
 
 const props = defineProps<Props>();
 
+const { formatPrice } = useCurrency();
 const selectedGroups = ref<number[]>([]);
 const showDeleteModal = ref(false);
 const deleteGroupId = ref<number | null>(null);
@@ -581,10 +583,10 @@ function handleDragEnd() {
                       Min Orders: <span class="font-medium text-gray-900 dark:text-white">{{ group.auto_assignment_rules.min_orders }}</span>
                     </div>
                     <div v-if="group.auto_assignment_rules.min_spent" class="text-gray-600 dark:text-gray-400">
-                      Min Spent: <span class="font-medium text-gray-900 dark:text-white">${{ group.auto_assignment_rules.min_spent }}</span>
+                      Min Spent: <span class="font-medium text-gray-900 dark:text-white">{{ formatPrice(group.auto_assignment_rules.min_spent) }}</span>
                     </div>
                     <div v-if="group.auto_assignment_rules.min_aov" class="text-gray-600 dark:text-gray-400">
-                      Min AOV: <span class="font-medium text-gray-900 dark:text-white">${{ group.auto_assignment_rules.min_aov }}</span>
+                      Min AOV: <span class="font-medium text-gray-900 dark:text-white">{{ formatPrice(group.auto_assignment_rules.min_aov) }}</span>
                     </div>
                     <button
                       @click="applyAutoAssignment(group.id)"

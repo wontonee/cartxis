@@ -6,6 +6,7 @@ import { useStorefrontMenu } from '@/composables/useStorefrontMenu';
 import { useWishlist } from '@/composables/useWishlist';
 import { Heart } from 'lucide-vue-next';
 import axios from 'axios';
+import { useCurrency } from '@/composables/useCurrency';
 
 interface SearchSuggestion {
     id: number;
@@ -40,6 +41,7 @@ const auth = computed(() => page.props.auth as any);
 const user = computed(() => auth.value?.user);
 
 const { wishlistCount, fetchWishlist } = useWishlist();
+const { formatPrice } = useCurrency();
 
 const searchQuery = ref('');
 const suggestions = ref<SearchSuggestion[]>([]);
@@ -487,7 +489,7 @@ onUnmounted(() => {
                                         {{ suggestion.name }}
                                     </p>
                                     <p class="text-sm text-indigo-600 font-semibold">
-                                        ${{ Number(suggestion.price).toFixed(2) }}
+                                        {{ formatPrice(suggestion.price) }}
                                     </p>
                                 </div>
 

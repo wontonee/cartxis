@@ -186,9 +186,9 @@
                 </td>
                 <td class="px-6 py-4 whitespace-nowrap">
                   <div class="text-sm text-gray-900 dark:text-white font-medium">
-                    ${{ Number(method.base_cost).toFixed(2) }}
+                    {{ formatPrice(method.base_cost) }}
                     <span class="text-gray-400 mx-1">+</span>
-                    ${{ Number(method.cost_per_kg).toFixed(2) }}<span class="text-gray-500 text-xs">/kg</span>
+                    {{ formatPrice(method.cost_per_kg) }}<span class="text-gray-500 text-xs">/kg</span>
                   </div>
                   <div class="text-xs text-gray-500 mt-0.5">
                     {{ method.rates?.length || 0 }} defined tiers
@@ -283,6 +283,7 @@ import {
 } from 'lucide-vue-next'
 import { Switch } from '@/components/ui/switch'
 import axios from 'axios'
+import { useCurrency } from '@/composables/useCurrency'
 
 interface ShippingMethod {
   id: number
@@ -312,6 +313,8 @@ const props = defineProps<{
     }
   }
 }>()
+
+const { formatPrice } = useCurrency()
 
 const methods = ref<ShippingMethod[]>(props.methods?.data || [])
 const extensions = ref(props.extensions || { delivery: { enabled: false }, shiprocket: { enabled: false } })

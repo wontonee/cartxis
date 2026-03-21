@@ -99,7 +99,7 @@ const props = defineProps<{
   currencySymbol?: string
 }>()
 
-const { formatPrice } = useCurrency()
+const { formatPrice, getSymbol } = useCurrency()
 
 // ─── Dark-mode detection (reactive) ──────────────────────────────────────────
 
@@ -343,7 +343,8 @@ const maxProductSales = computed(() =>
           >
             <div class="flex items-start justify-between mb-4">
               <div class="w-9 h-9 rounded-xl flex items-center justify-center" :class="statIconBg[stat.color]">
-                <component :is="statIconMap[stat.icon]" class="w-4 h-4" />
+                <span v-if="stat.icon === 'DollarSign'" class="text-sm font-bold leading-none">{{ getSymbol() }}</span>
+                <component v-else :is="statIconMap[stat.icon]" class="w-4 h-4" />
               </div>
               <div
                 class="flex items-center text-[11px] font-semibold px-2 py-0.5 rounded-full"
