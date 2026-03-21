@@ -1,0 +1,94 @@
+title: "[Feature Request] "
+labels: ["feature-request"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        ## 💡 New Feature Request
+        Have an idea that would make Cartxis better? We'd love to hear it! Please fill out this form to share your feature request with the community and maintainers.
+
+  - type: input
+    id: feature-title
+    attributes:
+      label: Feature Title
+      description: Provide a short, descriptive title for the feature you'd like to see.
+      placeholder: "e.g., Add support for multi-currency checkout"
+    validations:
+      required: true
+
+  - type: dropdown
+    id: feature-area
+    attributes:
+      label: Feature Area
+      description: Which area of Cartxis does this feature relate to?
+      options:
+        - "🛒 Cart & Checkout"
+        - "📦 Product Management"
+        - "💳 Payments & Gateways"
+        - "📊 Reports & Analytics"
+        - "👤 Customer Management"
+        - "🛠️ Admin Panel"
+        - "🎨 Themes & UI"
+        - "📡 API & Integrations"
+        - "⚙️ Settings & Configuration"
+        - "📦 Package / Extension"
+        - "🔒 Security"
+        - "🌐 Internationalization (i18n)"
+        - "📄 Documentation"
+        - "🧪 Testing"
+        - "Other"
+    validations:
+      required: true
+
+  - type: textarea
+    id: problem-statement
+    attributes:
+      label: Problem / Motivation
+      description: What problem does this feature solve? Why is it needed?
+      placeholder: "Currently, Cartxis does not support X, which means users must Y manually..."
+    validations:
+      required: true
+
+  - type: textarea
+    id: proposed-solution
+    attributes:
+      label: Proposed Solution
+      description: Describe the feature you'd like and how it should work.
+      placeholder: "Add a configurable multi-currency option in the Settings panel that allows..."
+    validations:
+      required: true
+
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives Considered
+      description: Have you thought of any alternative solutions or workarounds?
+      placeholder: "I tried using a third-party plugin but it doesn't integrate well with..."
+
+  - type: dropdown
+    id: priority
+    attributes:
+      label: Priority
+      description: How important is this feature to you?
+      options:
+        - "🔴 Critical — blocks my use of Cartxis"
+        - "🟠 High — significantly impacts my workflow"
+        - "🟡 Medium — would be a nice improvement"
+        - "🟢 Low — minor enhancement"
+    validations:
+      required: true
+
+  - type: checkboxes
+    id: contribution
+    attributes:
+      label: Contribution
+      description: Would you be willing to help implement this feature?
+      options:
+        - label: I am willing to submit a pull request for this feature.
+
+  - type: textarea
+    id: additional-context
+    attributes:
+      label: Additional Context
+      description: Add any other context, screenshots, mockups, or links that help illustrate the feature.
+      placeholder: "Attach screenshots, links to similar implementations, or any other relevant information."

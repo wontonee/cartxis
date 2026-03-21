@@ -1,0 +1,62 @@
+title: "[Announcement] "
+labels: ["announcement"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        ## 📢 Announcement
+        Use this template to share official announcements about Cartxis — including releases, breaking changes, deprecations, and other important updates.
+
+  - type: input
+    id: announcement-title
+    attributes:
+      label: Announcement Title
+      description: Provide a concise title for this announcement.
+      placeholder: "e.g., Cartxis v2.0.0 Released"
+    validations:
+      required: true
+
+  - type: dropdown
+    id: announcement-type
+    attributes:
+      label: Announcement Type
+      description: What kind of announcement is this?
+      options:
+        - "🚀 New Release"
+        - "⚠️ Breaking Change"
+        - "🔒 Security Advisory"
+        - "🗑️ Deprecation Notice"
+        - "📅 Upcoming Event"
+        - "📌 General Update"
+    validations:
+      required: true
+
+  - type: textarea
+    id: announcement-body
+    attributes:
+      label: Announcement Details
+      description: Provide the full details of the announcement.
+      placeholder: "Describe the announcement in detail..."
+    validations:
+      required: true
+
+  - type: textarea
+    id: action-required
+    attributes:
+      label: Action Required (if any)
+      description: What steps should users take in response to this announcement?
+      placeholder: "e.g., Update your composer.json to require cartxis/core ^2.0, then run composer update."
+
+  - type: input
+    id: affected-versions
+    attributes:
+      label: Affected Versions
+      description: Which versions of Cartxis are affected?
+      placeholder: "e.g., v1.x and earlier"
+
+  - type: input
+    id: reference-links
+    attributes:
+      label: Reference Links
+      description: Any relevant links (changelog, docs, PRs, etc.)
+      placeholder: "https://github.com/cartxis/cartxis/releases/tag/v2.0.0"
