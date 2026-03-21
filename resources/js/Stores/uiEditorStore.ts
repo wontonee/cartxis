@@ -371,6 +371,16 @@ export const useUiEditorStore = defineStore('uiEditor', () => {
   function findSection(sectionId: string): Section | undefined {
     return layout.value.sections.find(s => s.id === sectionId)
   }
+  function setColumnBlocks(columnId: string, blocks: Block[]) {
+    for (const section of layout.value.sections) {
+      const column = section.columns.find(c => c.id === columnId)
+      if (column) {
+        column.blocks.splice(0, column.blocks.length, ...blocks)
+        return
+      }
+    }
+  }
+
 
   // ─── API calls ─────────────────────────────────────────────────────────────
 
@@ -487,7 +497,7 @@ export const useUiEditorStore = defineStore('uiEditor', () => {
     selectNode, clearSelection,
     addSection, addSectionCustom, removeSection, updateSectionSettings, setSectionColumns,
     addBlock, removeBlock, duplicateBlock, updateBlockSettings,
-    findBlock, findSection,
+    findBlock, findSection, setColumnBlocks,
     triggerSave, triggerPublish, triggerUnpublish,
     setBlockTypes,
     fetchSavedBlocks, saveToLibrary, deleteFromLibrary, addSectionFromTemplate,

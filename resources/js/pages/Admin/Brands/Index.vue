@@ -22,7 +22,8 @@ import {
   MinusCircle,
   ImageIcon,
   ArrowUpDown,
-  Tag
+  Tag,
+  ExternalLink
 } from 'lucide-vue-next';
 
 interface Brand {

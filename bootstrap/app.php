@@ -37,6 +37,8 @@ return Application::configure(basePath: dirname(__DIR__))
             HandleInertiaRequests::class,
             AddLinkHeadersForPreloadedAssets::class,
             PreventAdminFrontendAccess::class, // Prevent admins from accessing frontend
+            PreventUserAdminAccess::class,    // Enforce is_active + role on admin guard sessions
+            \Cartxis\Core\Http\Middleware\SecurityHeaders::class,
         ]);
 
         // Add middleware to admin routes to prevent regular users

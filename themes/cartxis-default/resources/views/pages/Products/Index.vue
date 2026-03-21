@@ -394,7 +394,7 @@ const activeFilterBadges = computed(() => {
                                         class="block text-sm text-gray-600 hover:text-indigo-600 transition-colors cursor-pointer"
                                         :class="{ 'text-indigo-600 font-semibold': activeFilters.price_min === 0 && activeFilters.price_max === 50 }"
                                     >
-                                        Under $50
+                                        Under ₹50
                                     </a>
                                     <a
                                         href="#"
@@ -402,7 +402,7 @@ const activeFilterBadges = computed(() => {
                                         class="block text-sm text-gray-600 hover:text-indigo-600 transition-colors cursor-pointer"
                                         :class="{ 'text-indigo-600 font-semibold': activeFilters.price_min === 50 && activeFilters.price_max === 100 }"
                                     >
-                                        $50 - $100
+                                        ₹50 - ₹100
                                     </a>
                                     <a
                                         href="#"
@@ -410,7 +410,7 @@ const activeFilterBadges = computed(() => {
                                         class="block text-sm text-gray-600 hover:text-indigo-600 transition-colors cursor-pointer"
                                         :class="{ 'text-indigo-600 font-semibold': activeFilters.price_min === 100 && activeFilters.price_max === 200 }"
                                     >
-                                        $100 - $200
+                                        ₹100 - ₹200
                                     </a>
                                     <a
                                         href="#"
@@ -418,7 +418,7 @@ const activeFilterBadges = computed(() => {
                                         class="block text-sm text-gray-600 hover:text-indigo-600 transition-colors cursor-pointer"
                                         :class="{ 'text-indigo-600 font-semibold': activeFilters.price_min === 200 && !activeFilters.price_max }"
                                     >
-                                        Over $200
+                                        Over ₹200
                                     </a>
                                 </div>
                             </div>

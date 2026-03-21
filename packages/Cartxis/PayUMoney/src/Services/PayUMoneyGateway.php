@@ -120,7 +120,8 @@ class PayUMoneyGateway implements PaymentGatewayInterface
 
         $calculatedHash = hash('sha512', $hashString);
 
-        return strcasecmp($calculatedHash, $response['hash'] ?? '') === 0;
+        // Use constant-time comparison to prevent timing attacks (OWASP)
+        return hash_equals(strtolower($calculatedHash), strtolower($response['hash'] ?? ''));
     }
 
     /**
@@ -153,11 +154,6 @@ class PayUMoneyGateway implements PaymentGatewayInterface
      */
     public function processPayment(Order $order, array $data = [])
     {
-        Log::info('PayUMoneyGateway: processPayment called', [
-            'order_id' => $order->id,
-            'order_number' => $order->order_number,
-        ]);
-
         try {
             $merchantKey = $this->getConfig('merchant_key');
             $merchantSalt = $this->getConfig('merchant_salt');
@@ -213,12 +209,6 @@ class PayUMoneyGateway implements PaymentGatewayInterface
             // Generate hash
             $params['hash'] = $this->generateHash($params);
 
-            Log::info('PayUMoneyGateway: Payment parameters prepared', [
-                'order_id' => $order->id,
-                'txnid' => $txnId,
-                'amount' => $params['amount'],
-            ]);
-
             // Store transaction ID in order metadata
             $order->update([
                 'payment_gateway_data' => [
@@ -253,8 +243,6 @@ class PayUMoneyGateway implements PaymentGatewayInterface
      */
     public function handleCallback(array $data): array
     {
-        Log::info('PayUMoneyGateway: handleCallback called', $data);
-
         try {
             // Verify hash
             if (!$this->verifyHash($data)) {

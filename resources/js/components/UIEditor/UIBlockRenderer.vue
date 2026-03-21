@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { defineAsyncComponent, computed } from 'vue'
+import { defineAsyncComponent, computed, markRaw, onErrorCaptured, type Component } from 'vue'
 import { usePage } from '@inertiajs/vue3'
 
 interface Block   { id: string; type: string; settings: Record<string, unknown> }
@@ -18,22 +18,42 @@ const page = usePage()
 const themeSlug = computed(() => (page.props as any).theme?.slug as string | null ?? null)
 
 function toPascal(str: string): string {
+  if (!str) return 'Text'
   return str.split(/[-_]/).map(w => w.charAt(0).toUpperCase() + w.slice(1)).join('')
 }
 
-function blockComponent(type: string) {
-  const slug   = themeSlug.value
-  const pascal = toPascal(type)
+// Cache component definitions keyed by theme+type.
+// Re-creating defineAsyncComponent on every render causes Vue to unmount+remount
+// every block, losing state and triggering infinite update loops.
+const blockComponentCache = new Map<string, Component>()
 
-  return defineAsyncComponent(() => {
-    // 1. Try the active theme's override first
-    // 2. Fall back to the shared block library
-    // 3. Final fallback: TextBlock (never a blank crash)
-    const shared   = () => import(`./blocks/${pascal}Block.vue`).catch(() => import('./blocks/TextBlock.vue'))
-    if (!slug) return shared()
-    return import(`@themes/${slug}/blocks/${pascal}Block.vue`).catch(shared)
-  })
+function blockComponent(type: string) {
+  if (!type) return null
+  const cacheKey = `${themeSlug.value ?? ''}:${type}`
+  if (!blockComponentCache.has(cacheKey)) {
+    const slug   = themeSlug.value
+    const pascal = toPascal(type)
+    const silent = { template: '<div />' }   // errorComponent — hides broken blocks silently
+    blockComponentCache.set(cacheKey, markRaw(defineAsyncComponent({
+      loader: () => {
+        // 1. Try the active theme's override first
+        // 2. Fall back to the shared block library
+        // 3. Final fallback: TextBlock (never a blank crash)
+        const shared = () => import(`./blocks/${pascal}Block.vue`).catch(() => import('./blocks/TextBlock.vue'))
+        return slug ? import(`@themes/${slug}/blocks/${pascal}Block.vue`).catch(shared) : shared()
+      },
+      errorComponent: silent,
+    })))
+  }
+  return blockComponentCache.get(cacheKey)!
 }
+
+// Catch runtime errors thrown by individual block components so one broken block
+// cannot take down the entire renderer (all blocks disappearing).
+onErrorCaptured((err) => {
+  if (import.meta.env.DEV) console.warn('[UIBlockRenderer] block render error:', err)
+  return false  // stop propagation but log it
+})
 
 function sectionStyle(section: Section): Record<string, string> {
   const s = section.settings ?? {}

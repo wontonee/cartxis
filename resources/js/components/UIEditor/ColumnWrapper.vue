@@ -14,7 +14,7 @@ const isSelected = computed(() => store.selectedId === props.column.id)
 
 const blocks = computed({
   get: () => props.column.blocks,
-  set: (val) => { props.column.blocks = val },
+  set: (val) => { store.setColumnBlocks(props.column.id, val) },
 })
 
 function select(e: MouseEvent) {
@@ -37,7 +37,7 @@ function onBlockChange(evt: any) {
       type: element.type as string,
       settings: { ...(element.defaults as Record<string, unknown> ?? {}) },
     }
-    props.column.blocks.splice(newIndex, 1, newBlock)
+    store.setColumnBlocks(props.column.id, [...props.column.blocks.slice(0, newIndex), newBlock, ...props.column.blocks.slice(newIndex + 1)])
     nextTick(() => store.selectNode(newBlock.id, 'block'))
   } else {
     // Block moved from another column — just select it
@@ -73,7 +73,7 @@ function onPaletteDrop(e: DragEvent) {
     type: bt.type,
     settings: { ...bt.defaults },
   }
-  props.column.blocks.push(newBlock)
+  store.setColumnBlocks(props.column.id, [...props.column.blocks, newBlock])
   nextTick(() => store.selectNode(newBlock.id, 'block'))
 }
 </script>

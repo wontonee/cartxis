@@ -5,9 +5,7 @@ import AdminLayout from '@/layouts/AdminLayout.vue'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
 import { Search, Edit, Trash2, Users } from 'lucide-vue-next'
-
-// @ts-expect-error - route is globally defined
-const route = window.route
+import * as userRoutes from '@/routes/admin/users'
 
 interface User {
   id: number
@@ -37,7 +35,7 @@ const props = defineProps<Props>()
 const search = ref(props.filters.search || '')
 
 const searchUsers = () => {
-  router.get(route('admin.users.index'), { search: search.value }, {
+  router.get(userRoutes.index.url(), { search: search.value }, {
     preserveState: true,
     preserveScroll: true,
   })
@@ -45,7 +43,7 @@ const searchUsers = () => {
 
 const deleteUser = (user: User) => {
   if (confirm(`Are you sure you want to delete ${user.name}?`)) {
-    router.delete(route('admin.users.destroy', { user: user.id }), {
+    router.delete(userRoutes.destroy.url({ user: user.id }), {
       preserveScroll: true,
     })
   }
@@ -168,7 +166,7 @@ const getStatusBadgeClass = (isActive: boolean) => {
                 </td>
                 <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                   <Link
-                    :href="route('admin.users.edit', { user: user.id })"
+                    :href="userRoutes.edit.url({ user: user.id })"
                     class="text-primary hover:text-primary/80 mr-3 inline-flex items-center"
                   >
                     <Edit class="w-4 h-4 mr-1" />
@@ -191,14 +189,14 @@ const getStatusBadgeClass = (isActive: boolean) => {
             <div class="flex-1 flex justify-between sm:hidden">
               <Link
                 v-if="props.users.current_page > 1"
-                :href="route('admin.users.index', { page: props.users.current_page - 1 })"
+                :href="userRoutes.index.url({ query: { page: props.users.current_page - 1 } })"
                 class="relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50"
               >
                 Previous
               </Link>
               <Link
                 v-if="props.users.current_page < props.users.last_page"
-                :href="route('admin.users.index', { page: props.users.current_page + 1 })"
+                :href="userRoutes.index.url({ query: { page: props.users.current_page + 1 } })"
                 class="ml-3 relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50"
               >
                 Next

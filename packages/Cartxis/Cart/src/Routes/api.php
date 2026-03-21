@@ -19,4 +19,6 @@ Route::middleware(['web'])->prefix('api/cart')->name('api.cart.')->group(functio
     Route::put('/update/{itemId}', [CartController::class, 'update'])->name('update');
     Route::delete('/remove/{itemId}', [CartController::class, 'remove'])->name('remove');
     Route::delete('/clear', [CartController::class, 'clear'])->name('clear');
+    Route::post('/apply-coupon', [CartController::class, 'applyCoupon'])->name('apply-coupon');
+    Route::delete('/remove-coupon', [CartController::class, 'removeCoupon'])->name('remove-coupon');
 });

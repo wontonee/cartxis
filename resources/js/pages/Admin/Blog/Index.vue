@@ -204,7 +204,7 @@
                                         <a :href="`/blog/${post.slug}`" target="_blank" class="p-2 text-gray-400 hover:text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-lg transition-colors" title="Preview Post">
                                             <ExternalLink class="w-4 h-4" />
                                         </a>
-                                        <Link :href="blogRoutes.edit({ post: post.id }).url" class="p-2 text-gray-400 hover:text-indigo-600 hover:bg-indigo-50 dark:hover:bg-indigo-900/20 rounded-lg transition-colors" title="Edit Post">
+                                        <Link :href="blogRoutes.edit({ post: post.slug }).url" class="p-2 text-gray-400 hover:text-indigo-600 hover:bg-indigo-50 dark:hover:bg-indigo-900/20 rounded-lg transition-colors" title="Edit Post">
                                             <Edit class="w-4 h-4" />
                                         </Link>
                                         <button @click="deletePost(post)" class="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors" title="Delete Post">
@@ -279,9 +279,11 @@ const allSelected = computed(
 );
 
 const toggleAll = () => {
-    allSelected.value
-        ? (selectedPosts.value = [])
-        : (selectedPosts.value = props.posts.data.map((p) => p.id));
+    if (allSelected.value) {
+        selectedPosts.value = [];
+    } else {
+        selectedPosts.value = props.posts.data.map((p) => p.id);
+    }
 };
 
 const applyFilters = () => {
@@ -317,7 +319,7 @@ const bulkAction = (action: string) => {
 
 const deletePost = (post: Post) => {
     if (!confirm(`Are you sure you want to delete "${post.title}"?`)) return;
-    router.delete(blogRoutes.destroy({ post: post.id }).url);
+    router.delete(blogRoutes.destroy({ post: post.slug }).url);
 };
 
 const statusClass = (status: string) => {

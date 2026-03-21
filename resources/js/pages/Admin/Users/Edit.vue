@@ -6,9 +6,7 @@ import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
 import { Label } from '@/components/ui/label'
 import { ArrowLeft, Save, Key, User } from 'lucide-vue-next'
-
-// @ts-expect-error - route is globally defined
-const route = window.route
+import * as userRoutes from '@/routes/admin/users'
 
 interface User {
   id: number
@@ -35,19 +33,20 @@ const profileForm = useForm({
 })
 
 const updateProfile = () => {
-  profileForm.put(route('admin.users.update', { user: props.user.id }), {
+  profileForm.put(userRoutes.update.url({ user: props.user.id }), {
     preserveScroll: true,
   })
 }
 
 // Password change form
 const passwordForm = useForm({
+  current_password: '',
   password: '',
   password_confirmation: '',
 })
 
 const changePassword = () => {
-  passwordForm.put(route('admin.users.change-password', { user: props.user.id }), {
+  passwordForm.put(userRoutes.changePassword.url({ user: props.user.id }), {
     preserveScroll: true,
     onSuccess: () => {
       passwordForm.reset()
@@ -65,7 +64,7 @@ const changePassword = () => {
         <!-- Header -->
         <div class="mb-8">
           <Link
-            :href="route('admin.users.index')"
+            :href="userRoutes.index.url()"
             class="inline-flex items-center text-sm text-gray-600 hover:text-gray-900 mb-4"
           >
             <ArrowLeft class="w-4 h-4 mr-2" />
@@ -171,6 +170,22 @@ const changePassword = () => {
           </div>
           
           <form @submit.prevent="changePassword" class="space-y-6">
+            <!-- Current Password -->
+            <div>
+              <Label for="current_password">Current Password</Label>
+              <Input
+                id="current_password"
+                v-model="passwordForm.current_password"
+                type="password"
+                class="mt-1 bg-white"
+                :class="{ 'border-red-500': passwordForm.errors.current_password }"
+                required
+              />
+              <p v-if="passwordForm.errors.current_password" class="mt-1 text-sm text-red-600">
+                {{ passwordForm.errors.current_password }}
+              </p>
+            </div>
+
             <!-- New Password -->
             <div>
               <Label for="password">New Password</Label>

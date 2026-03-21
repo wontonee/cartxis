@@ -561,7 +561,8 @@ import {
   Eye,
   EyeOff,
   Power,
-  CheckCircle2
+  CheckCircle2,
+  Globe
 } from 'lucide-vue-next'
 
 const props = defineProps<{

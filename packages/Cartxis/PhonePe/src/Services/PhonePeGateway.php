@@ -232,11 +232,6 @@ class PhonePeGateway implements PaymentGatewayInterface
      */
     public function processPayment(Order $order, array $data = [])
     {
-        Log::info('PhonePeGateway: processPayment called', [
-            'order_id' => $order->id,
-            'order_number' => $order->order_number,
-        ]);
-
         try {
             $this->initializeClient();
 
@@ -253,24 +248,12 @@ class PhonePeGateway implements PaymentGatewayInterface
                 ->message("Order #{$order->order_number}")
                 ->build();
 
-            Log::info('PhonePeGateway: Initiating payment', [
-                'order_id' => $order->id,
-                'amount_paisa' => $amountInPaisa,
-            ]);
-
             // Initiate payment
             $payResponse = $this->client->pay($payRequest);
             
             $state = $payResponse->getState();
             $redirectUrl = $payResponse->getRedirectUrl();
             $phonePeOrderId = $payResponse->getOrderId();
-
-            Log::info('PhonePeGateway: Payment initiated', [
-                'order_id' => $order->id,
-                'phonepe_order_id' => $phonePeOrderId,
-                'state' => $state,
-                'redirect_url' => $redirectUrl,
-            ]);
 
             // Store PhonePe order ID in order metadata
             $order->update([

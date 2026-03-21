@@ -120,8 +120,7 @@ const submit = () => {
     onSuccess: () => {
       // Redirect handled by controller
     },
-    onError: (errors) => {
-      console.error('Form errors:', errors);
+    onError: () => {
     },
   });
 };

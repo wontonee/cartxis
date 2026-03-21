@@ -16,6 +16,9 @@ use Cartxis\Customer\Models\CustomerAddress;
 use Cartxis\Core\Models\PaymentMethod;
 use Cartxis\Core\Models\Currency;
 use Cartxis\Core\Services\PaymentGatewayManager;
+use Cartxis\Cart\Services\CartShippingCalculator;
+use Cartxis\Core\Models\EmailTemplate;
+use Illuminate\Support\Facades\DB;
 use Stripe\Stripe;
 use Stripe\PaymentIntent;
 
@@ -371,14 +374,6 @@ class CheckoutController extends Controller
                         // Get shipping address from session
                         $shippingAddress = session('checkout.shipping_address');
 
-                        // Log payment intent creation attempt
-                        \Log::info('Creating Stripe Payment Intent', [
-                            'amount' => $amount,
-                            'currency' => strtolower($currencyCode),
-                            'user_id' => $user->id,
-                            'cart_id' => $cart->id,
-                        ]);
-
                         // Create payment intent with automatic_payment_methods for mobile
                         $paymentIntentData = [
                             'amount' => $amount, // Amount in smallest currency unit (cents/paise)
@@ -430,14 +425,6 @@ class CheckoutController extends Controller
 
                         $paymentIntent = PaymentIntent::create($paymentIntentData);
 
-                        // Log successful creation
-                        \Log::info('Stripe Payment Intent Created Successfully', [
-                            'payment_intent_id' => $paymentIntent->id,
-                            'status' => $paymentIntent->status,
-                            'amount' => $paymentIntent->amount,
-                            'currency' => $paymentIntent->currency,
-                        ]);
-
                         $response['gateway_config']['client_secret'] = $paymentIntent->client_secret;
                         $response['gateway_config']['payment_intent_id'] = $paymentIntent->id;
                         $response['gateway_config']['amount'] = $amount;
@@ -475,8 +462,10 @@ class CheckoutController extends Controller
         }
 
         $subtotal = $cart->items->sum(fn($item) => $item->price * $item->quantity);
-        $shippingCost = 5.00; // TODO: Calculate from selected shipping method
-        $tax = $subtotal * 0.1; // TODO: Calculate based on address
+        $cartItemsArray = $cart->items->map(fn($i) => ['price' => $i->price, 'quantity' => $i->quantity])->toArray();
+        $shippingOption = app(CartShippingCalculator::class)->getCheapestOption($cartItemsArray);
+        $shippingCost = $shippingOption['cost'] ?? 5.00;
+        $tax = 0.00; // Tax calculated server-side at order placement
         $discount = $cart->discount_amount ?? 0;
         $total = $subtotal + $shippingCost + $tax - $discount;
 
@@ -538,92 +527,114 @@ class CheckoutController extends Controller
         $subtotal = $cart->items->sum(function ($item) {
             return $item->price * $item->quantity;
         });
-        
-        $shippingCost = 10.00; // TODO: Calculate based on address/method
-        $tax = $subtotal * 0.1; // TODO: Calculate based on address
+
+        $cartItemsArray = $cart->items->map(fn($i) => ['price' => $i->price, 'quantity' => $i->quantity])->toArray();
+        $shippingOption = app(CartShippingCalculator::class)->getCheapestOption($cartItemsArray, [
+            'country' => $shippingAddress->country,
+            'state'   => $shippingAddress->state,
+        ]);
+        $shippingCost = $shippingOption['cost'] ?? 0.00;
+        $tax = 0.00; // Tax calculated by TaxService at order review
         $total = $subtotal + $shippingCost + $tax;
 
-        // TODO: Implement order creation logic
-        // This should:
-        // 1. Create order
-        // 2. Create order items
-        // 3. Process payment
-        // 4. Clear cart
-        // 5. Send confirmation email
-
-        $order = Order::create([
-            'user_id' => $request->user()->id,
-            'customer_id' => $customer->id,
-            'order_number' => Order::generateOrderNumber(),
-            'status' => 'pending',
-            'payment_method' => $request->payment_method,
-            'subtotal' => $subtotal,
-            'shipping_cost' => $shippingCost,
-            'tax' => $tax,
-            'total' => $total,
-            'notes' => $request->notes,
-            'customer_email' => $customer->email ?? $request->user()->email,
-            'customer_phone' => $shippingAddress->phone ?? null,
-            'source_channel' => 'mobile_app',
-        ]);
-
-        // Create order items from cart items
-        foreach ($cart->items as $cartItem) {
-            $product = $cartItem->product;
-            OrderItem::create([
-                'order_id' => $order->id,
-                'product_id' => $cartItem->product_id,
-                'product_sku' => $product?->sku ?? '',
-                'product_name' => $product?->name ?? $cartItem->product_name ?? 'Product',
-                'product_image' => $product?->mainImage?->url ?? null,
-                'quantity' => $cartItem->quantity,
-                'price' => $cartItem->price,
-                'total' => $cartItem->price * $cartItem->quantity,
-                'tax_amount' => 0,
-                'discount_amount' => 0,
+        $order = DB::transaction(function () use ($request, $cart, $customer, $shippingAddress, $subtotal, $shippingCost, $tax, $total) {
+            $order = Order::create([
+                'user_id' => $request->user()->id,
+                'customer_id' => $customer->id,
+                'order_number' => Order::generateOrderNumber(),
+                'status' => 'pending',
+                'payment_method' => $request->payment_method,
+                'subtotal' => $subtotal,
+                'shipping_cost' => $shippingCost,
+                'tax' => $tax,
+                'total' => $total,
+                'notes' => $request->notes,
+                'customer_email' => $customer->email ?? $request->user()->email,
+                'customer_phone' => $shippingAddress->phone ?? null,
+                'source_channel' => 'mobile_app',
             ]);
-        }
 
-        // Create polymorphic shipping address for the order
-        Address::create([
-            'addressable_type' => Order::class,
-            'addressable_id' => $order->id,
-            'type' => Address::TYPE_SHIPPING,
-            'first_name' => $shippingAddress->first_name,
-            'last_name' => $shippingAddress->last_name,
-            'company' => $shippingAddress->company ?? null,
-            'phone' => $shippingAddress->phone,
-            'email' => $customer->email ?? $request->user()->email,
-            'address_line1' => $shippingAddress->address_line_1,
-            'address_line2' => $shippingAddress->address_line_2 ?? null,
-            'city' => $shippingAddress->city,
-            'state' => $shippingAddress->state,
-            'postal_code' => $shippingAddress->postal_code,
-            'country' => $shippingAddress->country,
-            'is_default' => true,
-        ]);
+            // Create order items from cart items
+            foreach ($cart->items as $cartItem) {
+                $product = $cartItem->product;
+                OrderItem::create([
+                    'order_id' => $order->id,
+                    'product_id' => $cartItem->product_id,
+                    'product_sku' => $product?->sku ?? '',
+                    'product_name' => $product?->name ?? $cartItem->product_name ?? 'Product',
+                    'product_image' => $product?->mainImage?->url ?? null,
+                    'quantity' => $cartItem->quantity,
+                    'price' => $cartItem->price,
+                    'total' => $cartItem->price * $cartItem->quantity,
+                    'tax_amount' => 0,
+                    'discount_amount' => 0,
+                ]);
+            }
 
-        // Use shipping address as billing address too
-        Address::create([
-            'addressable_type' => Order::class,
-            'addressable_id' => $order->id,
-            'type' => Address::TYPE_BILLING,
-            'first_name' => $shippingAddress->first_name,
-            'last_name' => $shippingAddress->last_name,
-            'company' => $shippingAddress->company ?? null,
-            'phone' => $shippingAddress->phone,
-            'email' => $customer->email ?? $request->user()->email,
-            'address_line1' => $shippingAddress->address_line_1,
-            'address_line2' => $shippingAddress->address_line_2 ?? null,
-            'city' => $shippingAddress->city,
-            'state' => $shippingAddress->state,
-            'postal_code' => $shippingAddress->postal_code,
-            'country' => $shippingAddress->country,
-            'is_default' => true,
-        ]);
+            // Create polymorphic shipping address for the order
+            Address::create([
+                'addressable_type' => Order::class,
+                'addressable_id' => $order->id,
+                'type' => Address::TYPE_SHIPPING,
+                'first_name' => $shippingAddress->first_name,
+                'last_name' => $shippingAddress->last_name,
+                'company' => $shippingAddress->company ?? null,
+                'phone' => $shippingAddress->phone,
+                'email' => $customer->email ?? $request->user()->email,
+                'address_line1' => $shippingAddress->address_line_1,
+                'address_line2' => $shippingAddress->address_line_2 ?? null,
+                'city' => $shippingAddress->city,
+                'state' => $shippingAddress->state,
+                'postal_code' => $shippingAddress->postal_code,
+                'country' => $shippingAddress->country,
+                'is_default' => true,
+            ]);
 
-        // Clear cart items after order is created successfully
-        $cart->items()->delete();
+            // Use shipping address as billing address
+            Address::create([
+                'addressable_type' => Order::class,
+                'addressable_id' => $order->id,
+                'type' => Address::TYPE_BILLING,
+                'first_name' => $shippingAddress->first_name,
+                'last_name' => $shippingAddress->last_name,
+                'company' => $shippingAddress->company ?? null,
+                'phone' => $shippingAddress->phone,
+                'email' => $customer->email ?? $request->user()->email,
+                'address_line1' => $shippingAddress->address_line_1,
+                'address_line2' => $shippingAddress->address_line_2 ?? null,
+                'city' => $shippingAddress->city,
+                'state' => $shippingAddress->state,
+                'postal_code' => $shippingAddress->postal_code,
+                'country' => $shippingAddress->country,
+                'is_default' => true,
+            ]);
+
+            // Clear cart
+            $cart->items()->delete();
+
+            // Send order confirmation email (non-fatal — order is already committed)
+            try {
+                $template = EmailTemplate::findByCode('order_placed');
+                if ($template) {
+                    $customerName = $shippingAddress->first_name . ' ' . $shippingAddress->last_name;
+                    $template->send($order->customer_email, [
+                        'customer_name' => $customerName,
+                        'order_number'  => $order->order_number,
+                        'order_date'    => $order->created_at->format('F j, Y'),
+                        'order_total'   => number_format($order->total, 2),
+                        'store_name'    => config('app.name', 'Cartxis'),
+                        'store_url'     => url('/'),
+                    ]);
+                }
+            } catch (\Exception $e) {
+                Log::error('Order confirmation email failed in placeOrder', [
+                    'order_id' => $order->id,
+                    'error'    => $e->getMessage(),
+                ]);
+            }
+
+            return $order;
+        });
 
         $currency = Currency::getDefault();
 

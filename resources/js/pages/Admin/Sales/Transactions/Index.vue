@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref, computed, watch } from 'vue';
-import { router, Link } from '@inertiajs/vue3';
+import { router, Link, Head } from '@inertiajs/vue3';
 import AdminLayout from '@/layouts/AdminLayout.vue';
 import type { Transaction, TransactionFilters, TransactionStatistics, StatusOption, PaginatedResponse } from '@/types/sales';
 import { useCurrency } from '@/composables/useCurrency';
@@ -24,7 +24,8 @@ import {
   Clock,
   CheckSquare,
   AlertCircle,
-  Ban
+  Ban,
+  RefreshCw
 } from 'lucide-vue-next';
 
 const props = defineProps<{

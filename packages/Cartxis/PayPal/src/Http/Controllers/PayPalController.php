@@ -116,28 +116,6 @@ class PayPalController extends Controller
             // to prevent forged payment-capture events marking orders as paid.
             Log::warning('PayPal webhook: signature verification not implemented — request rejected');
             return response()->json(['status' => 'not_implemented'], 400);
-
-            $event = $request->input('event_type');
-            $resource = $request->input('resource', []);
-
-
-            // Handle different webhook events
-            switch ($event) {
-                case 'PAYMENT.CAPTURE.COMPLETED':
-                    // Payment captured successfully
-                    // Update order status if needed
-                    break;
-
-                case 'PAYMENT.CAPTURE.DENIED':
-                    // Payment was denied
-                    break;
-
-                case 'PAYMENT.CAPTURE.REFUNDED':
-                    // Payment was refunded
-                    break;
-            }
-
-            return response()->json(['status' => 'success']);
         } catch (\Exception $e) {
             Log::error('PayPal webhook error', [
                 'error' => $e->getMessage(),

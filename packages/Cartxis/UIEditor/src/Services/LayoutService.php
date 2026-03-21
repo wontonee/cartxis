@@ -172,6 +172,11 @@ class LayoutService
                     }
                 }
                 break;
+            case 'newsletter':
+                if (isset($settings['subtitle'])) {
+                    $settings['subtitle'] = Purifier::clean($settings['subtitle']);
+                }
+                break;
         }
 
         $block['settings'] = $settings;

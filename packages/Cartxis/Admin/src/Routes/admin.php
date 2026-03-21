@@ -26,7 +26,9 @@ Route::prefix('admin')->name('admin.')->middleware(['web'])->group(function () {
     // Admin Authentication Routes (Guest)
     Route::middleware(\Cartxis\Admin\Http\Middleware\RedirectIfAdminAuthenticated::class)->group(function () {
         Route::get('/login', [AdminLoginController::class, 'create'])->name('login');
-        Route::post('/login', [AdminLoginController::class, 'store'])->name('login.store');
+        Route::post('/login', [AdminLoginController::class, 'store'])
+            ->name('login.store')
+            ->middleware('throttle:5,1'); // 5 attempts per minute per IP
     });
 
     // Admin Authenticated Routes

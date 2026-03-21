@@ -194,11 +194,6 @@ class PayPalGateway implements PaymentGatewayInterface
      */
     public function processPayment(Order $order, array $data = [])
     {
-        Log::info('PayPalGateway: processPayment called', [
-            'order_id' => $order->id,
-            'order_number' => $order->order_number,
-        ]);
-
         try {
             // Get shipping address
             $shippingAddress = $order->shippingAddress;
@@ -280,19 +275,8 @@ class PayPalGateway implements PaymentGatewayInterface
                 }
             }
 
-            Log::info('PayPalGateway: Creating PayPal order', [
-                'order_id' => $order->id,
-                'amount' => $order->grand_total,
-            ]);
-
             // Execute API request
             $response = $this->apiRequest('POST', '/v2/checkout/orders', $orderData);
-
-            Log::info('PayPalGateway: PayPal order created', [
-                'order_id' => $order->id,
-                'paypal_order_id' => $response['id'],
-                'status' => $response['status'],
-            ]);
 
             // Get approval URL
             $approveUrl = null;
@@ -341,8 +325,6 @@ class PayPalGateway implements PaymentGatewayInterface
      */
     public function handleCallback(array $data): array
     {
-        Log::info('PayPalGateway: handleCallback called', $data);
-
         try {
             $paypalOrderId = $data['token'] ?? null;
             $orderId = $data['order_id'] ?? null;
@@ -358,12 +340,6 @@ class PayPalGateway implements PaymentGatewayInterface
 
             // Capture the payment
             $response = $this->apiRequest('POST', "/v2/checkout/orders/{$paypalOrderId}/capture", []);
-
-            Log::info('PayPalGateway: Payment captured', [
-                'order_id' => $order->id,
-                'paypal_order_id' => $paypalOrderId,
-                'status' => $response['status'],
-            ]);
 
             if ($response['status'] === 'COMPLETED') {
                 // Extract capture details

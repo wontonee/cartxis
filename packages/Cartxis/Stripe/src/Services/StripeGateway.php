@@ -87,18 +87,9 @@ class StripeGateway implements PaymentGatewayInterface
      */
     public function processPayment(Order $order, array $data = [])
     {
-        Log::info('StripeGateway: processPayment called', [
-            'order_id' => $order->id,
-            'order_number' => $order->order_number,
-        ]);
-        
         try {
             // Set Stripe API key from database configuration
             $secretKey = $this->getConfig('secret_key');
-            
-            Log::info('StripeGateway: Retrieved secret key', [
-                'has_key' => !empty($secretKey),
-            ]);
             
             if (!$secretKey) {
                 throw new \Exception('Stripe secret key not configured');
@@ -106,11 +97,6 @@ class StripeGateway implements PaymentGatewayInterface
             
             Stripe::setApiKey($secretKey);
             
-            Log::info('StripeGateway: Creating Checkout Session', [
-                'order_id' => $order->id,
-                'customer_email' => $order->customer_email,
-            ]);
-
             // Create Stripe Checkout Session
             $session = Session::create([
                 'payment_method_types' => ['card'],
@@ -149,11 +135,6 @@ class StripeGateway implements PaymentGatewayInterface
                 ],
             ]);
             
-            Log::info('StripeGateway: Checkout Session created', [
-                'session_id' => $session->id,
-                'url' => $session->url,
-            ]);
-
             // Store session ID in order metadata
             $order->update([
                 'payment_data' => json_encode([
@@ -162,10 +143,6 @@ class StripeGateway implements PaymentGatewayInterface
                 ]),
             ]);
             
-            Log::info('StripeGateway: Redirecting to Stripe', [
-                'url' => $session->url,
-            ]);
-
             // Redirect to Stripe Checkout
             return redirect($session->url);
 
@@ -310,11 +287,6 @@ class StripeGateway implements PaymentGatewayInterface
                 if ($succeeded) {
                     $order->update(['payment_gateway_transaction_id' => $paymentIntentId]);
                 }
-                Log::info('StripeGateway: PaymentIntent verify', [
-                    'order_id' => $order->id,
-                    'intent'   => $paymentIntentId,
-                    'status'   => $intent->status,
-                ]);
                 return $succeeded;
             }
 

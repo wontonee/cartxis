@@ -5,6 +5,7 @@ namespace Cartxis\API\Http\Controllers\V1;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Facades\Cache;
 use Cartxis\API\Helpers\ApiResponse;
 use Cartxis\API\Http\Resources\ReviewResource;
 use Cartxis\Product\Models\ProductReview;
@@ -184,8 +185,11 @@ class ReviewController extends Controller
             return ApiResponse::notFound('Review not found', 'REVIEW_NOT_FOUND');
         }
 
-        // TODO: Implement vote tracking (prevent duplicate votes)
-        // For now, just increment count
+        $cacheKey = "review_vote_{$request->user()->id}_{$id}";
+        if (Cache::has($cacheKey)) {
+            return ApiResponse::error('You have already voted on this review', null, 409, 'DUPLICATE_VOTE');
+        }
+        Cache::put($cacheKey, true, now()->addDays(365));
 
         if ($request->vote === 'helpful') {
             $review->increment('helpful_count');

@@ -181,8 +181,9 @@ const isActive = (item: any) => {
       const remainder = cleanCurrentPath.substring(cleanMenuPath.length + 1)
       // Only match if remainder is a number (resource ID) or standard actions
       // Include nested configure pages such as payment-methods/{type}/configure.
+      // Also handles slug-based routes like blog/welcome-to-our-blog/edit.
       // Don't match unrelated sections like "groups", "reports", etc.
-      return /^(\d+|create|edit|show|[^/]+\/configure)(\/|$)/.test(remainder)
+      return /^(\d+|create|edit|show|[^/]+\/configure|[^/]+\/(edit|show))(\/|$)/.test(remainder)
     }
     
     return false

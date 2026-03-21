@@ -156,7 +156,8 @@ function bool(key: string, fallback: boolean): boolean {
         <div class="flex items-center gap-3">
           <input
             type="color"
-            :value="str('background_color', '#ffffff')"\n            class="w-7 h-7 rounded-md cursor-pointer border border-gray-300 dark:border-gray-600 p-0.5"
+            :value="str('background_color', '#ffffff')"
+            class="w-7 h-7 rounded-md cursor-pointer border border-gray-300 dark:border-gray-600 p-0.5"
             @input="update('background_color', ($event.target as HTMLInputElement).value)"
           />
           <span class="text-xs text-gray-700 dark:text-gray-300 flex-1">Background</span>
@@ -166,7 +167,8 @@ function bool(key: string, fallback: boolean): boolean {
         <div class="flex items-center gap-3">
           <input
             type="color"
-            :value="str('text_color', '#111827')"\n            class="w-7 h-7 rounded-md cursor-pointer border border-gray-300 dark:border-gray-600 p-0.5"
+            :value="str('text_color', '#111827')"
+            class="w-7 h-7 rounded-md cursor-pointer border border-gray-300 dark:border-gray-600 p-0.5"
             @input="update('text_color', ($event.target as HTMLInputElement).value)"
           />
           <span class="text-xs text-gray-700 dark:text-gray-300 flex-1">Text &amp; icons</span>
@@ -176,7 +178,8 @@ function bool(key: string, fallback: boolean): boolean {
         <div class="flex items-center gap-3">
           <input
             type="color"
-            :value="str('accent_color', '#2563eb')"\n            class="w-7 h-7 rounded-md cursor-pointer border border-gray-300 dark:border-gray-600 p-0.5"
+            :value="str('accent_color', '#2563eb')"
+            class="w-7 h-7 rounded-md cursor-pointer border border-gray-300 dark:border-gray-600 p-0.5"
             @input="update('accent_color', ($event.target as HTMLInputElement).value)"
           />
           <span class="text-xs text-gray-700 dark:text-gray-300 flex-1">Accent (logo text, buttons)</span>

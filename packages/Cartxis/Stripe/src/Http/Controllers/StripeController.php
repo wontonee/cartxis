@@ -8,6 +8,7 @@ use Stripe\PaymentIntent;
 use Stripe\Webhook;
 use Cartxis\Shop\Models\Order;
 use Cartxis\Core\Models\EmailTemplate;
+use Cartxis\Core\Models\PaymentMethod;
 use Cartxis\Core\Services\PaymentGatewayManager;
 use Cartxis\Sales\Services\InvoiceService;
 use Cartxis\Sales\Services\TransactionService;
@@ -166,18 +167,22 @@ class StripeController extends Controller
      */
     public function webhook(Request $request)
     {
-        $payload = $request->getContent();
+        $payload    = $request->getContent();
         $sig_header = $request->header('Stripe-Signature');
-        $webhook_secret = config('stripe.stripe.webhook_secret');
+
+        // Prefer webhook secret stored in DB (admin UI) over .env fallback
+        $dbMethod = PaymentMethod::where('code', 'stripe')->where('is_active', true)->first();
+        $dbSecret = null;
+        if ($dbMethod) {
+            $mode     = $dbMethod->getConfigValue('mode', 'live');
+            $dbKey    = $mode === 'test' ? 'test_webhook_secret' : 'webhook_secret';
+            $dbSecret = $dbMethod->getConfigValue($dbKey) ?: $dbMethod->getConfigValue('webhook_secret');
+        }
+        $webhook_secret = $dbSecret ?: config('stripe.stripe.webhook_secret');
 
         try {
-            $event = Webhook::constructEvent(
-                $payload,
-                $sig_header,
-                $webhook_secret
-            );
+            $event = Webhook::constructEvent($payload, $sig_header, $webhook_secret);
 
-            // Handle different event types
             match ($event->type) {
                 'payment_intent.succeeded' => $this->handlePaymentSuccess($event),
                 'payment_intent.payment_failed' => $this->handlePaymentFailed($event),
@@ -187,8 +192,10 @@ class StripeController extends Controller
 
             return response()->json(['status' => 'received']);
         } catch (\UnexpectedValueException $e) {
+            Log::warning('Stripe webhook: invalid payload', ['error' => $e->getMessage()]);
             return response()->json(['error' => 'Invalid payload'], 400);
         } catch (\Exception $e) {
+            Log::error('Stripe webhook failed', ['error' => $e->getMessage()]);
             return response()->json(['error' => 'Webhook error'], 400);
         }
     }
@@ -198,12 +205,18 @@ class StripeController extends Controller
      */
     protected function handlePaymentSuccess($event)
     {
-        // Future: Update order status to paid
         $paymentIntent = $event->data->object;
         $orderId = $paymentIntent->metadata->order_id ?? null;
 
         if ($orderId) {
-            // \App\Models\Order::find($orderId)?->update(['status' => 'paid']);
+            $order = Order::find($orderId);
+            if ($order && !in_array($order->status, ['paid', 'processing', 'shipped', 'completed'])) {
+                $order->update([
+                    'status' => 'paid',
+                    'payment_status' => 'paid',
+                    'payment_gateway_transaction_id' => $paymentIntent->id,
+                ]);
+            }
         }
     }
 
@@ -212,12 +225,17 @@ class StripeController extends Controller
      */
     protected function handlePaymentFailed($event)
     {
-        // Future: Update order status to payment_failed
         $paymentIntent = $event->data->object;
         $orderId = $paymentIntent->metadata->order_id ?? null;
 
         if ($orderId) {
-            // \App\Models\Order::find($orderId)?->update(['status' => 'payment_failed']);
+            $order = Order::find($orderId);
+            if ($order && !in_array($order->status, ['paid', 'shipped', 'completed'])) {
+                $order->update([
+                    'status' => 'payment_failed',
+                    'payment_status' => 'failed',
+                ]);
+            }
         }
     }
 
@@ -226,6 +244,17 @@ class StripeController extends Controller
      */
     protected function handleRefund($event)
     {
-        // Future: Update order status to refunded
+        $charge = $event->data->object;
+        $paymentIntentId = $charge->payment_intent ?? null;
+
+        if ($paymentIntentId) {
+            $order = Order::where('payment_gateway_transaction_id', $paymentIntentId)->first();
+            if ($order) {
+                $order->update([
+                    'status' => 'refunded',
+                    'payment_status' => 'refunded',
+                ]);
+            }
+        }
     }
 }

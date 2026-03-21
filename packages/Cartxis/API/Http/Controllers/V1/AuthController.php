@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Password;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\ValidationException;
 use Cartxis\API\Helpers\ApiResponse;
@@ -222,8 +223,16 @@ class AuthController extends Controller
             );
         }
 
-        // TODO: Send password reset email
-        // Password::sendResetLink($request->only('email'));
+        $status = Password::sendResetLink($request->only('email'));
+
+        if ($status !== Password::RESET_LINK_SENT) {
+            return ApiResponse::error(
+                'Unable to send password reset link. Please try again.',
+                null,
+                500,
+                'RESET_LINK_FAILED'
+            );
+        }
 
         return ApiResponse::success(
             null,
@@ -246,8 +255,21 @@ class AuthController extends Controller
             return ApiResponse::validationError($validator);
         }
 
-        // TODO: Implement password reset logic
-        // Password::reset($request->only('email', 'token', 'password', 'password_confirmation'));
+        $status = Password::reset(
+            $request->only('email', 'token', 'password', 'password_confirmation'),
+            function ($user, $password) {
+                $user->forceFill(['password' => Hash::make($password)])->save();
+            }
+        );
+
+        if ($status !== Password::PASSWORD_RESET) {
+            return ApiResponse::error(
+                'Invalid or expired password reset token.',
+                null,
+                422,
+                'INVALID_RESET_TOKEN'
+            );
+        }
 
         return ApiResponse::success(null, 'Password reset successfully');
     }

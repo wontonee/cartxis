@@ -204,11 +204,11 @@ class DashboardController extends Controller
         try {
             $products = DB::table('order_items')
                 ->select(
-                    'name',
+                    'product_name as name',
                     DB::raw('COUNT(*) as sales'),
                     DB::raw('SUM(price * quantity) as revenue')
                 )
-                ->groupBy('name')
+                ->groupBy('product_name')
                 ->orderBy('sales', 'desc')
                 ->limit(5)
                 ->get()
@@ -420,8 +420,8 @@ class DashboardController extends Controller
     private function getTotalCustomers(): int
     {
         try {
-            return \App\Models\User::whereHas('roles', function ($query) {
-                $query->where('name', 'customer');
+            return \App\Models\User::whereDoesntHave('roles', function ($query) {
+                $query->where('name', 'admin');
             })->count();
         } catch (\Exception $e) {
             try {
@@ -435,8 +435,8 @@ class DashboardController extends Controller
     private function getPreviousCustomers(): int
     {
         try {
-            return \App\Models\User::whereHas('roles', function ($query) {
-                $query->where('name', 'customer');
+            return \App\Models\User::whereDoesntHave('roles', function ($query) {
+                $query->where('name', 'admin');
             })->where('created_at', '<', now()->subMonth())->count();
         } catch (\Exception $e) {
             try {

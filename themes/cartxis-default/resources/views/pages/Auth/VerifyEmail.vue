@@ -19,7 +19,7 @@ defineProps<{
 
 <template>
     <ThemeLayout>
-        <Head :title="`Verify Email - ${siteConfig?.name || 'Shop'}`" />
+        <Head title="Verify Email" />
 
         <div class="min-h-screen flex items-center justify-center px-4 py-12 bg-gray-50">
             <div class="w-full max-w-md">

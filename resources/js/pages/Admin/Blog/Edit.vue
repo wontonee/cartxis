@@ -271,12 +271,12 @@ const checkSlugAvailability = useDebounceFn(async () => {
 
 const submitForm = () => {
     if (!slugAvailable.value) return;
-    form.put(blogRoutes.update({ post: props.post.id }).url);
+    form.put(blogRoutes.update({ post: props.post.slug }).url);
 };
 
 const deletePost = () => {
     if (!confirm(`Are you sure you want to delete "${props.post.title}"?`)) return;
-    router.delete(blogRoutes.destroy({ post: props.post.id }).url);
+    router.delete(blogRoutes.destroy({ post: props.post.slug }).url);
 };
 
 const formatDate = (date: string) =>

@@ -37,12 +37,12 @@ Route::prefix('api/v1')->group(function () {
     |--------------------------------------------------------------------------
     */
     
-    // Authentication
-    Route::prefix('auth')->group(function () {
+    // Authentication — throttle:10,1 for login/register; tighter 5/min for password resets
+    Route::prefix('auth')->middleware('throttle:10,1')->group(function () {
         Route::post('/register', [AuthController::class, 'register']);
         Route::post('/login', [AuthController::class, 'login']);
-        Route::post('/password/forgot', [AuthController::class, 'forgotPassword']);
-        Route::post('/password/reset', [AuthController::class, 'resetPassword']);
+        Route::post('/password/forgot', [AuthController::class, 'forgotPassword'])->middleware('throttle:5,1');
+        Route::post('/password/reset', [AuthController::class, 'resetPassword'])->middleware('throttle:5,1');
     });
 
     // App settings / branding (no auth — needed before login for auth screen logo)

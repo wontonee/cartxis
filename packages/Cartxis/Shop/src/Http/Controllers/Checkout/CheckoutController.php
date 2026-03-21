@@ -126,7 +126,9 @@ class CheckoutController extends Controller
         }
 
         $shippingCost = $selectedShipping['cost'] ?? 0;
-        $grandTotal = $subtotal + $taxResult['total'] + $shippingCost;
+        $couponData = Session::get('cart_coupon');
+        $discountAmount = $couponData['discount_amount'] ?? 0;
+        $grandTotal = $subtotal + $taxResult['total'] + $shippingCost - $discountAmount;
 
         // Get payment methods
         $paymentMethods = PaymentMethod::where('is_active', true)
@@ -202,6 +204,8 @@ class CheckoutController extends Controller
             })->toArray(),
             'cartSummary' => [
                 'subtotal' => round($subtotal, 2),
+                'discount' => round($discountAmount, 2),
+                'coupon' => $couponData,
                 'taxes' => [
                     'breakdown' => $taxResult['breakdown'],
                     'total' => round($taxResult['total'], 2),
@@ -211,7 +215,7 @@ class CheckoutController extends Controller
                     'selected' => $selectedShipping,
                     'cost' => round($shippingCost, 2),
                 ],
-                'total' => round($grandTotal, 2),
+                'total' => round(max(0, $grandTotal), 2),
             ],
             'checkoutConfig' => $checkoutConfig,
             'userAddresses' => $userAddresses,
@@ -289,7 +293,12 @@ class CheckoutController extends Controller
         }
 
         $shippingCost = $selectedShipping['cost'];
-        $grandTotal = $subtotal + $taxResult['total'] + $shippingCost;
+
+        // Apply coupon discount from session
+        $couponData = Session::get('cart_coupon');
+        $discountAmount = $couponData['discount_amount'] ?? 0;
+
+        $grandTotal = $subtotal + $taxResult['total'] + $shippingCost - $discountAmount;
 
         // Prepare order data
         $orderData = [
@@ -307,8 +316,8 @@ class CheckoutController extends Controller
             'subtotal' => $subtotal,
             'tax' => $taxResult['total'],
             'shipping_cost' => $shippingCost,
-            'discount' => 0,
-            'total' => $grandTotal,
+            'discount' => round($discountAmount, 2),
+            'total' => round(max(0, $grandTotal), 2),
             // Account creation fields
             'create_account' => $validated['create_account'] ?? false,
             'password' => $validated['password'] ?? null,
@@ -327,28 +336,12 @@ class CheckoutController extends Controller
         // Handle payment via gateway manager
         $paymentMethod = $validated['payment_method'];
         
-        Log::info('Checkout: Starting payment processing', [
-            'order_id' => $order->id,
-            'payment_method' => $paymentMethod,
-        ]);
-        
         // Check if a payment gateway handles this payment method
         $gateway = $this->gatewayManager->getByPaymentMethod($paymentMethod);
-        
-        Log::info('Checkout: Gateway lookup result', [
-            'payment_method' => $paymentMethod,
-            'gateway_found' => $gateway ? 'YES' : 'NO',
-            'gateway_code' => $gateway ? $gateway->getCode() : 'N/A',
-        ]);
         
         if ($gateway) {
             // Gateway exists - check if it's properly configured
             $isConfigured = $gateway->isConfigured();
-            
-            Log::info('Checkout: Gateway configuration check', [
-                'gateway_code' => $gateway->getCode(),
-                'is_configured' => $isConfigured ? 'YES' : 'NO',
-            ]);
             
             if (!$isConfigured) {
                 Log::warning('Checkout: Gateway not configured', [
@@ -358,27 +351,14 @@ class CheckoutController extends Controller
             }
             
             try {
-                Log::info('Checkout: Calling gateway processPayment', [
-                    'gateway_code' => $gateway->getCode(),
-                    'order_id' => $order->id,
-                ]);
-                
                 // Process payment (will redirect to gateway or return success)
                 $response = $this->gatewayManager->processPayment($order, $validated);
-                
-                Log::info('Checkout: Gateway returned response', [
-                    'gateway_code' => $gateway->getCode(),
-                    'response_type' => is_object($response) ? get_class($response) : gettype($response),
-                ]);
                 
                 // Handle different response types from payment gateways
                 if ($response instanceof \Illuminate\Http\RedirectResponse) {
                     // External redirect (Stripe Checkout, etc.)
                     // Cart will be cleared when user returns successfully
                     $redirectUrl = $response->getTargetUrl();
-                    Log::info('Checkout: Returning redirect URL for external gateway', [
-                        'url' => $redirectUrl,
-                    ]);
 
                     Session::put('checkout.last_order_id', $order->id);
                     
@@ -389,12 +369,6 @@ class CheckoutController extends Controller
                 
                 // Handle array response (Razorpay, etc. - payment data for frontend)
                 if (is_array($response)) {
-                    Log::info('Checkout: Returning payment data for frontend integration', [
-                        'has_success' => isset($response['success']),
-                        'has_payment_data' => isset($response['payment_data']),
-                        'payment_data' => $response,
-                    ]);
-                    
                     // Don't clear cart yet - will be cleared after payment verification in callback
                     // Store payment data in session for redundancy
                     Session::put('razorpay_payment_data', $response);

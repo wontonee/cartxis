@@ -20,7 +20,7 @@ class ShippingMethodSeeder extends Seeder
             'type' => 'flat-rate',
             'base_cost' => 5.00,
             'cost_per_kg' => 0.5,
-            'description' => 'Flat rate shipping: $5.00 + $0.50 per kg',
+            'description' => 'Flat rate shipping: ₹5.00 + ₹0.50 per kg',
             'is_default' => true,
             'status' => 'active',
             'display_order' => 1,

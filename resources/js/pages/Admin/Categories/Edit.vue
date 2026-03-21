@@ -113,9 +113,6 @@ const submit = () => {
       form.processing = false;
       if (error.response?.data?.errors) {
         form.setError(error.response.data.errors);
-        console.error('Validation errors:', error.response.data.errors);
-      } else {
-        console.error('Error response:', error.response?.data);
       }
     });
   } else {
@@ -128,8 +125,7 @@ const submit = () => {
       onSuccess: () => {
         // Success toast will be shown via flash message from backend
       },
-      onError: (errors) => {
-        console.error('Validation errors:', errors);
+      onError: () => {
       },
     });
   }

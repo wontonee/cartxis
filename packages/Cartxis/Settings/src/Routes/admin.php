@@ -20,6 +20,9 @@ Route::middleware(['web', 'auth:admin'])
     ->prefix('admin/settings')
     ->name('admin.settings.')
     ->group(function () {
+        // Index redirect — /admin/settings → /admin/settings/general
+        Route::redirect('/', '/admin/settings/general')->name('index');
+
         // General Settings
         Route::get('general', [GeneralSettingsController::class, 'index'])->name('general.index');
         Route::post('general', [GeneralSettingsController::class, 'save'])->name('general.save');

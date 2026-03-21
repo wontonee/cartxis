@@ -9,6 +9,9 @@ Route::middleware(['web', 'auth:admin'])
     ->prefix('admin/reports')
     ->name('admin.reports.')
     ->group(function () {
+        // Index redirect — /admin/reports → /admin/reports/sales
+        Route::redirect('/', '/admin/reports/sales')->name('index');
+
         // Sales Reports
         Route::get('/sales', [SalesReportController::class, 'index'])->name('sales');
         Route::post('/sales/export', [SalesReportController::class, 'export'])->name('sales.export');

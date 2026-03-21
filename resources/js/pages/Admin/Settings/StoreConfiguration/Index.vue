@@ -16,7 +16,9 @@ import {
   Mail,
   ShieldCheck,
   CreditCard,
-  Building2
+  Building2,
+  ShoppingCart,
+  Info
 } from 'lucide-vue-next'
 
 interface Props {

@@ -18,14 +18,15 @@ defineProps<{ settings: Record<string, unknown>; editorMode?: boolean }>()
         <img :src="img" :alt="`Gallery image ${i + 1}`" class="w-full h-40 object-cover" />
       </div>
       <!-- Empty state -->
-      <div
-        v-if="!(settings.images as string[])?.length && editorMode"
-        v-for="n in 3"
-        :key="n"
-        class="h-40 bg-gray-100 dark:bg-gray-800 rounded border-2 border-dashed border-gray-300 dark:border-gray-600 flex items-center justify-center text-gray-400 text-xs"
-      >
-        Image {{ n }}
-      </div>
+      <template v-if="!(settings.images as string[])?.length && editorMode">
+        <div
+          v-for="n in 3"
+          :key="n"
+          class="h-40 bg-gray-100 dark:bg-gray-800 rounded border-2 border-dashed border-gray-300 dark:border-gray-600 flex items-center justify-center text-gray-400 text-xs"
+        >
+          Image {{ n }}
+        </div>
+      </template>
     </div>
     <!-- Simple carousel (scroll) -->
     <div
