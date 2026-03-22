@@ -6,7 +6,9 @@ use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Session;
+use Illuminate\Support\Str;
 use Cartxis\Product\Models\Product;
+use Cartxis\Marketing\Services\CouponService;
 
 class CartController extends Controller
 {
@@ -17,11 +19,13 @@ class CartController extends Controller
     {
         $items = $this->getCartItems();
         $items = $this->refreshCartItemImages($items);
+        $coupon = $this->getCartCoupon();
 
         return response()->json([
             'items' => $items,
             'count' => collect($items)->sum('quantity'),
             'subtotal' => collect($items)->sum(fn($item) => $item['price'] * $item['quantity']),
+            'coupon' => $coupon,
         ]);
     }
 
@@ -78,11 +82,14 @@ class CartController extends Controller
 
         $this->saveCartItems($items);
 
+        $this->recalculateCoupon($items);
+
         return response()->json([
             'message' => 'Product added to cart successfully',
             'items' => $items,
             'count' => collect($items)->sum('quantity'),
             'subtotal' => collect($items)->sum(fn($item) => $item['price'] * $item['quantity']),
+            'coupon' => $this->getCartCoupon(),
         ]);
     }
 
@@ -112,6 +119,7 @@ class CartController extends Controller
 
         $items[$key]['quantity'] = $request->quantity;
         $this->saveCartItems($items);
+        $this->recalculateCoupon($items);
         
         $items = $this->refreshCartItemImages($items);
 
@@ -120,6 +128,7 @@ class CartController extends Controller
             'items' => $items,
             'count' => collect($items)->sum('quantity'),
             'subtotal' => collect($items)->sum(fn($item) => $item['price'] * $item['quantity']),
+            'coupon' => $this->getCartCoupon(),
         ]);
     }
 
@@ -137,6 +146,7 @@ class CartController extends Controller
 
         array_splice($items, $key, 1);
         $this->saveCartItems($items);
+        $this->recalculateCoupon($items);
         
         $items = $this->refreshCartItemImages($items);
 
@@ -145,6 +155,7 @@ class CartController extends Controller
             'items' => $items,
             'count' => collect($items)->sum('quantity'),
             'subtotal' => collect($items)->sum(fn($item) => $item['price'] * $item['quantity']),
+            'coupon' => $this->getCartCoupon(),
         ]);
     }
 
@@ -154,13 +165,70 @@ class CartController extends Controller
     public function clear()
     {
         $this->saveCartItems([]);
+        $this->clearCartCoupon();
 
         return response()->json([
             'message' => 'Cart cleared successfully',
             'items' => [],
             'count' => 0,
             'subtotal' => 0,
+            'coupon' => null,
         ]);
+    }
+
+    /**
+     * Apply a coupon code to the session cart.
+     */
+    public function applyCoupon(Request $request)
+    {
+        $request->validate(['coupon_code' => 'required|string|max:50']);
+
+        $items = $this->getCartItems();
+
+        if (empty($items)) {
+            return response()->json(['message' => 'Your cart is empty.'], 422);
+        }
+
+        $subtotal = collect($items)->sum(fn($i) => $i['price'] * $i['quantity']);
+        $cartItemsCollection = collect($items)->map(fn($i) => (object) $i);
+        $customerId = Auth::id();
+
+        $couponService = app(CouponService::class);
+        $result = $couponService->validate(
+            Str::upper(trim($request->coupon_code)),
+            $customerId,
+            $subtotal,
+            $cartItemsCollection
+        );
+
+        if (!$result['valid']) {
+            return response()->json(['message' => $result['message']], 422);
+        }
+
+        $applied = $couponService->apply($result['coupon'], $subtotal, $cartItemsCollection);
+
+        $coupon = [
+            'code'            => $applied['coupon_code'],
+            'discount_amount' => $applied['discount_amount'],
+            'message'         => $applied['message'],
+        ];
+
+        $this->saveCartCoupon($coupon);
+
+        return response()->json([
+            'message' => 'Coupon applied successfully.',
+            'coupon'  => $coupon,
+        ]);
+    }
+
+    /**
+     * Remove the currently applied coupon from the session cart.
+     */
+    public function removeCoupon()
+    {
+        $this->clearCartCoupon();
+
+        return response()->json(['message' => 'Coupon removed.', 'coupon' => null]);
     }
 
     /**
@@ -189,6 +257,74 @@ class CartController extends Controller
         } else {
             Session::put('cart', $items);
         }
+    }
+
+    /**
+     * Recalculate coupon discount against the current cart subtotal.
+     * Called after any cart mutation to keep discount in sync.
+     */
+    private function recalculateCoupon(array $items): void
+    {
+        $coupon = $this->getCartCoupon();
+        if (!$coupon || empty($coupon['code'])) {
+            return;
+        }
+
+        if (empty($items)) {
+            $this->clearCartCoupon();
+            return;
+        }
+
+        $subtotal = collect($items)->sum(fn($i) => $i['price'] * $i['quantity']);
+        $cartItemsCollection = collect($items)->map(fn($i) => (object) $i);
+
+        try {
+            $couponService = app(CouponService::class);
+            $result = $couponService->validate(
+                $coupon['code'],
+                Auth::id(),
+                $subtotal,
+                $cartItemsCollection
+            );
+
+            if ($result['valid']) {
+                $applied = $couponService->apply($result['coupon'], $subtotal, $cartItemsCollection);
+                $this->saveCartCoupon([
+                    'code'            => $applied['coupon_code'],
+                    'discount_amount' => $applied['discount_amount'],
+                    'message'         => $applied['message'],
+                ]);
+            } else {
+                // Coupon no longer valid (e.g. min spend no longer met) — remove it
+                $this->clearCartCoupon();
+            }
+        } catch (\Exception $e) {
+            // Silently ignore — do not break the cart operation
+        }
+    }
+
+    /**
+     * Get applied coupon from session.
+     */
+    private function getCartCoupon(): ?array
+    {
+        return Session::get('cart_coupon');
+    }
+
+    /**
+     * Persist coupon data in session.
+     */
+    private function saveCartCoupon(array $coupon): void
+    {
+        Session::put('cart_coupon', $coupon);
+    }
+
+    /**
+     * Remove coupon from session.
+     */
+    private function clearCartCoupon(): void
+    {
+        Session::forget('cart_coupon');
     }
 
     /**

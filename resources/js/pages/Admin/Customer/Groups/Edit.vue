@@ -91,7 +91,7 @@ const applyAutoAssignment = () => {
 </script>
 
 <template>
-    <AdminLayout>
+    <AdminLayout :title="`Edit ${group.name}`">
         <Head :title="`Edit ${group.name}`" />
 
         <div class="p-6">

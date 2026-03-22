@@ -17,11 +17,12 @@ return new class extends Migration
             $table->id();
             $table->string('title');
             $table->string('url_key')->unique();
-            $table->longText('content');
+            $table->longText('content')->nullable();
             $table->string('meta_title')->nullable();
             $table->text('meta_description')->nullable();
             $table->text('meta_keywords')->nullable();
             $table->enum('status', ['draft', 'published', 'disabled'])->default('draft');
+            $table->boolean('is_homepage')->default(false);
             $table->unsignedBigInteger('created_by')->nullable();
             $table->unsignedBigInteger('updated_by')->nullable();
             $table->timestamps();
@@ -30,6 +31,7 @@ return new class extends Migration
             // Indexes
             $table->index('url_key');
             $table->index('status');
+            $table->index('is_homepage');
 
             // Foreign keys
             $table->foreign('created_by')->references('id')->on('users')->onDelete('set null');

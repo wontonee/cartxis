@@ -1,7 +1,7 @@
 <template>
   <Head title="Edit Shipping Method" />
 
-  <AdminLayout>
+  <AdminLayout title="Edit Shipping Method">
     <div class="space-y-6">
       <!-- Header -->
       <div class="flex items-center justify-between">
@@ -128,7 +128,7 @@
                 <button
                   type="submit"
                   :disabled="loading"
-                  class="inline-flex items-center px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-sm font-medium transition-colors shadow-sm focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
+                  class="inline-flex items-center px-4 py-2 bg-blue-600 border border-transparent rounded-lg font-semibold text-xs text-white uppercase tracking-widest hover:bg-blue-700 focus:bg-blue-700 active:bg-blue-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition ease-in-out duration-150 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   <Save class="w-4 h-4 mr-2" />
                   {{ loading ? 'Saving...' : 'Save Changes' }}
@@ -199,7 +199,7 @@
                   <div class="text-gray-500 text-xs">{{ rate.min_weight }}-{{ rate.max_weight }}kg</div>
                 </div>
                 <div class="text-right">
-                  <div class="font-medium text-gray-900 dark:text-white">${{ parseFloat(rate.base_cost).toFixed(2) }}</div>
+                  <div class="font-medium text-gray-900 dark:text-white">{{ formatPrice(rate.base_cost) }}</div>
                 </div>
               </div>
             </div>
@@ -225,6 +225,7 @@ import {
   Power
 } from 'lucide-vue-next'
 import axios from 'axios'
+import { useCurrency } from '@/composables/useCurrency'
 
 interface ShippingMethod {
   id: number
@@ -241,6 +242,7 @@ interface ShippingMethod {
   updated_at: string
 }
 
+const { formatPrice } = useCurrency()
 const page = usePage()
 const method = ref<ShippingMethod>(page.props.method as ShippingMethod)
 

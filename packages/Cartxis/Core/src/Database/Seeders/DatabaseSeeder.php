@@ -23,6 +23,9 @@ use Cartxis\Reports\Database\Seeders\ReportsMenuSeeder;
 use Cartxis\Sales\Database\Seeders\CreditMemoEmailTemplatesSeeder;
 use Cartxis\Sales\Database\Seeders\ShipmentEmailTemplatesSeeder;
 use Cartxis\Settings\Database\Seeders\AiSettingsSeeder;
+use Cartxis\System\Database\Seeders\SystemSettingsSeeder;
+use Cartxis\UIEditor\Database\Seeders\GlobalRegionSeeder;
+use Cartxis\Blog\Database\Seeders\BlogSeeder;
 
 class DatabaseSeeder extends Seeder
 {
@@ -44,6 +47,7 @@ class DatabaseSeeder extends Seeder
             TaxSeeder::class,
             EmailSeeder::class,
             AiSettingsSeeder::class,
+            SystemSettingsSeeder::class,
 
             // Customer Package Seeders
             CustomerMenuSeeder::class,
@@ -69,6 +73,13 @@ class DatabaseSeeder extends Seeder
 
             // Shop Package Seeders
             ThemeSeeder::class,
+
+            // UIEditor Package Seeders
+            GlobalRegionSeeder::class,
+            // Note: UIEditorPageSeeder is called by ThemeSeeder (theme-specific CMS page layouts)
+
+            // Blog Package Seeders
+            BlogSeeder::class,
         ]);
     }
 }

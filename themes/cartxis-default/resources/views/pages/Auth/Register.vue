@@ -7,19 +7,22 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Form, Head, usePage } from '@inertiajs/vue3';
-import { LoaderCircle } from 'lucide-vue-next';
-import { computed } from 'vue';
+import { Eye, EyeOff, LoaderCircle } from 'lucide-vue-next';
+import { computed, ref } from 'vue';
 import ThemeLayout from '../../layouts/ThemeLayout.vue';
 
 const page = usePage();
 const theme = computed(() => page.props.theme as any);
 const siteConfig = computed(() => page.props.siteConfig as any);
 const primaryColor = computed(() => theme.value?.settings?.['colors.primary'] || theme.value?.settings?.['colors.primary_color'] || theme.value?.settings?.primary_color || '#3b82f6');
+
+const showPassword = ref(false);
+const showConfirmPassword = ref(false);
 </script>
 
 <template>
     <ThemeLayout>
-        <Head :title="`Create Account - ${siteConfig?.name || 'Shop'}`" />
+        <Head title="Create Account" />
 
         <div class="min-h-screen flex items-center justify-center px-4 py-12 bg-gray-50">
             <div class="w-full max-w-md">
@@ -82,16 +85,28 @@ const primaryColor = computed(() => theme.value?.settings?.['colors.primary'] ||
                             <Label for="password" class="text-sm font-medium text-gray-700">
                                 Password
                             </Label>
-                            <Input
-                                id="password"
-                                type="password"
-                                name="password"
-                                required
-                                :tabindex="3"
-                                autocomplete="new-password"
-                                placeholder="Create a strong password"
-                                class="w-full"
-                            />
+                            <div class="relative">
+                                <Input
+                                    id="password"
+                                    :type="showPassword ? 'text' : 'password'"
+                                    name="password"
+                                    required
+                                    :tabindex="3"
+                                    autocomplete="new-password"
+                                    placeholder="Create a strong password"
+                                    class="w-full pr-10"
+                                />
+                                <button
+                                    type="button"
+                                    tabindex="-1"
+                                    :aria-label="showPassword ? 'Hide password' : 'Show password'"
+                                    class="absolute inset-y-0 right-0 flex items-center pr-3 text-gray-400 hover:text-gray-600"
+                                    @click="showPassword = !showPassword"
+                                >
+                                    <EyeOff v-if="showPassword" class="h-4 w-4" />
+                                    <Eye v-else class="h-4 w-4" />
+                                </button>
+                            </div>
                             <p class="text-xs text-gray-500">Must be at least 8 characters</p>
                             <InputError :message="errors.password" />
                         </div>
@@ -101,16 +116,28 @@ const primaryColor = computed(() => theme.value?.settings?.['colors.primary'] ||
                             <Label for="password_confirmation" class="text-sm font-medium text-gray-700">
                                 Confirm Password
                             </Label>
-                            <Input
-                                id="password_confirmation"
-                                type="password"
-                                name="password_confirmation"
-                                required
-                                :tabindex="4"
-                                autocomplete="new-password"
-                                placeholder="Confirm your password"
-                                class="w-full"
-                            />
+                            <div class="relative">
+                                <Input
+                                    id="password_confirmation"
+                                    :type="showConfirmPassword ? 'text' : 'password'"
+                                    name="password_confirmation"
+                                    required
+                                    :tabindex="4"
+                                    autocomplete="new-password"
+                                    placeholder="Confirm your password"
+                                    class="w-full pr-10"
+                                />
+                                <button
+                                    type="button"
+                                    tabindex="-1"
+                                    :aria-label="showConfirmPassword ? 'Hide password' : 'Show password'"
+                                    class="absolute inset-y-0 right-0 flex items-center pr-3 text-gray-400 hover:text-gray-600"
+                                    @click="showConfirmPassword = !showConfirmPassword"
+                                >
+                                    <EyeOff v-if="showConfirmPassword" class="h-4 w-4" />
+                                    <Eye v-else class="h-4 w-4" />
+                                </button>
+                            </div>
                             <InputError :message="errors.password_confirmation" />
                         </div>
 

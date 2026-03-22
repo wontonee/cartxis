@@ -1,4 +1,203 @@
 {
+  "homepage": {
+    "version": "1.0",
+    "sections": [
+      {
+        "id": "sec_dmart_hero",
+        "type": "section",
+        "settings": {
+          "background_color": "#770215",
+          "background_image": null,
+          "padding_top": 0,
+          "padding_bottom": 0,
+          "full_width": true
+        },
+        "columns": [
+          {
+            "id": "col_dmart_hero",
+            "width": 12,
+            "settings": { "padding": 0, "align": "center" },
+            "blocks": [
+              {
+                "id": "blk_dmart_hero",
+                "type": "hero",
+                "settings": {
+                  "image": "/images/hero-banner.jpg",
+                  "video_url": "",
+                  "overlay_color": "#770215",
+                  "overlay_opacity": 55,
+                  "headline": "Electric Charging Smart Tea Maker",
+                  "subheading": "59% discount on all bestselling electronics this month — limited stock!",
+                  "cta_text": "Shop Now",
+                  "cta_url": "/products",
+                  "height": 540,
+                  "text_align": "center"
+                }
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "sec_dmart_features",
+        "type": "section",
+        "settings": {
+          "background_color": "#f3f4f6",
+          "background_image": null,
+          "padding_top": 48,
+          "padding_bottom": 48,
+          "full_width": false
+        },
+        "columns": [
+          {
+            "id": "col_dmart_feat1",
+            "width": 3,
+            "settings": { "padding": 12, "align": "center" },
+            "blocks": [
+              {
+                "id": "blk_dmart_feat1_h",
+                "type": "heading",
+                "settings": { "level": "h4", "text": "🚚 Free Shipping", "align": "center", "color": "#111827" }
+              },
+              {
+                "id": "blk_dmart_feat1_t",
+                "type": "text",
+                "settings": { "content": "<p style='text-align:center;color:#6b7280;font-size:14px;'>On all orders over $50</p>" }
+              }
+            ]
+          },
+          {
+            "id": "col_dmart_feat2",
+            "width": 3,
+            "settings": { "padding": 12, "align": "center" },
+            "blocks": [
+              {
+                "id": "blk_dmart_feat2_h",
+                "type": "heading",
+                "settings": { "level": "h4", "text": "🔒 Secure Payment", "align": "center", "color": "#111827" }
+              },
+              {
+                "id": "blk_dmart_feat2_t",
+                "type": "text",
+                "settings": { "content": "<p style='text-align:center;color:#6b7280;font-size:14px;'>100% secure checkout</p>" }
+              }
+            ]
+          },
+          {
+            "id": "col_dmart_feat3",
+            "width": 3,
+            "settings": { "padding": 12, "align": "center" },
+            "blocks": [
+              {
+                "id": "blk_dmart_feat3_h",
+                "type": "heading",
+                "settings": { "level": "h4", "text": "↩️ Easy Returns", "align": "center", "color": "#111827" }
+              },
+              {
+                "id": "blk_dmart_feat3_t",
+                "type": "text",
+                "settings": { "content": "<p style='text-align:center;color:#6b7280;font-size:14px;'>30-day return policy</p>" }
+              }
+            ]
+          },
+          {
+            "id": "col_dmart_feat4",
+            "width": 3,
+            "settings": { "padding": 12, "align": "center" },
+            "blocks": [
+              {
+                "id": "blk_dmart_feat4_h",
+                "type": "heading",
+                "settings": { "level": "h4", "text": "💬 24/7 Support", "align": "center", "color": "#111827" }
+              },
+              {
+                "id": "blk_dmart_feat4_t",
+                "type": "text",
+                "settings": { "content": "<p style='text-align:center;color:#6b7280;font-size:14px;'>Dedicated support team</p>" }
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "sec_dmart_products",
+        "type": "section",
+        "settings": {
+          "background_color": "#ffffff",
+          "background_image": null,
+          "padding_top": 64,
+          "padding_bottom": 64,
+          "full_width": false
+        },
+        "columns": [
+          {
+            "id": "col_dmart_products",
+            "width": 12,
+            "settings": { "padding": 16, "align": "left" },
+            "blocks": [
+              {
+                "id": "blk_dmart_prod_h",
+                "type": "heading",
+                "settings": { "level": "h2", "text": "Deal of the Day", "align": "center", "color": "#111827" }
+              },
+              {
+                "id": "blk_dmart_prod_sub",
+                "type": "text",
+                "settings": { "content": "<p style='text-align:center;color:#6b7280;margin-bottom:32px;'>Limited time offers — grab them before they're gone</p>" }
+              },
+              {
+                "id": "blk_dmart_products",
+                "type": "products_grid",
+                "settings": {
+                  "product_ids": [],
+                  "columns": 4,
+                  "show_price": true,
+                  "show_cart": true,
+                  "limit": 8
+                }
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "sec_dmart_testimonials",
+        "type": "section",
+        "settings": {
+          "background_color": "#f9fafb",
+          "background_image": null,
+          "padding_top": 64,
+          "padding_bottom": 64,
+          "full_width": false
+        },
+        "columns": [
+          {
+            "id": "col_dmart_test",
+            "width": 12,
+            "settings": { "padding": 16, "align": "center" },
+            "blocks": [
+              {
+                "id": "blk_dmart_test_h",
+                "type": "heading",
+                "settings": { "level": "h2", "text": "What Our Customers Say", "align": "center", "color": "#111827" }
+              },
+              {
+                "id": "blk_dmart_testimonials",
+                "type": "testimonials",
+                "settings": {
+                  "items": [
+                    { "author": "Sarah M.", "avatar": null, "text": "Fantastic quality electronics at unbeatable prices. The smart TV I ordered arrived perfectly packaged and works flawlessly!", "rating": 5 },
+                    { "author": "James K.", "avatar": null, "text": "Free shipping arrived faster than expected. Will definitely be shopping here again for all my tech needs.", "rating": 5 },
+                    { "author": "Emily R.", "avatar": null, "text": "Customer support was incredibly helpful when I had a question about my order. 10/10 experience.", "rating": 5 }
+                  ]
+                }
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  },
   "blocks": [
     {
       "identifier": "homepage-hero",

@@ -22,7 +22,7 @@ const submit = () => {
 </script>
 
 <template>
-    <AdminLayout>
+    <AdminLayout title="Change Password">
         <Head title="Change Password" />
 
         <div class="max-w-2xl">

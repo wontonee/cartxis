@@ -30,6 +30,7 @@ class Page extends Model
         'meta_description',
         'meta_keywords',
         'status',
+        'is_homepage',
         'created_by',
         'updated_by',
     ];
@@ -38,9 +39,10 @@ class Page extends Model
      * The attributes that should be cast.
      */
     protected $casts = [
-        'created_at' => 'datetime',
-        'updated_at' => 'datetime',
-        'deleted_at' => 'datetime',
+        'is_homepage' => 'boolean',
+        'created_at'  => 'datetime',
+        'updated_at'  => 'datetime',
+        'deleted_at'  => 'datetime',
     ];
 
     /**
@@ -92,6 +94,14 @@ class Page extends Model
     }
 
     /**
+     * Scope a query to only include the homepage page.
+     */
+    public function scopeHomepage($query)
+    {
+        return $query->where('is_homepage', true);
+    }
+
+    /**
      * Scope a query to only include published pages.
      */
     public function scopePublished($query)
@@ -117,9 +127,13 @@ class Page extends Model
 
     /**
      * Get the full URL for the page.
+     * Homepage lives at / via HomeController, not /home via PageController.
      */
     public function getUrlAttribute(): string
     {
+        if ($this->is_homepage) {
+            return url('/');
+        }
         return route('page.show', ['slug' => $this->url_key]);
     }
 

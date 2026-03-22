@@ -1,7 +1,9 @@
 <script setup lang="ts">
+import { computed } from 'vue';
 import { Head } from '@inertiajs/vue3';
 import ThemeLayout from '../../layouts/ThemeLayout.vue';
 import Breadcrumb from '../../components/Breadcrumb.vue';
+import UIBlockRenderer from '@/components/UIEditor/UIBlockRenderer.vue';
 
 interface CMSPage {
     id: number; title: string; slug: string; content: string;
@@ -13,10 +15,12 @@ interface Props {
     page: CMSPage;
     theme: { name: string; slug: string };
     siteConfig: { name: string };
+    layoutData?: Record<string, unknown> | null;
 }
 
 const props = defineProps<Props>();
 const breadcrumbs = [{ label: props.page.title }];
+const hasLayout = computed(() => !!(props.layoutData?.sections && (props.layoutData.sections as unknown[]).length));
 </script>
 
 <template>
@@ -44,7 +48,12 @@ const breadcrumbs = [{ label: props.page.title }];
                     {{ page.title }}
                 </h1>
 
-                <div class="prose prose-lg max-w-none text-gray-600 prose-headings:text-title prose-headings:font-title prose-a:text-theme-1 prose-img:rounded-xl" v-html="page.content" />
+                <template v-if="hasLayout">
+                    <UIBlockRenderer :layout="layoutData" :editor-mode="false" />
+                </template>
+                <template v-else>
+                    <div class="prose prose-lg max-w-none text-gray-600 prose-headings:text-title prose-headings:font-title prose-a:text-theme-1 prose-img:rounded-xl" v-html="page.content" />
+                </template>
             </div>
         </section>
     </ThemeLayout>

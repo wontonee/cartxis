@@ -132,11 +132,11 @@ class RazorpayController extends Controller
      */
     public function webhook(Request $request)
     {
-        $payload = $request->all();
+        $rawBody = $request->getContent();
         $signature = $request->header('X-Razorpay-Signature');
 
         Log::info('RazorpayController: Webhook received', [
-            'event' => $payload['event'] ?? 'unknown',
+            'event' => $request->input('event', 'unknown'),
         ]);
 
         if (!$signature) {
@@ -152,7 +152,7 @@ class RazorpayController extends Controller
             return response()->json(['error' => 'Gateway not found'], 500);
         }
 
-        $result = $gateway->handleWebhook($payload, $signature);
+        $result = $gateway->handleWebhook($rawBody, $signature);
 
         if ($result) {
             return response()->json(['status' => 'success']);

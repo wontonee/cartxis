@@ -224,9 +224,10 @@ class CustomerAddressTest extends TestCase
 
     protected function getAdminUser()
     {
-        // Create a simple user for admin auth
         return \App\Models\User::factory()->create([
             'email' => 'admin@test.com',
+            'role' => 'admin',
+            'is_active' => true,
         ]);
     }
 }

@@ -5,6 +5,7 @@ namespace Cartxis\Shop\Http\Controllers;
 use Cartxis\Shop\Services\HomeService;
 use Cartxis\Core\Services\ThemeViewResolver;
 use Cartxis\Core\Services\SettingService;
+use Cartxis\UIEditor\Services\LayoutService;
 use Inertia\Inertia;
 
 class HomeController extends Controller
@@ -25,16 +26,22 @@ class HomeController extends Controller
     protected $settingService;
 
     /**
+     * @var LayoutService
+     */
+    protected $layoutService;
+
+    /**
      * Create a new controller instance.
      *
      * @param HomeService $homeService
      * @param ThemeViewResolver $themeResolver
      */
-    public function __construct(HomeService $homeService, ThemeViewResolver $themeResolver, SettingService $settingService)
+    public function __construct(HomeService $homeService, ThemeViewResolver $themeResolver, SettingService $settingService, LayoutService $layoutService)
     {
         $this->homeService = $homeService;
         $this->themeResolver = $themeResolver;
         $this->settingService = $settingService;
+        $this->layoutService = $layoutService;
     }
 
     /**
@@ -45,6 +52,7 @@ class HomeController extends Controller
     public function index()
     {
         $data = $this->homeService->getHomepageData();
+        $homepageLayout = $this->layoutService->getPublishedHomepage();
         
         // Use ThemeViewResolver to get correct view path
         return Inertia::render($this->themeResolver->resolve('Home/Index'), [
@@ -54,6 +62,7 @@ class HomeController extends Controller
             'newProducts' => $data['new_products'],
             'categories' => $data['categories'], // Keep for backward compatibility
             'cmsBlocks' => $data['blocks'] ?? [],
+            'layoutData' => $homepageLayout?->layout_data,
             'siteConfig' => [
                 'name' => $this->settingService->get('site_name') ?? config('app.name', 'Cartxis'),
                 'url' => config('app.url'),

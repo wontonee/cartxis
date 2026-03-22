@@ -32,7 +32,7 @@ const generateCode = () => {
 </script>
 
 <template>
-    <AdminLayout>
+    <AdminLayout title="Create Customer Group">
         <Head title="Create Customer Group" />
 
         <div class="p-6">

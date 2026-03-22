@@ -19,6 +19,25 @@ return new class extends Migration
             $table->string('carrier', 100)->nullable();
             $table->string('tracking_number')->nullable();
             $table->text('tracking_url')->nullable();
+
+            // Shiprocket integration fields
+            $table->string('shiprocket_order_id')->nullable();
+            $table->string('shiprocket_shipment_id')->nullable();
+            $table->string('shiprocket_awb_code')->nullable();
+            $table->string('shiprocket_courier_name')->nullable();
+            $table->string('shiprocket_status')->nullable();
+            $table->json('shiprocket_tracking_payload')->nullable();
+            $table->timestamp('shiprocket_synced_at')->nullable();
+
+            // Delivery provider integration fields
+            $table->string('delivery_order_id')->nullable();
+            $table->string('delivery_shipment_id')->nullable();
+            $table->string('delivery_awb_code')->nullable();
+            $table->string('delivery_courier_name')->nullable();
+            $table->string('delivery_status')->nullable();
+            $table->json('delivery_tracking_payload')->nullable();
+            $table->timestamp('delivery_synced_at')->nullable();
+
             $table->timestamp('shipped_at')->nullable();
             $table->timestamp('delivered_at')->nullable();
             $table->text('notes')->nullable();
@@ -29,6 +48,14 @@ return new class extends Migration
             $table->index('tracking_number');
             $table->index('status');
             $table->index('shipped_at');
+            $table->index('shiprocket_order_id');
+            $table->index('shiprocket_shipment_id');
+            $table->index('shiprocket_awb_code');
+            $table->index('shiprocket_status');
+            $table->index('delivery_order_id');
+            $table->index('delivery_shipment_id');
+            $table->index('delivery_awb_code');
+            $table->index('delivery_status');
         });
 
         Schema::create('shipment_items', function (Blueprint $table) {

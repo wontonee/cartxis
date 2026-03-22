@@ -3,6 +3,7 @@
 use Illuminate\Support\Facades\Route;
 use Cartxis\Marketing\Http\Controllers\CouponController;
 use Cartxis\Marketing\Http\Controllers\PromotionController;
+use Cartxis\Marketing\Http\Controllers\NewsletterController;
 
 /*
 |--------------------------------------------------------------------------
@@ -52,5 +53,13 @@ Route::middleware(['web', 'auth:admin'])->prefix('admin/marketing')->name('admin
         
         // Analytics
         Route::get('/{promotion}/analytics', [PromotionController::class, 'analytics'])->name('analytics');
+    });
+
+    // Newsletter Subscribers
+    Route::prefix('newsletters')->name('newsletters.')->group(function () {
+        Route::get('/', [NewsletterController::class, 'index'])->name('index');
+        Route::get('/export', [NewsletterController::class, 'export'])->name('export');
+        Route::delete('/{customer}', [NewsletterController::class, 'unsubscribe'])->name('unsubscribe');
+        Route::post('/bulk-unsubscribe', [NewsletterController::class, 'bulkUnsubscribe'])->name('bulk-unsubscribe');
     });
 });

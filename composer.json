@@ -74,12 +74,14 @@
             "Cartxis\\Sales\\": "packages/Cartxis/Sales/src/",
             "Cartxis\\Customer\\": "packages/Cartxis/Customer/src/",
             "Cartxis\\CMS\\": "packages/Cartxis/CMS/src/",
+            "Cartxis\\UIEditor\\": "packages/Cartxis/UIEditor/src/",
             "Cartxis\\System\\": "packages/Cartxis/System/src/",
             "Cartxis\\Reports\\": "packages/Cartxis/Reports/src/",
             "Cartxis\\Marketing\\": "packages/Cartxis/Marketing/src/",
             "Cartxis\\API\\": "packages/Cartxis/API/",
             "Cartxis\\Setup\\": "packages/Cartxis/Setup/src/",
-            "Cartxis\\Setup\\Database\\Seeders\\": "packages/Cartxis/Setup/src/Database/Seeders/"
+            "Cartxis\\Setup\\Database\\Seeders\\": "packages/Cartxis/Setup/src/Database/Seeders/",
+            "Cartxis\\Blog\\": "packages/Cartxis/Blog/src/"
         }
     },
     "autoload-dev": {

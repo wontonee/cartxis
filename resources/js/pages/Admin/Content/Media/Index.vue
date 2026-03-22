@@ -337,7 +337,7 @@ const copyUrlToClipboard = async (url: string) => {
 <template>
     <Head title="Media Library" />
 
-    <AdminLayout>
+    <AdminLayout title="Media Library">
         <div class="p-6 space-y-6">
             <!-- Header -->
             <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">

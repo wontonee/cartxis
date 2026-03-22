@@ -3,12 +3,14 @@
 namespace Cartxis\Core\Providers;
 
 use Illuminate\Support\ServiceProvider;
+use Cartxis\Core\Console\Commands\ExtensionMakeCommand;
 use Cartxis\Core\Console\Commands\ExtensionsActivateCommand;
 use Cartxis\Core\Console\Commands\ExtensionsDeactivateCommand;
 use Cartxis\Core\Console\Commands\ExtensionsInstallCommand;
 use Cartxis\Core\Console\Commands\ExtensionsListCommand;
 use Cartxis\Core\Console\Commands\ExtensionsSyncCommand;
 use Cartxis\Core\Console\Commands\ExtensionsUninstallCommand;
+use Cartxis\Core\Http\Middleware\SetAdminSessionCookie;
 use Cartxis\Core\Services\HookService;
 use Cartxis\Core\Services\MenuService;
 use Cartxis\Core\Services\ExtensionService;
@@ -82,6 +84,7 @@ class CoreServiceProvider extends ServiceProvider
                 \Cartxis\Core\Console\Commands\InstallCommand::class,
                 ExtensionsListCommand::class,
                 ExtensionsSyncCommand::class,
+                ExtensionMakeCommand::class,
                 ExtensionsInstallCommand::class,
                 ExtensionsUninstallCommand::class,
                 ExtensionsActivateCommand::class,
@@ -99,6 +102,11 @@ class CoreServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        // Give the admin panel its own session cookie so admin and storefront
+        // users can be logged in simultaneously in the same browser.
+        $this->app->make(\Illuminate\Contracts\Http\Kernel::class)
+            ->prependMiddleware(SetAdminSessionCookie::class);
+
         // Load migrations
         $this->loadMigrationsFrom(__DIR__ . '/../Database/Migrations');
 

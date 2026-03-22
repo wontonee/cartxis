@@ -14,6 +14,8 @@ export function useCart() {
         itemCount, 
         subtotal, 
         isEmpty,
+        couponCode,
+        discountAmount,
     } = storeToRefs(cartStore);
 
     /**
@@ -61,6 +63,14 @@ export function useCart() {
         return await cartStore.fetchCart();
     };
 
+    const applyCoupon = async (code: string) => {
+        return await cartStore.applyCoupon(code);
+    };
+
+    const removeCoupon = async () => {
+        return await cartStore.removeCoupon();
+    };
+
     return {
         // State
         items,
@@ -70,11 +80,16 @@ export function useCart() {
         itemCount,
         subtotal,
         isEmpty,
+        // Coupon
+        couponCode,
+        discountAmount,
         // Actions
         addToCart,
         updateQuantity,
         removeItem,
         clearCart,
         fetchCart,
+        applyCoupon,
+        removeCoupon,
     };
 }

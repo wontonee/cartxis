@@ -2,6 +2,7 @@
 import { ref, computed } from 'vue';
 import { Link } from '@inertiajs/vue3';
 import ThemeLayout from '../../layouts/ThemeLayout.vue';
+import UIBlockRenderer from '@/components/UIEditor/UIBlockRenderer.vue';
 import ProductCard from '../../components/ProductCard.vue';
 import { useCurrency } from '@/composables/useCurrency';
 import { useCart } from '@/composables/useCart';
@@ -66,9 +67,11 @@ interface Props {
     newProducts?: Product[];
     cmsBlocks?: Record<string, any>;
     siteConfig?: any;
+    layoutData?: Record<string, unknown> | null;
 }
 
 const props = defineProps<Props>();
+const hasLayout = computed(() => !!(props.layoutData?.sections && (props.layoutData.sections as unknown[]).length));
 
 // Parse CMS block content (may be JSON string)
 function parseCmsContent(block: any): any {
@@ -267,6 +270,11 @@ defineOptions({ layout: ThemeLayout });
 
 <template>
     <div>
+        <!-- Visual Editor layout overrides the homepage when published -->
+        <template v-if="hasLayout">
+            <UIBlockRenderer :layout="layoutData" :editor-mode="false" />
+        </template>
+        <template v-else>
         <!-- ===== HERO / INTRO ===== -->
         <section class="dmart-intro-section">
             <div class="dmart-container">
@@ -524,6 +532,7 @@ defineOptions({ layout: ThemeLayout });
                 </Swiper>
             </div>
         </section>
+        </template><!-- /v-else -->
     </div>
 </template>
 

@@ -135,8 +135,7 @@ watch(selectAll, (value) => {
 });
 
 const exportInvoices = () => {
-  // Implementation for export
-  console.log('Exporting invoices...');
+  // TODO: implement export
 };
 
 const getStatusBadge = (status: string) => {

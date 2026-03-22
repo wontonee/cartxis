@@ -119,6 +119,8 @@ class CheckoutService extends ShopService
                 // Handle both array and object cart items
                 if (is_array($cartItem)) {
                     $product = Product::find($cartItem['product_id']);
+                    // Always use current DB price — prevents stale-cart price leakage
+                    $currentPrice = (float) ($product?->special_price ?? $product?->price ?? $cartItem['price']);
                     OrderItem::create([
                         'order_id' => $order->id,
                         'product_id' => $cartItem['product_id'],
@@ -126,14 +128,15 @@ class CheckoutService extends ShopService
                         'product_name' => $product->name ?? 'Product',
                         'product_image' => $product->mainImage?->url ?? null,
                         'quantity' => $cartItem['quantity'],
-                        'price' => $cartItem['price'],
-                        'total' => $cartItem['quantity'] * $cartItem['price'],
+                        'price' => $currentPrice,
+                        'total' => $cartItem['quantity'] * $currentPrice,
                         'tax_amount' => 0, // TODO: Calculate tax per item
                         'discount_amount' => 0, // TODO: Calculate discount per item
                         'options' => $cartItem['options'] ?? null,
                     ]);
                 } else {
-                    // Legacy object-based cart items
+                    // Legacy object-based cart items — always use current DB price
+                    $currentPrice = (float) ($cartItem->product?->special_price ?? $cartItem->product?->price ?? $cartItem->price);
                     OrderItem::create([
                         'order_id' => $order->id,
                         'product_id' => $cartItem->product_id,
@@ -141,8 +144,8 @@ class CheckoutService extends ShopService
                         'product_name' => $cartItem->product->name,
                         'product_image' => $cartItem->product->mainImage?->url ?? null,
                         'quantity' => $cartItem->quantity,
-                        'price' => $cartItem->price,
-                        'total' => $cartItem->quantity * $cartItem->price,
+                        'price' => $currentPrice,
+                        'total' => $cartItem->quantity * $currentPrice,
                         'tax_amount' => 0, // TODO: Calculate tax per item
                         'discount_amount' => 0, // TODO: Calculate discount per item
                         'options' => $cartItem->options ?? null,

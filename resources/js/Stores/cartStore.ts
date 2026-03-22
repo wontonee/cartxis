@@ -24,6 +24,8 @@ export const useCartStore = defineStore('cart', () => {
     const items = ref<CartItem[]>([]);
     const loading = ref(false);
     const error = ref<string | null>(null);
+    const couponCode = ref<string | null>(null);
+    const discountAmount = ref<number>(0);
 
     // Getters
     const itemCount = computed(() => {
@@ -64,6 +66,8 @@ export const useCartStore = defineStore('cart', () => {
 
             const data = await response.json();
             items.value = normalizeItems(data.items || []);
+            couponCode.value = data.coupon?.code ?? null;
+            discountAmount.value = data.coupon?.discount_amount ?? 0;
         } catch (e) {
             error.value = e instanceof Error ? e.message : 'Unknown error';
             console.error('Cart fetch error:', e);
@@ -216,6 +220,8 @@ export const useCartStore = defineStore('cart', () => {
             }
 
             items.value = [];
+            couponCode.value = null;
+            discountAmount.value = 0;
 
             return { success: true };
         } catch (e) {
@@ -227,11 +233,59 @@ export const useCartStore = defineStore('cart', () => {
         }
     };
 
+    const applyCoupon = async (code: string) => {
+        error.value = null;
+        try {
+            const response = await fetch('/api/cart/apply-coupon', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '',
+                },
+                body: JSON.stringify({ coupon_code: code }),
+            });
+
+            const data = await response.json();
+
+            if (!response.ok) {
+                return { success: false, message: data.message || 'Invalid coupon' };
+            }
+
+            couponCode.value = data.coupon?.code ?? code;
+            discountAmount.value = data.coupon?.discount_amount ?? 0;
+            return { success: true, message: data.message };
+        } catch (e) {
+            error.value = e instanceof Error ? e.message : 'Unknown error';
+            return { success: false, message: error.value };
+        }
+    };
+
+    const removeCoupon = async () => {
+        error.value = null;
+        try {
+            await fetch('/api/cart/remove-coupon', {
+                method: 'DELETE',
+                headers: {
+                    'Accept': 'application/json',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '',
+                },
+            });
+            couponCode.value = null;
+            discountAmount.value = 0;
+            return { success: true };
+        } catch (e) {
+            return { success: false };
+        }
+    };
+
     return {
         // State
         items,
         loading,
         error,
+        couponCode,
+        discountAmount,
         // Getters
         itemCount,
         subtotal,
@@ -243,5 +297,7 @@ export const useCartStore = defineStore('cart', () => {
         updateQuantity,
         removeItem,
         clearCart,
+        applyCoupon,
+        removeCoupon,
     };
 });

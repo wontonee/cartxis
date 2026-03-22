@@ -31,13 +31,21 @@ class PreventUserAdminAccess
 
             $isAdmin = $roleIsAdmin || $permissionsIsAdmin;
 
-            if (!$isAdmin) {
+            $isActive = is_object($admin)
+                && (property_exists($admin, 'is_active') || isset($admin->is_active))
+                && (bool) $admin->is_active;
+
+            if (!$isAdmin || !$isActive) {
                 auth()->guard('admin')->logout();
                 $request->session()->invalidate();
                 $request->session()->regenerateToken();
 
-                return redirect()->route('login')
-                    ->with('error', 'You do not have permission to access the admin panel.');
+                $message = !$isAdmin
+                    ? 'You do not have permission to access the admin panel.'
+                    : 'Your account has been deactivated.';
+
+                return redirect()->route('admin.login')
+                    ->with('error', $message);
             }
         }
 

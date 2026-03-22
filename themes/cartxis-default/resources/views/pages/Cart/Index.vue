@@ -9,6 +9,8 @@ import { useCurrency } from '@/composables/useCurrency';
 // Define props
 interface CartSummary {
     subtotal: number;
+    discount?: number;
+    coupon?: { code: string; discount_amount: number; message?: string } | null;
     taxes: {
         breakdown: Array<{
             tax_class: string;
@@ -46,8 +48,37 @@ const {
     itemCount, 
     updateQuantity, 
     removeItem, 
-    fetchCart 
+    fetchCart,
+    couponCode,
+    discountAmount,
+    applyCoupon,
+    removeCoupon,
 } = useCart();
+
+// Coupon state
+const couponInput = ref('');
+const couponError = ref('');
+const couponLoading = ref(false);
+
+const handleApplyCoupon = async () => {
+    const code = couponInput.value.trim();
+    if (!code) return;
+    couponLoading.value = true;
+    couponError.value = '';
+    const result = await applyCoupon(code);
+    if (!result.success) {
+        couponError.value = result.message || 'Invalid coupon code';
+    } else {
+        couponInput.value = '';
+        router.reload({ only: ['cartSummary'] });
+    }
+    couponLoading.value = false;
+};
+
+const handleRemoveCoupon = async () => {
+    await removeCoupon();
+    router.reload({ only: ['cartSummary'] });
+};
 
 // Currency formatting
 const { formatPrice } = useCurrency();
@@ -184,7 +215,7 @@ const handleRemove = async (itemId: string) => {
                         :class="{ 'opacity-50': isItemRemoving(item.id) }"
                     >
                         <!-- Product Image -->
-                        <Link :href="`/products/${item.product_slug}`" class="flex-shrink-0">
+                        <Link :href="`/product/${item.product_slug}`" class="flex-shrink-0">
                             <div v-if="item.product_image && item.product_image.trim()" class="w-24 h-24 rounded-md overflow-hidden">
                                 <img
                                     :src="item.product_image"
@@ -200,7 +231,7 @@ const handleRemove = async (itemId: string) => {
                         <!-- Product Info -->
                         <div class="flex-1">
                             <Link
-                                :href="`/products/${item.product_slug}`"
+                                :href="`/product/${item.product_slug}`"
                                 class="text-lg font-semibold text-gray-900 hover:text-blue-600"
                             >
                                 {{ item.product_name }}
@@ -278,6 +309,32 @@ const handleRemove = async (itemId: string) => {
                     <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6 sticky top-4">
                         <h2 class="text-xl font-bold text-gray-900 mb-4">Order Summary</h2>
 
+                        <!-- Coupon / Promo Code -->
+                        <div v-if="!couponCode" class="mb-4">
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Promo Code</label>
+                            <div class="flex gap-2">
+                                <input
+                                    v-model="couponInput"
+                                    type="text"
+                                    placeholder="Enter code"
+                                    class="flex-1 px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                    @keyup.enter="handleApplyCoupon"
+                                />
+                                <button
+                                    @click="handleApplyCoupon"
+                                    :disabled="couponLoading || !couponInput.trim()"
+                                    class="px-3 py-2 text-sm font-medium bg-gray-900 text-white rounded-md hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                                >
+                                    {{ couponLoading ? '...' : 'Apply' }}
+                                </button>
+                            </div>
+                            <p v-if="couponError" class="mt-1 text-xs text-red-600">{{ couponError }}</p>
+                        </div>
+                        <div v-else class="mb-4 flex items-center justify-between bg-green-50 border border-green-200 rounded-md px-3 py-2">
+                            <span class="text-sm text-green-700 font-medium">{{ couponCode }} applied</span>
+                            <button @click="handleRemoveCoupon" class="text-green-600 hover:text-green-800 text-lg leading-none">&times;</button>
+                        </div>
+
                         <div class="space-y-3 mb-4">
                             <div class="flex justify-between text-gray-700">
                                 <span>Subtotal</span>
@@ -299,6 +356,12 @@ const handleRemove = async (itemId: string) => {
                             <div v-else class="flex justify-between text-gray-700">
                                 <span>Tax</span>
                                 <span>{{ formatPrice(cartSummary.taxes.total) }}</span>
+                            </div>
+
+                            <!-- Discount -->
+                            <div v-if="discountAmount > 0" class="flex justify-between text-green-600">
+                                <span>Discount</span>
+                                <span>- {{ formatPrice(discountAmount) }}</span>
                             </div>
                             
                             <div class="border-t border-gray-200 pt-3">

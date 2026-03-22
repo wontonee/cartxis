@@ -5,7 +5,7 @@ import AdminLayout from '@/layouts/AdminLayout.vue'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
-import { Shield, ArrowLeft } from 'lucide-vue-next'
+import { Shield, ArrowLeft, PenLine, List } from 'lucide-vue-next'
 
 
 interface Props {
@@ -115,44 +115,48 @@ const submit = () => {
             <!-- Group Selection -->
             <div class="space-y-2">
               <Label for="group" class="required">Permission Group</Label>
-              <div class="flex gap-2">
-                <select
-                  v-if="!showCustomGroup"
-                  id="group"
-                  v-model="form.group"
-                  class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100"
-                  required
+              <select
+                v-if="!showCustomGroup"
+                id="group"
+                v-model="form.group"
+                class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100"
+                required
+              >
+                <option value="" disabled>Select a group</option>
+                <option value="catalog">Catalog</option>
+                <option value="sales">Sales</option>
+                <option value="customer">Customer</option>
+                <option value="marketing">Marketing</option>
+                <option value="content">Content</option>
+                <option value="settings">Settings</option>
+                <option value="system">System</option>
+                <option value="reports">Reports</option>
+                <option
+                  v-for="group in props.existingGroups"
+                  :key="group"
+                  :value="group"
                 >
-                  <option value="" disabled>Select a group</option>
-                  <option value="catalog">Catalog</option>
-                  <option value="sales">Sales</option>
-                  <option value="customer">Customer</option>
-                  <option value="marketing">Marketing</option>
-                  <option value="content">Content</option>
-                  <option value="settings">Settings</option>
-                  <option value="system">System</option>
-                  <option value="reports">Reports</option>
-                  <option
-                    v-for="group in props.existingGroups"
-                    :key="group"
-                    :value="group"
-                  >
-                    {{ group }}
-                  </option>
-                </select>
-                <Input
-                  v-else
-                  id="custom_group"
-                  v-model="customGroup"
-                  type="text"
-                  placeholder="Enter custom group name"
-                  @input="updateGroup(customGroup)"
-                  required
-                />
-                <Button type="button" variant="outline" @click="toggleCustomGroup">
-                  {{ showCustomGroup ? 'Select Existing' : 'Custom Group' }}
-                </Button>
-              </div>
+                  {{ group }}
+                </option>
+              </select>
+              <Input
+                v-else
+                id="custom_group"
+                v-model="customGroup"
+                type="text"
+                placeholder="Enter custom group name"
+                @input="updateGroup(customGroup)"
+                required
+              />
+              <button
+                type="button"
+                @click="toggleCustomGroup"
+                class="inline-flex items-center gap-1.5 text-xs text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300 underline-offset-2 hover:underline transition-colors"
+              >
+                <List v-if="showCustomGroup" class="h-3.5 w-3.5" />
+                <PenLine v-else class="h-3.5 w-3.5" />
+                {{ showCustomGroup ? 'Choose from existing groups' : 'Use a custom group name' }}
+              </button>
               <p class="text-sm text-gray-500 dark:text-gray-300">
                 Group related permissions together
               </p>

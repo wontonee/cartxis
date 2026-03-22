@@ -31,7 +31,7 @@ class ExtensionService
 
     public function __construct(HookService $hookService, MenuService $menuService)
     {
-        $this->extensionsPath = config('core.extensions_path', base_path('extensions'));
+        $this->extensionsPath = config('core.extensions_path', base_path('extension'));
         $this->bundledExtensionsPath = config('core.bundled_extensions_path', base_path('packages/Cartxis'));
         $this->hookService = $hookService;
         $this->menuService = $menuService;

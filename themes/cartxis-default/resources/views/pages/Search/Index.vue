@@ -2,6 +2,7 @@
 import { Head } from '@inertiajs/vue3';
 import ThemeLayout from '../../layouts/ThemeLayout.vue';
 import { computed } from 'vue';
+import { useCurrency } from '@/composables/useCurrency';
 
 interface Product {
     id: number;
@@ -31,6 +32,8 @@ interface Props {
 }
 
 const props = defineProps<Props>();
+
+const { formatPrice } = useCurrency();
 
 const productsData = computed(() => {
     if (Array.isArray(props.products)) {
@@ -136,7 +139,7 @@ const totalResults = computed(() => {
                                     v-if="product.special_price" 
                                     class="text-lg font-bold text-red-600"
                                 >
-                                    ${{ Number(product.special_price).toFixed(2) }}
+                                    {{ formatPrice(product.special_price!) }}
                                 </span>
                                 <span 
                                     :class="[
@@ -144,7 +147,7 @@ const totalResults = computed(() => {
                                         product.special_price ? 'text-sm text-gray-400 line-through' : 'text-lg text-gray-900'
                                     ]"
                                 >
-                                    ${{ Number(product.price).toFixed(2) }}
+                                    {{ formatPrice(product.price) }}
                                 </span>
                             </div>
                         </div>

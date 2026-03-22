@@ -1,7 +1,9 @@
 <script setup lang="ts">
 import { Head, router } from '@inertiajs/vue3'
-import { ref } from 'vue'
+import { ref, computed } from 'vue'
 import ThemeLayout from '@/../../themes/cartxis-default/resources/views/layouts/ThemeLayout.vue'
+import UIBlockRenderer from '@/components/UIEditor/UIBlockRenderer.vue'
+import { useCurrency } from '@/composables/useCurrency'
 
 interface TrackedOrder {
   id: number
@@ -25,11 +27,13 @@ const props = defineProps<{
   lookup: { order_number: string }
   trackedOrder: TrackedOrder | null
   error?: string
+  layoutData?: Record<string, unknown> | null
 }>()
 
 const orderNumber = ref(props.lookup?.order_number ?? '')
+const hasLayout = computed(() => !!(props.layoutData?.sections && (props.layoutData.sections as unknown[]).length))
 
-const formatPrice = (amount: number) => `₹${Number(amount || 0).toFixed(2)}`
+const { formatPrice } = useCurrency()
 
 const submit = () => {
   router.post('/checkout/track-order', {
@@ -40,7 +44,10 @@ const submit = () => {
 
 <template>
   <ThemeLayout>
-    <Head title="Track Guest Order" />
+    <Head title="Track Your Order" />
+
+    <!-- UIEditor hero/banner renders above the tracking form when published -->
+    <UIBlockRenderer v-if="hasLayout" :layout="layoutData" :editor-mode="false" />
 
     <div class="container mx-auto px-4 py-8 max-w-2xl">
       <h1 class="text-2xl font-bold mb-2">Track Guest Order</h1>

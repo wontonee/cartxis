@@ -164,6 +164,12 @@ class ProductService extends ShopService
                       ->where('stock_status', 'in_stock');
             }
 
+            // Filter by on-sale (special_price set and lower than regular price)
+            if (!empty($filters['on_sale'])) {
+                $query->whereNotNull('special_price')
+                      ->whereColumn('special_price', '<', 'price');
+            }
+
             // Apply sorting
             switch ($sort) {
                 case 'price_low':

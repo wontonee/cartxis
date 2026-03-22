@@ -8,6 +8,7 @@ use Cartxis\CMS\Models\Page;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Str;
+use Mews\Purifier\Facades\Purifier;
 
 class PageService
 {
@@ -22,6 +23,10 @@ class PageService
                 $data['title'],
                 $data['url_key'] ?? null
             );
+
+            if (isset($data['content'])) {
+                $data['content'] = Purifier::clean($data['content']);
+            }
 
             return Page::create($data);
         });
@@ -40,6 +45,10 @@ class PageService
                     $data['url_key'] ?? null,
                     $page->id
                 );
+            }
+
+            if (isset($data['content'])) {
+                $data['content'] = Purifier::clean($data['content']);
             }
 
             $page->update($data);
@@ -101,6 +110,28 @@ class PageService
     protected function clearPageCache(string $urlKey): void
     {
         Cache::forget("page:{$urlKey}");
+    }
+
+    /**
+     * Duplicate a page as a draft copy.
+     */
+    public function duplicate(Page $page): Page
+    {
+        return DB::transaction(function () use ($page) {
+            $baseSlug = $page->url_key . '-copy';
+            $uniqueSlug = $this->generateUniqueSlug('Copy of ' . $page->title, $baseSlug);
+
+            $newPage = $page->replicate();
+            $newPage->title = 'Copy of ' . $page->title;
+            $newPage->url_key = $uniqueSlug;
+            $newPage->status = 'draft';
+            $newPage->is_homepage = false;
+            $newPage->created_by = auth()->id();
+            $newPage->updated_by = auth()->id();
+            $newPage->save();
+
+            return $newPage;
+        });
     }
 
     /**

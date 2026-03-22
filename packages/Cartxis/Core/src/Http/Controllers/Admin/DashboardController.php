@@ -45,6 +45,8 @@ class DashboardController extends Controller
             'recentOrders' => $this->getRecentOrders(),
             'topProducts' => $this->getTopProducts(),
             'salesChart' => $this->getSalesChartData(),
+            'activityFeed' => $this->getActivityFeed(),
+            'lowStockProducts' => $this->getLowStockProducts(),
             'currencySymbol' => $currency ? $currency->symbol : '$',
         ]);
     }
@@ -202,11 +204,11 @@ class DashboardController extends Controller
         try {
             $products = DB::table('order_items')
                 ->select(
-                    'name',
+                    'product_name as name',
                     DB::raw('COUNT(*) as sales'),
                     DB::raw('SUM(price * quantity) as revenue')
                 )
-                ->groupBy('name')
+                ->groupBy('product_name')
                 ->orderBy('sales', 'desc')
                 ->limit(5)
                 ->get()
@@ -239,6 +241,7 @@ class DashboardController extends Controller
         try {
             $days = [];
             $sales = [];
+            $orders = [];
             
             for ($i = 6; $i >= 0; $i--) {
                 $date = now()->subDays($i);
@@ -248,19 +251,151 @@ class DashboardController extends Controller
                     ->whereDate('created_at', $date->format('Y-m-d'))
                     ->whereIn('status', ['completed', 'processing'])
                     ->sum('total');
-                    
                 $sales[] = (float) $daySales;
+
+                $dayOrders = DB::table('orders')
+                    ->whereDate('created_at', $date->format('Y-m-d'))
+                    ->whereIn('status', ['completed', 'processing'])
+                    ->count();
+                $orders[] = (int) $dayOrders;
             }
 
             return [
                 'labels' => $days,
-                'data' => $sales
+                'data'   => $sales,
+                'orders' => $orders,
             ];
         } catch (\Exception $e) {
             return [
                 'labels' => [],
-                'data' => []
+                'data'   => [],
+                'orders' => [],
             ];
+        }
+    }
+
+    /**
+     * Get live activity feed from recent system events.
+     */
+    private function getActivityFeed(): array
+    {
+        $events = collect();
+
+        try {
+            $recentOrders = DB::table('orders')
+                ->leftJoin('users', 'orders.user_id', '=', 'users.id')
+                ->select('orders.order_number', 'users.name as customer', 'orders.customer_email', 'orders.status', 'orders.created_at')
+                ->whereNull('orders.deleted_at')
+                ->orderBy('orders.created_at', 'desc')
+                ->limit(5)
+                ->get();
+
+            foreach ($recentOrders as $o) {
+                $name = $o->customer ?? ($o->customer_email ?? 'Guest');
+                $label = match ($o->status) {
+                    'completed'  => 'Order completed',
+                    'processing' => 'Order processing',
+                    'cancelled'  => 'Order cancelled',
+                    default      => 'New order placed',
+                };
+                $events->push([
+                    'type'    => 'order',
+                    'message' => "{$label} #{$o->order_number} by {$name}",
+                    'time'    => $o->created_at,
+                    'icon'    => 'ShoppingCart',
+                    'color'   => $o->status === 'cancelled' ? 'red' : ($o->status === 'completed' ? 'green' : 'blue'),
+                ]);
+            }
+        } catch (\Exception $e) {}
+
+        try {
+            $newUsers = DB::table('users')
+                ->select('name', 'email', 'created_at')
+                ->orderBy('created_at', 'desc')
+                ->limit(4)
+                ->get();
+
+            foreach ($newUsers as $u) {
+                $events->push([
+                    'type'    => 'user',
+                    'message' => "New user registered: {$u->name}",
+                    'time'    => $u->created_at,
+                    'icon'    => 'UserPlus',
+                    'color'   => 'purple',
+                ]);
+            }
+        } catch (\Exception $e) {}
+
+        try {
+            $newProducts = DB::table('products')
+                ->select('name', 'sku', 'created_at')
+                ->orderBy('created_at', 'desc')
+                ->limit(3)
+                ->get();
+
+            foreach ($newProducts as $p) {
+                $events->push([
+                    'type'    => 'product',
+                    'message' => "Product added: {$p->name} (SKU: {$p->sku})",
+                    'time'    => $p->created_at,
+                    'icon'    => 'Package',
+                    'color'   => 'orange',
+                ]);
+            }
+        } catch (\Exception $e) {}
+
+        return $events
+            ->sortByDesc('time')
+            ->take(10)
+            ->map(function ($event) {
+                $created = \Carbon\Carbon::parse($event['time']);
+                $mins  = (int) $created->diffInMinutes(now());
+                $hours = (int) $created->diffInHours(now());
+                $days  = (int) $created->diffInDays(now());
+
+                if ($mins < 60) {
+                    $timeStr = $mins . ' min ago';
+                } elseif ($hours < 24) {
+                    $timeStr = $hours . 'h ago';
+                } elseif ($days < 7) {
+                    $timeStr = $days . 'd ago';
+                } else {
+                    $timeStr = $created->format('M d');
+                }
+
+                return [
+                    'type'    => $event['type'],
+                    'message' => $event['message'],
+                    'time'    => $timeStr,
+                    'icon'    => $event['icon'],
+                    'color'   => $event['color'],
+                ];
+            })
+            ->values()
+            ->toArray();
+    }
+
+    /**
+     * Get products with low/out-of-stock status.
+     */
+    private function getLowStockProducts(): array
+    {
+        try {
+            return DB::table('products')
+                ->select('name', 'sku', 'stock_status', 'notify_stock_qty')
+                ->whereIn('stock_status', ['out_of_stock', 'on_backorder'])
+                ->orderByRaw("FIELD(stock_status,'out_of_stock','on_backorder')")
+                ->limit(8)
+                ->get()
+                ->map(fn($p) => [
+                    'name'         => $p->name,
+                    'sku'          => $p->sku,
+                    'stock_status' => $p->stock_status,
+                    'notify_qty'   => $p->notify_stock_qty,
+                ])
+                ->toArray();
+        } catch (\Exception $e) {
+            return [];
         }
     }
 
@@ -285,8 +420,8 @@ class DashboardController extends Controller
     private function getTotalCustomers(): int
     {
         try {
-            return \App\Models\User::whereHas('roles', function ($query) {
-                $query->where('name', 'customer');
+            return \App\Models\User::whereDoesntHave('roles', function ($query) {
+                $query->where('name', 'admin');
             })->count();
         } catch (\Exception $e) {
             try {
@@ -300,8 +435,8 @@ class DashboardController extends Controller
     private function getPreviousCustomers(): int
     {
         try {
-            return \App\Models\User::whereHas('roles', function ($query) {
-                $query->where('name', 'customer');
+            return \App\Models\User::whereDoesntHave('roles', function ($query) {
+                $query->where('name', 'admin');
             })->where('created_at', '<', now()->subMonth())->count();
         } catch (\Exception $e) {
             try {

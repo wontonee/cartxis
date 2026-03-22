@@ -92,12 +92,12 @@ const footerSections = computed(() => {
                                 </Link>
                             </li>
                             <li>
-                                <Link href="/shipping" class="hover:text-white transition-colors">
+                                <Link href="/shipping-and-returns" class="hover:text-white transition-colors">
                                     Shipping & Returns
                                 </Link>
                             </li>
                             <li>
-                                <Link href="/track-order" class="hover:text-white transition-colors">
+                                <Link href="/checkout/track-order" class="hover:text-white transition-colors">
                                     Track Order
                                 </Link>
                             </li>
@@ -109,12 +109,12 @@ const footerSections = computed(() => {
                         <h4 class="font-semibold text-white mb-4">Legal</h4>
                         <ul class="space-y-2 text-sm">
                             <li>
-                                <Link href="/privacy" class="hover:text-white transition-colors">
+                                <Link href="/privacy-policy" class="hover:text-white transition-colors">
                                     Privacy Policy
                                 </Link>
                             </li>
                             <li>
-                                <Link href="/terms" class="hover:text-white transition-colors">
+                                <Link href="/terms-and-conditions" class="hover:text-white transition-colors">
                                     Terms of Service
                                 </Link>
                             </li>

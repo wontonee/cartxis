@@ -80,9 +80,6 @@ onMounted(() => {
 const handleFiles = (files: FileList | null) => {
   if (!files) return;
 
-  console.log('handleFiles called with:', files.length, 'files');
-  console.log('Current modelValue length:', props.modelValue.length);
-
   const fileArray = Array.from(files);
   const validFiles: File[] = [];
 
@@ -111,7 +108,6 @@ const handleFiles = (files: FileList | null) => {
       if (fileArray.length > props.maxFiles) {
         alert(`Maximum ${props.maxFiles} ${props.maxFiles === 1 ? 'file' : 'files'} allowed`);
       }
-      console.log('Max files reached. Current:', props.modelValue.length, 'Valid:', validFiles.length, 'Max:', props.maxFiles);
       break;
     }
 
@@ -131,9 +127,7 @@ const handleFiles = (files: FileList | null) => {
     validFiles.push(file);
   }
 
-  console.log('Valid files to add:', validFiles.length);
   const newFiles = [...props.modelValue, ...validFiles];
-  console.log('Emitting new files, total:', newFiles.length);
   emit('update:modelValue', newFiles);
   // generatePreviews will be called automatically by the watcher
 };

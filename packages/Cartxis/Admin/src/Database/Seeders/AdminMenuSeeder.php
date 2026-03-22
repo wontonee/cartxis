@@ -85,6 +85,18 @@ class AdminMenuSeeder extends Seeder
                 'active' => true,
             ],
 
+            // Blog Parent
+            [
+                'key' => 'blog',
+                'title' => 'Blog',
+                'icon' => 'newspaper',
+                'route' => null,
+                'parent_id' => null,
+                'order' => 65,
+                'location' => 'admin',
+                'active' => true,
+            ],
+
             // Reports Parent
             [
                 'key' => 'reports',
@@ -151,6 +163,7 @@ class AdminMenuSeeder extends Seeder
         $customersId = DB::table('menu_items')->where('key', 'customers')->value('id');
         $marketingId = DB::table('menu_items')->where('key', 'marketing')->value('id');
         $contentId = DB::table('menu_items')->where('key', 'content')->value('id');
+        $blogId = DB::table('menu_items')->where('key', 'blog')->value('id');
         $reportsId = DB::table('menu_items')->where('key', 'reports')->value('id');
         $appearanceId = DB::table('menu_items')->where('key', 'appearance')->value('id');
         $settingsId = DB::table('menu_items')->where('key', 'settings')->value('id');
@@ -284,16 +297,6 @@ class AdminMenuSeeder extends Seeder
                 'active' => true,
             ],
             [
-                'key' => 'content-blocks',
-                'title' => 'Blocks',
-                'icon' => 'layout-grid',
-                'route' => 'admin.content.blocks.index',
-                'parent_id' => $contentId,
-                'order' => 3,
-                'location' => 'admin',
-                'active' => true,
-            ],
-            [
                 'key' => 'content-media',
                 'title' => 'Media Library',
                 'icon' => 'image',
@@ -304,16 +307,37 @@ class AdminMenuSeeder extends Seeder
                 'active' => true,
             ],
             [
-                'key' => 'content-blog',
-                'title' => 'Blog Posts',
-                'icon' => 'newspaper',
-                'route' => null,
+                'key' => 'content-global-regions',
+                'title' => 'Reusable Sections',
+                'icon' => 'layout-template',
+                'route' => 'admin.uieditor.regions.index',
                 'parent_id' => $contentId,
                 'order' => 5,
                 'location' => 'admin',
-                'active' => false,
+                'active' => true,
             ],
 
+            // Blog Children
+            [
+                'key' => 'content-blog',
+                'title' => 'Posts',
+                'icon' => 'file-text',
+                'route' => 'admin.blog.index',
+                'parent_id' => $blogId,
+                'order' => 1,
+                'location' => 'admin',
+                'active' => true,
+            ],
+            [
+                'key' => 'content-blog-categories',
+                'title' => 'Categories',
+                'icon' => 'tag',
+                'route' => 'admin.blog.categories.index',
+                'parent_id' => $blogId,
+                'order' => 2,
+                'location' => 'admin',
+                'active' => true,
+            ],
             // Reports Children
             [
                 'key' => 'reports-sales',

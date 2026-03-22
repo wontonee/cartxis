@@ -266,7 +266,7 @@ function cancel() {
 </script>
 
 <template>
-  <AdminLayout>
+  <AdminLayout title="Edit Address">
     <Head title="Edit Address" />
 
     <div class="p-6">

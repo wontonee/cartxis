@@ -26,6 +26,7 @@ class PageResource extends JsonResource
             'meta_keywords' => $this->meta_keywords,
             'status' => $this->status,
             'status_label' => $this->status_label,
+            'is_homepage' => (bool) $this->is_homepage,
             'url' => $this->url,
             'created_by' => $this->when($this->creator, [
                 'id' => $this->creator?->id,

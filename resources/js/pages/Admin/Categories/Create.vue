@@ -91,9 +91,6 @@ const submit = () => {
       form.processing = false;
       if (error.response?.data?.errors) {
         form.setError(error.response.data.errors);
-        console.error('Validation errors:', error.response.data.errors);
-      } else {
-        console.error('Error response:', error.response?.data);
       }
       // Scroll to first error
       if (error.response?.data?.errors) {
@@ -116,7 +113,6 @@ const submit = () => {
         form.reset();
       },
       onError: (errors) => {
-        console.error('Validation errors:', errors);
         // Scroll to first error
         const firstErrorField = Object.keys(errors)[0];
         const element = document.querySelector(`[name="${firstErrorField}"]`);

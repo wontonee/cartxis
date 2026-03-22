@@ -51,6 +51,15 @@ class MarketingMenuSeeder extends Seeder
                 'order' => 20,
                 'permission' => null,
             ],
+            [
+                'key' => 'marketing-newsletters',
+                'title' => 'Newsletters',
+                'icon' => 'mail',
+                'route' => 'admin.marketing.newsletters.index',
+                'url' => null,
+                'order' => 30,
+                'permission' => null,
+            ],
         ];
 
         foreach ($childItems as $item) {

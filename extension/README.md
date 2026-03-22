@@ -5,7 +5,7 @@ This guide explains how to create a Cartxis extension (plugin) that can be insta
 Cartxis supports two extension sources:
 
 1. **Bundled extensions** (first-party): discovered from `packages/Cartxis/*/extension.json`.
-2. **Filesystem extensions** (third-party / custom): discovered from `extensions/<your-extension>/extension.json`.
+2. **Filesystem extensions** (third-party / custom): discovered from `extension/<your-extension>/extension.json`.
 
 The extension system is backed by the database table **`extensions`** and a JSON manifest file **`extension.json`**.
 
@@ -42,11 +42,11 @@ Only **active** extensions should register routes, gateways, hooks, menus, etc.
 ### Option A — Third-party/custom extension (recommended)
 Create a new folder under:
 
-- `extensions/<vendor-or-extension-name>/`
+- `extension/<vendor-or-extension-name>/`
 
 Example:
 
-- `extensions/acme-payments/`
+- `extension/acme-payments/`
 
 ### Option B — Bundled/first-party extension
 Add a new package folder under:
@@ -62,7 +62,7 @@ Bundled packages are discovered automatically via their `extension.json`.
 Example:
 
 ```
-extensions/acme-example-gateway/
+extension/acme-example-gateway/
   extension.json
   src/
     Providers/
@@ -141,6 +141,18 @@ A typical gateway extension:
 
 These commands are available:
 
+**Scaffold a new extension:**
+
+```bash
+# Interactive — guided prompts for template, name, code, vendor, author
+php artisan cartxis:extension:make --interactive
+
+# Fast mode — all values supplied up front, no prompts
+php artisan cartxis:extension:make "My Extension" --code=my-extension
+```
+
+**Manage extensions:**
+
 - `php artisan cartxis:extensions:list`
 - `php artisan cartxis:extensions:sync`
 - `php artisan cartxis:extensions:install <code>`
@@ -150,7 +162,7 @@ These commands are available:
 
 Recommended workflow (filesystem extension):
 
-1. Place your extension folder under `extensions/`.
+1. Place your extension folder under `extension/`.
 2. Run `php artisan cartxis:extensions:sync`.
 3. Run `php artisan cartxis:extensions:install <code>`.
 4. Run `php artisan cartxis:extensions:activate <code>`.
@@ -163,7 +175,7 @@ A working template is included here:
 
 - `extension/templates/payment-gateway/`
 
-Copy it into `extensions/` and rename the namespace + code.
+Copy it into `extension/` and rename the namespace + code.
 
 ---
 

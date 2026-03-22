@@ -211,16 +211,21 @@ class Product extends Model
     }
 
     /**
-     * Get image attribute (main image URL)
+     * Get image attribute (main image URL) — always returns a full HTTP URL.
      */
     public function getImageAttribute(): ?string
     {
-        if ($this->mainImage) {
-            return $this->mainImage->url ?? $this->mainImage->path ?? null;
+        $img = $this->mainImage ?? $this->images->first();
+
+        if (!$img || !$img->path) {
+            return null;
         }
-        
-        $firstImage = $this->images()->first();
-        return $firstImage ? ($firstImage->url ?? $firstImage->path ?? null) : null;
+
+        if (filter_var($img->path, FILTER_VALIDATE_URL)) {
+            return $img->path;
+        }
+
+        return asset('storage/' . $img->path);
     }
 
     /**

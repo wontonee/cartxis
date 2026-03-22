@@ -10,6 +10,7 @@ use Illuminate\Http\Request;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Storage;
+use Mews\Purifier\Facades\Purifier;
 
 class CategoryController extends Controller
 {
@@ -101,6 +102,10 @@ class CategoryController extends Controller
             $validated['sort_order'] = $maxSortOrder + 1;
         }
 
+        if (isset($validated['description'])) {
+            $validated['description'] = Purifier::clean($validated['description']);
+        }
+
         Category::create($validated);
 
         return redirect()->route('admin.catalog.categories.index')
@@ -167,6 +172,10 @@ class CategoryController extends Controller
         // Prevent setting itself as parent
         if (isset($validated['parent_id']) && $validated['parent_id'] == $category->id) {
             return back()->withErrors(['parent_id' => 'Category cannot be its own parent.']);
+        }
+
+        if (isset($validated['description'])) {
+            $validated['description'] = Purifier::clean($validated['description']);
         }
 
         $category->update($validated);

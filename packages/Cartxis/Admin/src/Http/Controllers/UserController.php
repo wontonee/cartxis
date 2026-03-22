@@ -83,6 +83,7 @@ class UserController extends Controller
     public function changePassword(Request $request, User $user): RedirectResponse
     {
         $validated = $request->validate([
+            'current_password' => ['required', 'current_password'],
             'password' => ['required', 'confirmed', Password::defaults()],
         ]);
 
