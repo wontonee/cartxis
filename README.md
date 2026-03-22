@@ -45,14 +45,19 @@ A modern, extensible eCommerce platform built with **Laravel 12**, **Inertia.js*
 
 ### 📱 Mobile App
 
-A full **REST API** is available for building a mobile app (iOS & Android):
+The **Cartxis Mobile App** is live and open source! Download it or explore the source:
+
+| Platform | Link |
+|----------|------|
+| Android (Google Play) | [Download on Google Play](https://play.google.com/store/apps/details?id=com.cartxis.app) |
+| Source Code | [github.com/wontonee/cartxis-mobile](https://github.com/wontonee/cartxis-mobile) |
+
+The app is powered by a full **REST API** and supports:
 - Authentication and customer accounts
 - Product catalog, search, and categories
 - Cart, checkout, and order management
 - Wishlist and reviews
 - Store sync and banners
-
-Native iOS & Android apps are coming soon.
 
 #### 🗑️ Google Play / App Store — Account Deletion URL
 
@@ -466,11 +471,12 @@ For billing, licensing, or partnership enquiries, contact us at **dev@wontonee.c
 - [x] Demo data (Electronics, Fashion, Kirana, Retail)
 - [x] Data migration (WooCommerce, Bagisto)
 - [x] REST API for mobile app
+- [x] Mobile app — Android ([Google Play](https://play.google.com/store/apps/details?id=com.cartxis.app)) · [Open source](https://github.com/wontonee/cartxis-mobile)
 - [x] Interactive CLI installer (`php artisan cartxis:install`)
 - [x] Composer create-project support
 
 ### 🔜 Upcoming
-- [ ] Mobile app (iOS & Android)
+- [ ] iOS mobile app
 - [ ] Two-factor authentication (2FA)
 - [ ] Multi-vendor marketplace
 - [ ] Subscription products
