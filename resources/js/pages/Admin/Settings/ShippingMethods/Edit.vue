@@ -199,7 +199,7 @@
                   <div class="text-gray-500 text-xs">{{ rate.min_weight }}-{{ rate.max_weight }}kg</div>
                 </div>
                 <div class="text-right">
-                  <div class="font-medium text-gray-900 dark:text-white">${{ parseFloat(rate.base_cost).toFixed(2) }}</div>
+                  <div class="font-medium text-gray-900 dark:text-white">{{ formatPrice(rate.base_cost) }}</div>
                 </div>
               </div>
             </div>
@@ -225,6 +225,7 @@ import {
   Power
 } from 'lucide-vue-next'
 import axios from 'axios'
+import { useCurrency } from '@/composables/useCurrency'
 
 interface ShippingMethod {
   id: number
@@ -241,6 +242,7 @@ interface ShippingMethod {
   updated_at: string
 }
 
+const { formatPrice } = useCurrency()
 const page = usePage()
 const method = ref<ShippingMethod>(page.props.method as ShippingMethod)
 

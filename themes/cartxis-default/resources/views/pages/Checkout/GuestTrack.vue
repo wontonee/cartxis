@@ -3,6 +3,7 @@ import { Head, router } from '@inertiajs/vue3'
 import { ref, computed } from 'vue'
 import ThemeLayout from '@/../../themes/cartxis-default/resources/views/layouts/ThemeLayout.vue'
 import UIBlockRenderer from '@/components/UIEditor/UIBlockRenderer.vue'
+import { useCurrency } from '@/composables/useCurrency'
 
 interface TrackedOrder {
   id: number
@@ -32,7 +33,7 @@ const props = defineProps<{
 const orderNumber = ref(props.lookup?.order_number ?? '')
 const hasLayout = computed(() => !!(props.layoutData?.sections && (props.layoutData.sections as unknown[]).length))
 
-const formatPrice = (amount: number) => `₹${Number(amount || 0).toFixed(2)}`
+const { formatPrice } = useCurrency()
 
 const submit = () => {
   router.post('/checkout/track-order', {
