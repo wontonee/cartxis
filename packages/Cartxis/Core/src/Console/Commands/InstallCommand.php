@@ -34,7 +34,6 @@ class InstallCommand extends Command
         $appUrl  = $this->ask('App URL', 'http://localhost:8000');
         $this->writeEnvValue('APP_NAME', $appName);
         $this->writeEnvValue('APP_URL', $appUrl);
-        $this->writeEnvValue('ASSET_URL', $appUrl);
 
         $this->newLine();
 

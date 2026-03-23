@@ -13,4 +13,5 @@ Route::middleware(['web', 'setup.complete'])->prefix('setup')->name('setup.')->g
     Route::post('/import-demo-data', [SetupController::class, 'importDemoData'])->name('import-demo-data');
     Route::post('/complete', [SetupController::class, 'complete'])->name('complete');
     Route::get('/finish', [SetupController::class, 'finish'])->name('finish');
+    Route::post('/newsletter-subscribe', [SetupController::class, 'newsletterSubscribe'])->name('newsletter-subscribe');
 });
