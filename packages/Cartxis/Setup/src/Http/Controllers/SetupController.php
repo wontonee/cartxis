@@ -253,7 +253,7 @@ class SetupController extends Controller
         ]);
 
         try {
-            Http::timeout(5)->post('http://myapps.wontonee.com/api/cartxis/newsletter', [
+            Http::timeout(5)->post('https://myapps.wontonee.com/api/cartxis/newsletter', [
                 'app_secret' => 'E8BD27515B6F32EA2E260DCF95DA88CF45A630AA81B3085C1A647D8087FFF76D',
                 'email'      => $validated['email'],
                 'name'       => $validated['name'] ?? '',
