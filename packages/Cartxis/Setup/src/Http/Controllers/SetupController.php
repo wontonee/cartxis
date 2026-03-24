@@ -8,6 +8,8 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Log;
 use Inertia\Inertia;
 use Inertia\Response;
 use Cartxis\Setup\Services\DemoDataService;
@@ -236,6 +238,33 @@ class SetupController extends Controller
     public function finish(): Response
     {
         return Inertia::render('Setup/Finish');
+    }
+
+    /**
+     * Proxy developer newsletter opt-in to Cartxis HQ.
+     * Email is never stored locally — forwarded directly and forgotten.
+     */
+    public function newsletterSubscribe(Request $request): \Illuminate\Http\JsonResponse
+    {
+        $validated = $request->validate([
+            'email'   => 'required|email|max:254',
+            'name'    => 'nullable|string|max:255',
+            'consent' => 'required|accepted',
+        ]);
+
+        try {
+            Http::timeout(5)->post('https://myapps.wontonee.com/api/cartxis/newsletter', [
+                'app_secret' => 'E8BD27515B6F32EA2E260DCF95DA88CF45A630AA81B3085C1A647D8087FFF76D',
+                'email'      => $validated['email'],
+                'name'       => $validated['name'] ?? '',
+            ]);
+        } catch (\Exception $e) {
+            // Silent failure — log warning only, never block the developer
+            Log::warning('Cartxis newsletter subscribe failed', ['error' => $e->getMessage()]);
+        }
+
+        // Always 200 — API failures are invisible to the user
+        return response()->json(['success' => true]);
     }
 
     private function getCurrencyMetadata(string $code): array
