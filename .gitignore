@@ -1,4 +1,6 @@
 /.phpunit.cache
+/.cursor
+Agents.md
 /bootstrap/ssr
 /node_modules
 /public/build
