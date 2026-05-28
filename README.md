@@ -1,10 +1,10 @@
 # Cartxis — Open Source Laravel eCommerce Platform
 
-A modern, extensible eCommerce platform built with **Laravel 12**, **Inertia.js**, **Vue 3.5**, and **TypeScript**. Cartxis provides a complete solution for building online stores with a powerful admin panel, flexible theme system, and modular architecture.
+A modern, extensible eCommerce platform built with **Laravel 13**, **Inertia.js**, **Vue 3.5**, and **TypeScript**. Cartxis provides a complete solution for building online stores with a powerful admin panel, flexible theme system, and modular architecture.
 
 ![License](https://img.shields.io/badge/license-MIT-blue.svg)
-![PHP](https://img.shields.io/badge/PHP-8.2%2B-777BB4?logo=php)
-![Laravel](https://img.shields.io/badge/Laravel-12-FF2D20?logo=laravel)
+![PHP](https://img.shields.io/badge/PHP-8.3%2B-777BB4?logo=php)
+![Laravel](https://img.shields.io/badge/Laravel-13-FF2D20?logo=laravel)
 ![Vue.js](https://img.shields.io/badge/Vue.js-3.5-4FC08D?logo=vue.js)
 ![TypeScript](https://img.shields.io/badge/TypeScript-5.2%2B-3178C6?logo=typescript)
 ![Tailwind CSS](https://img.shields.io/badge/Tailwind-4.1-38B2AC?logo=tailwind-css)
@@ -95,7 +95,7 @@ In the **Google Play Console → App content → Data safety**, paste this URL i
 
 | Requirement | Version |
 |-------------|---------|
-| PHP | 8.2 or higher |
+| PHP | 8.3 or higher |
 | Composer | 2.x |
 | Node.js | 18.x or higher |
 | NPM | 9.x or higher |
