@@ -22,7 +22,7 @@ const props = defineProps<Props>();
 
 <template>
     <ThemeLayout>
-        <Head :title="`${siteConfig.name} - Premium E-Commerce Store`" />
+        <Head :title="`${siteConfig.name} — Shop Online`" />
         <UIBlockRenderer :layout="layoutData ?? null" :editor-mode="false" />
     </ThemeLayout>
 </template>

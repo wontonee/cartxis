@@ -1,12 +1,13 @@
 <script setup lang="ts">
 import { Link, usePage } from '@inertiajs/vue3';
-import { ref, computed, onMounted, onUnmounted } from 'vue';
+import { ref, computed, onMounted, onUnmounted, watch } from 'vue';
 import CartIcon from './CartIcon.vue';
 import { useStorefrontMenu } from '@/composables/useStorefrontMenu';
 import { useWishlist } from '@/composables/useWishlist';
-import { Heart } from 'lucide-vue-next';
+import { Heart, Menu, Search, X } from 'lucide-vue-next';
 import axios from 'axios';
 import { useCurrency } from '@/composables/useCurrency';
+import { useThemeSettings } from '@/composables/useThemeSettings';
 
 interface SearchSuggestion {
     id: number;
@@ -22,8 +23,10 @@ interface Props {
         name: string;
         url: string;
         description: string;
+        logo?: string | null;
     };
     categories?: any[];
+    containerStyle?: Record<string, string>;
 }
 
 const props = withDefaults(defineProps<Props>(), {
@@ -33,7 +36,8 @@ const props = withDefaults(defineProps<Props>(), {
         url: '/',
         description: 'E-commerce Platform'
     }),
-    categories: () => []
+    categories: () => [],
+    containerStyle: () => ({}),
 });
 
 const page = usePage();
@@ -42,6 +46,10 @@ const user = computed(() => auth.value?.user);
 
 const { wishlistCount, fetchWishlist } = useWishlist();
 const { formatPrice } = useCurrency();
+const { primary, stickyHeader, wishlistEnabled } = useThemeSettings();
+
+const mobileMenuOpen = ref(false);
+const mobileSearchOpen = ref(false);
 
 const searchQuery = ref('');
 const suggestions = ref<SearchSuggestion[]>([]);
@@ -59,7 +67,14 @@ let closeTimeout: ReturnType<typeof setTimeout> | null = null;
 let userMenuTimeout: ReturnType<typeof setTimeout> | null = null;
 let categoriesTimeout: ReturnType<typeof setTimeout> | null = null;
 
-const primaryColor = computed(() => props.theme?.settings?.['colors.primary'] ?? props.theme?.settings?.['colors.primary_color'] ?? props.theme?.settings?.primary_color ?? '#3b82f6');
+const closeMobileMenu = () => {
+    mobileMenuOpen.value = false;
+    mobileSearchOpen.value = false;
+};
+
+watch(mobileMenuOpen, (open) => {
+    document.body.style.overflow = open ? 'hidden' : '';
+});
 
 const toggleDropdown = (itemId: number) => {
     if (closeTimeout) {
@@ -232,6 +247,7 @@ onMounted(() => {
 
 onUnmounted(() => {
     document.removeEventListener('click', handleClickOutside);
+    document.body.style.overflow = '';
     if (debounceTimeout) {
         clearTimeout(debounceTimeout);
     }
@@ -239,23 +255,36 @@ onUnmounted(() => {
 </script>
 
 <template>
-    <header class="bg-white shadow-sm sticky top-0 z-50">
-        <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-            <div class="flex h-16 items-center justify-between">
+    <header
+        class="bg-white shadow-sm z-50"
+        :class="{ 'sticky top-0': stickyHeader }"
+    >
+        <div class="mx-auto px-4 sm:px-6 lg:px-8" :style="containerStyle">
+            <div class="flex h-16 items-center justify-between gap-3">
+                <!-- Mobile menu -->
+                <button
+                    type="button"
+                    class="md:hidden p-2 rounded-lg text-slate-700 hover:bg-slate-100"
+                    aria-label="Open menu"
+                    @click="mobileMenuOpen = true"
+                >
+                    <Menu class="w-6 h-6" />
+                </button>
+
                 <!-- Logo -->
-                <div class="flex items-center">
-                    <Link href="/" class="flex items-center">
-                        <img 
+                <div class="flex items-center flex-1 md:flex-none">
+                    <Link href="/" class="flex items-center" @click="closeMobileMenu">
+                        <img
                             v-if="siteConfig.logo"
-                            :src="`/storage/${siteConfig.logo}`" 
+                            :src="`/storage/${siteConfig.logo}`"
                             :alt="siteConfig.name"
                             class="h-10 object-contain"
                             :style="{ maxWidth: '200px' }"
                         />
-                        <h1 
+                        <h1
                             v-else
-                            class="text-2xl font-bold"
-                            :style="{ color: primaryColor }"
+                            class="text-xl md:text-2xl font-bold"
+                            :style="{ color: primary }"
                         >
                             {{ siteConfig.name }}
                         </h1>
@@ -380,7 +409,8 @@ onUnmounted(() => {
                                         <hr class="my-2" />
                                         <Link
                                             href="/products"
-                                            class="block px-4 py-2 text-sm text-indigo-600 hover:bg-gray-100 font-medium transition-colors"
+                                            class="block px-4 py-2 text-sm font-medium transition-colors hover:bg-gray-100"
+                                            :style="{ color: primary }"
                                         >
                                             View All Categories →
                                         </Link>
@@ -405,7 +435,17 @@ onUnmounted(() => {
                 </nav>
 
                 <!-- Right Section -->
-                <div class="flex items-center space-x-4">
+                <div class="flex items-center space-x-2 md:space-x-4">
+                    <!-- Mobile search toggle -->
+                    <button
+                        type="button"
+                        class="md:hidden p-2 rounded-lg text-slate-700 hover:bg-slate-100"
+                        aria-label="Search"
+                        @click="mobileSearchOpen = !mobileSearchOpen"
+                    >
+                        <Search class="w-5 h-5" />
+                    </button>
+
                     <!-- Search -->
                     <div class="relative hidden md:block">
                         <input
@@ -413,7 +453,7 @@ onUnmounted(() => {
                             v-model="searchQuery"
                             type="text"
                             placeholder="Search products..."
-                            class="w-64 rounded-lg border border-gray-300 px-4 py-2 pl-10 pr-10 focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500"
+                            class="w-64 rounded-lg border border-gray-300 px-4 py-2 pl-10 pr-10 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                             @input="onSearchInput"
                             @keydown="handleKeyDown"
                             @focus="searchQuery.length >= 2 && fetchSuggestions()"
@@ -421,10 +461,11 @@ onUnmounted(() => {
                             autocomplete="off"
                         />
                         <!-- Loading Spinner -->
-                        <svg 
+                        <svg
                             v-if="isSearching"
-                            class="absolute left-3 top-2.5 h-5 w-5 text-indigo-500 animate-spin" 
-                            fill="none" 
+                            class="absolute left-3 top-2.5 h-5 w-5 animate-spin"
+                            :style="{ color: primary }"
+                            fill="none"
                             viewBox="0 0 24 24"
                         >
                             <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
@@ -467,7 +508,7 @@ onUnmounted(() => {
                                 @click="handleSearch(suggestion)"
                                 :class="[
                                     'flex items-center gap-3 px-4 py-3 cursor-pointer transition-colors',
-                                    selectedIndex === index ? 'bg-indigo-50' : 'hover:bg-gray-50'
+                                    selectedIndex === index ? 'bg-blue-50' : 'hover:bg-gray-50'
                                 ]"
                             >
                                 <!-- Product Image -->
@@ -478,8 +519,8 @@ onUnmounted(() => {
                                         :alt="suggestion.name"
                                         class="w-full h-full object-cover"
                                     />
-                                    <div v-else class="w-full h-full flex items-center justify-center text-gray-400 text-xl">
-                                        📦
+                                    <div v-else class="w-full h-full flex items-center justify-center text-gray-400">
+                                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" /></svg>
                                     </div>
                                 </div>
                                 
@@ -488,7 +529,7 @@ onUnmounted(() => {
                                     <p class="text-sm font-medium text-gray-900 truncate">
                                         {{ suggestion.name }}
                                     </p>
-                                    <p class="text-sm text-indigo-600 font-semibold">
+                                    <p class="text-sm font-semibold" :style="{ color: primary }">
                                         {{ formatPrice(suggestion.price) }}
                                     </p>
                                 </div>
@@ -505,9 +546,9 @@ onUnmounted(() => {
                     <CartIcon />
 
                     <!-- Wishlist Icon -->
-                    <Link 
-                        v-if="user"
-                        href="/account/wishlist" 
+                    <Link
+                        v-if="user && wishlistEnabled"
+                        href="/account/wishlist"
                         class="relative p-2 text-gray-700 hover:text-red-500 transition-colors"
                         title="Wishlist"
                     >
@@ -522,17 +563,17 @@ onUnmounted(() => {
 
                     <!-- Auth Links - Show if NOT logged in -->
                     <template v-if="!user">
-                        <Link 
-                            href="/login" 
-                            class="rounded-lg px-4 py-2 text-sm font-medium text-white hover:opacity-90 transition-opacity"
-                            :style="{ backgroundColor: primaryColor }"
+                        <Link
+                            href="/login"
+                            class="hidden sm:inline-flex rounded-lg px-4 py-2 text-sm font-medium text-white hover:opacity-90 transition-opacity"
+                            :style="{ backgroundColor: primary }"
                         >
                             Login
                         </Link>
-                        <Link 
-                            href="/register" 
-                            class="rounded-lg border-2 px-4 py-2 text-sm font-medium hover:bg-gray-50 transition-colors"
-                            :style="{ borderColor: primaryColor, color: primaryColor }"
+                        <Link
+                            href="/register"
+                            class="hidden sm:inline-flex rounded-lg border-2 px-4 py-2 text-sm font-medium hover:bg-gray-50 transition-colors"
+                            :style="{ borderColor: primary, color: primary }"
                         >
                             Register
                         </Link>
@@ -544,7 +585,10 @@ onUnmounted(() => {
                             @click="toggleUserMenu"
                             class="flex items-center space-x-2 rounded-lg px-3 py-2 hover:bg-gray-100 transition-colors"
                         >
-                            <div class="w-8 h-8 rounded-full bg-indigo-600 flex items-center justify-center text-white font-medium">
+                            <div
+                                class="w-8 h-8 rounded-full flex items-center justify-center text-white font-medium"
+                                :style="{ backgroundColor: primary }"
+                            >
                                 {{ user.name?.charAt(0).toUpperCase() }}
                             </div>
                             <span class="text-sm font-medium text-gray-700">{{ user.name }}</span>
@@ -621,6 +665,122 @@ onUnmounted(() => {
                     </div>
                 </div>
             </div>
+
+            <!-- Mobile search bar -->
+            <div v-if="mobileSearchOpen" class="md:hidden pb-4">
+                <div class="relative">
+                    <input
+                        v-model="searchQuery"
+                        type="text"
+                        placeholder="Search products..."
+                        class="w-full rounded-lg border border-gray-300 px-4 py-2 pl-10 pr-4 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        @input="onSearchInput"
+                        @keydown="handleKeyDown"
+                        autocomplete="off"
+                    />
+                    <Search class="absolute left-3 top-2.5 h-5 w-5 text-gray-400" />
+                </div>
+            </div>
         </div>
+
+        <!-- Mobile drawer -->
+        <Teleport to="body">
+            <Transition name="fade">
+                <div
+                    v-if="mobileMenuOpen"
+                    class="fixed inset-0 z-[100] md:hidden"
+                >
+                    <div class="absolute inset-0 bg-black/40" @click="closeMobileMenu" />
+                    <aside class="absolute left-0 top-0 h-full w-[min(320px,88vw)] bg-white shadow-xl flex flex-col">
+                        <div class="flex items-center justify-between px-4 h-16 border-b border-slate-200">
+                            <span class="font-bold text-slate-900">{{ siteConfig.name }}</span>
+                            <button type="button" class="p-2 rounded-lg hover:bg-slate-100" aria-label="Close menu" @click="closeMobileMenu">
+                                <X class="w-5 h-5" />
+                            </button>
+                        </div>
+
+                        <nav class="flex-1 overflow-y-auto p-4 space-y-1">
+                            <template v-if="!loading && menus.header.length > 0">
+                                <template v-for="item in menus.header" :key="item.id">
+                                    <Link
+                                        v-if="!hasChildren(item)"
+                                        :href="getMenuUrl(item)"
+                                        class="block px-3 py-3 rounded-lg text-slate-700 hover:bg-blue-50 font-medium"
+                                        @click="closeMobileMenu"
+                                    >
+                                        {{ item.title }}
+                                    </Link>
+                                    <div v-else class="py-1">
+                                        <p class="px-3 py-2 text-xs font-semibold uppercase tracking-wide text-slate-400">{{ item.title }}</p>
+                                        <Link
+                                            v-for="child in item.children"
+                                            :key="child.id"
+                                            :href="getMenuUrl(child)"
+                                            class="block px-3 py-2 rounded-lg text-slate-700 hover:bg-blue-50"
+                                            @click="closeMobileMenu"
+                                        >
+                                            {{ child.title }}
+                                        </Link>
+                                    </div>
+                                </template>
+                            </template>
+                            <template v-else>
+                                <Link href="/products" class="block px-3 py-3 rounded-lg text-slate-700 hover:bg-blue-50 font-medium" @click="closeMobileMenu">Shop</Link>
+                                <Link href="/products?on_sale=1" class="block px-3 py-3 rounded-lg text-slate-700 hover:bg-blue-50 font-medium" @click="closeMobileMenu">Deals</Link>
+                                <Link href="/blog" class="block px-3 py-3 rounded-lg text-slate-700 hover:bg-blue-50 font-medium" @click="closeMobileMenu">Blog</Link>
+                                <Link href="/about-us" class="block px-3 py-3 rounded-lg text-slate-700 hover:bg-blue-50 font-medium" @click="closeMobileMenu">About</Link>
+                                <div v-if="categories?.length" class="pt-2">
+                                    <p class="px-3 py-2 text-xs font-semibold uppercase tracking-wide text-slate-400">Categories</p>
+                                    <Link
+                                        v-for="category in categories"
+                                        :key="category.id"
+                                        :href="`/category/${category.slug}`"
+                                        class="block px-3 py-2 rounded-lg text-slate-700 hover:bg-blue-50"
+                                        @click="closeMobileMenu"
+                                    >
+                                        {{ category.name }}
+                                    </Link>
+                                </div>
+                            </template>
+                        </nav>
+
+                        <div class="p-4 border-t border-slate-200 space-y-2">
+                            <template v-if="!user">
+                                <Link
+                                    href="/login"
+                                    class="block w-full text-center rounded-lg px-4 py-3 text-sm font-medium text-white"
+                                    :style="{ backgroundColor: primary }"
+                                    @click="closeMobileMenu"
+                                >
+                                    Login
+                                </Link>
+                                <Link
+                                    href="/register"
+                                    class="block w-full text-center rounded-lg border-2 px-4 py-3 text-sm font-medium"
+                                    :style="{ borderColor: primary, color: primary }"
+                                    @click="closeMobileMenu"
+                                >
+                                    Create Account
+                                </Link>
+                            </template>
+                            <Link v-else href="/account" class="block w-full text-center rounded-lg bg-slate-100 px-4 py-3 text-sm font-medium text-slate-800" @click="closeMobileMenu">
+                                My Account
+                            </Link>
+                        </div>
+                    </aside>
+                </div>
+            </Transition>
+        </Teleport>
     </header>
 </template>
+
+<style scoped>
+.fade-enter-active,
+.fade-leave-active {
+    transition: opacity 0.2s ease;
+}
+.fade-enter-from,
+.fade-leave-to {
+    opacity: 0;
+}
+</style>

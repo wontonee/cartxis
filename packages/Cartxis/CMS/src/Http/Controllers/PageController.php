@@ -27,33 +27,77 @@ class PageController extends Controller
      */
     public function show(string $slug): Response|RedirectResponse
     {
-        // Cache page for 1 hour
-        $page = Cache::remember("page:{$slug}", 3600, function () use ($slug) {
-            return $this->pageRepository->findByUrlKey($slug);
+        // Drop legacy cache entries that stored serialized Eloquent models
+        Cache::forget("page:{$slug}");
+
+        // Cache scalar page data — never cache Eloquent models (unserialize fails across requests)
+        $pageData = Cache::remember("page:data:{$slug}", 3600, function () use ($slug) {
+            $page = $this->pageRepository->findByUrlKey($slug);
+
+            if (! $page) {
+                return null;
+            }
+
+            return [
+                'id'               => $page->id,
+                'title'            => $page->title,
+                'content'          => $page->content,
+                'meta_title'       => $page->meta_title ?? $page->title,
+                'meta_description' => $page->meta_description,
+                'meta_keywords'    => $page->meta_keywords,
+                'url_key'          => $page->url_key,
+                'status'           => $page->status,
+                'is_homepage'      => (bool) $page->is_homepage,
+                'created_at'       => $page->created_at?->format('F j, Y'),
+                'updated_at'       => $page->updated_at?->format('F j, Y'),
+            ];
         });
 
-        if (!$page || $page->status !== 'published') {
+        // #region agent log
+        file_put_contents(
+            '/Volumes/Crucial/webapps/cartxis/.cursor/debug-97113c.log',
+            json_encode([
+                'sessionId'    => '97113c',
+                'runId'        => 'post-fix',
+                'hypothesisId' => 'A',
+                'location'     => 'PageController.php:show',
+                'message'      => 'CMS page lookup',
+                'data'         => [
+                    'slug'       => $slug,
+                    'found'      => $pageData !== null,
+                    'status'     => $pageData['status'] ?? null,
+                    'cacheKey'   => "page:data:{$slug}",
+                ],
+                'timestamp'    => (int) round(microtime(true) * 1000),
+            ]) . "\n",
+            FILE_APPEND
+        );
+        // #endregion
+
+        if (! $pageData || $pageData['status'] !== 'published') {
             abort(404, 'Page not found');
         }
 
         // Homepage lives at / (HomeController). Redirect /home → /
-        if ($page->is_homepage) {
+        if ($pageData['is_homepage']) {
             return redirect('/');
         }
 
+        $page = Page::find($pageData['id']);
+
         return Inertia::render($this->themeResolver->resolve('CMS/Page'), [
             'page' => [
-                'id'              => $page->id,
-                'title'           => $page->title,
-                'content'         => $page->content,
-                'meta_title'      => $page->meta_title ?? $page->title,
-                'meta_description' => $page->meta_description,
-                'meta_keywords'   => $page->meta_keywords,
-                'url_key'         => $page->url_key,
-                'created_at'      => $page->created_at?->format('F j, Y'),
-                'updated_at'      => $page->updated_at?->format('F j, Y'),
+                'id'               => $pageData['id'],
+                'title'            => $pageData['title'],
+                'content'          => $pageData['content'],
+                'meta_title'       => $pageData['meta_title'],
+                'meta_description' => $pageData['meta_description'],
+                'meta_keywords'    => $pageData['meta_keywords'],
+                'url_key'          => $pageData['url_key'],
+                'created_at'       => $pageData['created_at'],
+                'updated_at'       => $pageData['updated_at'],
             ],
-            'layoutData' => $this->layoutService->getPublishedForPage($page)?->layout_data,
+            'layoutData' => $page ? $this->layoutService->getPublishedForPage($page)?->layout_data : null,
         ]);
     }
 }

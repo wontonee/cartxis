@@ -1,11 +1,11 @@
 {
     "name": "Cartxis Default",
     "slug": "cartxis-default",
-    "description": "The default Cartxis Commerce theme with clean, modern design built with Tailwind CSS and Vue 3.",
-    "version": "1.0.0",
+    "description": "A vibrant, mobile-first storefront theme with UI Editor homepage layouts, quick view, and modern blue retail polish.",
+    "version": "2.0.0",
     "author": "Cartxis Team",
     "author_url": "https://cartxis-commerce.com",
-    "screenshot": null,
+    "screenshot": "screenshots/theme-preview.svg",
     "is_default": true,
     "supports": [
         "widgets",
@@ -17,9 +17,9 @@
     ],
     "settings": {
         "colors": {
-            "primary": "#3b82f6",
-            "secondary": "#8b5cf6",
-            "accent": "#f59e0b",
+            "primary": "#2563eb",
+            "secondary": "#1e40af",
+            "accent": "#0ea5e9",
             "success": "#10b981",
             "danger": "#ef4444",
             "warning": "#f59e0b",
@@ -41,7 +41,8 @@
             "back_to_top": true,
             "wishlist": true,
             "quick_view": true,
-            "product_zoom": true
+            "product_zoom": true,
+            "show_platform_branding": false
         }
     }
 }

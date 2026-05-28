@@ -2,6 +2,7 @@
 
 namespace Cartxis\CMS\Database\Seeders;
 
+use Cartxis\CMS\Services\StorefrontMenuSyncService;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
 
@@ -16,6 +17,10 @@ class StorefrontMenuSeeder extends Seeder
         $this->createHeaderMenu();
         $this->createFooterMenu();
         $this->createMobileMenu();
+
+        $sync = app(StorefrontMenuSyncService::class);
+        $sync->fixDealsUrls();
+        $sync->syncCategoryMenuItems();
     }
 
     /** Upsert a single menu record; returns its ID. */
@@ -42,25 +47,16 @@ class StorefrontMenuSeeder extends Seeder
             ['title' => 'Shop', 'icon' => 'shopping-bag', 'route' => null, 'url' => '/products', 'menu_type' => 'header', 'parent_id' => null, 'order' => 1, 'active' => true]
         );
 
-        $categoriesId = $this->upsert(
+        $this->upsert(
             ['key' => 'categories', 'location' => 'storefront'],
             ['title' => 'Categories', 'icon' => 'folder-tree', 'route' => null, 'url' => '#', 'menu_type' => 'header', 'parent_id' => null, 'order' => 2, 'active' => true]
         );
 
-        foreach ([
-            ['key' => 'category-electronics', 'title' => 'Electronics',  'url' => '/category/electronics', 'order' => 1],
-            ['key' => 'category-clothing',    'title' => 'Clothing',      'url' => '/category/clothing',    'order' => 2],
-            ['key' => 'category-home',        'title' => 'Home & Garden', 'url' => '/category/home-garden', 'order' => 3],
-        ] as $cat) {
-            $this->upsert(
-                ['key' => $cat['key'], 'location' => 'storefront'],
-                ['title' => $cat['title'], 'icon' => null, 'route' => null, 'url' => $cat['url'], 'menu_type' => 'header', 'parent_id' => $categoriesId, 'order' => $cat['order'], 'active' => true]
-            );
-        }
+        // Category children are synced from the categories table via StorefrontMenuSyncService
 
         $this->upsert(
             ['key' => 'deals', 'location' => 'storefront'],
-            ['title' => 'Deals', 'icon' => 'percent', 'route' => null, 'url' => '/deals', 'menu_type' => 'header', 'parent_id' => null, 'order' => 3, 'active' => true]
+            ['title' => 'Deals', 'icon' => 'percent', 'route' => null, 'url' => '/products?on_sale=1', 'menu_type' => 'header', 'parent_id' => null, 'order' => 3, 'active' => true]
         );
 
         $this->upsert(
@@ -124,7 +120,7 @@ class StorefrontMenuSeeder extends Seeder
     {
         foreach ([
             ['key' => 'mobile-shop',    'title' => 'Shop All', 'icon' => 'shopping-bag', 'url' => '/products', 'order' => 1],
-            ['key' => 'mobile-deals',   'title' => 'Deals',    'icon' => 'percent',      'url' => '/deals',    'order' => 2],
+            ['key' => 'mobile-deals',   'title' => 'Deals',    'icon' => 'percent',      'url' => '/products?on_sale=1', 'order' => 2],
             ['key' => 'mobile-account', 'title' => 'Account',  'icon' => 'users',        'url' => '/account',  'order' => 3],
             ['key' => 'mobile-help',    'title' => 'Help',     'icon' => 'help-circle',  'url' => '/help',     'order' => 4],
         ] as $item) {

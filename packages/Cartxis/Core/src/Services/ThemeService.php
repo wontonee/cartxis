@@ -68,9 +68,26 @@ class ThemeService
                     'is_default'  => $config['is_default'] ?? false,
                 ]
             );
+
+            $this->publishPublicAssets($directory, $slug);
         }
 
         return $discovered;
+    }
+
+    /**
+     * Copy theme assets (hero images, etc.) into public/themes/{slug}/.
+     */
+    protected function publishPublicAssets(string $themePath, string $slug): void
+    {
+        $assetsPath = $themePath . '/assets';
+        if (! is_dir($assetsPath)) {
+            return;
+        }
+
+        $publicThemePath = public_path("themes/{$slug}");
+        File::ensureDirectoryExists($publicThemePath);
+        File::copyDirectory($assetsPath, $publicThemePath . '/assets');
     }
 
     /**

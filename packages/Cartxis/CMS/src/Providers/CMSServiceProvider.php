@@ -27,6 +27,7 @@ class CMSServiceProvider extends ServiceProvider
             $this->app->singleton(\Cartxis\CMS\Repositories\PageRepository::class);
             $this->app->singleton(\Cartxis\CMS\Services\BlockService::class);
             $this->app->singleton(\Cartxis\CMS\Repositories\BlockRepository::class);
+            $this->app->singleton(\Cartxis\CMS\Services\StorefrontMenuSyncService::class);
     }
 
     /**

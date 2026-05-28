@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Cartxis\Setup\Services;
 
+use Cartxis\CMS\Services\StorefrontMenuSyncService;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -104,6 +105,12 @@ class DemoDataService
                 // Get import statistics
                 $results['stats'] = $this->getImportStatistics();
                 $results['message'] = "Demo data imported successfully for {$config['name']}";
+
+                // Sync storefront category menu to match imported catalog
+                $sync = app(StorefrontMenuSyncService::class);
+                $sync->fixDealsUrls();
+                $synced = $sync->syncCategoryMenuItems();
+                Log::info("Storefront category menu synced: {$synced} item(s)");
             }
 
             // Save the selected business type in settings

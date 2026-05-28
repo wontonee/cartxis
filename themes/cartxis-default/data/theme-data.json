@@ -1,7 +1,34 @@
 {
     "homepage": {
-        "version": "1.0",
+        "version": "2.0",
         "sections": [
+            {
+                "id": "sec_promo_strip",
+                "type": "section",
+                "settings": {
+                    "background_color": "#1e40af",
+                    "background_image": null,
+                    "padding_top": 10,
+                    "padding_bottom": 10,
+                    "full_width": true
+                },
+                "columns": [
+                    {
+                        "id": "col_promo_strip",
+                        "width": 12,
+                        "settings": { "padding": 0, "align": "center" },
+                        "blocks": [
+                            {
+                                "id": "blk_promo_strip",
+                                "type": "text",
+                                "settings": {
+                                    "content": "<p style='text-align:center;color:#ffffff;font-size:14px;font-weight:600;margin:0;letter-spacing:0.02em;'>Free shipping on orders over $50 &nbsp;·&nbsp; Easy 30-day returns &nbsp;·&nbsp; Secure checkout</p>"
+                                }
+                            }
+                        ]
+                    }
+                ]
+            },
             {
                 "id": "sec_demo_slider",
                 "type": "section",
@@ -16,10 +43,7 @@
                     {
                         "id": "col_demo_slider",
                         "width": 12,
-                        "settings": {
-                            "padding": 0,
-                            "align": "center"
-                        },
+                        "settings": { "padding": 0, "align": "center" },
                         "blocks": [
                             {
                                 "id": "blk_demo_slider",
@@ -31,38 +55,38 @@
                                     "slides": [
                                         {
                                             "id": "s1",
-                                            "image": "",
-                                            "grad_from": "#1e3a5f",
-                                            "grad_to": "#0ea5e9",
-                                            "badge": "New Arrivals",
-                                            "headline": "Summer Collection 2026",
-                                            "subheading": "Discover amazing products at unbeatable prices. Quality you can trust, delivered to your door.",
+                                            "image": "/themes/cartxis-default/assets/hero/slide-1.jpg",
+                                            "grad_from": "#1e3a8a",
+                                            "grad_to": "#2563eb",
+                                            "badge": "New Season",
+                                            "headline": "Shop the Latest Arrivals",
+                                            "subheading": "Fresh styles, premium quality, and prices you'll love — delivered fast to your door.",
                                             "cta_text": "Shop Now",
                                             "cta_url": "/products",
                                             "text_align": "center"
                                         },
                                         {
                                             "id": "s2",
-                                            "image": "",
-                                            "grad_from": "#7c3aed",
-                                            "grad_to": "#ec4899",
-                                            "badge": "Exclusive Deals",
-                                            "headline": "Up to 50% Off",
-                                            "subheading": "Limited-time offers on our best-selling products. Don't miss out on these incredible deals.",
+                                            "image": "/themes/cartxis-default/assets/hero/slide-2.jpg",
+                                            "grad_from": "#1e40af",
+                                            "grad_to": "#0ea5e9",
+                                            "badge": "Limited Offers",
+                                            "headline": "Up to 40% Off Best Sellers",
+                                            "subheading": "Handpicked deals on customer favorites. Grab them before they're gone.",
                                             "cta_text": "View Deals",
-                                            "cta_url": "/products",
+                                            "cta_url": "/products?on_sale=1",
                                             "text_align": "center"
                                         },
                                         {
                                             "id": "s3",
-                                            "image": "",
-                                            "grad_from": "#064e3b",
-                                            "grad_to": "#0d9488",
-                                            "badge": "Free Shipping",
-                                            "headline": "Free Delivery on All Orders",
-                                            "subheading": "Shop with confidence. Free shipping on every order, easy returns and 24/7 customer support.",
-                                            "cta_text": "Start Shopping",
-                                            "cta_url": "/products",
+                                            "image": "/themes/cartxis-default/assets/hero/slide-3.jpg",
+                                            "grad_from": "#172554",
+                                            "grad_to": "#3b82f6",
+                                            "badge": "Member Perks",
+                                            "headline": "Join & Save 10% Today",
+                                            "subheading": "Create a free account for exclusive offers, faster checkout, and order tracking.",
+                                            "cta_text": "Create Account",
+                                            "cta_url": "/register",
                                             "text_align": "center"
                                         }
                                     ]
@@ -76,7 +100,7 @@
                 "id": "sec_demo_features",
                 "type": "section",
                 "settings": {
-                    "background_color": "#f9fafb",
+                    "background_color": "#f8fafc",
                     "background_image": null,
                     "padding_top": 56,
                     "padding_bottom": 56,
@@ -86,10 +110,7 @@
                     {
                         "id": "col_demo_feat1",
                         "width": 3,
-                        "settings": {
-                            "padding": 16,
-                            "align": "center"
-                        },
+                        "settings": { "padding": 16, "align": "center" },
                         "blocks": [
                             {
                                 "id": "blk_demo_feat1",
@@ -99,7 +120,7 @@
                                     "icon_color": "#2563eb",
                                     "icon_size": 36,
                                     "title": "Free Shipping",
-                                    "description": "Free shipping on all orders over $50. Fast, reliable delivery straight to your door.",
+                                    "description": "Complimentary delivery on qualifying orders. Fast, tracked shipping nationwide.",
                                     "align": "center"
                                 }
                             }
@@ -108,20 +129,17 @@
                     {
                         "id": "col_demo_feat2",
                         "width": 3,
-                        "settings": {
-                            "padding": 16,
-                            "align": "center"
-                        },
+                        "settings": { "padding": 16, "align": "center" },
                         "blocks": [
                             {
                                 "id": "blk_demo_feat2",
                                 "type": "icon_box",
                                 "settings": {
                                     "icon": "shield",
-                                    "icon_color": "#16a34a",
+                                    "icon_color": "#1d4ed8",
                                     "icon_size": 36,
-                                    "title": "Secure Payment",
-                                    "description": "Your payment information is always protected with industry-standard encryption.",
+                                    "title": "Secure Checkout",
+                                    "description": "256-bit encryption and trusted payment partners keep every transaction safe.",
                                     "align": "center"
                                 }
                             }
@@ -130,20 +148,17 @@
                     {
                         "id": "col_demo_feat3",
                         "width": 3,
-                        "settings": {
-                            "padding": 16,
-                            "align": "center"
-                        },
+                        "settings": { "padding": 16, "align": "center" },
                         "blocks": [
                             {
                                 "id": "blk_demo_feat3",
                                 "type": "icon_box",
                                 "settings": {
                                     "icon": "refresh-cw",
-                                    "icon_color": "#d97706",
+                                    "icon_color": "#0ea5e9",
                                     "icon_size": 36,
                                     "title": "Easy Returns",
-                                    "description": "Not satisfied? Return any item within 30 days for a full refund, no questions asked.",
+                                    "description": "Changed your mind? Return within 30 days for a hassle-free refund or exchange.",
                                     "align": "center"
                                 }
                             }
@@ -152,20 +167,17 @@
                     {
                         "id": "col_demo_feat4",
                         "width": 3,
-                        "settings": {
-                            "padding": 16,
-                            "align": "center"
-                        },
+                        "settings": { "padding": 16, "align": "center" },
                         "blocks": [
                             {
                                 "id": "blk_demo_feat4",
                                 "type": "icon_box",
                                 "settings": {
                                     "icon": "headphones",
-                                    "icon_color": "#7c3aed",
+                                    "icon_color": "#3b82f6",
                                     "icon_size": 36,
-                                    "title": "24/7 Support",
-                                    "description": "Our dedicated support team is available around the clock to help you with any questions.",
+                                    "title": "Expert Support",
+                                    "description": "Real humans ready to help — before, during, and after your purchase.",
                                     "align": "center"
                                 }
                             }
@@ -177,7 +189,7 @@
                 "id": "sec_demo_categories",
                 "type": "section",
                 "settings": {
-                    "background_color": "#f9fafb",
+                    "background_color": "#ffffff",
                     "background_image": null,
                     "padding_top": 64,
                     "padding_bottom": 64,
@@ -187,26 +199,23 @@
                     {
                         "id": "col_demo_categories",
                         "width": 12,
-                        "settings": {
-                            "padding": 16,
-                            "align": "left"
-                        },
+                        "settings": { "padding": 16, "align": "left" },
                         "blocks": [
                             {
                                 "id": "blk_cat_h",
                                 "type": "heading",
                                 "settings": {
                                     "level": "h2",
-                                    "text": "Shop by Category",
+                                    "text": "Browse by Category",
                                     "align": "center",
-                                    "color": "#111827"
+                                    "color": "#0f172a"
                                 }
                             },
                             {
                                 "id": "blk_cat_sub",
                                 "type": "text",
                                 "settings": {
-                                    "content": "<p style='text-align:center;color:#6b7280;margin-bottom:32px;'>Explore our wide range of product categories</p>"
+                                    "content": "<p style='text-align:center;color:#64748b;margin-bottom:32px;max-width:560px;margin-left:auto;margin-right:auto;'>Find exactly what you need — from everyday essentials to premium picks.</p>"
                                 }
                             },
                             {
@@ -223,6 +232,96 @@
                 ]
             },
             {
+                "id": "sec_promo_split",
+                "type": "section",
+                "settings": {
+                    "background_color": "#eff6ff",
+                    "background_image": null,
+                    "padding_top": 64,
+                    "padding_bottom": 64,
+                    "full_width": false
+                },
+                "columns": [
+                    {
+                        "id": "col_promo_left",
+                        "width": 6,
+                        "settings": { "padding": 24, "align": "left" },
+                        "blocks": [
+                            {
+                                "id": "blk_promo_h",
+                                "type": "heading",
+                                "settings": {
+                                    "level": "h2",
+                                    "text": "Curated Collections",
+                                    "align": "left",
+                                    "color": "#1e3a8a"
+                                }
+                            },
+                            {
+                                "id": "blk_promo_t",
+                                "type": "text",
+                                "settings": {
+                                    "content": "<p style='color:#475569;line-height:1.7;margin-bottom:24px;'>Discover staff picks and trending products updated weekly. Quality you can see, value you can trust.</p>"
+                                }
+                            },
+                            {
+                                "id": "blk_promo_btn",
+                                "type": "button",
+                                "settings": {
+                                    "label": "Explore Collections",
+                                    "text": "Explore Collections",
+                                    "url": "/products",
+                                    "align": "left",
+                                    "variant": "primary",
+                                    "style": "solid",
+                                    "bg_color": "#2563eb",
+                                    "text_color": "#ffffff"
+                                }
+                            }
+                        ]
+                    },
+                    {
+                        "id": "col_promo_right",
+                        "width": 6,
+                        "settings": { "padding": 24, "align": "left" },
+                        "blocks": [
+                            {
+                                "id": "blk_promo_h2",
+                                "type": "heading",
+                                "settings": {
+                                    "level": "h2",
+                                    "text": "Flash Sale Ends Soon",
+                                    "align": "left",
+                                    "color": "#1e3a8a"
+                                }
+                            },
+                            {
+                                "id": "blk_promo_t2",
+                                "type": "text",
+                                "settings": {
+                                    "content": "<p style='color:#475569;line-height:1.7;margin-bottom:24px;'>Save big on top-rated products this week only. Limited stock — shop the sale before it's gone.</p>"
+                                }
+                            },
+                            {
+                                "id": "blk_promo_btn2",
+                                "type": "button",
+                                "settings": {
+                                    "label": "Shop Flash Sale",
+                                    "text": "Shop Flash Sale",
+                                    "url": "/products?on_sale=1",
+                                    "align": "left",
+                                    "variant": "outline",
+                                    "style": "outline",
+                                    "bg_color": "#2563eb",
+                                    "text_color": "#2563eb"
+                                }
+                            }
+                        ]
+                    }
+                ]
+            },
+            {
+                "id": "sec_demo_products",
                 "type": "section",
                 "settings": {
                     "background_color": "#ffffff",
@@ -235,10 +334,7 @@
                     {
                         "id": "col_demo_products",
                         "width": 12,
-                        "settings": {
-                            "padding": 16,
-                            "align": "left"
-                        },
+                        "settings": { "padding": 16, "align": "left" },
                         "blocks": [
                             {
                                 "id": "blk_prod_h",
@@ -247,14 +343,14 @@
                                     "level": "h2",
                                     "text": "Featured Products",
                                     "align": "center",
-                                    "color": "#111827"
+                                    "color": "#0f172a"
                                 }
                             },
                             {
                                 "id": "blk_prod_sub",
                                 "type": "text",
                                 "settings": {
-                                    "content": "<p style='text-align:center;color:#6b7280;margin-bottom:32px;'>Handpicked products our customers love most</p>"
+                                    "content": "<p style='text-align:center;color:#64748b;margin-bottom:32px;'>Top-rated picks loved by thousands of shoppers.</p>"
                                 }
                             },
                             {
@@ -267,6 +363,69 @@
                                     "show_price": true,
                                     "show_cart": true,
                                     "limit": 8
+                                }
+                            }
+                        ]
+                    }
+                ]
+            },
+            {
+                "id": "sec_testimonials",
+                "type": "section",
+                "settings": {
+                    "background_color": "#f8fafc",
+                    "background_image": null,
+                    "padding_top": 64,
+                    "padding_bottom": 64,
+                    "full_width": false
+                },
+                "columns": [
+                    {
+                        "id": "col_testimonials",
+                        "width": 12,
+                        "settings": { "padding": 16, "align": "center" },
+                        "blocks": [
+                            {
+                                "id": "blk_test_h",
+                                "type": "heading",
+                                "settings": {
+                                    "level": "h2",
+                                    "text": "Loved by Shoppers",
+                                    "align": "center",
+                                    "color": "#0f172a"
+                                }
+                            },
+                            {
+                                "id": "blk_test_sub",
+                                "type": "text",
+                                "settings": {
+                                    "content": "<p style='text-align:center;color:#64748b;margin-bottom:32px;'>Real reviews from real customers.</p>"
+                                }
+                            },
+                            {
+                                "id": "blk_testimonials",
+                                "type": "testimonials",
+                                "settings": {
+                                    "items": [
+                                        {
+                                            "author": "Sarah Mitchell",
+                                            "avatar": null,
+                                            "text": "Fast delivery, great packaging, and the product exceeded my expectations. Will definitely order again!",
+                                            "rating": 5
+                                        },
+                                        {
+                                            "author": "James Chen",
+                                            "avatar": null,
+                                            "text": "The checkout was smooth and customer support answered my question within minutes. Five stars.",
+                                            "rating": 5
+                                        },
+                                        {
+                                            "author": "Emily Rodriguez",
+                                            "avatar": null,
+                                            "text": "Beautiful quality and fair prices. The return process was simple when I needed a size exchange.",
+                                            "rating": 5
+                                        }
+                                    ]
                                 }
                             }
                         ]
@@ -287,10 +446,7 @@
                     {
                         "id": "col_demo_nl",
                         "width": 12,
-                        "settings": {
-                            "padding": 0,
-                            "align": "center"
-                        },
+                        "settings": { "padding": 0, "align": "center" },
                         "blocks": [
                             {
                                 "id": "blk_newsletter",
@@ -298,60 +454,8 @@
                                 "settings": {
                                     "bg_color": "#0f172a",
                                     "layout": "split",
-                                    "title": "Join Thousands of Happy Shoppers",
-                                    "cta_text": "Subscribe Free"
-                                }
-                            }
-                        ]
-                    }
-                ]
-            },
-            {
-                "id": "sec_demo_cta",
-                "type": "section",
-                "settings": {
-                    "background_color": "#1e3a5f",
-                    "background_image": null,
-                    "padding_top": 80,
-                    "padding_bottom": 80,
-                    "full_width": true
-                },
-                "columns": [
-                    {
-                        "id": "col_demo_cta",
-                        "width": 12,
-                        "settings": {
-                            "padding": 24,
-                            "align": "center"
-                        },
-                        "blocks": [
-                            {
-                                "id": "blk_cta_h",
-                                "type": "heading",
-                                "settings": {
-                                    "level": "h2",
-                                    "text": "Join Thousands of Happy Customers",
-                                    "align": "center",
-                                    "color": "#ffffff"
-                                }
-                            },
-                            {
-                                "id": "blk_cta_t",
-                                "type": "text",
-                                "settings": {
-                                    "content": "<p style='text-align:center;color:#cbd5e1;'>Sign up today and get 10% off your first order.</p>"
-                                }
-                            },
-                            {
-                                "id": "blk_cta_btn",
-                                "type": "button",
-                                "settings": {
-                                    "text": "Browse All Products",
-                                    "url": "/products",
-                                    "align": "center",
-                                    "style": "solid",
-                                    "bg_color": "#3b82f6",
-                                    "text_color": "#ffffff"
+                                    "title": "Get 10% Off Your First Order",
+                                    "cta_text": "Subscribe"
                                 }
                             }
                         ]
