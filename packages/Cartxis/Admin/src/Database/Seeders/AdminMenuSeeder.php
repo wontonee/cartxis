@@ -275,6 +275,38 @@ class AdminMenuSeeder extends Seeder
                 'active' => true,
             ],
 
+            // Marketing Children
+            [
+                'key' => 'marketing-coupons',
+                'title' => 'Coupons',
+                'icon' => 'ticket',
+                'route' => 'admin.marketing.coupons.index',
+                'parent_id' => $marketingId,
+                'order' => 10,
+                'location' => 'admin',
+                'active' => true,
+            ],
+            [
+                'key' => 'marketing-promotions',
+                'title' => 'Promotions',
+                'icon' => 'sparkles',
+                'route' => 'admin.marketing.promotions.index',
+                'parent_id' => $marketingId,
+                'order' => 20,
+                'location' => 'admin',
+                'active' => true,
+            ],
+            [
+                'key' => 'marketing-newsletters',
+                'title' => 'Newsletters',
+                'icon' => 'mail',
+                'route' => 'admin.marketing.newsletters.index',
+                'parent_id' => $marketingId,
+                'order' => 30,
+                'location' => 'admin',
+                'active' => true,
+            ],
+
             // Content Children
             [
                 'key' => 'content-pages',
