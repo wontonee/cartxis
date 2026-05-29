@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('extensions', function (Blueprint $table) {
             $table->id();
-            $table->string('code')->unique()->comment('Extension code: vortex-payment-stripe');
+            $table->string('code')->unique()->comment('Extension code: cartxis-payment-stripe');
             $table->string('name')->comment('Display name');
             $table->text('description')->nullable()->comment('Extension description');
             $table->string('version')->comment('Semantic version: 1.0.0');

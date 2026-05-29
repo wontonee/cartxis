@@ -328,23 +328,32 @@ The `UIBlockRenderer` Vue component is shared across all themes. When a publishe
 
 ## 🎨 Theme Development
 
-The default theme is located in `themes/cartxis-default/`.
+Storefront templates live under `templates/storefront/{category}/{slug}/`. The default template is `templates/storefront/general/cartxis-default/`.
 
-### Creating a Custom Theme
+### Creating a Custom Template
 
 ```bash
-cp -r themes/cartxis-default themes/your-theme-name
+cp -r templates/storefront/general/cartxis-default templates/storefront/general/your-theme-name
 ```
 
-Update `config/theme.php`:
+Update `config/theme.php` (or activate via Admin → Appearance):
+
 ```php
-'active' => 'your-theme-name',
+'default' => 'your-theme-name',
 ```
 
 Customise:
-- **Pages**: `themes/your-theme-name/resources/views/pages/`
-- **Components**: `themes/your-theme-name/resources/views/components/`
-- **Layouts**: `themes/your-theme-name/resources/views/layouts/`
+- **Pages**: `templates/storefront/general/your-theme-name/resources/views/pages/`
+- **Components**: `templates/storefront/general/your-theme-name/resources/views/components/`
+- **Layouts**: `templates/storefront/general/your-theme-name/resources/views/layouts/`
+- **Demo data**: `templates/storefront/general/your-theme-name/data/theme-data.json`
+
+Discover and register templates:
+
+```bash
+php artisan theme:discover
+php artisan theme:import-data cartxis-default
+```
 
 ---
 

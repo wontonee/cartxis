@@ -139,7 +139,7 @@ class MigrateOrdersCommand extends Command
         $this->migrateOrderItems($config, $prefix, $wcOrder->id, $order->id);
     }
     
-    private function migrateOrderItems(array $config, string $prefix, int $wcOrderId, int $vortexOrderId): void
+    private function migrateOrderItems(array $config, string $prefix, int $wcOrderId, int $cartxisOrderId): void
     {
         if ($this->hposEnabled) {
             $items = DB::connection($config['connection'])
@@ -160,7 +160,7 @@ class MigrateOrdersCommand extends Command
             
             OrderItem::updateOrCreate(
                 [
-                    'order_id' => $vortexOrderId,
+                    'order_id' => $cartxisOrderId,
                     'product_id' => $itemMeta['product_id'] ?? null,
                 ],
                 [

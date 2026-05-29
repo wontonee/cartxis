@@ -14,17 +14,24 @@ const props = defineProps<{
 
 const page = usePage()
 
-// Active theme slug from Inertia shared props (set by ShareFrontendData middleware)
 const themeSlug = computed(() => (page.props as any).theme?.slug as string | null ?? null)
+
+const templateBlockModules = import.meta.glob<Component>(
+  '../../../../templates/storefront/**/blocks/*Block.vue',
+)
 
 function toPascal(str: string): string {
   if (!str) return 'Text'
   return str.split(/[-_]/).map(w => w.charAt(0).toUpperCase() + w.slice(1)).join('')
 }
 
-// Cache component definitions keyed by theme+type.
-// Re-creating defineAsyncComponent on every render causes Vue to unmount+remount
-// every block, losing state and triggering infinite update loops.
+function loadTemplateBlock(slug: string, pascal: string) {
+  const suffix = `/${slug}/blocks/${pascal}Block.vue`
+  const entry = Object.entries(templateBlockModules).find(([key]) => key.includes(suffix))
+
+  return entry ? entry[1]() : Promise.reject(new Error(`Template block not found: ${suffix}`))
+}
+
 const blockComponentCache = new Map<string, Component>()
 
 function blockComponent(type: string) {
@@ -33,14 +40,11 @@ function blockComponent(type: string) {
   if (!blockComponentCache.has(cacheKey)) {
     const slug   = themeSlug.value
     const pascal = toPascal(type)
-    const silent = { template: '<div />' }   // errorComponent — hides broken blocks silently
+    const silent = { template: '<div />' }
     blockComponentCache.set(cacheKey, markRaw(defineAsyncComponent({
       loader: () => {
-        // 1. Try the active theme's override first
-        // 2. Fall back to the shared block library
-        // 3. Final fallback: TextBlock (never a blank crash)
         const shared = () => import(`./blocks/${pascal}Block.vue`).catch(() => import('./blocks/TextBlock.vue'))
-        return slug ? import(`@themes/${slug}/blocks/${pascal}Block.vue`).catch(shared) : shared()
+        return slug ? loadTemplateBlock(slug, pascal).catch(shared) : shared()
       },
       errorComponent: silent,
     })))
@@ -48,11 +52,9 @@ function blockComponent(type: string) {
   return blockComponentCache.get(cacheKey)!
 }
 
-// Catch runtime errors thrown by individual block components so one broken block
-// cannot take down the entire renderer (all blocks disappearing).
 onErrorCaptured((err) => {
   if (import.meta.env.DEV) console.warn('[UIBlockRenderer] block render error:', err)
-  return false  // stop propagation but log it
+  return false
 })
 
 function sectionStyle(section: Section): Record<string, string> {

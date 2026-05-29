@@ -4,7 +4,7 @@ import { Head, router, usePage } from '@inertiajs/vue3';
 import AdminLayout from '@/layouts/AdminLayout.vue';
 import {
   Trash2, Settings, Power, CheckCircle, Eye,
-  AlertTriangle, Monitor, Plus, Package, LayoutTemplate, Wand2, ChevronRight,
+  AlertTriangle, Monitor, Plus, Package, LayoutTemplate, Wand2, ChevronRight, Download,
 } from 'lucide-vue-next';
 
 interface Theme {
@@ -19,12 +19,21 @@ interface Theme {
   is_default: boolean;
   exists: boolean;
   supports: string[];
-  hasDemoLayout: boolean;
+  homepageEditor: HomepageEditorMeta;
+}
+
+interface HomepageEditorMeta {
+  mode: 'native' | 'layout';
+  showPublishedBanner: boolean;
+  showImportLayout: boolean;
+  editorUrl: string;
+  editorLabel: string;
+  bannerTitle: string;
+  bannerDescription: string;
 }
 
 interface Props {
   themes: Theme[];
-  hasPublishedLayout: boolean;
 }
 
 const props = defineProps<Props>();
@@ -91,6 +100,10 @@ const goToSettings = (slug: string) => {
   router.get('/admin/appearance');
 };
 
+const downloadTheme = (slug: string) => {
+  window.location.href = `/admin/appearance/themes/${encodeURIComponent(slug)}/download?source=installed`;
+};
+
 const triggerThemeUpload = () => {
   if (uploadingTheme.value) return;
   themeFileInput.value?.click();
@@ -129,8 +142,24 @@ const uploadTheme = (event: Event) => {
           <div>
             <h1 class="text-2xl font-bold text-gray-900 tracking-tight">Themes</h1>
             <p class="mt-1 text-sm text-gray-500">
-              Manage your store's appearance and layout
+              Manage installed themes — browse the catalog to add new storefront templates
             </p>
+          </div>
+          <div class="flex flex-wrap gap-2">
+            <a
+              href="/admin/appearance/template-zone"
+              class="inline-flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium text-white bg-blue-600 hover:bg-blue-700"
+            >
+              <LayoutTemplate class="w-4 h-4" />
+              Browse Template Zone
+            </a>
+            <button
+              @click="triggerThemeUpload"
+              class="inline-flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium border border-gray-300 text-gray-700 bg-white hover:bg-gray-50"
+            >
+              <Plus class="w-4 h-4" />
+              Upload Zip
+            </button>
           </div>
           <input
             ref="themeFileInput"
@@ -224,17 +253,17 @@ const uploadTheme = (event: Event) => {
                 </button>
                 <!-- Layout is live → link to page builder -->
                 <a
-                  v-if="activeTheme.hasDemoLayout && hasPublishedLayout"
-                  href="/admin/content/pages"
+                  v-if="activeTheme.homepageEditor?.showPublishedBanner"
+                  :href="activeTheme.homepageEditor.editorUrl"
                   class="inline-flex items-center gap-2 px-5 py-2.5 border border-green-300 text-sm font-medium rounded-lg text-green-700 bg-green-50 hover:bg-green-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-400 transition-colors"
                 >
                   <Wand2 class="w-4 h-4" />
-                  Open Page Builder
+                  {{ activeTheme.homepageEditor.editorLabel }}
                   <ChevronRight class="w-3.5 h-3.5 opacity-60" />
                 </a>
                 <!-- No layout yet → import button -->
                 <button
-                  v-else-if="activeTheme.hasDemoLayout && !hasPublishedLayout"
+                  v-else-if="activeTheme.homepageEditor?.showImportLayout"
                   @click="importDemoLayout(activeTheme.slug)"
                   :disabled="importingLayout[activeTheme.slug]"
                   class="inline-flex items-center gap-2 px-5 py-2.5 border border-gray-300 text-sm font-medium rounded-lg text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-300 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
@@ -252,9 +281,9 @@ const uploadTheme = (event: Event) => {
           </div>
         </div>
 
-        <!-- Other Themes -->
+        <!-- Installed Themes -->
         <div v-if="otherThemes.length > 0">
-          <h2 class="text-sm font-medium text-gray-500 uppercase tracking-wider mb-4">Theme Library</h2>
+          <h2 class="text-sm font-medium text-gray-500 uppercase tracking-wider mb-4">Installed Themes</h2>
           <div class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
             <div
               v-for="theme in otherThemes"
@@ -312,14 +341,24 @@ const uploadTheme = (event: Event) => {
                         {{ theme.exists ? 'Ready to use' : 'Not installed' }}
                    </div>
 
-                   <button
-                    v-if="!theme.is_active && !theme.is_default"
-                    @click="deleteTheme(theme.slug, theme.name)"
-                    class="text-gray-400 hover:text-red-600 transition-colors p-1"
-                    title="Delete Theme"
-                   >
+                   <div class="flex items-center gap-1">
+                     <button
+                       v-if="theme.exists"
+                       @click="downloadTheme(theme.slug)"
+                       class="text-gray-400 hover:text-blue-600 transition-colors p-1"
+                       title="Download Theme"
+                     >
+                       <Download class="w-4 h-4" />
+                     </button>
+                     <button
+                      v-if="!theme.is_active && !theme.is_default"
+                      @click="deleteTheme(theme.slug, theme.name)"
+                      class="text-gray-400 hover:text-red-600 transition-colors p-1"
+                      title="Delete Theme"
+                     >
                        <Trash2 class="w-4 h-4" />
-                   </button>
+                     </button>
+                   </div>
                 </div>
               </div>
             </div>

@@ -20,7 +20,26 @@ class HandleAppearance
      */
     public function handle(Request $request, Closure $next): Response
     {
-        View::share('appearance', $request->cookie('appearance') ?? 'system');
+        $appearance = $request->cookie('appearance') ?? 'system';
+        $forceLightStorefront = false;
+
+        if (! $request->is('admin') && ! $request->is('admin/*')) {
+            try {
+                $theme = \Cartxis\Core\Models\Theme::active();
+                $config = $theme?->getConfig() ?? [];
+
+                // Native-homepage themes ship light-only CSS; system/admin dark mode breaks them.
+                if (! empty($config['native_homepage'])) {
+                    $appearance = 'light';
+                    $forceLightStorefront = true;
+                }
+            } catch (\Throwable $e) {
+                // ignore during install/migrations
+            }
+        }
+
+        View::share('appearance', $appearance);
+        View::share('forceLightStorefront', $forceLightStorefront);
 
         $storedFavicon = $this->settingService->get('site_favicon');
         $faviconUrl = $storedFavicon

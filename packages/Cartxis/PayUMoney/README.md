@@ -1,6 +1,6 @@
 # PayUMoney Payment Gateway Extension
 
-Accept payments in India using PayUMoney (PayU India). This extension integrates PayUMoney with your Vortex e-commerce store, supporting all major Indian payment methods.
+Accept payments in India using PayUMoney (PayU India). This extension integrates PayUMoney with your Cartxis e-commerce store, supporting all major Indian payment methods.
 
 ## Features
 
@@ -17,7 +17,7 @@ Accept payments in India using PayUMoney (PayU India). This extension integrates
 
 - PHP ^8.2
 - Laravel 11
-- Vortex Core ^1.0
+- Cartxis Core ^1.0
 - PayUMoney Merchant Account (Indian business only)
 
 ## Installation
@@ -237,7 +237,7 @@ For issues related to:
 
 ## License
 
-This extension is part of the Vortex e-commerce platform.
+This extension is part of the Cartxis e-commerce platform.
 
 ## Changelog
 

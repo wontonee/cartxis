@@ -20,7 +20,25 @@ Agents.md
 /Agent-Mac
 /design
 /templates-design
-/themes/dmart-electronics
+
+# -----------------------------------------------------------------------------
+# Storefront templates — OSS install ships cartxis-default ONLY
+#
+# COMMIT with the app:
+#   templates/storefront/general/cartxis-default/
+#   public/templates/cartxis-default/
+#
+# DO NOT COMMIT (optional templates — template server / local dev only):
+#   templates/storefront/electronics/
+#   public/templates/dmart-electronics/
+# -----------------------------------------------------------------------------
+
+/public/templates/*
+!/public/templates/cartxis-default/
+
+/templates/storefront/electronics/
+
+/public/images/homepage-1/
 /test-screenshots
 /_backup
 /resources/admin/media

@@ -29,7 +29,7 @@ class ProductRepository extends ShopRepository implements ProductRepositoryInter
             ->where('featured', 1)
             ->where('status', 'enabled')
             ->where('quantity', '>', 0)
-            ->with(['images', 'mainImage'])
+            ->with(['images', 'mainImage', 'categories'])
             ->limit($limit)
             ->get();
     }
@@ -45,10 +45,81 @@ class ProductRepository extends ShopRepository implements ProductRepositoryInter
         return $this->model
             ->where('status', 'enabled')
             ->where('quantity', '>', 0)
-            ->with(['images', 'mainImage'])
+            ->with(['images', 'mainImage', 'categories'])
             ->orderBy('created_at', 'desc')
             ->limit($limit)
             ->get();
+    }
+
+    /**
+     * Get products currently on sale.
+     */
+    public function getOnSaleProducts($limit = 12)
+    {
+        return $this->model
+            ->where('status', 'enabled')
+            ->where('quantity', '>', 0)
+            ->whereNotNull('special_price')
+            ->whereColumn('special_price', '<', 'price')
+            ->with(['images', 'mainImage', 'categories'])
+            ->orderByDesc('updated_at')
+            ->limit($limit)
+            ->get();
+    }
+
+    /**
+     * Resolve products by ID or slug, preserving reference order.
+     */
+    public function resolveProductReferences(array $references)
+    {
+        if ($references === []) {
+            return collect([]);
+        }
+
+        $ids = [];
+        $slugs = [];
+
+        foreach ($references as $reference) {
+            if (($reference['type'] ?? '') === 'id') {
+                $ids[] = (int) $reference['value'];
+            } elseif (($reference['type'] ?? '') === 'slug') {
+                $slugs[] = (string) $reference['value'];
+            }
+        }
+
+        $products = $this->model
+            ->where('status', 'enabled')
+            ->where('quantity', '>', 0)
+            ->with(['images', 'mainImage', 'categories'])
+            ->where(function ($query) use ($ids, $slugs) {
+                if ($ids !== []) {
+                    $query->whereIn('id', $ids);
+                }
+
+                if ($slugs !== []) {
+                    $method = $ids !== [] ? 'orWhereIn' : 'whereIn';
+                    $query->{$method}('slug', $slugs);
+                }
+            })
+            ->get();
+
+        $ordered = collect();
+
+        foreach ($references as $reference) {
+            $match = $products->first(function ($product) use ($reference) {
+                if (($reference['type'] ?? '') === 'id') {
+                    return (int) $product->id === (int) $reference['value'];
+                }
+
+                return $product->slug === ($reference['value'] ?? null);
+            });
+
+            if ($match) {
+                $ordered->push($match);
+            }
+        }
+
+        return $ordered;
     }
 
     /**

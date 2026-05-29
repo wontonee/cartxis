@@ -21,6 +21,22 @@ interface ProductRepositoryInterface extends ShopRepositoryInterface
     public function getNewProducts($limit = 12);
 
     /**
+     * Get products currently on sale.
+     *
+     * @param int $limit
+     * @return \Illuminate\Database\Eloquent\Collection
+     */
+    public function getOnSaleProducts($limit = 12);
+
+    /**
+     * Resolve products by ID or slug, preserving reference order.
+     *
+     * @param  array<int, array{type: string, value: int|string}>  $references
+     * @return \Illuminate\Database\Eloquent\Collection
+     */
+    public function resolveProductReferences(array $references);
+
+    /**
      * Get product by slug.
      *
      * @param string $slug

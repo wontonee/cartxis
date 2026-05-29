@@ -14,6 +14,13 @@ const pinia = createPinia();
 createInertiaApp({
     title: (title) => (title ? `${title} - ${appName}` : appName),
     resolve: (name) => {
+        // Legacy Theme:: / themes/ component names → templates/{slug}/pages/...
+        if (name.startsWith('themes/')) {
+            name = name
+                .replace(/^themes\//, 'templates/')
+                .replace(/^templates\/([^/]+)\/resources\/views\//, 'templates/$1/');
+        }
+
         // Extension pages (e.g. "Extensions/SalesChat/Settings") — resolved from
         // extension/*/src/Resources/js/pages/**/*.vue so that premium extensions
         // stay completely self-contained and never pollute the main app source.
@@ -25,16 +32,25 @@ createInertiaApp({
             throw new Error(`Extension page not found: ${name}`)
         }
 
-        // Theme pages (e.g. "themes/cartxis-default/pages/Home")
-        if (name.startsWith('themes/')) {
+        // Storefront template pages (e.g. "templates/cartxis-default/pages/Home")
+        if (name.startsWith('templates/')) {
             const parts = name.split('/')
-            const themeSlug    = parts[1]                   // e.g. "cartxis-default"
-            const componentPath = parts.slice(2).join('/') // e.g. "pages/Home"
+            const themeSlug = parts[1]
+            const componentPath = parts.slice(2).join('/')
 
-            return resolvePageComponent(
-                `../../themes/${themeSlug}/resources/views/${componentPath}.vue`,
-                import.meta.glob<DefineComponent>('../../themes/**/resources/views/**/*.vue'),
+            const pages = import.meta.glob<DefineComponent>(
+                '../../templates/storefront/**/resources/views/**/*.vue',
             )
+            const suffix = `/resources/views/${componentPath}.vue`
+            const entry = Object.entries(pages).find(
+                ([key]) => key.includes(`/${themeSlug}/`) && key.endsWith(suffix),
+            )
+
+            if (entry) {
+                return entry[1]()
+            }
+
+            throw new Error(`Template page not found: ${name}`)
         }
 
         // Default — main app pages directory
@@ -55,7 +71,14 @@ createInertiaApp({
 });
 
 // This will set light / dark mode on page load...
-initializeTheme();
+const forceLightStorefront = typeof document !== 'undefined'
+    && document.body?.dataset?.forceLight === '1';
+
+if (forceLightStorefront) {
+    document.documentElement.classList.remove('dark');
+} else {
+    initializeTheme();
+}
 
 // Permanently fix 419 PAGE EXPIRED errors caused by stale CSRF tokens in the
 // Inertia SPA. Inertia v2 uses Axios internally but does NOT inject CSRF headers

@@ -3,7 +3,7 @@
     "description": "System management module for Cartxis ecommerce platform",
     "type": "library",
     "require": {
-        "php": "^8.2",
+        "php": "^8.3",
         "illuminate/support": "^11.0"
     },
     "autoload": {

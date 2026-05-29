@@ -16,7 +16,7 @@ class ThemeSeeder extends Seeder
      */
     public function run(): void
     {
-        $themePath = base_path('themes/cartxis-default');
+        $themePath = base_path('templates/storefront/general/cartxis-default');
 
         // ── 1. Theme record ────────────────────────────────────────────────
         $themeConfig = json_decode(file_get_contents($themePath . '/theme.json'), true);
@@ -31,6 +31,9 @@ class ThemeSeeder extends Seeder
                 'screenshot'  => $themeConfig['screenshot'] ?? null,
                 'is_active'   => true,
                 'is_default'  => true,
+                'catalog_slug' => 'cartxis-default',
+                'source'      => 'bundled',
+                'category'    => 'general',
                 'settings'    => $themeConfig['settings'] ?? [],
             ]
         );
@@ -39,7 +42,7 @@ class ThemeSeeder extends Seeder
 
         // Publish theme public assets (hero images, etc.)
         Artisan::call('theme:discover');
-        $this->command->info('  ↳ Theme assets published to public/themes/cartxis-default/.');
+        $this->command->info('  ↳ Theme assets published to public/templates/cartxis-default/.');
 
         // ── 2. Homepage UIEditor layout ────────────────────────────────────
         // Only seed if NO published homepage layout exists yet.

@@ -53,27 +53,6 @@ class PageController extends Controller
             ];
         });
 
-        // #region agent log
-        file_put_contents(
-            '/Volumes/Crucial/webapps/cartxis/.cursor/debug-97113c.log',
-            json_encode([
-                'sessionId'    => '97113c',
-                'runId'        => 'post-fix',
-                'hypothesisId' => 'A',
-                'location'     => 'PageController.php:show',
-                'message'      => 'CMS page lookup',
-                'data'         => [
-                    'slug'       => $slug,
-                    'found'      => $pageData !== null,
-                    'status'     => $pageData['status'] ?? null,
-                    'cacheKey'   => "page:data:{$slug}",
-                ],
-                'timestamp'    => (int) round(microtime(true) * 1000),
-            ]) . "\n",
-            FILE_APPEND
-        );
-        // #endregion
-
         if (! $pageData || $pageData['status'] !== 'published') {
             abort(404, 'Page not found');
         }

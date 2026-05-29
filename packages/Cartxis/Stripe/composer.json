@@ -1,9 +1,9 @@
 ﻿{
   "name": "cartxis/stripe",
   "description": "Stripe payment gateway extension for Cartxis Commerce",
-  "type": "vortex-extension",
+  "type": "cartxis-extension",
   "require": {
-    "php": "^8.2",
+    "php": "^8.3",
     "stripe/stripe-php": "^14.0"
   },
   "autoload": {
@@ -12,7 +12,7 @@
     }
   },
   "extra": {
-    "vortex": {
+    "cartxis": {
       "provider": "Cartxis\\Stripe\\Providers\\StripeServiceProvider"
     }
   }

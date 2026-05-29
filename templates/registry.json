@@ -1,0 +1,41 @@
+{
+    "remote_url": null,
+    "types": [
+        {
+            "slug": "storefront",
+            "label": "Storefront Themes",
+            "runtime_path": "templates/storefront",
+            "enabled": true
+        },
+        {
+            "slug": "layout",
+            "label": "Homepage Layouts",
+            "runtime_path": "storage/templates/layouts",
+            "enabled": false
+        },
+        {
+            "slug": "demo_pack",
+            "label": "Demo Data Packs",
+            "runtime_path": null,
+            "enabled": false
+        },
+        {
+            "slug": "email",
+            "label": "Email Templates",
+            "runtime_path": null,
+            "enabled": false
+        }
+    ],
+    "categories": [
+        {
+            "slug": "general",
+            "label": "General / Retail",
+            "sort": 1
+        },
+        {
+            "slug": "electronics",
+            "label": "Electronics",
+            "sort": 2
+        }
+    ]
+}

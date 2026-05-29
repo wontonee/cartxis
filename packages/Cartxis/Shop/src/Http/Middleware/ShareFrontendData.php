@@ -6,6 +6,7 @@ use Closure;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Cartxis\Core\Models\Theme;
+use Cartxis\CMS\Services\StorefrontMenuService;
 use Cartxis\Shop\Repositories\CategoryRepository;
 use Cartxis\Core\Services\SettingService;
 use Cartxis\UIEditor\Models\GlobalRegion;
@@ -15,8 +16,11 @@ class ShareFrontendData
     protected $categoryRepository;
     protected $settingService;
 
-    public function __construct(CategoryRepository $categoryRepository, SettingService $settingService)
-    {
+    public function __construct(
+        CategoryRepository $categoryRepository,
+        SettingService $settingService,
+        protected StorefrontMenuService $menuService,
+    ) {
         $this->categoryRepository = $categoryRepository;
         $this->settingService = $settingService;
     }
@@ -49,6 +53,7 @@ class ShareFrontendData
             'categories' => function () {
                 try {
                     return $this->categoryRepository->getRootCategories()
+                        ->load(['children' => fn ($q) => $q->where('status', 'enabled')->orderBy('sort_order')])
                         ->map(function ($category) {
                             return [
                                 'id' => $category->id,
@@ -56,13 +61,24 @@ class ShareFrontendData
                                 'slug' => $category->slug,
                                 'description' => $category->description,
                                 'image' => $category->image,
+                                'products_count' => $category->products()->count(),
+                                'children' => $category->children->map(fn ($child) => [
+                                    'id' => $child->id,
+                                    'name' => $child->name,
+                                    'slug' => $child->slug,
+                                ])->values()->all(),
                             ];
-                        });
+                        })
+                        ->values()
+                        ->all();
                 } catch (\Exception $e) {
                     // Silent fail during migrations
                 }
                 return [];
             },
+
+            // Storefront menus — server-rendered so headers work without waiting on axios
+            'storefrontMenus' => fn () => $this->menuService->getAllMenus(),
 
             // Theme basics (name, slug, settings) — needed by all themes
             'theme' => function () {

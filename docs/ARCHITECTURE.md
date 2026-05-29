@@ -18,8 +18,8 @@ Cartxis is a **modular Laravel 12 eCommerce monolith** with a **Vue 3 + TypeScri
 ├─────────────────────────────────────────────────────────────────────────┤
 │                    packages/Cartxis/* (domain packages)                  │
 ├─────────────────────────────────────────────────────────────────────────┤
-│  Core services: vortex.hook · vortex.menu · vortex.setting ·             │
-│                 vortex.extension · vortex.theme · vortex.payment.gateway │
+│  Core services: cartxis.hook · cartxis.menu · cartxis.setting ·             │
+│                 cartxis.extension · cartxis.theme · cartxis.payment.gateway │
 ├─────────────────────────────────────────────────────────────────────────┤
 │                         MySQL 8 (settings, catalog, orders)              │
 └─────────────────────────────────────────────────────────────────────────┘
@@ -47,7 +47,7 @@ cartxis/
 ├── bootstrap/providers.php # Registers all Cartxis service providers
 ├── packages/Cartxis/       # All domain logic (PSR-4 Cartxis\*)
 ├── resources/js/           # Admin + shared Vue (pages, UI Editor, components)
-├── themes/cartxis-default/ # Storefront theme (Vue pages override)
+├── templates/storefront/   # Storefront template packages (cartxis-default, …)
 ├── routes/                 # Core web, auth, settings only
 ├── database/               # App-level seeders/factories
 ├── extension/              # Optional third-party extensions (gitignored clones)
@@ -92,7 +92,7 @@ Payment gateways register with `PaymentGatewayManager` in Core; credentials live
 ### Admin
 
 1. Prefix `/admin`, guard `admin`, separate session cookie (`SetAdminSessionCookie`)
-2. Each package registers `Routes/admin.php` and menu items via `vortex.menu`
+2. Each package registers `Routes/admin.php` and menu items via `cartxis.menu`
 3. Pages live under `resources/js/pages/Admin/`
 
 ### REST API (Mobile)
@@ -111,7 +111,7 @@ Global helpers in `packages/Cartxis/Core/src/Helpers/hooks.php`:
 - `add_action` / `do_action`
 - `add_filter` / `apply_filters`
 
-Backed by `app('vortex.hook')` singleton.
+Backed by `app('cartxis.hook')` singleton.
 
 ### Extensions
 
@@ -122,7 +122,7 @@ Backed by `app('vortex.hook')` singleton.
 
 ### Themes
 
-- `themes/{code}/` with `resources/views/pages`, layouts, components
+- `templates/storefront/{category}/{slug}/` with `resources/views/pages`, layouts, components
 - Active theme: `config/theme.php`
 - `php artisan cartxis:theme:activate`
 - **Templates (OSS)**: themes ship `theme.json` + optional `data/theme-data.json` for demo homepage/layout import (`theme:import-data`). Cursor agent: `@cartxis-templates`.

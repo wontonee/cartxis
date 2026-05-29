@@ -27,7 +27,7 @@ class CustomerMenuSeeder extends Seeder
                 'order' => 40,
                 'permission' => null,
                 'active' => true,
-                'extension_code' => 'vortex_customer',
+                'extension_code' => 'cartxis_customer',
             ]
         );
 
@@ -68,7 +68,7 @@ class CustomerMenuSeeder extends Seeder
                     'order' => $item['order'],
                     'permission' => $item['permission'],
                     'active' => true,
-                    'extension_code' => 'vortex_customer',
+                    'extension_code' => 'cartxis_customer',
                 ]
             );
         }

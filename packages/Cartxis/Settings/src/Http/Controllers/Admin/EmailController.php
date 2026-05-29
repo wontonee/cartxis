@@ -215,7 +215,7 @@ class EmailController
         }
 
         try {
-            \Illuminate\Support\Facades\Mail::raw('This is a test email from your Vortex store.', function ($message) use ($request, $config) {
+            \Illuminate\Support\Facades\Mail::raw('This is a test email from your Cartxis store.', function ($message) use ($request, $config) {
                 $message->to($request->email)
                     ->subject('Test Email from ' . $config->mail_from_name)
                     ->from($config->mail_from_address, $config->mail_from_name);

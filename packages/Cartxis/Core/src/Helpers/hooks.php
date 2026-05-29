@@ -20,7 +20,7 @@ if (!function_exists('add_action')) {
      */
     function add_action(string $hook, callable $callback, int $priority = 10): void
     {
-        app('vortex.hook')->addAction($hook, $callback, $priority);
+        app('cartxis.hook')->addAction($hook, $callback, $priority);
     }
 }
 
@@ -33,7 +33,7 @@ if (!function_exists('do_action')) {
      */
     function do_action(string $hook, ...$args): void
     {
-        app('vortex.hook')->doAction($hook, ...$args);
+        app('cartxis.hook')->doAction($hook, ...$args);
     }
 }
 
@@ -47,7 +47,7 @@ if (!function_exists('add_filter')) {
      */
     function add_filter(string $hook, callable $callback, int $priority = 10): void
     {
-        app('vortex.hook')->addFilter($hook, $callback, $priority);
+        app('cartxis.hook')->addFilter($hook, $callback, $priority);
     }
 }
 
@@ -62,7 +62,7 @@ if (!function_exists('apply_filters')) {
      */
     function apply_filters(string $hook, mixed $value, ...$args): mixed
     {
-        return app('vortex.hook')->applyFilter($hook, $value, ...$args);
+        return app('cartxis.hook')->applyFilter($hook, $value, ...$args);
     }
 }
 
@@ -75,7 +75,7 @@ if (!function_exists('has_action')) {
      */
     function has_action(string $hook): bool
     {
-        return app('vortex.hook')->hasAction($hook);
+        return app('cartxis.hook')->hasAction($hook);
     }
 }
 
@@ -88,7 +88,7 @@ if (!function_exists('has_filter')) {
      */
     function has_filter(string $hook): bool
     {
-        return app('vortex.hook')->hasFilter($hook);
+        return app('cartxis.hook')->hasFilter($hook);
     }
 }
 
@@ -102,7 +102,7 @@ if (!function_exists('theme_setting')) {
      */
     function theme_setting(string $key, mixed $default = null): mixed
     {
-        $theme = app('vortex.theme')->active();
+        $theme = app('cartxis.theme')->active();
 
         if (!$theme) {
             return $default;

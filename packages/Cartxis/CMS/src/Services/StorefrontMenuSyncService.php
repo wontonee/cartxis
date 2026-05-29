@@ -83,26 +83,6 @@ class StorefrontMenuSyncService
             ->whereNotIn('key', $activeKeys)
             ->update(['active' => false, 'updated_at' => now()]);
 
-        // #region agent log
-        file_put_contents(
-            '/Volumes/Crucial/webapps/cartxis/.cursor/debug-97113c.log',
-            json_encode([
-                'sessionId'    => '97113c',
-                'runId'        => 'post-fix',
-                'hypothesisId' => 'B',
-                'location'     => 'StorefrontMenuSyncService.php:syncCategoryMenuItems',
-                'message'      => 'Category menu synced',
-                'data'         => [
-                    'syncedCount' => $categories->count(),
-                    'slugs'       => $categories->pluck('slug')->all(),
-                    'activeKeys'  => $activeKeys,
-                ],
-                'timestamp'    => (int) round(microtime(true) * 1000),
-            ]) . "\n",
-            FILE_APPEND
-        );
-        // #endregion
-
         return $categories->count();
     }
 

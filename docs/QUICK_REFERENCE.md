@@ -194,22 +194,22 @@ Providers are registered in `bootstrap/providers.php` in a deliberate sequence:
 
 | Container Key | Class | Purpose |
 |--------------|-------|---------|
-| `vortex.hook` | `HookService` | Event hook system for extensions |
-| `vortex.menu` | `MenuService` | Dynamic admin & shop menu builder |
-| `vortex.setting` | `SettingService` | Database-backed key/value settings |
-| `vortex.extension` | `ExtensionService` | Extension discovery, install, activate lifecycle |
-| `vortex.theme` | `ThemeService` | Theme management |
-| `vortex.theme.resolver` | `ThemeViewResolver` | Theme-aware Inertia page resolution |
-| `vortex.payment.gateway` | `PaymentGatewayManager` | Payment gateway registry |
+| `cartxis.hook` | `HookService` | Event hook system for extensions |
+| `cartxis.menu` | `MenuService` | Dynamic admin & shop menu builder |
+| `cartxis.setting` | `SettingService` | Database-backed key/value settings |
+| `cartxis.extension` | `ExtensionService` | Extension discovery, install, activate lifecycle |
+| `cartxis.theme` | `ThemeService` | Theme management |
+| `cartxis.theme.resolver` | `ThemeViewResolver` | Theme-aware Inertia page resolution |
+| `cartxis.payment.gateway` | `PaymentGatewayManager` | Payment gateway registry |
 
 ### Core Facades
 
 | Facade | Singleton |
 |--------|-----------|
-| `Extension` | `vortex.extension` |
-| `Hook` | `vortex.hook` |
-| `Menu` | `vortex.menu` |
-| `Setting` | `vortex.setting` |
+| `Extension` | `cartxis.extension` |
+| `Hook` | `cartxis.hook` |
+| `Menu` | `cartxis.menu` |
+| `Setting` | `cartxis.setting` |
 
 ### Core Models (20)
 
@@ -710,7 +710,7 @@ interface PaymentGatewayInterface
 1. Gateway package implements `PaymentGatewayInterface` in its Service class.
 2. Gateway's `ServiceProvider::boot()` registers itself with `PaymentGatewayManager`:
    ```php
-   $gatewayManager = app('vortex.payment.gateway');
+   $gatewayManager = app('cartxis.payment.gateway');
    $gatewayManager->register(new StripeGateway());
    ```
 3. Gateway seeds a record into the `payment_methods` table.
@@ -800,16 +800,16 @@ $this->app->singleton(CheckoutService::class, function ($app) {
 
 ### 3. Singleton Container Bindings
 
-Core services use `vortex.*` naming convention, bound via `$this->app->singleton()` with companion class bindings:
+Core services use `cartxis.*` naming convention, bound via `$this->app->singleton()` with companion class bindings:
 
 ```php
-$this->app->singleton('vortex.theme', fn ($app) => new ThemeService());
-$this->app->bind(ThemeService::class, fn ($app) => $app->make('vortex.theme'));
+$this->app->singleton('cartxis.theme', fn ($app) => new ThemeService());
+$this->app->bind(ThemeService::class, fn ($app) => $app->make('cartxis.theme'));
 ```
 
 ### 4. Facade Pattern
 
-Core provides 4 facades (Extension, Hook, Menu, Setting) that resolve `vortex.*` singletons.
+Core provides 4 facades (Extension, Hook, Menu, Setting) that resolve `cartxis.*` singletons.
 
 ### 5. Extension/Plugin Architecture
 
@@ -856,10 +856,10 @@ All page navigation goes through Laravel routes → controllers return `Inertia:
 | Core | `core` | extensions_path, bundled_extensions_path |
 | Admin | `admin` | Admin-specific settings |
 | Shop | `shop` | Homepage settings, featured products count, hero block config |
-| API | `vortex-api` | Rate limits (60 guest / 300 auth / 10 payment / 5 login per min), token expiry (24hr), pagination (20/page, max 100), feature flags, upload limits, search config, cache TTLs |
+| API | `cartxis-api` | Rate limits (60 guest / 300 auth / 10 payment / 5 login per min), token expiry (24hr), pagination (20/page, max 100), feature flags, upload limits, search config, cache TTLs |
 | Stripe | `stripe` | Stripe API keys, webhook secret |
 
-### API Feature Flags (`config('vortex-api.features')`)
+### API Feature Flags (`config('cartxis-api.features')`)
 
 | Flag | Status |
 |------|--------|

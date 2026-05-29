@@ -70,11 +70,42 @@ abstract class ShopService
      */
     protected function remember($key, $ttl, \Closure $callback)
     {
-        return cache()->remember(
-            $this->getCacheKey($key),
-            $ttl,
-            $callback
-        );
+        $cacheKey = $this->getCacheKey($key);
+        $cached = cache()->get($cacheKey);
+
+        if ($cached !== null && $this->isBrokenCachedValue($cached)) {
+            cache()->forget($cacheKey);
+            $cached = null;
+        }
+
+        if ($cached !== null) {
+            return $cached;
+        }
+
+        $value = $callback();
+        cache()->put($cacheKey, $value, $ttl);
+
+        return $value;
+    }
+
+    /**
+     * Detect serialized model objects that cannot be safely unserialized.
+     */
+    protected function isBrokenCachedValue(mixed $value): bool
+    {
+        if (is_object($value) && get_class($value) === '__PHP_Incomplete_Class') {
+            return true;
+        }
+
+        if ($value instanceof \Illuminate\Support\Collection) {
+            foreach ($value as $item) {
+                if ($this->isBrokenCachedValue($item)) {
+                    return true;
+                }
+            }
+        }
+
+        return false;
     }
 
     /**
