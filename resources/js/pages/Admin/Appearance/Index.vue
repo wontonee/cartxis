@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, reactive, computed } from 'vue'
+import { ref, reactive, computed, onMounted } from 'vue'
 import { Head, router, usePage } from '@inertiajs/vue3'
 import AdminLayout from '@/layouts/AdminLayout.vue'
 import {
@@ -43,14 +43,23 @@ interface Schema {
   sections: Section[]
 }
 
+interface HomepageEditorMeta {
+  mode: 'native' | 'layout'
+  showPublishedBanner: boolean
+  showImportLayout: boolean
+  editorUrl: string
+  editorLabel: string
+  bannerTitle: string
+  bannerDescription: string
+}
+
 interface Props {
   theme: Theme
   schema: Schema
   settings: Record<string, any>
   hasThemeData: boolean
   hasProductData: boolean
-  hasDemoLayout: boolean
-  hasPublishedLayout: boolean
+  homepageEditor: HomepageEditorMeta
 }
 
 const props = defineProps<Props>()
@@ -131,6 +140,15 @@ const tabs = computed(() =>
 )
 
 const activeTab = ref(tabs.value[0]?.id ?? 'contact')
+
+onMounted(() => {
+  const params = new URLSearchParams(window.location.search)
+  const requestedTab = params.get('tab')
+
+  if (requestedTab && tabs.value.some((tab) => tab.id === requestedTab)) {
+    activeTab.value = requestedTab
+  }
+})
 
 const sectionsForTab = computed(() => {
   const def = tabDefs[activeTab.value]
@@ -291,10 +309,10 @@ const saveSettings = () => {
       </div>
 
       <!-- Homepage Layout Status -->
-      <div v-if="hasDemoLayout">
-        <!-- Published -->
+      <div v-if="homepageEditor.showPublishedBanner || homepageEditor.showImportLayout">
+        <!-- Published / native homepage -->
         <div
-          v-if="hasPublishedLayout"
+          v-if="homepageEditor.showPublishedBanner"
           class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 px-5 py-4 rounded-2xl border border-green-200 dark:border-green-800/60 bg-green-50 dark:bg-green-900/20"
         >
           <div class="flex items-center gap-3">
@@ -302,25 +320,36 @@ const saveSettings = () => {
               <CheckCircle class="w-5 h-5 text-green-600 dark:text-green-400" />
             </div>
             <div>
-              <p class="text-sm font-semibold text-green-900 dark:text-green-200">Homepage Layout is Live</p>
+              <p class="text-sm font-semibold text-green-900 dark:text-green-200">{{ homepageEditor.bannerTitle }}</p>
               <p class="text-xs text-green-700 dark:text-green-400 mt-0.5">
-                Your homepage is rendering a published layout. Open the Page Builder to edit it.
+                {{ homepageEditor.bannerDescription }}
               </p>
             </div>
           </div>
-          <a
-            href="/admin/content/pages"
+          <button
+            v-if="homepageEditor.mode === 'native'"
+            type="button"
+            @click="activeTab = 'features'"
             class="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-green-700 dark:text-green-300 bg-white dark:bg-green-950/40 border border-green-300 dark:border-green-700 rounded-xl hover:bg-green-50 dark:hover:bg-green-900/40 transition-colors flex-shrink-0"
           >
             <Wand2 class="w-4 h-4" />
-            Open Page Builder
+            {{ homepageEditor.editorLabel }}
+            <ChevronRight class="w-3.5 h-3.5 opacity-60" />
+          </button>
+          <a
+            v-else
+            :href="homepageEditor.editorUrl"
+            class="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-green-700 dark:text-green-300 bg-white dark:bg-green-950/40 border border-green-300 dark:border-green-700 rounded-xl hover:bg-green-50 dark:hover:bg-green-900/40 transition-colors flex-shrink-0"
+          >
+            <Wand2 class="w-4 h-4" />
+            {{ homepageEditor.editorLabel }}
             <ChevronRight class="w-3.5 h-3.5 opacity-60" />
           </a>
         </div>
 
         <!-- Not published -->
         <div
-          v-else
+          v-else-if="homepageEditor.showImportLayout"
           class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 px-5 py-4 rounded-2xl border border-amber-200 dark:border-amber-800/60 bg-amber-50 dark:bg-amber-900/20"
         >
           <div class="flex items-center gap-3">

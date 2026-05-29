@@ -51,7 +51,7 @@ class BrandMenuSeeder extends Seeder
                 'location' => 'admin',
                 'active' => true,
                 'order' => 25,
-                'extension_code' => 'vortex-product',
+                'extension_code' => 'cartxis-product',
                 'created_at' => now(),
                 'updated_at' => now(),
             ]);
@@ -77,7 +77,7 @@ class BrandMenuSeeder extends Seeder
                 'location' => 'admin',
                 'active' => true,
                 'order' => 30,
-                'extension_code' => 'vortex-product',
+                'extension_code' => 'cartxis-product',
                 'created_at' => now(),
                 'updated_at' => now(),
             ]);

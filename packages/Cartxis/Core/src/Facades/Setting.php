@@ -28,6 +28,6 @@ class Setting extends Facade
      */
     protected static function getFacadeAccessor(): string
     {
-        return 'vortex.setting';
+        return 'cartxis.setting';
     }
 }

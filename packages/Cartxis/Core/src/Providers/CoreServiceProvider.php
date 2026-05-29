@@ -15,8 +15,11 @@ use Cartxis\Core\Services\HookService;
 use Cartxis\Core\Services\MenuService;
 use Cartxis\Core\Services\ExtensionService;
 use Cartxis\Core\Services\SettingService;
+use Cartxis\Core\Services\ThemePathResolver;
 use Cartxis\Core\Services\ThemeViewResolver;
 use Cartxis\Core\Services\ThemeService;
+use Cartxis\Core\Services\TemplateCatalogService;
+use Cartxis\Core\Services\TemplateInstallService;
 use Cartxis\Core\Services\PaymentGatewayManager;
 
 class CoreServiceProvider extends ServiceProvider
@@ -27,56 +30,73 @@ class CoreServiceProvider extends ServiceProvider
     public function register(): void
     {
         // Register HookService as singleton
-        $this->app->singleton('vortex.hook', function ($app) {
+        $this->app->singleton('cartxis.hook', function ($app) {
             return new HookService();
         });
 
         // Register MenuService as singleton
-        $this->app->singleton('vortex.menu', function ($app) {
+        $this->app->singleton('cartxis.menu', function ($app) {
             return new MenuService();
         });
 
         // Register SettingService as singleton
-        $this->app->singleton('vortex.setting', function ($app) {
+        $this->app->singleton('cartxis.setting', function ($app) {
             return new SettingService();
         });
 
         // Register ExtensionService as singleton
-        $this->app->singleton('vortex.extension', function ($app) {
+        $this->app->singleton('cartxis.extension', function ($app) {
             return new ExtensionService(
-                $app->make('vortex.hook'),
-                $app->make('vortex.menu')
+                $app->make('cartxis.hook'),
+                $app->make('cartxis.menu')
             );
         });
 
+        $this->app->singleton(ThemePathResolver::class, function () {
+            return new ThemePathResolver();
+        });
+
         // Register ThemeService as singleton
-        $this->app->singleton('vortex.theme', function ($app) {
-            return new ThemeService();
+        $this->app->singleton('cartxis.theme', function ($app) {
+            return new ThemeService($app->make(ThemePathResolver::class));
+        });
+
+        $this->app->singleton(TemplateCatalogService::class, function ($app) {
+            return new TemplateCatalogService($app->make(ThemePathResolver::class));
+        });
+
+        $this->app->singleton(TemplateInstallService::class, function ($app) {
+            return new TemplateInstallService(
+                $app->make(TemplateCatalogService::class),
+                $app->make('cartxis.theme'),
+                $app->make(\Cartxis\UIEditor\Services\LayoutService::class),
+                $app->make(ThemePathResolver::class),
+            );
         });
         
         // Bind ThemeService class to service container
         $this->app->bind(ThemeService::class, function ($app) {
-            return $app->make('vortex.theme');
+            return $app->make('cartxis.theme');
         });
         
         // Register ThemeViewResolver as singleton
-        $this->app->singleton('vortex.theme.resolver', function ($app) {
-            return new ThemeViewResolver();
+        $this->app->singleton('cartxis.theme.resolver', function ($app) {
+            return new ThemeViewResolver($app->make(ThemePathResolver::class));
         });
         
         // Bind ThemeViewResolver class to service container
         $this->app->bind(ThemeViewResolver::class, function ($app) {
-            return $app->make('vortex.theme.resolver');
+            return $app->make('cartxis.theme.resolver');
         });
 
         // Register PaymentGatewayManager as singleton
-        $this->app->singleton('vortex.payment.gateway', function ($app) {
+        $this->app->singleton('cartxis.payment.gateway', function ($app) {
             return new PaymentGatewayManager();
         });
         
         // Bind PaymentGatewayManager class to service container
         $this->app->bind(PaymentGatewayManager::class, function ($app) {
-            return $app->make('vortex.payment.gateway');
+            return $app->make('cartxis.payment.gateway');
         });
 
         if ($this->app->runningInConsole()) {
@@ -93,6 +113,9 @@ class CoreServiceProvider extends ServiceProvider
                 \Cartxis\Core\Console\Commands\ThemeListCommand::class,
                 \Cartxis\Core\Console\Commands\ThemeActivateCommand::class,
                 \Cartxis\Core\Console\Commands\ThemeImportDataCommand::class,
+                \Cartxis\Core\Console\Commands\TemplateDiscoverCommand::class,
+                \Cartxis\Core\Console\Commands\TemplateInstallCommand::class,
+                \Cartxis\Core\Console\Commands\TemplateExportCommand::class,
             ]);
         }
     }
@@ -139,10 +162,12 @@ class CoreServiceProvider extends ServiceProvider
     protected function bootThemes(): void
     {
         try {
-            /** @var \Cartxis\Core\Services\ThemeService $themeService */
-            $themeService = $this->app->make('vortex.theme');
+            $this->removeStaleViteHotFile();
 
-            // Auto-discover themes from the themes/ directory into the DB
+            /** @var \Cartxis\Core\Services\ThemeService $themeService */
+            $themeService = $this->app->make('cartxis.theme');
+
+            // Auto-discover storefront templates from templates/storefront/ into the DB
             $themeService->discover();
 
             // Load asset paths and hooks for the currently active theme
@@ -158,12 +183,64 @@ class CoreServiceProvider extends ServiceProvider
     }
 
     /**
+     * Remove public/hot when the Vite dev server is no longer reachable.
+     * A stale hot file makes @vite point at :5173 and breaks all JS/CSS the next day.
+     */
+    protected function removeStaleViteHotFile(): void
+    {
+        $hotPath = public_path('hot');
+
+        if (! is_file($hotPath)) {
+            return;
+        }
+
+        $devServerUrl = trim((string) file_get_contents($hotPath));
+
+        if ($devServerUrl === '') {
+            @unlink($hotPath);
+
+            return;
+        }
+
+        $parts = parse_url($devServerUrl);
+        $host = $parts['host'] ?? '127.0.0.1';
+        $scheme = $parts['scheme'] ?? 'http';
+        $port = $parts['port'] ?? ($scheme === 'https' ? 443 : 80);
+        $path = $parts['path'] ?? '/';
+        $probeUrl = "{$scheme}://{$host}:{$port}{$path}";
+
+        $reachable = false;
+
+        if (function_exists('curl_init')) {
+            $handle = curl_init($probeUrl);
+            curl_setopt_array($handle, [
+                CURLOPT_NOBODY => true,
+                CURLOPT_RETURNTRANSFER => true,
+                CURLOPT_TIMEOUT => 2,
+                CURLOPT_CONNECTTIMEOUT => 2,
+                CURLOPT_SSL_VERIFYPEER => false,
+                CURLOPT_SSL_VERIFYHOST => false,
+            ]);
+            curl_exec($handle);
+            $httpCode = (int) curl_getinfo($handle, CURLINFO_HTTP_CODE);
+            curl_close($handle);
+            $reachable = $httpCode >= 200 && $httpCode < 500;
+        }
+
+        if ($reachable) {
+            return;
+        }
+
+        @unlink($hotPath);
+    }
+
+    /**
      * Boot active extensions.
      */
     protected function bootExtensions(): void
     {
         try {
-            $extensionService = $this->app->make('vortex.extension');
+            $extensionService = $this->app->make('cartxis.extension');
             $activeExtensions = $extensionService->getActive();
 
             foreach ($activeExtensions as $extension) {

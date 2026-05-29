@@ -3,7 +3,7 @@
     "name": "PayUMoney Payment Gateway",
     "description": "Accept payments in India using PayUMoney. Supports credit/debit cards, net banking, UPI, and wallets.",
     "version": "1.0.0",
-    "author": "Vortex Team",
+    "author": "Cartxis Team",
     "provider": "Cartxis\\PayUMoney\\Providers\\PayUMoneyServiceProvider",
     "type": "extension",
     "category": "payment-gateway"

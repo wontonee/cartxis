@@ -26,12 +26,25 @@ return [
 
     /*
     |--------------------------------------------------------------------------
-    | Themes Directory
+    | Storefront templates (single source of truth)
     |--------------------------------------------------------------------------
     |
-    | The base path where themes are stored. Each theme is a subdirectory
-    | here, discovered by its theme.json file.
+    | All storefront themes live under templates/storefront/{category}/{slug}/.
+    | There is no separate themes/ directory. Use ThemePathResolver for paths.
     |
     */
-    'path' => base_path('themes'),
+    'catalog_path' => base_path('templates'),
+    'catalog_registry' => base_path('templates/registry.json'),
+    'storefront_path' => base_path('templates/storefront'),
+
+    /*
+    |--------------------------------------------------------------------------
+    | Remote Template Catalog (optional)
+    |--------------------------------------------------------------------------
+    |
+    | When set, Cartxis merges templates from this registry URL with the local
+    | catalog. Intended for https://cartxis.com marketplace feeds.
+    |
+    */
+    'catalog_remote_url' => env('CARTXIS_TEMPLATE_CATALOG_URL'),
 ];

@@ -33,7 +33,7 @@ return [
     'cache' => [
         'enabled' => true,
         'duration' => 3600, // 1 hour in seconds
-        'prefix' => 'vortex:',
+        'prefix' => 'cartxis:',
     ],
 
     /*

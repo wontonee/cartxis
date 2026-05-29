@@ -12,11 +12,38 @@ createServer(
             page,
             render: renderToString,
             title: (title) => (title ? `${title} - ${appName}` : appName),
-            resolve: (name) =>
-                resolvePageComponent(
+            resolve: (name) => {
+                if (name.startsWith('themes/')) {
+                    name = name
+                        .replace(/^themes\//, 'templates/')
+                        .replace(/^templates\/([^/]+)\/resources\/views\//, 'templates/$1/');
+                }
+
+                if (name.startsWith('templates/')) {
+                    const parts = name.split('/');
+                    const themeSlug = parts[1];
+                    const componentPath = parts.slice(2).join('/');
+
+                    const pages = import.meta.glob<DefineComponent>(
+                        '../../templates/storefront/**/resources/views/**/*.vue',
+                    );
+                    const suffix = `/resources/views/${componentPath}.vue`;
+                    const entry = Object.entries(pages).find(
+                        ([key]) => key.includes(`/${themeSlug}/`) && key.endsWith(suffix),
+                    );
+
+                    if (entry) {
+                        return entry[1]();
+                    }
+
+                    throw new Error(`Template page not found: ${name}`);
+                }
+
+                return resolvePageComponent(
                     `./pages/${name}.vue`,
                     import.meta.glob<DefineComponent>('./pages/**/*.vue'),
-                ),
+                );
+            },
             setup: ({ App, props, plugin }) =>
                 createSSRApp({ render: () => h(App, props) }).use(plugin),
         }),

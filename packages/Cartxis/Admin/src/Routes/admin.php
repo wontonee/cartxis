@@ -1,7 +1,6 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
-use Illuminate\Support\Facades\Auth;
 use Cartxis\Admin\Http\Controllers\Auth\AdminLoginController;
 use Cartxis\Admin\Http\Controllers\UserController;
 use Cartxis\Admin\Http\Controllers\ProfileController;
@@ -10,7 +9,7 @@ use Cartxis\Admin\Http\Controllers\NotificationController;
 use Cartxis\Admin\Http\Controllers\ActivityLogController;
 use Cartxis\Core\Http\Controllers\Admin\DashboardController;
 use Cartxis\Core\Http\Controllers\Admin\ThemeController;
-use Cartxis\Core\Http\Controllers\Admin\Settings\GeneralSettingsController;
+use Cartxis\Core\Http\Controllers\Admin\TemplateZoneController;
 
 /*
 |--------------------------------------------------------------------------
@@ -27,8 +26,7 @@ Route::prefix('admin')->name('admin.')->middleware(['web'])->group(function () {
     Route::middleware(\Cartxis\Admin\Http\Middleware\RedirectIfAdminAuthenticated::class)->group(function () {
         Route::get('/login', [AdminLoginController::class, 'create'])->name('login');
         Route::post('/login', [AdminLoginController::class, 'store'])
-            ->name('login.store')
-            ->middleware('throttle:5,1'); // 5 attempts per minute per IP
+            ->name('login.store');
     });
 
     // Admin Authenticated Routes
@@ -83,9 +81,15 @@ Route::prefix('admin')->name('admin.')->middleware(['web'])->group(function () {
             Route::post('/{slug}/import-layout', [ThemeController::class, 'importLayout'])->name('import-layout');
             Route::post('/{slug}/screenshot', [ThemeController::class, 'uploadScreenshot'])->name('screenshot');
             Route::post('/upload', [ThemeController::class, 'upload'])->name('upload');
+            Route::get('/{slug}/download', [TemplateZoneController::class, 'download'])->name('download');
         });
-        // Settings Routes
-        Route::prefix('settings')->name('settings.')->group(function () {
+
+        Route::prefix('appearance/template-zone')->name('template-zone.')->group(function () {
+            Route::get('/', [TemplateZoneController::class, 'index'])->name('index');
+            Route::post('/sync', [TemplateZoneController::class, 'sync'])->name('sync');
+            Route::get('/{slug}', [TemplateZoneController::class, 'show'])->name('show');
+            Route::post('/{slug}/install', [TemplateZoneController::class, 'install'])->name('install');
+            Route::get('/{slug}/download', [TemplateZoneController::class, 'download'])->name('download');
         });
     });
 });

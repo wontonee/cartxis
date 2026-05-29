@@ -1949,8 +1949,8 @@ export default new CartxisApi();
 
 Import the included Postman collection for testing:
 
-- `packages/Cartxis/API/Vortex-API.postman_collection.json`
-- `packages/Cartxis/API/Vortex-API.postman_environment.json`
+- `packages/Cartxis/API/Cartxis-API.postman_collection.json`
+- `packages/Cartxis/API/Cartxis-API.postman_environment.json`
 
 ### cURL Examples
 

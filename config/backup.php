@@ -35,7 +35,7 @@ return [
                     base_path('resources'),
                     base_path('routes'),
                     base_path('tests'),
-                    base_path('themes'),
+                    base_path('templates'),
                     storage_path('framework'),
                     storage_path('logs'),
                     storage_path('app/backup-temp'),

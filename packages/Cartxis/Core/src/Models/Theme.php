@@ -2,6 +2,7 @@
 
 namespace Cartxis\Core\Models;
 
+use Cartxis\Core\Services\ThemePathResolver;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Facades\Cache;
@@ -11,6 +12,7 @@ class Theme extends Model
     protected $fillable = [
         'name',
         'slug',
+        'catalog_slug',
         'description',
         'version',
         'author',
@@ -18,6 +20,9 @@ class Theme extends Model
         'screenshot',
         'is_active',
         'is_default',
+        'source',
+        'category',
+        'installed_from_catalog_at',
         'settings',
     ];
 
@@ -25,6 +30,7 @@ class Theme extends Model
         'is_active' => 'boolean',
         'is_default' => 'boolean',
         'settings' => 'array',
+        'installed_from_catalog_at' => 'datetime',
     ];
 
     /**
@@ -51,6 +57,9 @@ class Theme extends Model
         // Deactivate all themes first
         static::query()->update(['is_active' => false]);
 
+        // Mass update bypasses model state — sync so re-activating this theme still persists.
+        $this->is_active = false;
+
         // Activate this theme
         $activated = $this->update(['is_active' => true]);
 
@@ -62,19 +71,19 @@ class Theme extends Model
     }
 
     /**
-     * Get theme path
+     * Get theme path under templates/storefront/{category}/{slug}
      */
     public function getPath(): string
     {
-        return base_path("themes/{$this->slug}");
+        return app(ThemePathResolver::class)->resolveOrFail($this->slug, $this->category);
     }
 
     /**
-     * Check if theme exists
+     * Check if theme package exists on disk
      */
     public function exists(): bool
     {
-        return is_dir($this->getPath());
+        return app(ThemePathResolver::class)->isInstalled($this->slug, $this->category);
     }
 
     /**
@@ -114,7 +123,7 @@ class Theme extends Model
      */
     public function asset(string $path): string
     {
-        return asset("themes/{$this->slug}/{$path}");
+        return app(ThemePathResolver::class)->publicAssetUrl($this->slug, $path);
     }
 
     /**

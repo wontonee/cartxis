@@ -29,7 +29,7 @@ export default defineConfig({
     resolve: {
         alias: [
             { find: '@admin', replacement: '/resources/admin' },
-            { find: '@themes', replacement: '/themes' },
+            { find: '@templates', replacement: '/templates/storefront' },
             { find: '@', replacement: '/resources/js' },
         ],
     },

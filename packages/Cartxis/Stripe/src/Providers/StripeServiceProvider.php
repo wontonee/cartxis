@@ -79,7 +79,7 @@ class StripeServiceProvider extends ServiceProvider
                     'author' => 'Cartxis Commerce',
                     'author_url' => 'https://cartxiscommerce.com',
                     'icon' => 'credit-card',
-                    'requires' => ['vortex/core' => '^1.0', 'php' => '^8.2'],
+                    'requires' => ['cartxis/core' => '^1.0', 'php' => '^8.2'],
                     'config' => [],
                     'installed' => true,
                     'active' => true,

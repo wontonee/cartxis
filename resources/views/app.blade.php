@@ -39,14 +39,31 @@
         <link rel="preconnect" href="https://fonts.bunny.net">
         <link href="https://fonts.bunny.net/css?family=instrument-sans:400,500,600" rel="stylesheet" />
 
+        @php
+            $themeStylesheet = null;
+            try {
+                $activeTheme = \Cartxis\Core\Models\Theme::active();
+                if ($activeTheme) {
+                    $publicThemeCss = public_path("templates/{$activeTheme->slug}/css/theme.css");
+                    if (file_exists($publicThemeCss)) {
+                        $themeStylesheet = asset("templates/{$activeTheme->slug}/css/theme.css") . '?v=' . filemtime($publicThemeCss);
+                    }
+                }
+            } catch (\Throwable $e) {
+                // ignore during install/migrations
+            }
+        @endphp
+        @if ($themeStylesheet)
+            <link rel="stylesheet" href="{{ $themeStylesheet }}">
+        @endif
         @vite(['resources/js/app.ts'])
         @inertiaHead
     </head>
-    <body class="font-sans antialiased">
+    <body class="font-sans antialiased" data-force-light="{{ ($forceLightStorefront ?? false) ? '1' : '0' }}">
         @inertia        @php
-            if (app()->bound('vortex.hook')) {
+            if (app()->bound('cartxis.hook')) {
                 ob_start();
-                app('vortex.hook')->doAction('storefront.body.end');
+                app('cartxis.hook')->doAction('storefront.body.end');
                 echo ob_get_clean();
             }
         @endphp    </body>

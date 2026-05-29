@@ -3,6 +3,7 @@
 namespace Cartxis\Admin\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
+use Cartxis\Admin\Http\Requests\AdminLoginRequest;
 use Cartxis\Core\Services\SettingService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -34,12 +35,9 @@ class AdminLoginController extends Controller
     /**
      * Handle an incoming admin authentication request.
      */
-    public function store(Request $request): RedirectResponse
+    public function store(AdminLoginRequest $request): RedirectResponse
     {
-        $request->validate([
-            'email' => ['required', 'string', 'email'],
-            'password' => ['required', 'string'],
-        ]);
+        $request->ensureIsNotRateLimited();
 
         // Attempt to authenticate
         if (Auth::guard('admin')->attempt(
@@ -55,6 +53,7 @@ class AdminLoginController extends Controller
             // Check if user has admin role
             if (!$isAdmin) {
                 Auth::guard('admin')->logout();
+                $request->hitRateLimiter();
                 throw ValidationException::withMessages([
                     'email' => __('You do not have admin access.'),
                 ]);
@@ -63,15 +62,19 @@ class AdminLoginController extends Controller
             // Check if user is active
             if (!$user->is_active) {
                 Auth::guard('admin')->logout();
+                $request->hitRateLimiter();
                 throw ValidationException::withMessages([
                     'email' => __('Your account has been deactivated.'),
                 ]);
             }
 
+            $request->clearRateLimiter();
             $request->session()->regenerate();
 
             return redirect()->intended(config('admin.path', 'admin') . '/dashboard');
         }
+
+        $request->hitRateLimiter();
 
         throw ValidationException::withMessages([
             'email' => __('The provided credentials do not match our records.'),

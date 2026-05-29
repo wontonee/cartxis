@@ -27,7 +27,7 @@ class MarketingMenuSeeder extends Seeder
                 'order' => 50,
                 'permission' => null,
                 'active' => true,
-                'extension_code' => 'vortex_marketing',
+                'extension_code' => 'cartxis_marketing',
             ]
         );
 
@@ -77,7 +77,7 @@ class MarketingMenuSeeder extends Seeder
                     'order' => $item['order'],
                     'permission' => $item['permission'],
                     'active' => true,
-                    'extension_code' => 'vortex_marketing',
+                    'extension_code' => 'cartxis_marketing',
                 ]
             );
         }

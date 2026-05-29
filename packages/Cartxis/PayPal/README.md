@@ -1,6 +1,6 @@
 # PayPal Payment Gateway Extension
 
-Accept payments worldwide using PayPal. This extension integrates PayPal Checkout (REST API v2) with your Vortex e-commerce store.
+Accept payments worldwide using PayPal. This extension integrates PayPal Checkout (REST API v2) with your Cartxis e-commerce store.
 
 ## Features
 
@@ -17,7 +17,7 @@ Accept payments worldwide using PayPal. This extension integrates PayPal Checkou
 
 - PHP ^8.2
 - Laravel 11
-- Vortex Core ^1.0
+- Cartxis Core ^1.0
 - GuzzleHttp/Guzzle ^7.0
 - PayPal Business Account
 
@@ -203,7 +203,7 @@ For issues related to:
 
 ## License
 
-This extension is part of the Vortex e-commerce platform.
+This extension is part of the Cartxis e-commerce platform.
 
 ## Changelog
 

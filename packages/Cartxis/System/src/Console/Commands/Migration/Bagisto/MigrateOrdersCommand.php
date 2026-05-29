@@ -111,7 +111,7 @@ class MigrateOrdersCommand extends Command
         $this->migrateOrderItems($config, $bagistoOrder->id, $order->id);
     }
     
-    private function migrateOrderItems(array $config, int $bagistoOrderId, int $vortexOrderId): void
+    private function migrateOrderItems(array $config, int $bagistoOrderId, int $cartxisOrderId): void
     {
         $items = DB::connection($config['connection'])
             ->table('order_items')
@@ -122,7 +122,7 @@ class MigrateOrdersCommand extends Command
         foreach ($items as $item) {
             OrderItem::updateOrCreate(
                 [
-                    'order_id' => $vortexOrderId,
+                    'order_id' => $cartxisOrderId,
                     'product_sku' => $item->sku,
                 ],
                 [

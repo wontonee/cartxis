@@ -73,6 +73,7 @@ class HomeService extends ShopService
                     $primaryHeroIdentifier,
                     'homepage-hero',
                     'homepage-hero-2',
+                    'homepage-hero-3',
                     'fashion-hero-banner',
                     'fashion-hero-banner-2',
                 ]
@@ -113,7 +114,7 @@ class HomeService extends ShopService
             $blocksUpdatedAt = Block::whereIn('identifier', $blockIdentifiers)->max('updated_at');
             $blocksVersion = $blocksUpdatedAt ? (int) strtotime((string) $blocksUpdatedAt) : 0;
 
-            return $this->remember('homepage.data.v3.' . $activeThemeSlug . '.' . $blocksVersion, 3600, function () use ($featuredCount, $blockIdentifiers, $heroCandidateGroups, $sectionCandidateGroups) {
+            return $this->remember('homepage.data.v5.' . $activeThemeSlug . '.' . $blocksVersion, 3600, function () use ($featuredCount, $blockIdentifiers, $heroCandidateGroups, $sectionCandidateGroups) {
                 // Get active CMS blocks for homepage
                 $blocks = Block::whereIn('identifier', $blockIdentifiers)
                     ->active()
@@ -162,20 +163,75 @@ class HomeService extends ShopService
                             'image' => $category->image,
                             'products_count' => $category->products()->count(),
                         ];
-                    });
+                    })
+                    ->values()
+                    ->all();
                 
                 // Convert to plain arrays before caching so appended attributes
                 // (image, in_stock, etc.) are computed now, not after deserialization.
-                $toProductArray = fn ($collection) => $collection->map(fn ($p) => $p->toArray())->values();
+                $toProductArray = fn ($collection) => $collection->map(function ($product) {
+                    $data = $product->toArray();
+
+                    if ($product->relationLoaded('categories')) {
+                        $data['categories'] = $product->categories
+                            ->map(fn ($category) => [
+                                'id' => $category->id,
+                                'name' => $category->name,
+                                'slug' => $category->slug,
+                            ])
+                            ->values()
+                            ->all();
+                    }
+
+                    return $data;
+                })->values()->all();
+
+                $featuredProducts = config('shop.homepage.show_featured_products', true)
+                    ? $this->productRepository->getFeaturedProducts($featuredCount)
+                    : collect([]);
+
+                $newProducts = config('shop.homepage.show_new_products', true)
+                    ? $this->productRepository->getNewProducts($featuredCount)
+                    : collect([]);
+
+                $onSaleProducts = $this->productRepository->getOnSaleProducts(8);
+
+                $heroReferences = $this->extractProductReferencesFromBlocks($heroBlocks);
+                $heroProducts = $this->resolveLinkedProducts(
+                    $heroReferences,
+                    $featuredProducts,
+                    3
+                );
+
+                $offerReferences = $this->extractProductReferencesFromBlocks([
+                    $offer1Block,
+                    $offer2Block,
+                ]);
+                $offerProducts = $this->resolveLinkedProducts(
+                    $offerReferences,
+                    $onSaleProducts->isNotEmpty() ? $onSaleProducts : $featuredProducts,
+                    2
+                );
+
+                $bannerReferences = $this->extractProductReferencesFromBlocks([$bannerBlock]);
+                $bannerProduct = $this->resolveLinkedProducts(
+                    $bannerReferences,
+                    $featuredProducts,
+                    1
+                )->first();
 
                 return [
-                    'featured_products' => config('shop.homepage.show_featured_products', true)
-                        ? $toProductArray($this->productRepository->getFeaturedProducts($featuredCount))
-                        : collect([]),
+                    'featured_products' => $toProductArray($featuredProducts),
                     
-                    'new_products' => config('shop.homepage.show_new_products', true)
-                        ? $toProductArray($this->productRepository->getNewProducts($featuredCount))
-                        : collect([]),
+                    'new_products' => $toProductArray($newProducts),
+
+                    'hero_products' => $toProductArray($heroProducts),
+
+                    'offer_products' => $toProductArray($offerProducts),
+
+                    'banner_product' => $bannerProduct
+                        ? ($toProductArray(collect([$bannerProduct]))[0] ?? null)
+                        : null,
                     
                     'categories' => $categories,
                     
@@ -303,5 +359,58 @@ class HomeService extends ShopService
         $this->forget('homepage.data');
         $this->forget('featured_products.*');
         $this->forget('new_products.*');
+    }
+
+    /**
+     * @param  array<int, \Cartxis\CMS\Models\Block|null>  $blocks
+     * @return array<int, array{type: string, value: int|string}>
+     */
+    protected function extractProductReferencesFromBlocks(array $blocks): array
+    {
+        $references = [];
+
+        foreach ($blocks as $block) {
+            if (! $block) {
+                continue;
+            }
+
+            $content = json_decode((string) $block->content, true);
+
+            if (! is_array($content)) {
+                continue;
+            }
+
+            if (! empty($content['product_id'])) {
+                $references[] = ['type' => 'id', 'value' => (int) $content['product_id']];
+            } elseif (! empty($content['product_slug'])) {
+                $references[] = ['type' => 'slug', 'value' => (string) $content['product_slug']];
+            }
+        }
+
+        return $references;
+    }
+
+    /**
+     * @param  array<int, array{type: string, value: int|string}>  $references
+     * @param  \Illuminate\Support\Collection<int, \Cartxis\Product\Models\Product>  $fallback
+     * @return \Illuminate\Support\Collection<int, \Cartxis\Product\Models\Product>
+     */
+    protected function resolveLinkedProducts(array $references, $fallback, int $limit)
+    {
+        $products = $references === []
+            ? collect()
+            : $this->productRepository->resolveProductReferences($references);
+
+        foreach ($fallback as $product) {
+            if ($products->count() >= $limit) {
+                break;
+            }
+
+            if (! $products->contains('id', $product->id)) {
+                $products->push($product);
+            }
+        }
+
+        return $products->take($limit)->values();
     }
 }

@@ -1,4 +1,5 @@
-import { ref, onMounted } from 'vue';
+import { ref, onMounted, computed } from 'vue';
+import { usePage } from '@inertiajs/vue3';
 import axios from 'axios';
 
 export interface MenuItem {
@@ -16,15 +17,28 @@ export interface MenuData {
     mobile: MenuItem[];
 }
 
+const emptyMenus = (): MenuData => ({
+    header: [],
+    footer: [],
+    mobile: [],
+});
+
 export function useStorefrontMenu() {
-    const menus = ref<MenuData>({
-        header: [],
-        footer: [],
-        mobile: [],
-    });
-    
-    const loading = ref(false);
+    const page = usePage();
+    const sharedMenus = computed(() => (page.props as { storefrontMenus?: MenuData }).storefrontMenus);
+
+    const fetchedMenus = ref<MenuData>(emptyMenus());
+    const menus = computed<MenuData>(() => sharedMenus.value ?? fetchedMenus.value);
+    const loading = ref(!sharedMenus.value);
     const error = ref<string | null>(null);
+
+    const applyMenus = (data: MenuData) => {
+        fetchedMenus.value = {
+            header: data.header ?? [],
+            footer: data.footer ?? [],
+            mobile: data.mobile ?? [],
+        };
+    };
 
     const fetchMenus = async () => {
         loading.value = true;
@@ -32,7 +46,7 @@ export function useStorefrontMenu() {
 
         try {
             const response = await axios.get('/api/menus/all');
-            menus.value = response.data;
+            applyMenus(response.data);
         } catch (err) {
             error.value = 'Failed to load menus';
             console.error('Error fetching menus:', err);
@@ -47,7 +61,10 @@ export function useStorefrontMenu() {
 
         try {
             const response = await axios.get(`/api/menus/${type}`);
-            menus.value[type] = response.data.items;
+            fetchedMenus.value = {
+                ...fetchedMenus.value,
+                [type]: response.data.items,
+            };
         } catch (err) {
             error.value = `Failed to load ${type} menu`;
             console.error(`Error fetching ${type} menu:`, err);
@@ -61,8 +78,6 @@ export function useStorefrontMenu() {
             return item.url;
         }
         if (item.route) {
-            // For named routes, use route() helper if available
-            // For now, return the route as-is
             return item.route;
         }
         return '#';
@@ -72,9 +87,10 @@ export function useStorefrontMenu() {
         return item.children && item.children.length > 0;
     };
 
-    // Auto-fetch on mount
     onMounted(() => {
-        fetchMenus();
+        if (!sharedMenus.value) {
+            fetchMenus();
+        }
     });
 
     return {

@@ -7,7 +7,7 @@
   "author_url": "https://cartxis-commerce.com",
   "icon": "credit-card",
   "requires": {
-    "vortex/core": "^1.0",
+    "cartxis/core": "^1.0",
     "php": "^8.2"
   },
   "provider": "Cartxis\\Stripe\\Providers\\StripeServiceProvider",

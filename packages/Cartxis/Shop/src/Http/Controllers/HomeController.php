@@ -5,6 +5,7 @@ namespace Cartxis\Shop\Http\Controllers;
 use Cartxis\Shop\Services\HomeService;
 use Cartxis\Core\Services\ThemeViewResolver;
 use Cartxis\Core\Services\SettingService;
+use Cartxis\Core\Models\Theme;
 use Cartxis\UIEditor\Services\LayoutService;
 use Inertia\Inertia;
 
@@ -52,12 +53,17 @@ class HomeController extends Controller
     public function index()
     {
         $data = $this->homeService->getHomepageData();
-        $homepageLayout = $this->layoutService->getPublishedHomepage();
+        $homepageLayout = $this->usesNativeHomepage()
+            ? null
+            : $this->layoutService->getPublishedHomepage();
         
         // Use ThemeViewResolver to get correct view path
         return Inertia::render($this->themeResolver->resolve('Home/Index'), [
             // 'theme' prop is shared via HandleInertiaRequests middleware (flattened settings)
             'featuredProducts' => $data['featured_products'],
+            'heroProducts' => $data['hero_products'] ?? [],
+            'offerProducts' => $data['offer_products'] ?? [],
+            'bannerProduct' => $data['banner_product'] ?? null,
             'featuredCategories' => $data['categories'], // Renamed for clarity
             'newProducts' => $data['new_products'],
             'categories' => $data['categories'], // Keep for backward compatibility
@@ -76,5 +82,16 @@ class HomeController extends Controller
                 'keywords' => 'ecommerce, shop, products',
             ],
         ]);
+    }
+
+    protected function usesNativeHomepage(): bool
+    {
+        $theme = Theme::active();
+
+        if (! $theme) {
+            return false;
+        }
+
+        return (bool) ($theme->getConfig()['native_homepage'] ?? false);
     }
 }

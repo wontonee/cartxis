@@ -9,7 +9,7 @@ class ThemeDiscoverCommand extends Command
 {
     protected $signature = 'theme:discover';
 
-    protected $description = 'Scan the themes/ directory and register any new themes into the database';
+    protected $description = 'Scan templates/storefront/ and register storefront templates into the database';
 
     public function handle(ThemeService $themeService): int
     {
@@ -18,7 +18,7 @@ class ThemeDiscoverCommand extends Command
         $discovered = $themeService->discover();
 
         if (empty($discovered)) {
-            $this->components->warn('No themes found in ' . base_path('themes'));
+            $this->components->warn('No themes found in ' . config('theme.catalog_path', 'templates/storefront'));
             return self::SUCCESS;
         }
 

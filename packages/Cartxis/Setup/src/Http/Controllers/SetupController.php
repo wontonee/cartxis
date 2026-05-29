@@ -179,7 +179,7 @@ class SetupController extends Controller
 
             if ($result['success']) {
                 // Also seed the homepage layout from the default theme if not already published
-                $themeDataPath = base_path('themes/cartxis-default/data/theme-data.json');
+                $themeDataPath = base_path('templates/storefront/general/cartxis-default/data/theme-data.json');
                 if (file_exists($themeDataPath)) {
                     $themeData = json_decode(file_get_contents($themeDataPath), true);
                     if (!empty($themeData['homepage']) && !PageLayout::homepage()->published()->exists()) {

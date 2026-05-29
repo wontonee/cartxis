@@ -1,0 +1,18 @@
+{
+    "slug": "cartxis-default",
+    "type": "storefront",
+    "category": "general",
+    "tags": ["retail", "mobile-first", "ui-editor"],
+    "name": "Cartxis Default",
+    "description": "A vibrant, mobile-first storefront theme with UI Editor homepage layouts, quick view, and modern blue retail polish.",
+    "version": "2.0.0",
+    "author": "Cartxis Team",
+    "author_url": "https://cartxis-commerce.com",
+    "screenshot": "screenshots/theme-preview.svg",
+    "source": "bundled",
+    "requires": {
+        "cartxis": ">=1.0"
+    },
+    "includes": ["theme", "homepage"],
+    "demo_business_type": "retail"
+}

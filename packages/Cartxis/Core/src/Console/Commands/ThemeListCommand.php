@@ -20,7 +20,7 @@ class ThemeListCommand extends Command
         $themes = Theme::orderBy('name')->get();
 
         if ($themes->isEmpty()) {
-            $this->components->warn('No themes registered. Place a theme in themes/ and run theme:discover.');
+            $this->components->warn('No themes registered. Place a template under templates/storefront/ and run theme:discover.');
             return self::SUCCESS;
         }
 

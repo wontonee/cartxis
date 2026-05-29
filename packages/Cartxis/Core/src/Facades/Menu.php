@@ -26,6 +26,6 @@ class Menu extends Facade
      */
     protected static function getFacadeAccessor(): string
     {
-        return 'vortex.menu';
+        return 'cartxis.menu';
     }
 }

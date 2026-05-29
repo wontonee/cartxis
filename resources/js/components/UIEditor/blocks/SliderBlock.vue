@@ -38,8 +38,21 @@ const slides = computed<Slide[]>(() => {
           text_align: 'center',
         },
       ]
+})
+
+const failedImages = ref<Record<string, boolean>>({})
+
+function slideBackground(slide: Slide) {
+  return `linear-gradient(135deg, ${slide.grad_from ?? '#1e3a8a'} 0%, ${slide.grad_to ?? '#2563eb'} 100%)`
 }
-)
+
+function imageFailed(slide: Slide) {
+  return !slide.image || failedImages.value[slide.id]
+}
+
+function onImageError(slide: Slide) {
+  failedImages.value = { ...failedImages.value, [slide.id]: true }
+}
 
 const height = computed(() => Number(props.settings.height ?? 540))
 const autoplay = computed(() => props.settings.autoplay !== false)
@@ -99,22 +112,19 @@ function alignClass(align: string) {
         :key="slide.id ?? idx"
         class="absolute inset-0 flex flex-col justify-center px-6 md:px-20"
         :class="alignClass(slide.text_align)"
-        :style="{
-          background: slide.image
-            ? 'transparent'
-            : `linear-gradient(135deg, ${slide.grad_from ?? '#1e3a5f'} 0%, ${slide.grad_to ?? '#0ea5e9'} 100%)`
-        }"
+        :style="{ background: slideBackground(slide) }"
       >
         <!-- Background image -->
         <img
-          v-if="slide.image"
+          v-if="slide.image && !imageFailed(slide)"
           :src="slide.image"
           alt=""
           class="absolute inset-0 w-full h-full object-cover"
+          @error="onImageError(slide)"
         />
-        <!-- Overlay (only when image is set) -->
+        <!-- Overlay (only when image is visible) -->
         <div
-          v-if="slide.image"
+          v-if="slide.image && !imageFailed(slide)"
           class="absolute inset-0"
           :style="{ background: 'linear-gradient(90deg, rgba(0,0,0,0.65) 0%, rgba(0,0,0,0.2) 100%)' }"
         />

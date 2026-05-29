@@ -22,6 +22,6 @@ class Theme extends Facade
      */
     protected static function getFacadeAccessor(): string
     {
-        return 'vortex.theme';
+        return 'cartxis.theme';
     }
 }
