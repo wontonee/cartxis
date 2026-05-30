@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Cartxis\Core\Console\Commands;
 
+use Cartxis\Admin\Services\AdminMenuSyncService;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\DB;
 use PDO;
@@ -31,7 +32,7 @@ class InstallCommand extends Command
 
         // ── Step 2: App settings ─────────────────────────────────────────────
         $appName = $this->ask('App name', 'Cartxis');
-        $appUrl  = $this->ask('App URL', 'http://localhost:8000');
+        $appUrl = $this->ask('App URL', 'http://localhost:8000');
         $this->writeEnvValue('APP_NAME', $appName);
         $this->writeEnvValue('APP_URL', $appUrl);
 
@@ -45,10 +46,10 @@ class InstallCommand extends Command
         $dbConnected = false;
 
         while (! $dbConnected) {
-            $dbHost     = $this->ask('DB host', '127.0.0.1');
-            $dbPort     = $this->ask('DB port', '3306');
-            $dbName     = $this->ask('DB database');
-            $dbUser     = $this->ask('DB username', 'root');
+            $dbHost = $this->ask('DB host', '127.0.0.1');
+            $dbPort = $this->ask('DB port', '3306');
+            $dbName = $this->ask('DB database');
+            $dbUser = $this->ask('DB username', 'root');
             $dbPassword = $this->secret('DB password (leave blank for none)') ?? '';
 
             $dbConnected = $this->testDatabaseConnection($dbHost, (int) $dbPort, $dbName, $dbUser, $dbPassword);
@@ -58,6 +59,7 @@ class InstallCommand extends Command
 
                 if (! $this->confirm('Try again?', true)) {
                     $this->error('Installation aborted.');
+
                     return self::FAILURE;
                 }
             }
@@ -95,8 +97,8 @@ class InstallCommand extends Command
         $this->line('<fg=yellow>  Admin Account</fg=yellow>');
         $this->line('<fg=yellow>━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━</fg=yellow>');
 
-        $adminName     = $this->ask('Admin name', 'Admin');
-        $adminEmail    = $this->ask('Admin email', 'admin@example.com');
+        $adminName = $this->ask('Admin name', 'Admin');
+        $adminEmail = $this->ask('Admin email', 'admin@example.com');
         $adminPassword = $this->askForPassword();
 
         // Write temp env vars so AdminUserSeeder can pick them up
@@ -116,6 +118,9 @@ class InstallCommand extends Command
         $this->line('<fg=yellow>  Seeding Database</fg=yellow>');
         $this->line('<fg=yellow>━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━</fg=yellow>');
         $this->call('db:seed', ['--class' => 'Cartxis\\Core\\Database\\Seeders\\DatabaseSeeder', '--force' => true]);
+
+        app(AdminMenuSyncService::class)->sync();
+        $this->line('  <fg=green>✔</fg=green> Admin navigation menu synced');
 
         // Remove temp admin env vars (they've been used by the seeder)
         $this->removeEnvValue('CARTXIS_ADMIN_NAME');
@@ -139,7 +144,7 @@ class InstallCommand extends Command
 
         $npmBin = $this->detectNodePackageManager();
         // Ensure the binary name is from the known-good allowlist before passing to shell
-        if (!in_array($npmBin, ['pnpm', 'yarn', 'npm'], true)) {
+        if (! in_array($npmBin, ['pnpm', 'yarn', 'npm'], true)) {
             $npmBin = null;
         }
 
@@ -151,7 +156,7 @@ class InstallCommand extends Command
             $buildDir = public_path('build');
             if (is_dir($buildDir)) {
                 $this->line('  Removing stale build files...');
-                passthru('rm -rf ' . escapeshellarg($buildDir));
+                passthru('rm -rf '.escapeshellarg($buildDir));
             }
 
             $this->line("  Running {$npmBin} install...");
@@ -193,7 +198,7 @@ class InstallCommand extends Command
         $this->line('<fg=cyan> ╚═════╝╚═╝  ╚═╝╚═╝  ╚═╝   ╚═╝   ╚═╝  ╚═╝╚═╝╚══════╝</fg=cyan>');
         $this->newLine();
         $this->line('<fg=green>  Open Source Laravel eCommerce Platform</fg=green>');
-        $this->line('<fg=gray>  Version ' . config('app.version', '1.0.0') . '  •  https://cartxis.com</fg=gray>');
+        $this->line('<fg=gray>  Version '.config('app.version', '1.0.0').'  •  https://cartxis.com</fg=gray>');
         $this->newLine();
         $this->line('<fg=yellow>════════════════════════════════════════════════════</fg=yellow>');
         $this->line('<fg=yellow>   Welcome to the Cartxis Installation Wizard</fg=yellow>');
@@ -208,9 +213,9 @@ class InstallCommand extends Command
         $this->line('<fg=green>  ✔  Cartxis installation complete!</fg=green>');
         $this->line('<fg=green>════════════════════════════════════════════════════</fg=green>');
         $this->newLine();
-        $this->line('  Admin panel : <fg=cyan>' . rtrim($appUrl, '/') . '/admin/login</fg=cyan>');
-        $this->line('  Email       : <fg=cyan>' . $adminEmail . '</fg=cyan>');
-        $this->line('  Password    : <fg=cyan>' . $adminPassword . '</fg=cyan>');
+        $this->line('  Admin panel : <fg=cyan>'.rtrim($appUrl, '/').'/admin/login</fg=cyan>');
+        $this->line('  Email       : <fg=cyan>'.$adminEmail.'</fg=cyan>');
+        $this->line('  Password    : <fg=cyan>'.$adminPassword.'</fg=cyan>');
         $this->newLine();
 
         if (! $assetsBuilt) {
@@ -228,7 +233,7 @@ class InstallCommand extends Command
 
     private function ensureEnvFile(): void
     {
-        $envPath     = base_path('.env');
+        $envPath = base_path('.env');
         $examplePath = base_path('.env.example');
 
         if (! file_exists($envPath)) {
@@ -260,6 +265,7 @@ class InstallCommand extends Command
                 $password,
                 [PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION, PDO::ATTR_TIMEOUT => 5]
             );
+
             return true;
         } catch (PDOException) {
             return false;
@@ -274,8 +280,8 @@ class InstallCommand extends Command
         string $password
     ): void {
         config([
-            'database.connections.mysql.host'     => $host,
-            'database.connections.mysql.port'     => $port,
+            'database.connections.mysql.host' => $host,
+            'database.connections.mysql.port' => $port,
             'database.connections.mysql.database' => $database,
             'database.connections.mysql.username' => $username,
             'database.connections.mysql.password' => $password,
@@ -291,13 +297,13 @@ class InstallCommand extends Command
         $content = file_exists($envPath) ? file_get_contents($envPath) : '';
 
         // Escape double quotes in value
-        $safeValue = str_contains($value, ' ') ? '"' . addslashes($value) . '"' : $value;
-        $line      = "{$key}={$safeValue}";
+        $safeValue = str_contains($value, ' ') ? '"'.addslashes($value).'"' : $value;
+        $line = "{$key}={$safeValue}";
 
         if (preg_match("/^{$key}=.*/m", $content)) {
             $content = preg_replace("/^{$key}=.*/m", $line, $content);
         } else {
-            $content .= PHP_EOL . $line;
+            $content .= PHP_EOL.$line;
         }
 
         file_put_contents($envPath, $content);
@@ -323,6 +329,7 @@ class InstallCommand extends Command
 
             if (! $password || strlen($password) < 8) {
                 $this->error('Password must be at least 8 characters.');
+
                 continue;
             }
 
@@ -330,6 +337,7 @@ class InstallCommand extends Command
 
             if ($password !== $confirm) {
                 $this->error('Passwords do not match. Try again.');
+
                 continue;
             }
 
