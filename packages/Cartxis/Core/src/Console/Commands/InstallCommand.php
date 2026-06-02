@@ -247,7 +247,13 @@ class InstallCommand extends Command
         } elseif ($result['status'] === 'registered') {
             $this->line('  <fg=green>✔</fg=green> Theme directory API key generated and saved to .env');
         } else {
-            $this->line('  <fg=yellow>!</fg=yellow> Could not register theme directory key (service unreachable).');
+            $this->line('  <fg=yellow>!</fg=yellow> '.$result['message']);
+            if (! empty($result['directory_url'])) {
+                $this->line('    URL: <fg=cyan>'.$result['directory_url'].'</fg=cyan>');
+            }
+            if (! empty($result['error'])) {
+                $this->line('    Detail: '.$result['error']);
+            }
             $this->line('    Run <fg=cyan>php artisan theme:directory:register</fg=cyan> after go-live, or set <fg=cyan>CARTXIS_THEME_API_KEY</fg=cyan> manually.');
         }
     }

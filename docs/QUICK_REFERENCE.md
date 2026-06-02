@@ -455,19 +455,10 @@ Routes are loaded from two sources: **app-level** (`routes/`) and **package-leve
 ### Inertia Page Resolution
 
 ```typescript
-// In app.ts — theme-aware page resolution
-resolve: (name) => {
-    if (name.startsWith('themes/')) {
-        // Theme page: "themes/cartxis-default/pages/Home"
-        // Resolves from: ../../themes/{slug}/resources/views/{path}.vue
-        return resolvePageComponent(
-            `../../themes/${themeSlug}/resources/views/${componentPath}.vue`,
-            import.meta.glob('../../themes/**/resources/views/**/*.vue'),
-        );
-    }
-    // Default: resolves from ./pages/{name}.vue
-    return resolvePageComponent(`./pages/${name}.vue`, import.meta.glob('./pages/**/*.vue'));
-}
+// resolveTemplatePage.ts — theme pages under templates/storefront/
+// Inertia name: templates/{slug}/pages/Home/Index
+// Glob: templates/storefront/**/resources/views/**/*.vue
+// Production fallback: public/build/manifest.json
 ```
 
 ### Vite Path Aliases
@@ -477,7 +468,7 @@ resolve: (name) => {
 | `@` | `/resources/js` |
 | `@/Layouts` | `/resources/js/layouts` |
 | `@admin` | `/resources/admin` |
-| `@themes` | `/themes` |
+| `@templates` | `/templates/storefront` |
 
 ### Page Directory Structure (`resources/js/pages/`)
 
@@ -563,66 +554,69 @@ Configuration in `components.json` — style: default, baseColor: neutral, CSS v
 
 ## 9. Theme System
 
+Storefront themes are **template packages** under `templates/storefront/{category}/{slug}/`. Static assets are published to `public/templates/{slug}/`.
+
 ### Structure
 
 ```
-themes/cartxis-default/
-├── theme.json              # Manifest — name, slug, version, supports, settings
+templates/storefront/general/cartxis-default/
+├── theme.json              # Manifest — name, slug, version, settings
+├── template.json           # Optional — catalog metadata for Browse Themes
 ├── hooks.php               # Theme lifecycle hooks
-├── config/                 # Theme configuration
-├── screenshot.png          # Theme preview image
+├── config/settings.php     # Appearance admin schema
+├── data/theme-data.json    # Demo blocks, menus, homepage layout
+├── assets/                 # Images copied to public/templates/{slug}/assets/
+├── resources/css/theme.css # Storefront CSS (also bundled by Vite)
 └── resources/views/
     ├── layouts/            # ThemeLayout.vue
-    ├── components/         # Theme-specific components (7)
-    │   ├── CartIcon.vue
-    │   ├── CartItemSkeleton.vue
-    │   ├── ProductCard.vue
-    │   ├── ProductSkeleton.vue
-    │   ├── QuickViewModal.vue
-    │   ├── ThemeFooter.vue
-    │   └── ThemeHeader.vue
-    └── pages/              # Theme page overrides (10 sections)
-        ├── Account/        # Dashboard, Orders, Addresses, Profile, Wishlist
-        ├── Auth/           # Login, Register
-        ├── CMS/            # Dynamic CMS pages
-        ├── Cart/           # Shopping cart
-        ├── Category/       # Category listing
-        ├── Checkout/       # Checkout flow
-        ├── Home/           # Homepage
-        ├── Products/       # Product detail
-        ├── Search/         # Search results
-        └── Stripe/         # Stripe payment pages
+    ├── components/         # Header, footer, product card, …
+    └── pages/              # Home, Products, Cart, Checkout, …
 ```
 
-### theme.json
+### Remote catalog (Template Zone)
 
-```json
-{
-    "name": "Cartxis Default",
-    "slug": "cartxis-default",
-    "version": "1.0.0",
-    "supports": ["widgets", "menus", "custom-logo", "custom-colors", "responsive", "dark-mode"],
-    "settings": {
-        "colors": { "primary": "#3b82f6", "secondary": "#8b5cf6", ... },
-        "typography": { "font_family": "Inter, sans-serif" },
-        "layout": { "container_width": "1280px" },
-        "features": { "sticky_header": true, "wishlist": true, "quick_view": true, ... }
-    }
-}
-```
+| Env var | Purpose |
+|---------|---------|
+| `CARTXIS_THEME_DIRECTORY_URL` | API base — `https://cartxis.com/api` (no `www`) |
+| `CARTXIS_THEME_API_KEY` | Bearer token for `POST /api/themes/{slug}/install` |
+| `CARTXIS_THEME_REBUILD_ASSETS` | Run `npm run build` after install/activate (default `true`) |
 
-### How Theme Resolution Works
+Registered by `php artisan cartxis:install` or `php artisan theme:directory:register`.
 
-1. **Backend** — Controller returns `Inertia::render('themes/cartxis-default/pages/Home')`.
-2. **Vite** — `app.ts` detects the `themes/` prefix and resolves from `../../themes/{slug}/resources/views/{path}.vue` via glob import.
-3. **Fallback** — Pages without `themes/` prefix resolve from `resources/js/pages/`.
+### How page resolution works
 
-### Creating a Theme
+1. **Backend** — `ThemeViewResolver` reads active theme from DB → `templates/{slug}/pages/{View}`.
+2. **Frontend** — `resolveTemplatePage.ts` loads Vue files via `import.meta.glob('templates/storefront/**/…')` or production `manifest.json`.
+3. **Legacy alias** — Inertia names starting with `themes/` are normalized to `templates/`.
 
-1. Create `themes/{slug}/` directory.
-2. Add `theme.json` manifest.
-3. Add `resources/views/` with layouts, components, and pages.
-4. Register theme in admin (Settings → Themes).
+### Artisan commands
+
+| Command | Purpose |
+|---------|---------|
+| `theme:discover` | Scan disk, register DB rows, publish public assets |
+| `theme:list` | List themes |
+| `theme:activate {slug}` | Activate theme |
+| `template:install {slug}` | Install from catalog/remote |
+| `theme:import-data {slug}` | Import demo JSON |
+| `theme:directory:register` | Register theme directory API key |
+| `optimize:clear` | Clear caches after theme change |
+
+### Post-install lifecycle
+
+`ThemeLifecycleService` runs on template install, theme activate, and zip upload:
+
+1. `theme:discover` (republish assets, strip `__MACOSX` junk)
+2. `optimize:clear`
+3. `npm run build` (when enabled)
+
+### Creating a theme
+
+1. Copy `templates/storefront/general/cartxis-default` to `templates/storefront/{category}/{slug}/`.
+2. Edit `theme.json` and add `template.json` for catalog listing.
+3. Run `php artisan theme:discover && npm run build`.
+4. Activate in **Admin → Appearance**.
+
+**Merchant guide:** [THEMES.md](./THEMES.md) · **Block overrides:** [THEME_BLOCK_ARCHITECTURE.md](./THEME_BLOCK_ARCHITECTURE.md)
 
 ---
 
@@ -1017,11 +1011,13 @@ composer dev
 
 ### Creating a Theme
 
-1. Create `themes/{slug}/` with `theme.json`
-2. Add `resources/views/layouts/ThemeLayout.vue`
-3. Override pages in `resources/views/pages/`
-4. Add theme-specific components in `resources/views/components/`
-5. Activate in Admin → Settings → Themes
+1. Copy `templates/storefront/general/cartxis-default` to `templates/storefront/{category}/{slug}/`
+2. Edit `theme.json`; add `template.json` for Browse Themes catalog
+3. Override pages in `resources/views/pages/` and components in `resources/views/components/`
+4. Run `php artisan theme:discover && npm run build`
+5. Install/activate via **Admin → Appearance → Browse Themes** or `php artisan template:install {slug} --activate`
+
+See [THEMES.md](./THEMES.md).
 
 ### Code Quality
 

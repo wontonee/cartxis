@@ -142,6 +142,8 @@ class TemplateZoneController extends Controller
 
             if ($result['assets_rebuilt'] ?? false) {
                 $message .= ' Storefront assets updated.';
+            } elseif ($result['cache_cleared'] ?? false) {
+                $message .= ' Caches cleared.';
             } else {
                 $message .= ' Run npm run build on the server, then hard-refresh the storefront.';
             }

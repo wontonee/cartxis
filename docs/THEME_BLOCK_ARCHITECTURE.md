@@ -2,6 +2,8 @@
 
 This document explains the multi-theme block system used by the UIEditor. Read this before creating blocks for a new theme.
 
+> **Paths:** Theme packages live under `templates/storefront/{category}/{slug}/`. Block overrides go in `templates/storefront/.../{slug}/blocks/`. See [THEMES.md](./THEMES.md) for install and troubleshooting.
+
 ---
 
 ## Overview
@@ -42,13 +44,13 @@ These composables hold all data-fetching, state management, and utility logic. T
 When rendering a block of type e.g. `products_grid`, the resolver:
 
 1. Reads the active theme slug from `page.props.theme?.slug`
-2. Tries to load `@themes/{slug}/blocks/{PascalCase}Block.vue`
+2. Tries to load `@templates/{category}/{slug}/blocks/{PascalCase}Block.vue` (or theme blocks under `templates/storefront/.../blocks/`)
 3. If not found (import fails), falls back to `resources/js/components/UIEditor/blocks/{Type}Block.vue`
 4. If that also fails, renders `TextBlock.vue` as a last resort
 
-**The `@themes` alias** is configured in `vite.config.ts`:
+**The `@templates` alias** is configured in `vite.config.ts`:
 ```ts
-{ find: '@themes', replacement: '/themes' }
+{ find: '@templates', replacement: '/templates/storefront' }
 ```
 
 **Type → filename mapping** (handled by `toPascal()` in UIBlockRenderer):
@@ -84,18 +86,16 @@ const { products, loading, addingToCart, addedToCart, formatPrice, handleAddToCa
 
 ## Layer 4 — Theme-Specific Block Overrides
 
-**Location:** `themes/{theme-slug}/blocks/`
+**Location:** `templates/storefront/{category}/{slug}/blocks/`
 
 These files contain the **visual presentation only** for a specific theme. They use the same composable as the shared fallback but render a completely different template — matching the theme's design system.
 
 **Current theme overrides:**
 
 ```
-themes/
-  cartxis-default/
-    blocks/
-      ProductsGridBlock.vue    ← rounded-2xl, shadow-md hover:shadow-2xl, indigo-600 palette
-      CategoriesGridBlock.vue  ← same design language, indigo hover border overlay
+templates/storefront/general/cartxis-default/blocks/
+  ProductsGridBlock.vue
+  CategoriesGridBlock.vue
 ```
 
 ---

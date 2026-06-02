@@ -46,6 +46,12 @@ function loadManifestSync(): Record<string, ViteManifestEntry> {
     return manifestCache!
 }
 
+function isValidTemplateVuePath(key: string): boolean
+{
+    return ! key.includes('/__MACOSX/')
+        && ! key.split('/').some((part) => part.startsWith('._'))
+}
+
 export async function resolveTemplatePage(name: string): Promise<DefineComponent> {
     const normalized = normalizeTemplateName(name)
     const { themeSlug, suffix } = parseTemplateName(normalized)
@@ -55,7 +61,7 @@ export async function resolveTemplatePage(name: string): Promise<DefineComponent
     )
 
     const globEntry = Object.entries(pages).find(
-        ([key]) => key.includes(`/${themeSlug}/`) && key.endsWith(suffix),
+        ([key]) => isValidTemplateVuePath(key) && key.includes(`/${themeSlug}/`) && key.endsWith(suffix),
     )
 
     if (globEntry) {
@@ -65,7 +71,8 @@ export async function resolveTemplatePage(name: string): Promise<DefineComponent
     const manifest = loadManifestSync()
     const manifestKey = Object.keys(manifest).find(
         (key) =>
-            key.startsWith('templates/storefront/')
+            isValidTemplateVuePath(key)
+            && key.startsWith('templates/storefront/')
             && key.includes(`/${themeSlug}/`)
             && key.endsWith(suffix),
     )

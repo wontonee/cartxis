@@ -137,6 +137,12 @@ Sets `setup_completed` flag to `1` in settings table.
 
 ### 1. First Installation
 When a user installs Cartxis for the first time:
+
+**CLI install (`php artisan cartxis:install`):**
+- Registers theme directory API key when `https://cartxis.com/api` is reachable
+- See [docs/THEMES.md](../../../docs/THEMES.md) if key registration fails
+
+**Setup wizard (web `/setup`):**
 1. Navigate to any URL
 2. `RedirectIfSetupIncomplete` middleware triggers
 3. Redirected to `/setup` welcome screen

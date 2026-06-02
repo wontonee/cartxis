@@ -34,7 +34,7 @@ class ThemeDirectoryRegisterCommand extends Command
         return match ($result['status']) {
             'already_configured' => $this->reportSuccess('Theme directory API key is already saved in .env.'),
             'registered' => $this->reportSuccess($result['message']),
-            default => $this->reportFailure($result['message']),
+            default => $this->reportFailure($result),
         };
     }
 
@@ -47,10 +47,22 @@ class ThemeDirectoryRegisterCommand extends Command
         return self::SUCCESS;
     }
 
-    protected function reportFailure(string $message): int
+    /**
+     * @param  array<string, mixed>  $result
+     */
+    protected function reportFailure(array $result): int
     {
-        $this->components->error($message);
-        $this->line('  Check CARTXIS_THEME_DIRECTORY_URL and that cartxis.com/api is reachable.');
+        $this->components->error((string) ($result['message'] ?? 'Could not register theme directory key.'));
+
+        if (! empty($result['directory_url'])) {
+            $this->line('  URL: '.$result['directory_url']);
+        }
+
+        if (! empty($result['error'])) {
+            $this->line('  Detail: '.$result['error']);
+        }
+        $this->line('  Use <fg=cyan>https://cartxis.com/api</fg=cyan> (without www) for CARTXIS_THEME_DIRECTORY_URL.');
+        $this->line('  Then run: <fg=cyan>php artisan theme:directory:register --force</fg=cyan>');
 
         return self::FAILURE;
     }

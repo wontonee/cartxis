@@ -21,6 +21,7 @@ class TemplateInstallService
         protected ThemePathResolver $paths,
         protected RemoteThemeDirectoryClient $remoteDirectory,
         protected ThemeAssetBuildService $assetBuild,
+        protected ThemeLifecycleService $lifecycle,
     ) {}
 
     /**
@@ -129,9 +130,13 @@ class TemplateInstallService
      */
     protected function finishInstall(array $result): array
     {
-        $result['assets_rebuilt'] = $this->assetBuild->rebuild(background: false);
+        $lifecycle = $this->lifecycle->finalize((string) $result['slug']);
 
-        return $result;
+        return array_merge($result, [
+            'cache_cleared' => $lifecycle['cache_cleared'],
+            'assets_published' => $lifecycle['assets_published'],
+            'assets_rebuilt' => $lifecycle['assets_rebuilt'],
+        ]);
     }
 
     /**

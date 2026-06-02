@@ -21,24 +21,8 @@ Agents.md
 /design
 /templates-design
 
-# -----------------------------------------------------------------------------
-# Storefront templates — OSS install ships cartxis-default ONLY
-#
-# COMMIT with the app:
-#   templates/storefront/general/cartxis-default/
-#   public/templates/cartxis-default/
-#
-# DO NOT COMMIT (optional templates — template server / local dev only):
-#   templates/storefront/electronics/
-#   public/templates/dmart-electronics/
-# -----------------------------------------------------------------------------
-
-/public/templates/*
-!/public/templates/cartxis-default/
-
-/templates/storefront/electronics/
-
-/public/images/homepage-1/
+# Storefront templates live under templates/storefront/{category}/{slug}/
+# Published static assets are mirrored to public/templates/{slug}/ at install/activate.
 /test-screenshots
 /_backup
 /resources/admin/media
