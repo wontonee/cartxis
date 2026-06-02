@@ -47,4 +47,40 @@ return [
     |
     */
     'catalog_remote_url' => env('CARTXIS_TEMPLATE_CATALOG_URL'),
+
+    /*
+    |--------------------------------------------------------------------------
+    | Cartxis Theme Directory (cartxis-home API)
+    |--------------------------------------------------------------------------
+    |
+    | Browse and one-click install themes from the official Cartxis directory.
+    | Set CARTXIS_THEME_DIRECTORY_URL to the cartxis-home API base (e.g. https://www.cartxis.com/api)
+    | and CARTXIS_THEME_API_KEY to a key generated in the cartxis-home admin.
+    |
+    */
+    'directory' => [
+        'url' => env(
+            'CARTXIS_THEME_DIRECTORY_URL',
+            env(
+                'CARTXIS_TEMPLATE_CATALOG_URL',
+                env('APP_ENV') === 'local'
+                    ? 'https://cartxis-home.test/api'
+                    : 'https://www.cartxis.com/api'
+            )
+        ),
+        'api_key' => env('CARTXIS_THEME_API_KEY'),
+        'cache_ttl' => (int) env('CARTXIS_THEME_DIRECTORY_CACHE_TTL', 3600),
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
+    | Rebuild storefront assets after theme install
+    |--------------------------------------------------------------------------
+    |
+    | Theme Vue pages are bundled by Vite at build time. After installing a new
+    | theme, npm run build must run so the storefront can load its pages.
+    |
+    */
+    'rebuild_assets_on_install' => (bool) env('CARTXIS_THEME_REBUILD_ASSETS', true),
+    'rebuild_assets_timeout' => (int) env('CARTXIS_THEME_REBUILD_TIMEOUT', 300),
 ];

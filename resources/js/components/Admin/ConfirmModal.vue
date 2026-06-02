@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { X, AlertTriangle } from 'lucide-vue-next'
+import { X, AlertTriangle, Download } from 'lucide-vue-next'
 
 interface Props {
     show: boolean
@@ -69,12 +69,16 @@ const confirm = () => {
                                 ]"
                             >
                                 <AlertTriangle 
+                                    v-if="variant !== 'primary'"
                                     :class="[
                                         'h-6 w-6',
                                         variant === 'danger' ? 'text-red-600 dark:text-red-400' : 
-                                        variant === 'warning' ? 'text-yellow-600 dark:text-yellow-400' : 
-                                        'text-blue-600 dark:text-blue-400'
+                                        'text-yellow-600 dark:text-yellow-400'
                                     ]"
+                                />
+                                <Download
+                                    v-else
+                                    class="h-6 w-6 text-blue-600 dark:text-blue-400"
                                 />
                             </div>
                             <div class="flex-1">

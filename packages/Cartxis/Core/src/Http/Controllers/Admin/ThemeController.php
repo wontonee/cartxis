@@ -5,6 +5,7 @@ namespace Cartxis\Core\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use Cartxis\Core\Services\ThemeService;
 use Cartxis\Core\Services\ThemeDataImportService;
+use Cartxis\Core\Services\ThemeAssetBuildService;
 use Cartxis\Core\Models\Theme;
 use Cartxis\UIEditor\Services\LayoutService;
 use Cartxis\UIEditor\Models\PageLayout;
@@ -225,7 +226,17 @@ class ThemeController extends Controller
                 'source' => 'upload',
             ]);
 
-            return back()->with('success', "Theme installed successfully ({$installedSlug})!");
+            $assetsRebuilt = app(ThemeAssetBuildService::class)->rebuild(background: false);
+
+            $message = "Theme installed successfully ({$installedSlug})!";
+
+            if ($assetsRebuilt) {
+                $message .= ' Storefront assets updated.';
+            } else {
+                $message .= ' Run npm run build on the server, then hard-refresh the storefront.';
+            }
+
+            return back()->with('success', $message);
         } catch (\Exception $e) {
             return back()->with('error', 'Failed to install theme: ' . $e->getMessage());
         }

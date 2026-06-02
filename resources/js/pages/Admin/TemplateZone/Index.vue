@@ -2,6 +2,7 @@
 import { ref, computed } from 'vue'
 import { Head, Link, router } from '@inertiajs/vue3'
 import AdminLayout from '@/layouts/AdminLayout.vue'
+import ConfirmModal from '@/components/Admin/ConfirmModal.vue'
 import {
   RefreshCcw, Download, LayoutTemplate, Search, CheckCircle2, ArrowUpCircle, Monitor,
   Wand2, Settings2, Power, ChevronRight,
@@ -40,6 +41,8 @@ interface TemplateItem {
   is_active?: boolean
   installed_version?: string | null
   update_available?: boolean
+  remote_categories?: Array<{ slug: string; name: string }>
+  updated_at?: string | null
 }
 
 interface Props {
@@ -51,6 +54,17 @@ interface Props {
     category?: string | null
     search?: string | null
   }
+  remoteBrowseEnabled?: boolean
+  remoteInstallEnabled?: boolean
+  directoryUrl?: string
+  remoteThemeCount?: number
+  remoteProbe?: {
+    ok: boolean
+    theme_count: number
+    category_count: number
+    status: number | null
+    error: string | null
+  }
 }
 
 const props = defineProps<Props>()
@@ -61,6 +75,37 @@ const activating = ref<Record<string, boolean>>({})
 const searchQuery = ref(props.filters.search || '')
 const selectedCategory = ref(props.filters.category || '')
 const selectedType = ref(props.filters.type || 'storefront')
+
+const confirmModal = ref({
+  show: false,
+  title: '',
+  message: '',
+  confirmText: 'Confirm',
+  variant: 'primary' as 'primary' | 'warning' | 'danger',
+  onConfirm: () => {},
+})
+
+const openConfirm = (options: {
+  title: string
+  message: string
+  confirmText?: string
+  variant?: 'primary' | 'warning' | 'danger'
+  onConfirm: () => void
+}) => {
+  confirmModal.value = {
+    show: true,
+    title: options.title,
+    message: options.message,
+    confirmText: options.confirmText ?? 'Confirm',
+    variant: options.variant ?? 'primary',
+    onConfirm: options.onConfirm,
+  }
+}
+
+const handleConfirm = () => {
+  confirmModal.value.onConfirm()
+  confirmModal.value.show = false
+}
 
 const categoryLabel = (template: TemplateItem) =>
   template.category_label
@@ -91,41 +136,69 @@ const syncCatalog = () => {
   })
 }
 
-const installTemplate = (template: TemplateItem) => {
-  if (installing.value[template.slug]) return
+const isRemoteTheme = (template: TemplateItem) => template.source === 'remote'
 
-  if (!confirm(`Install "${template.name}" into your store?`)) return
+const canInstallRemote = (template: TemplateItem) =>
+  !isRemoteTheme(template) || props.remoteInstallEnabled !== false
 
-  let importDemoProducts = false
-  if (template.includes?.includes('demo_products')) {
-    importDemoProducts = confirm('Also import demo products for this vertical?')
-  }
-
-  const importLayout = template.has_demo_layout
-    ? confirm('Also import the demo homepage layout?')
-    : false
-
-  const activateNow = confirm('Activate this theme after installation?')
+const runInstall = (template: TemplateItem) => {
+  const remote = isRemoteTheme(template)
 
   installing.value[template.slug] = true
   router.post(`/admin/appearance/template-zone/${encodeURIComponent(template.slug)}/install`, {
-    import_demo_products: importDemoProducts,
-    import_layout: importLayout,
-    activate: activateNow,
+    import_demo_products: false,
+    import_layout: !remote && !!template.has_demo_layout,
+    activate: true,
   }, {
     preserveScroll: true,
     onFinish: () => { installing.value[template.slug] = false },
   })
 }
 
-const activateTemplate = (template: TemplateItem) => {
-  if (activating.value[template.slug]) return
-  if (!confirm(`Activate "${template.name}" as your storefront theme?`)) return
-
+const runActivate = (template: TemplateItem) => {
   activating.value[template.slug] = true
   router.post(`/admin/appearance/themes/${encodeURIComponent(template.slug)}/activate`, {}, {
     preserveScroll: true,
     onFinish: () => { activating.value[template.slug] = false },
+  })
+}
+
+const installTemplate = (template: TemplateItem) => {
+  if (installing.value[template.slug]) return
+
+  if (!canInstallRemote(template)) {
+    openConfirm({
+      title: 'API key required',
+      message: 'Set CARTXIS_THEME_API_KEY in your .env file to install themes from the Cartxis directory. It is auto-generated when you run php artisan cartxis:install.',
+      confirmText: 'Got it',
+      variant: 'warning',
+      onConfirm: () => {},
+    })
+    return
+  }
+
+  const remote = isRemoteTheme(template)
+
+  openConfirm({
+    title: remote ? 'Install from Cartxis Directory' : 'Install theme',
+    message: remote
+      ? `Install "${template.name}" from the Cartxis theme directory? The package will be downloaded securely and activated on your store.`
+      : `Install "${template.name}" into your store and activate it as the storefront theme?`,
+    confirmText: 'Install & Activate',
+    variant: 'primary',
+    onConfirm: () => runInstall(template),
+  })
+}
+
+const activateTemplate = (template: TemplateItem) => {
+  if (activating.value[template.slug]) return
+
+  openConfirm({
+    title: 'Activate theme',
+    message: `Activate "${template.name}" as your storefront theme? Your live store appearance will switch to this theme.`,
+    confirmText: 'Activate',
+    variant: 'primary',
+    onConfirm: () => runActivate(template),
   })
 }
 
@@ -135,18 +208,18 @@ const downloadTemplate = (slug: string) => {
 </script>
 
 <template>
-  <Head title="Template Zone" />
+  <Head title="Browse Themes" />
 
-  <AdminLayout title="Template Zone">
+  <AdminLayout title="Browse Themes">
     <div class="space-y-6">
       <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
         <div>
           <h1 class="text-2xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
             <LayoutTemplate class="w-7 h-7 text-blue-600" />
-            Template Zone
+            Browse Themes
           </h1>
           <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
-            Browse categorized storefront templates, install for free, or download a zip package.
+            Search the Cartxis theme directory, preview storefront themes, and install with one click.
           </p>
         </div>
 
@@ -168,9 +241,61 @@ const downloadTemplate = (slug: string) => {
         </div>
       </div>
 
-      <div class="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-xl p-4">
+      <div
+        v-if="remoteBrowseEnabled === false"
+        class="bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-xl p-4"
+      >
+        <p class="text-sm text-amber-900 dark:text-amber-100">
+          Theme directory URL is not configured. Set
+          <code class="font-mono text-xs">CARTXIS_THEME_DIRECTORY_URL</code> in your
+          <code class="font-mono text-xs">.env</code> or run
+          <code class="font-mono text-xs">php artisan cartxis:install</code>
+          to browse themes from cartxis.com.
+        </p>
+      </div>
+
+      <div
+        v-else-if="remoteProbe && !remoteProbe.ok"
+        class="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-xl p-4"
+      >
+        <p class="text-sm text-red-900 dark:text-red-100">
+          Could not reach the theme directory at
+          <code class="font-mono text-xs">{{ directoryUrl }}</code>.
+          {{ remoteProbe.error || 'Check that cartxis-home is running and the URL includes /api.' }}
+        </p>
+      </div>
+
+      <div
+        v-else-if="remoteProbe?.ok && remoteProbe.theme_count > 0 && filteredTemplates.length === 0"
+        class="bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-xl p-4"
+      >
+        <p class="text-sm text-amber-900 dark:text-amber-100">
+          The directory reports {{ remoteProbe.theme_count }} theme(s) but none matched the current filters.
+          Try <strong>All Templates</strong> or click <strong>Sync Catalog</strong>.
+        </p>
+      </div>
+
+      <div
+        v-else-if="remoteProbe?.ok && remoteProbe.theme_count === 0"
+        class="bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-xl p-4"
+      >
+        <p class="text-sm text-amber-900 dark:text-amber-100">
+          Connected to <code class="font-mono text-xs">{{ directoryUrl }}</code> but no themes are published there yet.
+        </p>
+      </div>
+
+      <div v-else-if="remoteInstallEnabled === false" class="bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-xl p-4">
+        <p class="text-sm text-amber-900 dark:text-amber-100">
+          You can browse the Cartxis theme directory, but one-click installs require
+          <code class="font-mono text-xs">CARTXIS_THEME_API_KEY</code> in your
+          <code class="font-mono text-xs">.env</code> (auto-generated during
+          <code class="font-mono text-xs">cartxis:install</code>).
+        </p>
+      </div>
+
+      <div v-else class="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-xl p-4">
         <p class="text-sm text-blue-900 dark:text-blue-100">
-          Templates are organized by category like a theme directory. Installation is free — copies the package into your runtime themes folder.
+          Themes from the official Cartxis directory install securely — packages are downloaded server-side and activated in one step.
         </p>
       </div>
 
@@ -223,14 +348,14 @@ const downloadTemplate = (slug: string) => {
               v-model="searchQuery"
               @keyup.enter="applyFilters"
               type="search"
-              placeholder="Search templates..."
+              placeholder="Search themes..."
               class="w-full pl-10 pr-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 text-sm"
             />
           </div>
 
           <div v-if="filteredTemplates.length === 0" class="text-center py-16 bg-white dark:bg-gray-900 rounded-xl border border-dashed border-gray-300">
             <Monitor class="w-12 h-12 text-gray-300 mx-auto mb-3" />
-            <h3 class="text-lg font-medium text-gray-900 dark:text-white">No templates found</h3>
+            <h3 class="text-lg font-medium text-gray-900 dark:text-white">No themes found</h3>
             <p class="text-sm text-gray-500 mt-1">Try another category or clear your search filters.</p>
           </div>
 
@@ -257,6 +382,12 @@ const downloadTemplate = (slug: string) => {
                   </span>
 
                   <div class="flex flex-col items-end gap-1.5 shrink-0">
+                    <span
+                      v-if="isRemoteTheme(template)"
+                      class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold bg-purple-100 text-purple-800 ring-1 ring-purple-600/10"
+                    >
+                      Cartxis Directory
+                    </span>
                     <span
                       v-if="template.is_active"
                       class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold bg-blue-600 text-white shadow-sm"
@@ -326,13 +457,14 @@ const downloadTemplate = (slug: string) => {
                   <button
                     v-else
                     @click="installTemplate(template)"
-                    :disabled="installing[template.slug]"
+                    :disabled="installing[template.slug] || (isRemoteTheme(template) && !canInstallRemote(template))"
                     class="inline-flex items-center px-4 py-2 rounded-lg text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 disabled:opacity-50"
                   >
-                    {{ template.installed && template.update_available ? 'Update' : 'Install Free' }}
+                    {{ template.installed && template.update_available ? 'Update' : 'Install Now' }}
                   </button>
 
                   <button
+                    v-if="!isRemoteTheme(template)"
                     @click="downloadTemplate(template.slug)"
                     class="inline-flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium border border-gray-300 text-gray-700 hover:bg-gray-50"
                   >
@@ -352,5 +484,14 @@ const downloadTemplate = (slug: string) => {
         </div>
       </div>
     </div>
+
+    <ConfirmModal
+      v-model:show="confirmModal.show"
+      :title="confirmModal.title"
+      :message="confirmModal.message"
+      :confirm-text="confirmModal.confirmText"
+      :variant="confirmModal.variant"
+      @confirm="handleConfirm"
+    />
   </AdminLayout>
 </template>
