@@ -128,7 +128,7 @@ class AdminMenuSyncService
         DB::table('menu_items')->updateOrInsert(
             ['key' => 'appearance-template-zone'],
             [
-                'title' => 'Browse Template Zone',
+                'title' => 'Browse Themes',
                 'icon' => 'layout-template',
                 'route' => 'admin.template-zone.index',
                 'url' => null,

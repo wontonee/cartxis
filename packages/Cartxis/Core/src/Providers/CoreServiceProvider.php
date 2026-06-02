@@ -2,7 +2,6 @@
 
 namespace Cartxis\Core\Providers;
 
-use Illuminate\Support\ServiceProvider;
 use Cartxis\Core\Console\Commands\ExtensionMakeCommand;
 use Cartxis\Core\Console\Commands\ExtensionsActivateCommand;
 use Cartxis\Core\Console\Commands\ExtensionsDeactivateCommand;
@@ -10,17 +9,31 @@ use Cartxis\Core\Console\Commands\ExtensionsInstallCommand;
 use Cartxis\Core\Console\Commands\ExtensionsListCommand;
 use Cartxis\Core\Console\Commands\ExtensionsSyncCommand;
 use Cartxis\Core\Console\Commands\ExtensionsUninstallCommand;
+use Cartxis\Core\Console\Commands\InstallCommand;
+use Cartxis\Core\Console\Commands\TemplateDiscoverCommand;
+use Cartxis\Core\Console\Commands\TemplateExportCommand;
+use Cartxis\Core\Console\Commands\TemplateInstallCommand;
+use Cartxis\Core\Console\Commands\ThemeActivateCommand;
+use Cartxis\Core\Console\Commands\ThemeDiscoverCommand;
+use Cartxis\Core\Console\Commands\ThemeImportDataCommand;
+use Cartxis\Core\Console\Commands\ThemeListCommand;
+use Cartxis\Core\Console\Commands\ThemeDirectoryRegisterCommand;
 use Cartxis\Core\Http\Middleware\SetAdminSessionCookie;
+use Cartxis\Core\Services\ExtensionService;
 use Cartxis\Core\Services\HookService;
 use Cartxis\Core\Services\MenuService;
-use Cartxis\Core\Services\ExtensionService;
+use Cartxis\Core\Services\PaymentGatewayManager;
+use Cartxis\Core\Services\RemoteThemeDirectoryClient;
 use Cartxis\Core\Services\SettingService;
-use Cartxis\Core\Services\ThemePathResolver;
-use Cartxis\Core\Services\ThemeViewResolver;
-use Cartxis\Core\Services\ThemeService;
 use Cartxis\Core\Services\TemplateCatalogService;
 use Cartxis\Core\Services\TemplateInstallService;
-use Cartxis\Core\Services\PaymentGatewayManager;
+use Cartxis\Core\Services\ThemeAssetBuildService;
+use Cartxis\Core\Services\ThemePathResolver;
+use Cartxis\Core\Services\ThemeService;
+use Cartxis\Core\Services\ThemeViewResolver;
+use Cartxis\UIEditor\Services\LayoutService;
+use Illuminate\Contracts\Http\Kernel;
+use Illuminate\Support\ServiceProvider;
 
 class CoreServiceProvider extends ServiceProvider
 {
@@ -31,17 +44,17 @@ class CoreServiceProvider extends ServiceProvider
     {
         // Register HookService as singleton
         $this->app->singleton('cartxis.hook', function ($app) {
-            return new HookService();
+            return new HookService;
         });
 
         // Register MenuService as singleton
         $this->app->singleton('cartxis.menu', function ($app) {
-            return new MenuService();
+            return new MenuService;
         });
 
         // Register SettingService as singleton
         $this->app->singleton('cartxis.setting', function ($app) {
-            return new SettingService();
+            return new SettingService;
         });
 
         // Register ExtensionService as singleton
@@ -53,7 +66,7 @@ class CoreServiceProvider extends ServiceProvider
         });
 
         $this->app->singleton(ThemePathResolver::class, function () {
-            return new ThemePathResolver();
+            return new ThemePathResolver;
         });
 
         // Register ThemeService as singleton
@@ -61,29 +74,38 @@ class CoreServiceProvider extends ServiceProvider
             return new ThemeService($app->make(ThemePathResolver::class));
         });
 
+        $this->app->singleton(RemoteThemeDirectoryClient::class, function () {
+            return new RemoteThemeDirectoryClient;
+        });
+
         $this->app->singleton(TemplateCatalogService::class, function ($app) {
-            return new TemplateCatalogService($app->make(ThemePathResolver::class));
+            return new TemplateCatalogService(
+                $app->make(ThemePathResolver::class),
+                $app->make(RemoteThemeDirectoryClient::class),
+            );
         });
 
         $this->app->singleton(TemplateInstallService::class, function ($app) {
             return new TemplateInstallService(
                 $app->make(TemplateCatalogService::class),
                 $app->make('cartxis.theme'),
-                $app->make(\Cartxis\UIEditor\Services\LayoutService::class),
+                $app->make(LayoutService::class),
                 $app->make(ThemePathResolver::class),
+                $app->make(RemoteThemeDirectoryClient::class),
+                $app->make(ThemeAssetBuildService::class),
             );
         });
-        
+
         // Bind ThemeService class to service container
         $this->app->bind(ThemeService::class, function ($app) {
             return $app->make('cartxis.theme');
         });
-        
+
         // Register ThemeViewResolver as singleton
         $this->app->singleton('cartxis.theme.resolver', function ($app) {
             return new ThemeViewResolver($app->make(ThemePathResolver::class));
         });
-        
+
         // Bind ThemeViewResolver class to service container
         $this->app->bind(ThemeViewResolver::class, function ($app) {
             return $app->make('cartxis.theme.resolver');
@@ -91,9 +113,9 @@ class CoreServiceProvider extends ServiceProvider
 
         // Register PaymentGatewayManager as singleton
         $this->app->singleton('cartxis.payment.gateway', function ($app) {
-            return new PaymentGatewayManager();
+            return new PaymentGatewayManager;
         });
-        
+
         // Bind PaymentGatewayManager class to service container
         $this->app->bind(PaymentGatewayManager::class, function ($app) {
             return $app->make('cartxis.payment.gateway');
@@ -101,7 +123,7 @@ class CoreServiceProvider extends ServiceProvider
 
         if ($this->app->runningInConsole()) {
             $this->commands([
-                \Cartxis\Core\Console\Commands\InstallCommand::class,
+                InstallCommand::class,
                 ExtensionsListCommand::class,
                 ExtensionsSyncCommand::class,
                 ExtensionMakeCommand::class,
@@ -109,13 +131,14 @@ class CoreServiceProvider extends ServiceProvider
                 ExtensionsUninstallCommand::class,
                 ExtensionsActivateCommand::class,
                 ExtensionsDeactivateCommand::class,
-                \Cartxis\Core\Console\Commands\ThemeDiscoverCommand::class,
-                \Cartxis\Core\Console\Commands\ThemeListCommand::class,
-                \Cartxis\Core\Console\Commands\ThemeActivateCommand::class,
-                \Cartxis\Core\Console\Commands\ThemeImportDataCommand::class,
-                \Cartxis\Core\Console\Commands\TemplateDiscoverCommand::class,
-                \Cartxis\Core\Console\Commands\TemplateInstallCommand::class,
-                \Cartxis\Core\Console\Commands\TemplateExportCommand::class,
+                ThemeDiscoverCommand::class,
+                ThemeListCommand::class,
+                ThemeActivateCommand::class,
+                ThemeImportDataCommand::class,
+                TemplateDiscoverCommand::class,
+                TemplateInstallCommand::class,
+                TemplateExportCommand::class,
+                ThemeDirectoryRegisterCommand::class,
             ]);
         }
     }
@@ -127,26 +150,26 @@ class CoreServiceProvider extends ServiceProvider
     {
         // Give the admin panel its own session cookie so admin and storefront
         // users can be logged in simultaneously in the same browser.
-        $this->app->make(\Illuminate\Contracts\Http\Kernel::class)
+        $this->app->make(Kernel::class)
             ->prependMiddleware(SetAdminSessionCookie::class);
 
         // Load migrations
-        $this->loadMigrationsFrom(__DIR__ . '/../Database/Migrations');
+        $this->loadMigrationsFrom(__DIR__.'/../Database/Migrations');
 
         // Load routes
-        $this->loadRoutesFrom(__DIR__ . '/../Routes/admin.php');
+        $this->loadRoutesFrom(__DIR__.'/../Routes/admin.php');
 
         // Load translations
-        $this->loadTranslationsFrom(__DIR__ . '/../Resources/lang', 'core');
+        $this->loadTranslationsFrom(__DIR__.'/../Resources/lang', 'core');
 
         // Publish configuration
         $this->publishes([
-            __DIR__ . '/../Config/core.php' => config_path('core.php'),
+            __DIR__.'/../Config/core.php' => config_path('core.php'),
         ], 'core-config');
 
         // Publish translations
         $this->publishes([
-            __DIR__ . '/../Resources/lang' => lang_path('vendor/core'),
+            __DIR__.'/../Resources/lang' => lang_path('vendor/core'),
         ], 'core-translations');
 
         // Boot themes — discover filesystem, load active theme assets
@@ -164,7 +187,7 @@ class CoreServiceProvider extends ServiceProvider
         try {
             $this->removeStaleViteHotFile();
 
-            /** @var \Cartxis\Core\Services\ThemeService $themeService */
+            /** @var ThemeService $themeService */
             $themeService = $this->app->make('cartxis.theme');
 
             // Auto-discover storefront templates from templates/storefront/ into the DB
@@ -246,31 +269,33 @@ class CoreServiceProvider extends ServiceProvider
             foreach ($activeExtensions as $extension) {
                 // Load extension service provider if exists
                 $discovered = $extensionService->discover()->firstWhere('manifest.code', $extension->code);
-                
+
                 if ($discovered && isset($discovered['manifest']['provider'])) {
                     $providerClass = $discovered['manifest']['provider'];
 
                     // Prefer autoloaded providers (bundled / composer packages)
                     if (class_exists($providerClass)) {
                         $this->app->register($providerClass);
+
                         continue;
                     }
 
                     // Support explicit provider file path
                     $providerFile = $discovered['manifest']['provider_file'] ?? null;
                     if ($providerFile) {
-                        $providerPath = rtrim($discovered['path'], '/\\') . '/' . ltrim($providerFile, '/\\');
+                        $providerPath = rtrim($discovered['path'], '/\\').'/'.ltrim($providerFile, '/\\');
                         if (file_exists($providerPath)) {
                             require_once $providerPath;
                             if (class_exists($providerClass)) {
                                 $this->app->register($providerClass);
                             }
                         }
+
                         continue;
                     }
 
                     // Legacy fallback
-                    $providerPath = $discovered['path'] . '/src/' . str_replace('\\', '/', $providerClass) . '.php';
+                    $providerPath = $discovered['path'].'/src/'.str_replace('\\', '/', $providerClass).'.php';
                     if (file_exists($providerPath)) {
                         require_once $providerPath;
                         if (class_exists($providerClass)) {

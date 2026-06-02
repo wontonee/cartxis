@@ -7,6 +7,7 @@ import type { DefineComponent } from 'vue';
 import { createApp, h } from 'vue';
 import { createPinia } from 'pinia';
 import { initializeTheme } from './composables/useAppearance';
+import { resolveTemplatePage } from './lib/resolveTemplatePage';
 
 const appName = import.meta.env.VITE_APP_NAME || 'Laravel';
 const pinia = createPinia();
@@ -32,25 +33,10 @@ createInertiaApp({
             throw new Error(`Extension page not found: ${name}`)
         }
 
-        // Storefront template pages (e.g. "templates/cartxis-default/pages/Home")
+        // Storefront template pages — glob first, then Vite manifest fallback for
+        // themes installed after the main app bundle was last built.
         if (name.startsWith('templates/')) {
-            const parts = name.split('/')
-            const themeSlug = parts[1]
-            const componentPath = parts.slice(2).join('/')
-
-            const pages = import.meta.glob<DefineComponent>(
-                '../../templates/storefront/**/resources/views/**/*.vue',
-            )
-            const suffix = `/resources/views/${componentPath}.vue`
-            const entry = Object.entries(pages).find(
-                ([key]) => key.includes(`/${themeSlug}/`) && key.endsWith(suffix),
-            )
-
-            if (entry) {
-                return entry[1]()
-            }
-
-            throw new Error(`Template page not found: ${name}`)
+            return resolveTemplatePage(name)
         }
 
         // Default — main app pages directory

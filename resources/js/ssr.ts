@@ -3,6 +3,7 @@ import createServer from '@inertiajs/vue3/server';
 import { resolvePageComponent } from 'laravel-vite-plugin/inertia-helpers';
 import { createSSRApp, DefineComponent, h } from 'vue';
 import { renderToString } from 'vue/server-renderer';
+import { resolveTemplatePage } from './lib/resolveTemplatePage.ssr';
 
 const appName = import.meta.env.VITE_APP_NAME || 'Laravel';
 
@@ -20,23 +21,7 @@ createServer(
                 }
 
                 if (name.startsWith('templates/')) {
-                    const parts = name.split('/');
-                    const themeSlug = parts[1];
-                    const componentPath = parts.slice(2).join('/');
-
-                    const pages = import.meta.glob<DefineComponent>(
-                        '../../templates/storefront/**/resources/views/**/*.vue',
-                    );
-                    const suffix = `/resources/views/${componentPath}.vue`;
-                    const entry = Object.entries(pages).find(
-                        ([key]) => key.includes(`/${themeSlug}/`) && key.endsWith(suffix),
-                    );
-
-                    if (entry) {
-                        return entry[1]();
-                    }
-
-                    throw new Error(`Template page not found: ${name}`);
+                    return resolveTemplatePage(name);
                 }
 
                 return resolvePageComponent(

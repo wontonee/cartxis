@@ -10,7 +10,6 @@ use Cartxis\Core\Services\TemplateInstallService;
 use Exception;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\File;
 use Inertia\Inertia;
 use Inertia\Response;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
@@ -20,8 +19,7 @@ class TemplateZoneController extends Controller
     public function __construct(
         protected TemplateCatalogService $catalog,
         protected TemplateInstallService $installer,
-    ) {
-    }
+    ) {}
 
     public function index(Request $request): Response
     {
@@ -29,24 +27,22 @@ class TemplateZoneController extends Controller
         $category = $request->query('category');
         $search = trim((string) $request->query('search', ''));
 
-        $templates = $this->catalog
-            ->discover(is_string($type) && $type !== '' ? $type : null, is_string($category) && $category !== '' ? $category : null)
-            ->when($search !== '', function ($collection) use ($search) {
-                $needle = strtolower($search);
+        $templates = collect($this->catalog
+            ->discover(
+                is_string($type) && $type !== '' ? $type : null,
+                is_string($category) && $category !== '' ? $category : null,
+                $search !== '' ? $search : null,
+            ))
+            ->map(function (array $item) {
+                $item['screenshot_url'] = $this->catalog->resolveScreenshotUrl($item);
 
-                return $collection->filter(function (array $item) use ($needle) {
-                    $haystack = strtolower(implode(' ', [
-                        (string) ($item['name'] ?? ''),
-                        (string) ($item['description'] ?? ''),
-                        (string) ($item['slug'] ?? ''),
-                        implode(' ', (array) ($item['tags'] ?? [])),
-                    ]));
-
-                    return str_contains($haystack, $needle);
-                });
+                return $item;
             })
             ->values()
             ->all();
+
+        $remoteProbe = $this->catalog->probeRemoteDirectory();
+        $remoteThemeCount = collect($templates)->where('source', 'remote')->count();
 
         return Inertia::render('Admin/TemplateZone/Index', [
             'templates' => $templates,
@@ -57,6 +53,11 @@ class TemplateZoneController extends Controller
                 'category' => $category,
                 'search' => $search,
             ],
+            'remoteBrowseEnabled' => $this->catalog->isRemoteBrowseAvailable(),
+            'remoteInstallEnabled' => $this->catalog->isRemoteInstallAvailable(),
+            'directoryUrl' => $this->catalog->remoteDirectoryUrl(),
+            'remoteProbe' => $remoteProbe,
+            'remoteThemeCount' => $remoteThemeCount,
         ]);
     }
 
@@ -75,20 +76,35 @@ class TemplateZoneController extends Controller
         return Inertia::render('Admin/TemplateZone/Show', [
             'template' => $template,
             'categories' => $this->catalog->getCategories(),
+            'remoteBrowseEnabled' => $this->catalog->isRemoteBrowseAvailable(),
+            'remoteInstallEnabled' => $this->catalog->isRemoteInstallAvailable(),
         ]);
     }
 
     public function sync(): RedirectResponse
     {
+        $this->catalog->clearRemoteCache();
+
         $errors = $this->catalog->validateCatalog();
 
         if (! empty($errors)) {
-            return back()->with('error', 'Catalog validation failed: ' . implode('; ', $errors));
+            return back()->with('error', 'Catalog validation failed: '.implode('; ', $errors));
         }
 
+        $probe = $this->catalog->probeRemoteDirectory();
         $count = $this->catalog->discover()->count();
 
-        return back()->with('success', "Template catalog synced. {$count} template(s) available.");
+        $message = "Theme catalog synced. {$count} theme(s) available.";
+
+        if ($this->catalog->isRemoteBrowseAvailable()) {
+            if ($probe['ok']) {
+                $message .= " Remote directory ({$this->catalog->remoteDirectoryUrl()}) returned {$probe['theme_count']} theme(s).";
+            } else {
+                return back()->with('error', 'Local catalog synced, but remote theme directory failed: '.($probe['error'] ?? 'Unknown error'));
+            }
+        }
+
+        return back()->with('success', $message);
     }
 
     public function install(Request $request, string $slug): RedirectResponse
@@ -100,10 +116,14 @@ class TemplateZoneController extends Controller
         ]);
 
         try {
+            $defaults = $this->catalog->isRemoteEntry($this->catalog->find($slug) ?? [])
+                ? ['activate' => true, 'import_layout' => false, 'import_demo_products' => false]
+                : [];
+
             $result = $this->installer->install($slug, [
-                'activate' => (bool) ($validated['activate'] ?? false),
-                'import_layout' => (bool) ($validated['import_layout'] ?? false),
-                'import_demo_products' => (bool) ($validated['import_demo_products'] ?? false),
+                'activate' => (bool) ($validated['activate'] ?? $defaults['activate'] ?? false),
+                'import_layout' => (bool) ($validated['import_layout'] ?? $defaults['import_layout'] ?? false),
+                'import_demo_products' => (bool) ($validated['import_demo_products'] ?? $defaults['import_demo_products'] ?? false),
             ]);
 
             $message = "Template \"{$slug}\" installed successfully.";
@@ -118,6 +138,12 @@ class TemplateZoneController extends Controller
 
             if ($result['demo_products_imported']) {
                 $message .= ' Demo products imported.';
+            }
+
+            if ($result['assets_rebuilt'] ?? false) {
+                $message .= ' Storefront assets updated.';
+            } else {
+                $message .= ' Run npm run build on the server, then hard-refresh the storefront.';
             }
 
             return redirect()

@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Cartxis\Core\Console\Commands;
 
 use Cartxis\Admin\Services\AdminMenuSyncService;
+use Cartxis\Core\Services\ThemeDirectoryEnvConfigurator;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\DB;
 use PDO;
@@ -35,6 +36,8 @@ class InstallCommand extends Command
         $appUrl = $this->ask('App URL', 'http://localhost:8000');
         $this->writeEnvValue('APP_NAME', $appName);
         $this->writeEnvValue('APP_URL', $appUrl);
+
+        $this->registerThemeDirectoryAccess($appName, $appUrl);
 
         $this->newLine();
 
@@ -229,6 +232,24 @@ class InstallCommand extends Command
         $this->line('  To start the development server run:');
         $this->line('  <fg=cyan>  composer run dev</fg=cyan>');
         $this->newLine();
+    }
+
+    private function registerThemeDirectoryAccess(string $appName, string $appUrl): void
+    {
+        $this->line('<fg=yellow>━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━</fg=yellow>');
+        $this->line('<fg=yellow>  Theme Directory</fg=yellow>');
+        $this->line('<fg=yellow>━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━</fg=yellow>');
+
+        $result = app(ThemeDirectoryEnvConfigurator::class)->ensureConfigured($appName, $appUrl);
+
+        if ($result['status'] === 'already_configured') {
+            $this->line('  <fg=green>✔</fg=green> Theme directory API key already configured');
+        } elseif ($result['status'] === 'registered') {
+            $this->line('  <fg=green>✔</fg=green> Theme directory API key generated and saved to .env');
+        } else {
+            $this->line('  <fg=yellow>!</fg=yellow> Could not register theme directory key (service unreachable).');
+            $this->line('    Run <fg=cyan>php artisan theme:directory:register</fg=cyan> after go-live, or set <fg=cyan>CARTXIS_THEME_API_KEY</fg=cyan> manually.');
+        }
     }
 
     private function ensureEnvFile(): void

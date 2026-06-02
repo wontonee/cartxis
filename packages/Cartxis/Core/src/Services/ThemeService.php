@@ -3,18 +3,18 @@
 namespace Cartxis\Core\Services;
 
 use Cartxis\Core\Models\Theme;
+use Cartxis\Shop\Services\HomeService;
 use Cartxis\UIEditor\Models\PageLayout;
-use Illuminate\Support\Facades\File;
-use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\File;
 use Illuminate\Support\Str;
 
 class ThemeService
 {
     public function __construct(
         protected ThemePathResolver $paths,
-    ) {
-    }
+    ) {}
 
     /**
      * Discover and register storefront templates from templates/storefront/{category}/{slug}/.
@@ -38,8 +38,10 @@ class ThemeService
             $category = basename($categoryPath);
 
             foreach (File::directories($categoryPath) as $directory) {
+                $this->flattenNestedPackage($directory);
+
                 $slug = basename($directory);
-                $configPath = $directory . '/theme.json';
+                $configPath = $directory.'/theme.json';
 
                 if (! file_exists($configPath)) {
                     continue;
@@ -53,25 +55,36 @@ class ThemeService
 
                 $slugsOnDisk[] = $slug;
 
+                $templateJsonPath = $directory.'/template.json';
+                $isCatalogPackage = file_exists($templateJsonPath);
+                $isBundledDefault = (bool) ($config['is_default'] ?? false);
+                $existingTheme = Theme::where('slug', $slug)->first();
+
+                // Optional Template Zone packages (template.json present) are browse-only
+                // until explicitly installed — do not register them in the themes table.
+                if ($isCatalogPackage && ! $isBundledDefault && $existingTheme === null) {
+                    continue;
+                }
+
                 $discovered[] = [
-                    'slug'     => $slug,
+                    'slug' => $slug,
                     'category' => $category,
-                    'config'   => $config,
-                    'path'     => $directory,
+                    'config' => $config,
+                    'path' => $directory,
                 ];
 
                 Theme::updateOrCreate(
                     ['slug' => $slug],
                     [
-                        'name'        => $config['name'] ?? $slug,
+                        'name' => $config['name'] ?? $slug,
                         'description' => $config['description'] ?? '',
-                        'version'     => $config['version'] ?? '1.0.0',
-                        'author'      => $config['author'] ?? '',
-                        'author_url'  => $config['author_url'] ?? '',
-                        'screenshot'  => $config['screenshot'] ?? '',
-                        'is_default'  => $config['is_default'] ?? false,
-                        'category'    => $category,
-                        'source'      => $category === 'general' && ($config['is_default'] ?? false)
+                        'version' => $config['version'] ?? '1.0.0',
+                        'author' => $config['author'] ?? '',
+                        'author_url' => $config['author_url'] ?? '',
+                        'screenshot' => $config['screenshot'] ?? '',
+                        'is_default' => $config['is_default'] ?? false,
+                        'category' => $category,
+                        'source' => $category === 'general' && ($config['is_default'] ?? false)
                             ? 'bundled'
                             : (Theme::where('slug', $slug)->value('source') ?? 'catalog'),
                     ]
@@ -86,6 +99,22 @@ class ThemeService
             ->whereNotIn('slug', $slugsOnDisk)
             ->delete();
 
+        // Remove catalog browse packages that were previously auto-registered.
+        Theme::query()
+            ->where('is_default', false)
+            ->whereNull('installed_from_catalog_at')
+            ->where('source', 'catalog')
+            ->get()
+            ->each(function (Theme $theme) use ($storefrontRoot) {
+                $packagePath = $storefrontRoot
+                    .DIRECTORY_SEPARATOR.$theme->category
+                    .DIRECTORY_SEPARATOR.$theme->slug;
+
+                if (file_exists($packagePath.'/template.json')) {
+                    $theme->delete();
+                }
+            });
+
         return $discovered;
     }
 
@@ -97,17 +126,17 @@ class ThemeService
         $publicThemePath = $this->paths->publicPath($slug);
         File::ensureDirectoryExists($publicThemePath);
 
-        $assetsPath = $themePath . '/assets';
+        $assetsPath = $themePath.'/assets';
 
         if (is_dir($assetsPath)) {
-            File::copyDirectory($assetsPath, $publicThemePath . '/assets');
+            File::copyDirectory($assetsPath, $publicThemePath.'/assets');
         }
 
-        $themeCssPath = $themePath . '/resources/css/theme.css';
+        $themeCssPath = $themePath.'/resources/css/theme.css';
 
         if (file_exists($themeCssPath)) {
-            File::ensureDirectoryExists($publicThemePath . '/css');
-            File::copy($themeCssPath, $publicThemePath . '/css/theme.css');
+            File::ensureDirectoryExists($publicThemePath.'/css');
+            File::copy($themeCssPath, $publicThemePath.'/css/theme.css');
         }
     }
 
@@ -147,7 +176,7 @@ class ThemeService
         }
 
         $config = $theme->getConfig();
-        $dataPath = $theme->getPath() . '/data/theme-data.json';
+        $dataPath = $theme->getPath().'/data/theme-data.json';
         $themeData = file_exists($dataPath)
             ? json_decode((string) file_get_contents($dataPath), true)
             : [];
@@ -181,8 +210,8 @@ class ThemeService
 
         Cache::forget('active_theme');
 
-        if (class_exists(\Cartxis\Shop\Services\HomeService::class)) {
-            app(\Cartxis\Shop\Services\HomeService::class)->clearCache();
+        if (class_exists(HomeService::class)) {
+            app(HomeService::class)->clearCache();
         }
     }
 
@@ -197,9 +226,9 @@ class ThemeService
     public function install(string $zipPath, string $category = 'general'): ?string
     {
         $storefrontRoot = $this->paths->storefrontRoot();
-        File::ensureDirectoryExists($storefrontRoot . DIRECTORY_SEPARATOR . $category);
+        File::ensureDirectoryExists($storefrontRoot.DIRECTORY_SEPARATOR.$category);
 
-        $zip = new \ZipArchive();
+        $zip = new \ZipArchive;
 
         if ($zip->open($zipPath) !== true) {
             return null;
@@ -233,17 +262,35 @@ class ThemeService
         $topLevelEntries = array_keys($topLevel);
         $singleRootDir = (! $hasTopLevelFiles && count($topLevelEntries) === 1) ? $topLevelEntries[0] : null;
         $zipBaseName = pathinfo($zipPath, PATHINFO_FILENAME);
-        $fallbackFolder = Str::slug($zipBaseName) ?: ('template-' . time());
-        $slugFolder = $singleRootDir ?: $fallbackFolder;
-        $extractPath = $this->paths->installPath($category, $slugFolder);
+        $fallbackFolder = Str::slug($zipBaseName) ?: ('template-'.time());
+        $categoryPath = $storefrontRoot.DIRECTORY_SEPARATOR.$category;
 
-        if (is_dir($extractPath)) {
-            File::deleteDirectory($extractPath);
+        if ($singleRootDir !== null) {
+            // Zip is packaged as {slug}/theme.json — extract into the category folder.
+            $slugFolder = $singleRootDir;
+            $extractPath = $categoryPath.DIRECTORY_SEPARATOR.$slugFolder;
+
+            if (is_dir($extractPath)) {
+                File::deleteDirectory($extractPath);
+            }
+
+            File::ensureDirectoryExists($categoryPath);
+            $zip->extractTo($categoryPath);
+        } else {
+            $slugFolder = $fallbackFolder;
+            $extractPath = $this->paths->installPath($category, $slugFolder);
+
+            if (is_dir($extractPath)) {
+                File::deleteDirectory($extractPath);
+            }
+
+            File::ensureDirectoryExists($extractPath);
+            $zip->extractTo($extractPath);
         }
 
-        File::ensureDirectoryExists($extractPath);
-        $zip->extractTo($extractPath);
         $zip->close();
+
+        $this->flattenNestedPackage($extractPath);
 
         $discovered = $this->discover();
 
@@ -251,13 +298,38 @@ class ThemeService
             return $slugFolder;
         }
 
-        if (! empty($discovered)) {
-            $last = end($discovered);
+        return null;
+    }
 
-            return $last['slug'] ?? null;
+    /**
+     * Fix zip installs that landed one folder too deep, e.g.
+     * templates/storefront/electronics/dmart-electronics/dmart-electronics/theme.json
+     */
+    public function flattenNestedPackage(string $packagePath): void
+    {
+        if ($this->paths->isValidPackage($packagePath)) {
+            return;
         }
 
-        return null;
+        $childDirs = array_values(array_filter(
+            File::directories($packagePath),
+            fn (string $dir) => ! in_array(basename($dir), ['__MACOSX', '.git'], true)
+        ));
+
+        if (count($childDirs) !== 1) {
+            return;
+        }
+
+        $nested = $childDirs[0];
+
+        if (! $this->paths->isValidPackage($nested)) {
+            return;
+        }
+
+        $temp = $packagePath.'_flatten_'.uniqid('', true);
+        File::moveDirectory($nested, $temp);
+        File::deleteDirectory($packagePath);
+        File::moveDirectory($temp, $packagePath);
     }
 
     public function delete(string $slug): bool
@@ -287,7 +359,7 @@ class ThemeService
 
     public function getSettingsSchema(Theme $theme): array
     {
-        $settingsPath = $theme->getPath() . '/config/settings.php';
+        $settingsPath = $theme->getPath().'/config/settings.php';
 
         if (file_exists($settingsPath)) {
             return require $settingsPath;
@@ -304,13 +376,13 @@ class ThemeService
             return;
         }
 
-        $viewPath = $theme->getPath() . '/resources/views';
+        $viewPath = $theme->getPath().'/resources/views';
 
         if (is_dir($viewPath)) {
             app('view')->addNamespace("theme.{$theme->slug}", $viewPath);
         }
 
-        $hooksPath = $theme->getPath() . '/hooks.php';
+        $hooksPath = $theme->getPath().'/hooks.php';
 
         if (file_exists($hooksPath)) {
             require_once $hooksPath;
