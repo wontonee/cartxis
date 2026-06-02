@@ -32,10 +32,16 @@ class ThemeService
             return $discovered;
         }
 
+        $this->cleanJunkFiles($storefrontRoot);
+
         $slugsOnDisk = [];
 
         foreach (File::directories($storefrontRoot) as $categoryPath) {
             $category = basename($categoryPath);
+
+            if (in_array($category, ['__MACOSX', '.git'], true)) {
+                continue;
+            }
 
             foreach (File::directories($categoryPath) as $directory) {
                 $this->flattenNestedPackage($directory);
@@ -96,6 +102,7 @@ class ThemeService
 
         Theme::query()
             ->where('is_default', false)
+            ->whereNull('installed_from_catalog_at')
             ->whereNotIn('slug', $slugsOnDisk)
             ->delete();
 
@@ -124,6 +131,11 @@ class ThemeService
     protected function publishPublicAssets(string $themePath, string $slug): void
     {
         $publicThemePath = $this->paths->publicPath($slug);
+
+        if (is_dir($publicThemePath)) {
+            File::deleteDirectory($publicThemePath);
+        }
+
         File::ensureDirectoryExists($publicThemePath);
 
         $assetsPath = $themePath.'/assets';
@@ -330,6 +342,30 @@ class ThemeService
         File::moveDirectory($nested, $temp);
         File::deleteDirectory($packagePath);
         File::moveDirectory($temp, $packagePath);
+    }
+
+    /**
+     * Remove macOS archive junk that breaks Vite/Tailwind when scanned by import.meta.glob.
+     */
+    public function cleanJunkFiles(string $root): void
+    {
+        if (! is_dir($root)) {
+            return;
+        }
+
+        foreach (File::allDirectories($root) as $directory) {
+            if (basename($directory) === '__MACOSX') {
+                File::deleteDirectory($directory);
+            }
+        }
+
+        foreach (File::allFiles($root) as $file) {
+            $filename = $file->getFilename();
+
+            if (str_starts_with($filename, '._') || $filename === '.DS_Store') {
+                File::delete($file->getPathname());
+            }
+        }
     }
 
     public function delete(string $slug): bool

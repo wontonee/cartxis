@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Cartxis\Core\Services;
 
+use Cartxis\Core\Support\ThemeDirectoryUrl;
 use Exception;
 use Illuminate\Http\Client\PendingRequest;
 use Illuminate\Support\Facades\Cache;
@@ -249,7 +250,7 @@ class RemoteThemeDirectoryClient
 
     protected function baseUrl(): string
     {
-        return rtrim((string) config('theme.directory.url', ''), '/');
+        return ThemeDirectoryUrl::resolve();
     }
 
     protected function apiKey(): string

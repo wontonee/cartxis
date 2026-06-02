@@ -123,9 +123,13 @@ Backed by `app('cartxis.hook')` singleton.
 ### Themes
 
 - `templates/storefront/{category}/{slug}/` with `resources/views/pages`, layouts, components
-- Active theme: `config/theme.php`
-- `php artisan cartxis:theme:activate`
-- **Templates (OSS)**: themes ship `theme.json` + optional `data/theme-data.json` for demo homepage/layout import (`theme:import-data`). Cursor agent: `@cartxis-templates`.
+- Published assets: `public/templates/{slug}/` (css, images — copied on discover/install)
+- Active theme: resolved from **database** at runtime (`Theme::active()`), not hard-coded in config
+- **Browse Themes:** Admin → Appearance → Browse Themes (remote catalog via `CARTXIS_THEME_*` env)
+- **Docs:** [THEMES.md](./THEMES.md), [THEME_DIRECTORY_API.md](./THEME_DIRECTORY_API.md)
+- Commands: `theme:discover`, `template:install`, `theme:activate`, `theme:directory:register`
+- Post install/activate: discover → `optimize:clear` → `npm run build` (automatic via `ThemeLifecycleService`)
+- **Templates (OSS)**: bundled `cartxis-default`; optional themes via Template Zone. `theme.json` + optional `data/theme-data.json` for demo import (`theme:import-data`).
 
 ## Data Model (Conceptual)
 

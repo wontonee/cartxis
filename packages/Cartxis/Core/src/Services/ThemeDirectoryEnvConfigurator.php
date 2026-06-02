@@ -28,22 +28,27 @@ class ThemeDirectoryEnvConfigurator
 
         $this->writeDirectoryUrl();
 
-        try {
-            $apiKey = $this->registration->register($appName, $appUrl);
-        } catch (\Throwable) {
-            $apiKey = null;
-        }
+        $registration = $this->registration->registerWithDiagnostics($appName, $appUrl);
+        $apiKey = $registration['key'];
 
         if ($apiKey === null || $apiKey === '') {
+            $details = $registration['error'] ?? 'Unknown error.';
+            $status = $registration['status'];
+            $statusLabel = $status !== null ? "HTTP {$status}" : 'connection failed';
+
             return [
                 'status' => 'failed',
-                'message' => 'Could not register theme directory key (service unreachable).',
+                'message' => "Could not register theme directory key ({$statusLabel}).",
                 'api_key' => null,
+                'directory_url' => $registration['url'],
+                'http_status' => $status,
+                'error' => $details,
             ];
         }
 
         $this->writeEnvValue('CARTXIS_THEME_API_KEY', $apiKey);
         putenv('CARTXIS_THEME_API_KEY='.$apiKey);
+        config(['theme.directory.api_key' => $apiKey]);
 
         return [
             'status' => 'registered',
@@ -91,13 +96,10 @@ class ThemeDirectoryEnvConfigurator
 
     protected function writeDirectoryUrl(): void
     {
-        $directoryUrl = (string) config('theme.directory.url', 'https://www.cartxis.com/api');
-
-        if ($directoryUrl === '') {
-            return;
-        }
+        $directoryUrl = \Cartxis\Core\Support\ThemeDirectoryUrl::resolve();
 
         $this->writeEnvValue('CARTXIS_THEME_DIRECTORY_URL', $directoryUrl);
+        config(['theme.directory.url' => $directoryUrl]);
     }
 
     protected function writeEnvValue(string $key, string $value): void

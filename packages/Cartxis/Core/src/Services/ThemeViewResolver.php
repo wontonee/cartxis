@@ -2,6 +2,7 @@
 
 namespace Cartxis\Core\Services;
 
+use Cartxis\Core\Models\Theme;
 use Illuminate\Support\Facades\File;
 
 class ThemeViewResolver
@@ -20,7 +21,9 @@ class ThemeViewResolver
     protected function getActiveThemeSlug(): string
     {
         if (! $this->resolved) {
-            $this->activeTheme = config('theme.active', $this->defaultTheme);
+            $this->activeTheme = Theme::active()?->slug
+                ?? config('theme.active')
+                ?? config('theme.default', $this->defaultTheme);
             $this->resolved = true;
         }
 

@@ -1,7 +1,7 @@
 # Cartxis E-Commerce Platform — User Guide
 
-**Version:** 1.0.4
-**Last Updated:** February 2026
+**Version:** 1.0.13
+**Last Updated:** June 2026
 **Platform:** Cartxis E-Commerce Platform
 **Stack:** Laravel 12 · Inertia.js · Vue 3 · TypeScript · Tailwind CSS
 
@@ -51,6 +51,7 @@
     - [Tax Rules](#117-tax-rules)
     - [Email Settings](#118-email-settings)
     - [AI Settings](#119-ai-settings)
+    - [Appearance & Themes](#1110-appearance--themes)
 12. [System Administration](#12-system-administration)
     - [Cache Management](#121-cache-management)
     - [Menu Configuration](#122-menu-configuration)
@@ -134,6 +135,25 @@ npm run dev          # Development with HMR
 php artisan serve
 ```
 
+### Theme directory (Browse Themes)
+
+During `php artisan cartxis:install`, Cartxis registers a theme catalog API key when `https://cartxis.com/api` is reachable. This enables **Admin → Appearance → Browse Themes** for optional storefront templates.
+
+Add to `.env` (usually auto-written by the installer):
+
+```env
+CARTXIS_THEME_DIRECTORY_URL=https://cartxis.com/api
+CARTXIS_THEME_API_KEY=
+```
+
+If install shows **“Could not register theme directory key”**, run after go-live:
+
+```bash
+php artisan theme:directory:register
+```
+
+Use the **non-www** URL (`cartxis.com`, not `www.cartxis.com`). See [THEMES.md](./THEMES.md) for full theme installation and troubleshooting.
+
 ### Post-Installation
 
 - Access the admin panel at `http://your-domain/admin`
@@ -164,6 +184,7 @@ The sidebar provides access to all modules:
 | **Content** | Pages, Storefront Menus, Blocks, Media Library |
 | **Reports** | Sales Reports, Product Reports, Customer Reports |
 | **Settings** | General, Store Config, Locales & Currencies, Channels, Payment Methods, Shipping Methods, Tax Rules, Email Settings, AI Settings |
+| **Appearance** | Browse Themes, Themes list, active theme customization (colors, layout, features) |
 | **System** | Cache Management, Menu Configuration, Extensions, Permissions, Maintenance Mode, Data Migration, API Sync, Backups |
 
 ### Common UI Patterns
@@ -1403,6 +1424,65 @@ Global AI feature toggles and default assignments.
 
 ---
 
+### 11.10 Appearance & Themes
+
+Manage the storefront look and feel: install themes from the catalog, activate templates, and customize colors, layout, and features.
+
+#### Browse Themes (Template Zone)
+
+**Navigation:** Appearance → Browse Themes
+
+| Action | Description |
+|--------|-------------|
+| **Browse** | Filter by category (General, Electronics, etc.) or search by name |
+| **Install** | Download/copy template to `templates/storefront/{category}/{slug}/` |
+| **Activate** | Set as live storefront theme (can be combined with install) |
+| **Customize** | Open Appearance settings for an installed theme |
+| **Open Page Builder** | Native homepage editor or UI Editor (depends on theme) |
+
+Installing a theme automatically publishes assets, clears caches, and rebuilds frontend bundles (when Node/npm is available).
+
+#### Themes list
+
+**Navigation:** Appearance → Themes
+
+Shows installed themes with activate, export, import demo data, and delete actions. The **default** theme (`cartxis-default`) cannot be deleted.
+
+#### Appearance customization
+
+**Navigation:** Appearance (main settings page)
+
+Tabs vary by theme schema; common groups:
+
+| Tab | Settings |
+|-----|----------|
+| **Contact & Social** | Phone, email, address, social links |
+| **Colors & Typography** | Primary/accent colors, fonts |
+| **Layout** | Header style, container width, **shop sidebar** position (left/right/none) |
+| **Features** | Sticky header, wishlist, quick view, homepage sections |
+
+#### Native vs UI Editor homepages
+
+| Theme type | Homepage editing |
+|------------|------------------|
+| **Native** (`native_homepage: true`) | Appearance → Features tab |
+| **UI Editor** | Admin → UI Editor — drag-and-drop blocks |
+
+#### CLI reference
+
+```bash
+php artisan theme:list
+php artisan template:install {slug} --activate
+php artisan theme:activate {slug}
+php artisan theme:discover
+php artisan theme:import-data {slug}
+php artisan theme:directory:register
+```
+
+**Detailed guide:** [THEMES.md](./THEMES.md)
+
+---
+
 ## 12. System Administration
 
 ### 12.1 Cache Management
@@ -1616,10 +1696,34 @@ Some admin routes are not yet implemented:
 
 These features are planned for a future release.
 
+#### Theme / storefront issues
+
+See **[THEMES.md](./THEMES.md)** for the full guide. Common fixes:
+
+| Symptom | Fix |
+|---------|-----|
+| Broken CSS or layout after theme change | Hard-refresh browser; **Appearance → Themes → Activate** again, or run `php artisan optimize:clear && npm run build` |
+| “Template page not found” on storefront | `npm run build` — theme Vue pages are bundled at build time |
+| Browse Themes install disabled | Run `php artisan theme:directory:register`; verify `CARTXIS_THEME_DIRECTORY_URL=https://cartxis.com/api` |
+| Theme directory failed during install | Same as above — use non-www URL |
+| Shop sidebar missing | **Appearance → Layout** → set Shop Sidebar to Left/Right; check desktop width |
+| Hero/slider images 404 | `php artisan theme:discover` to republish `public/templates/{slug}/assets/` |
+| `npm run build` fails after remote install | `php artisan theme:discover` removes macOS ZIP junk; retry build |
+
+#### Theme directory API key
+
+```bash
+grep CARTXIS_THEME .env
+php artisan theme:directory:register
+```
+
+Expected: `CARTXIS_THEME_DIRECTORY_URL=https://cartxis.com/api` and a `ctx_...` API key.
+
 ### Performance Optimization
 
 - Use `database` or `redis` cache driver for production (configure in `.env`)
 - Rebuild caches after configuration changes: System → Cache Management → Rebuild Selected
+- After theme install/activate: `php artisan optimize:clear` and `npm run build` (automatic from admin when Node is available)
 - Optimize autoloading: `composer dump-autoload --optimize`
 - Enable route caching: `php artisan route:cache`
 - Enable config caching: `php artisan config:cache`

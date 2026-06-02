@@ -28,6 +28,7 @@ use Cartxis\Core\Services\SettingService;
 use Cartxis\Core\Services\TemplateCatalogService;
 use Cartxis\Core\Services\TemplateInstallService;
 use Cartxis\Core\Services\ThemeAssetBuildService;
+use Cartxis\Core\Services\ThemeLifecycleService;
 use Cartxis\Core\Services\ThemePathResolver;
 use Cartxis\Core\Services\ThemeService;
 use Cartxis\Core\Services\ThemeViewResolver;
@@ -85,6 +86,14 @@ class CoreServiceProvider extends ServiceProvider
             );
         });
 
+        $this->app->singleton(ThemeLifecycleService::class, function ($app) {
+            return new ThemeLifecycleService(
+                $app->make('cartxis.theme'),
+                $app->make(ThemeAssetBuildService::class),
+                $app->make(ThemeViewResolver::class),
+            );
+        });
+
         $this->app->singleton(TemplateInstallService::class, function ($app) {
             return new TemplateInstallService(
                 $app->make(TemplateCatalogService::class),
@@ -93,6 +102,7 @@ class CoreServiceProvider extends ServiceProvider
                 $app->make(ThemePathResolver::class),
                 $app->make(RemoteThemeDirectoryClient::class),
                 $app->make(ThemeAssetBuildService::class),
+                $app->make(ThemeLifecycleService::class),
             );
         });
 

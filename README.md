@@ -117,15 +117,32 @@ php artisan cartxis:install
 
 The interactive installer will guide you through:
 - Database configuration (with live connection test)
+- **Theme directory API key** registration (for Browse Themes / one-click installs)
 - Admin account creation (name, email, and password)
 - Migrations and seeders
 - Building frontend assets automatically
 
 Once complete, the installer displays your admin panel URL, email, and password.
 
+### Theme directory (Browse Themes)
+
+During install, Cartxis registers a free API key with the official theme catalog at `https://cartxis.com/api`. This enables **Admin → Appearance → Browse Themes** for one-click theme installs.
+
+If registration fails during install (offline server, firewall, etc.):
+
+```bash
+# Ensure .env uses the non-www URL
+CARTXIS_THEME_DIRECTORY_URL=https://cartxis.com/api
+
+php artisan theme:directory:register
+```
+
+See **[docs/THEMES.md](docs/THEMES.md)** for installing themes, customization, and troubleshooting.
+
 > **If you see blank pages or asset errors after the setup wizard**, the frontend build may not have completed yet. Fix it by running:
 > ```bash
 > npm run build
+> php artisan optimize:clear
 > # or if you use Yarn:
 > yarn build
 > ```
@@ -326,6 +343,45 @@ The `UIBlockRenderer` Vue component is shared across all themes. When a publishe
 
 ---
 
+## 🎨 Themes & Template Zone
+
+Storefront themes are **templates** under `templates/storefront/{category}/{slug}/`. The default **cartxis-default** theme is bundled; additional themes (e.g. Dmart Electronics) install from the remote catalog.
+
+### Browse & install themes
+
+1. **Admin → Appearance → Browse Themes**
+2. Choose a category, click **Install** (optionally **Activate**)
+3. Cartxis publishes assets, clears caches, and rebuilds frontend bundles automatically
+
+### Customize the active theme
+
+- **Admin → Appearance** — colors, typography, layout (sidebar, header), features
+- **Admin → UI Editor** — block-based homepage (non-native themes)
+- **Appearance → Features** — native homepage sections (themes with built-in homepages)
+
+### Common commands
+
+```bash
+php artisan theme:list
+php artisan template:install dmart-electronics --activate
+php artisan theme:discover
+php artisan theme:directory:register
+php artisan optimize:clear && npm run build   # manual recovery
+```
+
+### Theme troubleshooting
+
+| Issue | Quick fix |
+|-------|-----------|
+| Broken CSS / missing sidebar after theme change | Hard-refresh browser; re-activate theme in admin or run `optimize:clear` + `npm run build` |
+| “Template page not found” | `npm run build` (theme pages are bundled at build time) |
+| Theme directory key failed on install | Set `CARTXIS_THEME_DIRECTORY_URL=https://cartxis.com/api` (no `www`), run `theme:directory:register` |
+| Remote install broke `npm run build` | `php artisan theme:discover` (removes macOS ZIP junk), then `npm run build` |
+
+**Full guide:** [docs/THEMES.md](docs/THEMES.md) · **API reference:** [docs/THEME_DIRECTORY_API.md](docs/THEME_DIRECTORY_API.md)
+
+---
+
 ## 🎨 Theme Development
 
 Storefront templates live under `templates/storefront/{category}/{slug}/`. The default template is `templates/storefront/general/cartxis-default/`.
@@ -353,7 +409,10 @@ Discover and register templates:
 ```bash
 php artisan theme:discover
 php artisan theme:import-data cartxis-default
+npm run build    # required after adding/changing theme Vue pages
 ```
+
+After installing or activating any theme in admin, Cartxis runs discover, `optimize:clear`, and `npm run build` automatically when `CARTXIS_THEME_REBUILD_ASSETS=true` (default).
 
 ---
 
@@ -378,18 +437,22 @@ php artisan theme:import-data cartxis-default
 
 1. Set `APP_ENV=production` and `APP_DEBUG=false` in `.env`
 2. `composer install --optimize-autoloader --no-dev`
-3. `npm run build`
-4. `php artisan config:cache`
-5. `php artisan route:cache`
-6. `php artisan view:cache`
-7. Set file permissions:
+3. `npm ci && npm run build`
+4. `php artisan migrate --force`
+5. `php artisan theme:discover`
+6. `php artisan config:cache`
+7. `php artisan route:cache`
+8. `php artisan view:cache`
+9. Set file permissions:
    ```bash
    chmod -R 755 storage bootstrap/cache
    chown -R www-data:www-data storage bootstrap/cache
    ```
-8. Configure your web server (Nginx/Apache) with document root pointing to `public/`
-9. Set up an SSL certificate
-10. Configure queue workers and the task scheduler
+10. Configure your web server (Nginx/Apache) with document root pointing to `public/`
+11. Set up an SSL certificate
+12. Configure queue workers and the task scheduler
+
+> **After installing or activating a theme on production**, run `php artisan optimize:clear` and `npm run build` — or activate the theme from admin (triggers this automatically). See [docs/THEMES.md](docs/THEMES.md).
 
 ### Queue Workers
 
@@ -449,6 +512,17 @@ Please follow PSR-12 for PHP, write tests for new features, and update documenta
 | Email | [dev@wontonee.com](mailto:dev@wontonee.com) |
 | Issues | [GitHub Issues](https://github.com/cartxis/cartxis/issues) |
 | Discussions | [GitHub Discussions](https://github.com/cartxis/cartxis/discussions) |
+
+### Documentation
+
+| Guide | Description |
+|-------|-------------|
+| [docs/THEMES.md](docs/THEMES.md) | Install, activate, customize & troubleshoot themes |
+| [docs/THEME_DIRECTORY_API.md](docs/THEME_DIRECTORY_API.md) | Remote theme catalog API & env vars |
+| [docs/USER_GUIDE.md](docs/USER_GUIDE.md) | Full admin user manual |
+| [docs/QUICK_REFERENCE.md](docs/QUICK_REFERENCE.md) | Developer commands & architecture |
+| [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) | Package map & data flows |
+| [docs/UPGRADE.md](docs/UPGRADE.md) | Version upgrades |
 
 For billing, licensing, or partnership enquiries, contact us at **dev@wontonee.com**.
 

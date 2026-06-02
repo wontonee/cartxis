@@ -33,6 +33,12 @@ function parseTemplateName(name: string): { themeSlug: string; componentPath: st
     return { themeSlug, componentPath, suffix }
 }
 
+function isValidTemplateVuePath(key: string): boolean
+{
+    return ! key.includes('/__MACOSX/')
+        && ! key.split('/').some((part) => part.startsWith('._'))
+}
+
 function findGlobEntry(
     themeSlug: string,
     suffix: string,
@@ -42,7 +48,7 @@ function findGlobEntry(
     )
 
     const entry = Object.entries(pages).find(
-        ([key]) => key.includes(`/${themeSlug}/`) && key.endsWith(suffix),
+        ([key]) => isValidTemplateVuePath(key) && key.includes(`/${themeSlug}/`) && key.endsWith(suffix),
     )
 
     return entry ?? null
@@ -71,7 +77,8 @@ async function resolveFromManifest(themeSlug: string, suffix: string): Promise<D
     const manifest = await loadManifest()
     const manifestKey = Object.keys(manifest).find(
         (key) =>
-            key.startsWith('templates/storefront/')
+            isValidTemplateVuePath(key)
+            && key.startsWith('templates/storefront/')
             && key.includes(`/${themeSlug}/`)
             && key.endsWith(suffix),
     )

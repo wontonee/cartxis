@@ -3,6 +3,7 @@
 namespace Cartxis\Core\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use Cartxis\Core\Services\ThemeLifecycleService;
 use Cartxis\Core\Services\ThemeService;
 use Cartxis\Core\Services\ThemeDataImportService;
 use Cartxis\Core\Services\ThemeAssetBuildService;
@@ -117,7 +118,17 @@ class ThemeController extends Controller
 
             $this->themeService->activate($slug);
 
-            return back()->with('success', "Theme '{$theme->name}' activated successfully!");
+            $lifecycle = app(ThemeLifecycleService::class)->finalize($slug);
+
+            $message = "Theme '{$theme->name}' activated successfully!";
+
+            if ($lifecycle['assets_rebuilt']) {
+                $message .= ' Storefront assets updated.';
+            } elseif ($lifecycle['cache_cleared']) {
+                $message .= ' Caches cleared — hard-refresh the storefront if styles look stale.';
+            }
+
+            return back()->with('success', $message);
         } catch (\Exception $e) {
             return back()->with('error', 'Failed to activate theme: ' . $e->getMessage());
         }
@@ -226,11 +237,11 @@ class ThemeController extends Controller
                 'source' => 'upload',
             ]);
 
-            $assetsRebuilt = app(ThemeAssetBuildService::class)->rebuild(background: false);
+            $lifecycle = app(ThemeLifecycleService::class)->finalize($installedSlug);
 
             $message = "Theme installed successfully ({$installedSlug})!";
 
-            if ($assetsRebuilt) {
+            if ($lifecycle['assets_rebuilt']) {
                 $message .= ' Storefront assets updated.';
             } else {
                 $message .= ' Run npm run build on the server, then hard-refresh the storefront.';

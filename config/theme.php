@@ -54,20 +54,14 @@ return [
     |--------------------------------------------------------------------------
     |
     | Browse and one-click install themes from the official Cartxis directory.
-    | Set CARTXIS_THEME_DIRECTORY_URL to the cartxis-home API base (e.g. https://www.cartxis.com/api)
+    | Set CARTXIS_THEME_DIRECTORY_URL to the cartxis-home API base (e.g. https://cartxis.com/api)
     | and CARTXIS_THEME_API_KEY to a key generated in the cartxis-home admin.
     |
     */
     'directory' => [
-        'url' => env(
-            'CARTXIS_THEME_DIRECTORY_URL',
-            env(
-                'CARTXIS_TEMPLATE_CATALOG_URL',
-                env('APP_ENV') === 'local'
-                    ? 'https://cartxis-home.test/api'
-                    : 'https://www.cartxis.com/api'
-            )
-        ),
+        'url' => env('CARTXIS_THEME_DIRECTORY_URL')
+            ?: env('CARTXIS_TEMPLATE_CATALOG_URL')
+            ?: 'https://cartxis.com/api',
         'api_key' => env('CARTXIS_THEME_API_KEY'),
         'cache_ttl' => (int) env('CARTXIS_THEME_DIRECTORY_CACHE_TTL', 3600),
     ],
