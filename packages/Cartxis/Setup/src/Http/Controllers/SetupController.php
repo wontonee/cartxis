@@ -33,7 +33,7 @@ class SetupController extends Controller
     {
         return Inertia::render('Setup/Welcome', [
             'appName' => config('app.name', 'Cartxis'),
-            'appVersion' => '1.0.0',
+            'appVersion' => config('app.version', '1.0.15'),
         ]);
     }
 
