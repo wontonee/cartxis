@@ -15,18 +15,23 @@ A modern, extensible eCommerce platform built with **Laravel 13**, **Inertia.js*
 
 ### 🛍️ Shop Features
 - **Product Management** — Complete product catalog with variants, attributes, and inventory tracking
+- **Digital & Downloadable Products** — Sell ebooks, software, and files with secure post-purchase downloads in the customer account
+- **Quote / RFQ Products** — Quote-only catalog items with a storefront Request Quote form (no add-to-cart checkout)
 - **Shopping Cart** — Real-time cart with session persistence and guest checkout support
 - **Multi-Payment Gateway** — Stripe, Razorpay, PayPal, PhonePe, and PayUMoney support
 - **Order Management** — Comprehensive order tracking and lifecycle management
-- **Customer Accounts** — Registration, authentication, profile, and order history
+- **Customer Accounts** — Registration, authentication, profile, order history, and digital downloads
 - **Theme System** — Flexible theme architecture with easy customization
+- **Friendly Setup Wizard** — Start with retail, grocery, electronics, fashion, digital downloads, RFQ, or a blank catalog
 
 ### 🎛️ Admin Features
 - **Dashboard** — Analytics and key insights at a glance
-- **Product Management** — Products, categories, brands, attributes, and variants
+- **Product Management** — Products, categories, brands, attributes, and variants (including digital and quote types)
+- **Quote Requests Inbox** — Review and update RFQ submissions from Catalog → Quote Requests
 - **Order Processing** — Complete order lifecycle with status management
 - **Customer Management** — Profiles, addresses, and notes
 - **Settings** — Store configuration, payment methods, shipping rates, and tax rules
+- **MCP Server** — Connect Cursor, Claude Code, VS Code, and other AI clients to manage catalog, orders, customers, and safe settings ([docs/MCP.md](docs/MCP.md))
 - **AI Agents** — Create and manage custom AI agents for commerce workflows
 - **Email Templates** — Customizable transactional email templates
 - **CMS & UI Editor** — Visual drag-and-drop page builder with 32+ block types, global regions, reusable saved blocks, and responsive live preview
@@ -425,6 +430,26 @@ npm run build    # required after adding/changing theme Vue pages
 ```
 
 After installing or activating any theme in admin, Cartxis runs discover, `optimize:clear`, and `npm run build` automatically when `CARTXIS_THEME_REBUILD_ASSETS=true` (default).
+
+---
+
+## 🤖 MCP (Model Context Protocol)
+
+Cartxis includes a built-in **remote MCP server** so AI tools can manage your store over HTTP.
+
+| | |
+|--|--|
+| **Endpoint** | `POST /mcp` (Bearer token) |
+| **Admin UI** | Settings → **MCP** |
+| **Clients** | Cursor, Claude Code, VS Code Copilot, ChatGPT connectors, and other MCP clients |
+
+Typical capabilities: list/create/update products and pages, list/update orders, search customers, and update safe store settings.
+
+1. Open **Admin → Settings → MCP**
+2. Enable MCP and create a token (copy it once)
+3. Point your client at `https://your-store.test/mcp` with `Authorization: Bearer <token>`
+
+Full setup, Cursor HTTPS tips, and tool list: **[docs/MCP.md](docs/MCP.md)**
 
 ---
 
