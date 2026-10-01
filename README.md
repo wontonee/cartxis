@@ -97,17 +97,31 @@ In the **Google Play Console → App content → Data safety**, paste this URL i
 |-------------|---------|
 | PHP | 8.3 or higher |
 | Composer | 2.x |
-| Node.js | 18.x or higher |
-| NPM | 9.x or higher |
 | MySQL | 8.0 or higher |
+| Node.js | 18.x or higher *(developer / source installs only)* |
+| NPM | 9.x or higher *(developer / source installs only)* |
 
 **Required PHP extensions:** OpenSSL, PDO, Mbstring, Tokenizer, XML, Ctype, JSON, BCMath
+
+**Shared hosting:** Node.js is **not** required when you use the Shared Hosting release zip (includes `public/build`). See **[docs/SHARED_HOSTING.md](docs/SHARED_HOSTING.md)**.
+
+---
+
+## 🚀 Quick Install — Shared Hosting (no Node)
+
+Best for cPanel, Plesk, AlwaysData, and similar hosts:
+
+1. Download **`cartxis-{version}-shared-hosting.zip`** from [GitHub Releases](https://github.com/cartxis/cartxis/releases).
+2. Upload, extract, and set the document root to **`public/`**.
+3. Copy `.env.example` → `.env`, set `APP_URL` and database credentials.
+4. Run `php artisan key:generate` then `php artisan cartxis:install` (SSH), or follow [docs/SHARED_HOSTING.md](docs/SHARED_HOSTING.md).
+5. Open `/setup` in the browser to finish the storefront wizard.
 
 ---
 
 ## 🚀 Quick Install via Composer
 
-The fastest way to get Cartxis running:
+The fastest way to get Cartxis running on a machine with Composer **and** Node:
 
 ```bash
 composer create-project cartxis/cartxis my-store
@@ -120,7 +134,7 @@ The interactive installer will guide you through:
 - **Theme directory API key** registration (for Browse Themes / one-click installs)
 - Admin account creation (name, email, and password)
 - Migrations and seeders
-- Building frontend assets automatically
+- Building frontend assets automatically (or using pre-built assets from a Shared Hosting package)
 
 Once complete, the installer displays your admin panel URL, email, and password.
 
@@ -139,12 +153,10 @@ php artisan theme:directory:register
 
 See **[docs/THEMES.md](docs/THEMES.md)** for installing themes, customization, and troubleshooting.
 
-> **If you see blank pages or asset errors after the setup wizard**, the frontend build may not have completed yet. Fix it by running:
+> **If you see “Frontend assets are missing” or blank pages after setup**, you need production Vite assets. Prefer the [Shared Hosting zip](docs/SHARED_HOSTING.md), or run:
 > ```bash
 > npm run build
 > php artisan optimize:clear
-> # or if you use Yarn:
-> yarn build
 > ```
 
 ---

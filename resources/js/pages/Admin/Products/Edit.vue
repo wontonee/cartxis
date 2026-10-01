@@ -95,6 +95,14 @@ interface Product {
       type: string;
     };
   }>;
+  downloads?: Array<{
+    id: number;
+    title: string;
+    file_name: string | null;
+    file_size: number | null;
+    max_downloads: number | null;
+    sort_order: number;
+  }>;
 }
 
 interface Props {
@@ -158,6 +166,45 @@ const activeTab = ref<'general' | 'images' | 'attributes' | 'inventory' | 'seo' 
 // Images for upload
 const images = ref<File[]>([]);
 const isUploading = ref(false);
+const downloadUploading = ref(false);
+const downloadFileInput = ref<HTMLInputElement | null>(null);
+
+const formatFileSize = (bytes?: number | null) => {
+  if (!bytes) return '0 B';
+  if (bytes < 1024) return `${bytes} B`;
+  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
+  return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
+};
+
+const uploadDownload = async (event: Event) => {
+  const input = event.target as HTMLInputElement;
+  const file = input.files?.[0];
+  if (!file) return;
+
+  downloadUploading.value = true;
+  const body = new FormData();
+  body.append('file', file);
+  body.append('title', file.name.replace(/\.[^/.]+$/, ''));
+
+  try {
+    await router.post(`/admin/catalog/products/${props.product.id}/downloads`, body, {
+      forceFormData: true,
+      preserveScroll: true,
+      onFinish: () => {
+        downloadUploading.value = false;
+        if (downloadFileInput.value) downloadFileInput.value.value = '';
+      },
+    });
+  } catch {
+    downloadUploading.value = false;
+  }
+};
+
+const removeDownload = (downloadId: number) => {
+  router.delete(`/admin/catalog/products/${props.product.id}/downloads/${downloadId}`, {
+    preserveScroll: true,
+  });
+};
 
 // Attribute values - Initialize multiselect attributes as arrays
 const attributeValues = ref<Record<string, any>>({});
@@ -837,12 +884,14 @@ const deleteProduct = () => {
                     <option value="configurable">Configurable Product (Variants)</option>
                     <option value="virtual">Virtual Product (No Shipping)</option>
                     <option value="downloadable">Downloadable Product (Digital)</option>
+                    <option value="quote">Quote / RFQ Product</option>
                   </select>
                   <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">
                     <span v-if="form.type === 'simple'">Physical product with no variants</span>
                     <span v-else-if="form.type === 'configurable'">Product with options like size, color, etc.</span>
                     <span v-else-if="form.type === 'virtual'">Non-physical product (no shipping required)</span>
                     <span v-else-if="form.type === 'downloadable'">Digital file product with download links</span>
+                    <span v-else-if="form.type === 'quote'">Customers request a quote instead of buying</span>
                   </p>
                   <p v-if="errors?.type" class="mt-1 text-sm text-red-600">{{ errors.type }}</p>
                 </div>
@@ -1217,33 +1266,37 @@ const deleteProduct = () => {
               <div v-show="activeTab === 'downloads'" v-if="form.type === 'downloadable'" class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6 space-y-6">
                 <div>
                   <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-4">Downloadable Files</h3>
-                  
-                  <div class="border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg p-8 text-center hover:border-blue-400 dark:hover:border-blue-500 transition-colors">
-                    <svg class="mx-auto h-12 w-12 text-gray-400 dark:text-gray-500" stroke="currentColor" fill="none" viewBox="0 0 48 48">
-                      <path d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
-                    </svg>
-                    <p class="mt-4 text-sm text-gray-600 dark:text-gray-400">
-                      <label for="file-upload-edit" class="relative cursor-pointer rounded-md font-medium text-blue-600 dark:text-blue-400 hover:text-blue-500">
-                        <span>Upload files</span>
-                        <input id="file-upload-edit" name="file-upload" type="file" class="sr-only" multiple />
-                      </label>
-                      or drag and drop
-                    </p>
-                    <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Any file type up to 50MB</p>
+
+                  <div class="space-y-3 mb-6" v-if="(product.downloads || []).length">
+                    <div
+                      v-for="file in product.downloads"
+                      :key="file.id"
+                      class="flex items-center justify-between gap-4 rounded-lg border border-gray-200 dark:border-gray-700 px-4 py-3"
+                    >
+                      <div class="min-w-0">
+                        <p class="font-medium text-gray-900 dark:text-white truncate">{{ file.title }}</p>
+                        <p class="text-xs text-gray-500 truncate">{{ file.file_name }} · {{ formatFileSize(file.file_size) }}</p>
+                      </div>
+                      <button
+                        type="button"
+                        class="text-sm text-red-600 hover:text-red-500"
+                        @click="removeDownload(file.id)"
+                      >
+                        Remove
+                      </button>
+                    </div>
                   </div>
 
-                  <div class="mt-6 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-700/50 rounded-md p-4">
-                    <div class="flex">
-                      <svg class="h-5 w-5 text-yellow-400 mr-3 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-                      </svg>
-                      <div>
-                        <p class="text-sm text-yellow-800 dark:text-yellow-300 font-medium">File Management Coming Soon</p>
-                        <p class="text-sm text-yellow-700 dark:text-yellow-400 mt-1">
-                          Downloadable file upload and management will be available in the next update.
-                        </p>
-                      </div>
-                    </div>
+                  <div class="border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg p-8 text-center hover:border-blue-400 dark:hover:border-blue-500 transition-colors">
+                    <p class="text-sm text-gray-600 dark:text-gray-400 mb-4">Upload a file for customers to download after purchase</p>
+                    <input
+                      ref="downloadFileInput"
+                      type="file"
+                      class="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
+                      @change="uploadDownload"
+                    />
+                    <p class="text-xs text-gray-500 dark:text-gray-400 mt-2">Any file type up to 50MB</p>
+                    <p v-if="downloadUploading" class="text-sm text-blue-600 mt-3">Uploading…</p>
                   </div>
                 </div>
               </div>

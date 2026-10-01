@@ -30,6 +30,8 @@ class OrderItem extends Model
         'product_sku',
         'product_name',
         'product_image',
+        'product_type',
+        'requires_shipping',
         'quantity',
         'price',
         'total',
@@ -49,10 +51,26 @@ class OrderItem extends Model
         'total' => 'decimal:2',
         'tax_amount' => 'decimal:2',
         'discount_amount' => 'decimal:2',
+        'requires_shipping' => 'boolean',
         'options' => 'array',
         'created_at' => 'datetime',
         'updated_at' => 'datetime',
     ];
+
+    /**
+     * Whether this line item requires physical shipping.
+     */
+    public function requiresShipping(): bool
+    {
+        if ($this->requires_shipping !== null) {
+            return (bool) $this->requires_shipping;
+        }
+
+        return in_array($this->product_type, [
+            Product::TYPE_SIMPLE,
+            Product::TYPE_CONFIGURABLE,
+        ], true);
+    }
 
     /**
      * Get the order that owns the order item.

@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue';
-import { Head, Link } from '@inertiajs/vue3';
+import { Head, Link, router } from '@inertiajs/vue3';
 import { useCartStore } from '@/Stores/cartStore';
 import ThemeLayout from '../../layouts/ThemeLayout.vue';
 import ProductCard from '../../components/ProductCard.vue';
@@ -74,6 +74,38 @@ const props = defineProps<{
 }>();
 
 const cartStore = useCartStore();
+
+const quoteForm = ref({
+    customer_name: '',
+    customer_email: '',
+    customer_phone: '',
+    company: '',
+    quantity: 1,
+    message: '',
+});
+const quoteSubmitting = ref(false);
+const quoteSuccess = ref('');
+const quoteError = ref('');
+
+const submitQuote = () => {
+    quoteSubmitting.value = true;
+    quoteSuccess.value = '';
+    quoteError.value = '';
+
+    router.post(`/product/${props.product.slug}/quote`, quoteForm.value, {
+        preserveScroll: true,
+        onSuccess: (page) => {
+            quoteSuccess.value = (page.props.flash as any)?.success || 'Quote request submitted.';
+            quoteForm.value.message = '';
+        },
+        onError: (errors) => {
+            quoteError.value = Object.values(errors)[0] as string || 'Unable to submit quote request.';
+        },
+        onFinish: () => {
+            quoteSubmitting.value = false;
+        },
+    });
+};
 
 // Image gallery state
 const selectedImage = ref(0);
@@ -297,8 +329,11 @@ const handleMouseMove = (e: MouseEvent) => {
 
                     <!-- Price -->
                     <div class="flex items-baseline gap-3">
+                        <span v-if="product.type === 'quote'" class="text-3xl font-bold text-gray-900">Price on request</span>
+                        <template v-else>
                         <span class="text-3xl font-bold text-gray-900">{{ formatPrice(displayPrice) }}</span>
                         <span v-if="hasDiscount" class="text-xl text-gray-500 line-through">{{ formatPrice(product.price) }}</span>
+                        </template>
                         <span v-if="hasDiscount" class="text-sm font-semibold text-green-600 bg-green-50 px-2 py-1 rounded">
                             Save {{ discountPercentage }}%
                         </span>
@@ -445,7 +480,32 @@ const handleMouseMove = (e: MouseEvent) => {
                     </div>
 
                     <!-- Quantity & Add to Cart -->
-                    <div v-if="product.in_stock" class="space-y-4">
+                    <div v-if="product.type === 'quote'" class="space-y-4 rounded-xl border border-amber-200 bg-amber-50 p-5">
+                        <div>
+                            <h3 class="text-lg font-semibold text-amber-900">Request a Quote</h3>
+                            <p class="text-sm text-amber-800 mt-1">This product is sold by quote. Tell us what you need and we will get back to you.</p>
+                        </div>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                            <input v-model="quoteForm.customer_name" type="text" placeholder="Your name *" class="rounded-lg border border-amber-200 px-3 py-2 text-sm" />
+                            <input v-model="quoteForm.customer_email" type="email" placeholder="Email *" class="rounded-lg border border-amber-200 px-3 py-2 text-sm" />
+                            <input v-model="quoteForm.customer_phone" type="tel" placeholder="Phone" class="rounded-lg border border-amber-200 px-3 py-2 text-sm" />
+                            <input v-model="quoteForm.company" type="text" placeholder="Company" class="rounded-lg border border-amber-200 px-3 py-2 text-sm" />
+                            <input v-model.number="quoteForm.quantity" type="number" min="1" placeholder="Quantity" class="rounded-lg border border-amber-200 px-3 py-2 text-sm" />
+                        </div>
+                        <textarea v-model="quoteForm.message" rows="3" placeholder="Tell us about your requirements" class="w-full rounded-lg border border-amber-200 px-3 py-2 text-sm" />
+                        <p v-if="quoteSuccess" class="text-sm text-green-700">{{ quoteSuccess }}</p>
+                        <p v-if="quoteError" class="text-sm text-red-600">{{ quoteError }}</p>
+                        <button
+                            type="button"
+                            @click="submitQuote"
+                            :disabled="quoteSubmitting"
+                            class="w-full bg-amber-600 text-white px-8 py-3 rounded-lg hover:bg-amber-500 transition-colors disabled:opacity-50 font-medium"
+                        >
+                            {{ quoteSubmitting ? 'Submitting…' : 'Request Quote' }}
+                        </button>
+                    </div>
+
+                    <div v-else-if="product.in_stock" class="space-y-4">
                         <!-- Quantity Selector - Hidden for downloadable products -->
                         <div v-if="product.type !== 'downloadable'" class="flex items-center gap-4">
                             <span class="text-sm font-medium text-gray-700">Quantity:</span>

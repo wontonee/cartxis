@@ -7,6 +7,7 @@ use Cartxis\Shop\Models\Order;
 use Cartxis\Shop\Models\OrderItem;
 use Cartxis\Shop\Models\Address;
 use Cartxis\Product\Models\Product;
+use Cartxis\Cart\Support\CartTypeHelper;
 use Cartxis\Customer\Models\Customer;
 use Cartxis\Customer\Models\CustomerAddress;
 use Cartxis\Admin\Services\AdminNotificationService;
@@ -121,33 +122,43 @@ class CheckoutService extends ShopService
                     $product = Product::find($cartItem['product_id']);
                     // Always use current DB price — prevents stale-cart price leakage
                     $currentPrice = (float) ($product?->special_price ?? $product?->price ?? $cartItem['price']);
+                    $type = $cartItem['type'] ?? $product?->type ?? Product::TYPE_SIMPLE;
+                    $requiresShipping = array_key_exists('requires_shipping', $cartItem)
+                        ? (bool) $cartItem['requires_shipping']
+                        : ($product?->requiresShipping() ?? true);
+
                     OrderItem::create([
                         'order_id' => $order->id,
                         'product_id' => $cartItem['product_id'],
                         'product_sku' => $product->sku ?? null,
                         'product_name' => $product->name ?? 'Product',
                         'product_image' => $product->mainImage?->url ?? null,
+                        'product_type' => $type,
+                        'requires_shipping' => $requiresShipping,
                         'quantity' => $cartItem['quantity'],
                         'price' => $currentPrice,
                         'total' => $cartItem['quantity'] * $currentPrice,
-                        'tax_amount' => 0, // TODO: Calculate tax per item
-                        'discount_amount' => 0, // TODO: Calculate discount per item
+                        'tax_amount' => 0,
+                        'discount_amount' => 0,
                         'options' => $cartItem['options'] ?? null,
                     ]);
                 } else {
                     // Legacy object-based cart items — always use current DB price
                     $currentPrice = (float) ($cartItem->product?->special_price ?? $cartItem->product?->price ?? $cartItem->price);
+                    $product = $cartItem->product;
                     OrderItem::create([
                         'order_id' => $order->id,
                         'product_id' => $cartItem->product_id,
-                        'product_sku' => $cartItem->product->sku ?? null,
-                        'product_name' => $cartItem->product->name,
-                        'product_image' => $cartItem->product->mainImage?->url ?? null,
+                        'product_sku' => $product->sku ?? null,
+                        'product_name' => $product->name ?? 'Product',
+                        'product_image' => $product->mainImage?->url ?? null,
+                        'product_type' => $product->type ?? Product::TYPE_SIMPLE,
+                        'requires_shipping' => $product?->requiresShipping() ?? true,
                         'quantity' => $cartItem->quantity,
                         'price' => $currentPrice,
                         'total' => $cartItem->quantity * $currentPrice,
-                        'tax_amount' => 0, // TODO: Calculate tax per item
-                        'discount_amount' => 0, // TODO: Calculate discount per item
+                        'tax_amount' => 0,
+                        'discount_amount' => 0,
                         'options' => $cartItem->options ?? null,
                     ]);
                 }
@@ -415,14 +426,26 @@ class CheckoutService extends ShopService
                 $productId = is_array($item) ? $item['product_id'] : $item->product_id;
                 $quantity = is_array($item) ? $item['quantity'] : $item->quantity;
                 $product = Product::find($productId);
-                
-                if (!$product || $product->quantity < $quantity) {
+
+                if (! $product) {
+                    $errors[] = 'A product in your cart is no longer available';
+                    continue;
+                }
+
+                if ($product->isQuote()) {
+                    $errors[] = "Product '{$product->name}' requires a quote and cannot be purchased via checkout";
+                    continue;
+                }
+
+                if (CartTypeHelper::hasInsufficientStock($product, (int) $quantity)) {
                     $errors[] = "Product '{$product->name}' is out of stock";
                 }
             }
 
-            // Validate shipping address
-            if (empty($data['shipping_address'])) {
+            $requiresShipping = CartTypeHelper::cartRequiresShipping($cartItems);
+
+            // Validate shipping address only when cart has physical items
+            if ($requiresShipping && empty($data['shipping_address'])) {
                 $errors[] = 'Shipping address is required';
             }
 
@@ -527,9 +550,16 @@ class CheckoutService extends ShopService
     protected function getOrCreateGuestCustomer(array $data): Customer
     {
         $email = $data['customer_email'];
-        $firstName = $data['shipping_address']['first_name'] ?? 'Guest';
-        $lastName = $data['shipping_address']['last_name'] ?? 'Customer';
-        $phone = $data['customer_phone'] ?? $data['shipping_address']['phone'] ?? null;
+        $firstName = $data['shipping_address']['first_name']
+            ?? $data['billing_address']['first_name']
+            ?? 'Guest';
+        $lastName = $data['shipping_address']['last_name']
+            ?? $data['billing_address']['last_name']
+            ?? 'Customer';
+        $phone = $data['customer_phone']
+            ?? $data['shipping_address']['phone']
+            ?? $data['billing_address']['phone']
+            ?? null;
 
         // Try to find existing guest customer with this email
         $customer = Customer::where('email', $email)
@@ -569,9 +599,16 @@ class CheckoutService extends ShopService
     protected function createUserAndCustomer(array $data): array
     {
         $email = $data['customer_email'];
-        $firstName = $data['shipping_address']['first_name'] ?? 'Customer';
-        $lastName = $data['shipping_address']['last_name'] ?? 'Customer';
-        $phone = $data['customer_phone'] ?? $data['shipping_address']['phone'] ?? null;
+        $firstName = $data['shipping_address']['first_name']
+            ?? $data['billing_address']['first_name']
+            ?? 'Customer';
+        $lastName = $data['shipping_address']['last_name']
+            ?? $data['billing_address']['last_name']
+            ?? 'Customer';
+        $phone = $data['customer_phone']
+            ?? $data['shipping_address']['phone']
+            ?? $data['billing_address']['phone']
+            ?? null;
         $password = $data['password'];
         $newsletterSubscribed = $data['newsletter_subscribed'] ?? false;
 

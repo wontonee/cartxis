@@ -1,14 +1,16 @@
 <?php
 
-use App\Http\Middleware\HandleAppearance;
 use App\Http\Middleware\FrontendMaintenanceMode;
+use App\Http\Middleware\HandleAppearance;
 use App\Http\Middleware\HandleInertiaRequests;
 use Cartxis\Admin\Http\Middleware\PreventAdminFrontendAccess;
 use Cartxis\Admin\Http\Middleware\PreventUserAdminAccess;
+use Cartxis\Core\Http\Middleware\SecurityHeaders;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
+use Illuminate\Foundation\ViteManifestNotFoundException;
 use Illuminate\Http\Middleware\AddLinkHeadersForPreloadedAssets;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\RateLimiter;
@@ -38,7 +40,7 @@ return Application::configure(basePath: dirname(__DIR__))
             AddLinkHeadersForPreloadedAssets::class,
             PreventAdminFrontendAccess::class, // Prevent admins from accessing frontend
             PreventUserAdminAccess::class,    // Enforce is_active + role on admin guard sessions
-            \Cartxis\Core\Http\Middleware\SecurityHeaders::class,
+            SecurityHeaders::class,
         ]);
 
         // Add middleware to admin routes to prevent regular users
@@ -51,9 +53,12 @@ return Application::configure(basePath: dirname(__DIR__))
             if ($request->is('admin/*')) {
                 return route('admin.login');
             }
+
             return route('login');
         });
     })
     ->withExceptions(function (Exceptions $exceptions) {
-        //
+        $exceptions->render(function (ViteManifestNotFoundException $e, Request $request) {
+            return response()->view('errors.missing-frontend-assets', [], 503);
+        });
     })->create();

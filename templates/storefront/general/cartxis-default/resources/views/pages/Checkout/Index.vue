@@ -30,6 +30,7 @@ interface CartSummary {
   subtotal: number;
   discount?: number;
   coupon?: { code: string; discount_amount: number } | null;
+  requires_shipping?: boolean;
   taxes: {
     breakdown: Array<{ name: string; amount: number }>;
     total: number;
@@ -90,6 +91,8 @@ const props = defineProps<Props>();
 
 const page = usePage();
 const { formatPrice } = useCurrency();
+
+const requiresShipping = computed(() => props.cartSummary.requires_shipping !== false);
 
 const processing = ref(false);
 const selectedAddressId = ref<number | null>(props.userAddresses.find(a => a.is_default)?.id || null);
@@ -337,30 +340,32 @@ const submitOrder = () => {
     fieldErrors.value.last_name = 'Last name is required';
   }
 
-  // Validate street address
-  if (!shippingAddress.value.address_line1) {
-    fieldErrors.value.address = 'Street address is required';
-  }
+  if (requiresShipping.value) {
+    // Validate street address
+    if (!shippingAddress.value.address_line1) {
+      fieldErrors.value.address = 'Street address is required';
+    }
 
-  // Validate city, state, postal code
-  if (!shippingAddress.value.city) {
-    fieldErrors.value.city = 'City is required';
-  }
-  if (!shippingAddress.value.state) {
-    fieldErrors.value.state = 'State is required';
-  }
-  if (!shippingAddress.value.postal_code) {
-    fieldErrors.value.postal_code = 'Postal code is required';
-  }
+    // Validate city, state, postal code
+    if (!shippingAddress.value.city) {
+      fieldErrors.value.city = 'City is required';
+    }
+    if (!shippingAddress.value.state) {
+      fieldErrors.value.state = 'State is required';
+    }
+    if (!shippingAddress.value.postal_code) {
+      fieldErrors.value.postal_code = 'Postal code is required';
+    }
 
-  // Validate phone number
-  if (!shippingAddress.value.phone) {
-    fieldErrors.value.phone = 'Phone number is required';
-  }
+    // Validate phone number
+    if (!shippingAddress.value.phone) {
+      fieldErrors.value.phone = 'Phone number is required';
+    }
 
-  // Validate shipping method selection
-  if (!selectedShippingId.value) {
-    fieldErrors.value.shipping_method = 'Please select a shipping method';
+    // Validate shipping method selection
+    if (!selectedShippingId.value) {
+      fieldErrors.value.shipping_method = 'Please select a shipping method';
+    }
   }
 
   // Validate terms acceptance
@@ -390,13 +395,16 @@ const submitOrder = () => {
   const formData: any = {
     email: isAuthenticated.value ? currentUser.value?.email : guestEmail.value,
     phone: guestPhone.value,
-    shipping_method_id: selectedShippingId.value,
     payment_method: selectedPaymentMethod.value,
-    billing_same_as_shipping: billingSameAsShipping.value,
+    billing_same_as_shipping: requiresShipping.value ? billingSameAsShipping.value : false,
     terms_accepted: termsAccepted.value,
     newsletter_signup: newsletterSignup.value,
     order_notes: orderNotes.value,
   };
+
+  if (requiresShipping.value) {
+    formData.shipping_method_id = selectedShippingId.value;
+  }
 
   // Add account password if creating account
   if (shouldCreateAccount) {
@@ -405,16 +413,30 @@ const submitOrder = () => {
     formData.create_account = true;
   }
 
-  // Add shipping address
-  if (isAuthenticated.value && !useNewAddress.value && selectedAddress.value) {
-    formData.shipping_address = selectedAddress.value;
-  } else {
-    formData.shipping_address = shippingAddress.value;
-  }
+  // Add shipping / billing address
+  if (requiresShipping.value) {
+    if (isAuthenticated.value && !useNewAddress.value && selectedAddress.value) {
+      formData.shipping_address = selectedAddress.value;
+    } else {
+      formData.shipping_address = shippingAddress.value;
+    }
 
-  // Add billing address if different
-  if (!billingSameAsShipping.value) {
-    formData.billing_address = billingAddress.value;
+    if (!billingSameAsShipping.value) {
+      formData.billing_address = billingAddress.value;
+    }
+  } else {
+    formData.billing_address = {
+      first_name: shippingAddress.value.first_name,
+      last_name: shippingAddress.value.last_name,
+      company: shippingAddress.value.company,
+      phone: shippingAddress.value.phone || guestPhone.value,
+      address_line1: shippingAddress.value.address_line1 || '',
+      address_line2: shippingAddress.value.address_line2 || '',
+      city: shippingAddress.value.city || '',
+      state: shippingAddress.value.state || '',
+      postal_code: shippingAddress.value.postal_code || '',
+      country: shippingAddress.value.country || '',
+    };
   }
 
   // Submit checkout - let the backend determine how to handle the payment method
@@ -622,12 +644,12 @@ const submitOrder = () => {
             </div>
           </div>
 
-          <!-- Shipping Address -->
+          <!-- Shipping Address (physical carts) / Billing contact (digital-only) -->
           <div class="bg-white p-6 rounded-lg shadow">
-            <h2 class="text-xl font-bold mb-4">Shipping Address</h2>
+            <h2 class="text-xl font-bold mb-4">{{ requiresShipping ? 'Shipping Address' : 'Billing Details' }}</h2>
             
             <!-- Saved Addresses (for authenticated users) -->
-            <div v-if="isAuthenticated && userAddresses.length > 0" class="mb-4">
+            <div v-if="requiresShipping && isAuthenticated && userAddresses.length > 0" class="mb-4">
               <div class="space-y-2 mb-4">
                 <label
                   v-for="address in userAddresses"
@@ -696,6 +718,7 @@ const submitOrder = () => {
                   class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
                 />
               </div>
+              <template v-if="requiresShipping">
               <div class="md:col-span-2">
                 <label class="block text-sm font-medium mb-2">Address *</label>
                 <input
@@ -783,11 +806,12 @@ const submitOrder = () => {
                 />
                 <p v-if="fieldErrors.phone" class="mt-1 text-sm text-red-600">{{ fieldErrors.phone }}</p>
               </div>
+              </template>
             </div>
           </div>
 
           <!-- Shipping Method -->
-          <div class="bg-white p-6 rounded-lg shadow">
+          <div v-if="requiresShipping" class="bg-white p-6 rounded-lg shadow">
             <h2 class="text-xl font-bold mb-4">Shipping Method</h2>
             
             <div class="space-y-2">

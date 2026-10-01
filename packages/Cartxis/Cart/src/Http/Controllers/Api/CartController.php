@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\Session;
 use Illuminate\Support\Str;
 use Cartxis\Product\Models\Product;
 use Cartxis\Marketing\Services\CouponService;
+use Cartxis\Cart\Support\CartTypeHelper;
 
 class CartController extends Controller
 {
@@ -44,8 +45,18 @@ class CartController extends Controller
         $quantity = $validated['quantity'] ?? 1;
         $productAttributes = $validated['attributes'] ?? [];
 
+        if ($product->status !== 'enabled') {
+            return response()->json(['message' => 'Product not available'], 400);
+        }
+
+        if (! CartTypeHelper::canAddToCart($product)) {
+            return response()->json([
+                'message' => 'This product requires a quote request and cannot be added to the cart',
+            ], 400);
+        }
+
         // Check stock
-        if ($product->quantity < $quantity) {
+        if (CartTypeHelper::hasInsufficientStock($product, (int) $quantity)) {
             return response()->json([
                 'message' => 'Insufficient stock available',
             ], 400);
@@ -53,6 +64,7 @@ class CartController extends Controller
 
         // Convert attribute IDs to readable format
         $readableAttributes = $this->convertAttributesToReadable($productAttributes);
+        $snapshot = CartTypeHelper::snapshotFromProduct($product);
 
         $cartItem = [
             'id' => uniqid('cart_'),
@@ -65,6 +77,8 @@ class CartController extends Controller
             'attributes' => $readableAttributes,
             'tax_class_id' => $product->tax_class_id,
             'weight' => $product->weight,
+            'type' => $snapshot['type'],
+            'requires_shipping' => $snapshot['requires_shipping'],
         ];
 
         $items = $this->getCartItems();
@@ -111,7 +125,7 @@ class CartController extends Controller
 
         // Check stock
         $product = Product::find($items[$key]['product_id']);
-        if ($product && $product->quantity < $request->quantity) {
+        if ($product && CartTypeHelper::hasInsufficientStock($product, (int) $request->quantity)) {
             return response()->json([
                 'message' => 'Insufficient stock available',
             ], 400);

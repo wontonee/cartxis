@@ -194,6 +194,29 @@ php artisan theme:discover
 
 ---
 
+### RuntimeException: template not found under templates/storefront/
+
+**Symptoms:** Error when opening admin Appearance or the storefront; message mentions `dmart-electronics` (or another slug).
+
+**Cause:** The database still has that theme **active**, but the template folder is missing on disk (common on the dev repo if optional themes were never installed, or after deleting `templates/storefront/electronics/`).
+
+**Fix A — use Dmart again:**
+
+```bash
+php artisan template:install dmart-electronics --activate
+```
+
+**Fix B — switch back to default:**
+
+```bash
+php artisan theme:activate cartxis-default
+php artisan optimize:clear
+```
+
+On the next request, Cartxis also **auto-falls back** to `cartxis-default` when the active theme’s files are missing (see `ThemeService::reconcileActiveTheme()`).
+
+---
+
 ### `npm run build` fails after remote theme install
 
 Remote ZIPs sometimes include macOS junk (`__MACOSX/`, `._*.vue`). Cartxis removes these on discover/install; if build still fails:

@@ -14,10 +14,10 @@ use Cartxis\Core\Console\Commands\TemplateDiscoverCommand;
 use Cartxis\Core\Console\Commands\TemplateExportCommand;
 use Cartxis\Core\Console\Commands\TemplateInstallCommand;
 use Cartxis\Core\Console\Commands\ThemeActivateCommand;
+use Cartxis\Core\Console\Commands\ThemeDirectoryRegisterCommand;
 use Cartxis\Core\Console\Commands\ThemeDiscoverCommand;
 use Cartxis\Core\Console\Commands\ThemeImportDataCommand;
 use Cartxis\Core\Console\Commands\ThemeListCommand;
-use Cartxis\Core\Console\Commands\ThemeDirectoryRegisterCommand;
 use Cartxis\Core\Http\Middleware\SetAdminSessionCookie;
 use Cartxis\Core\Services\ExtensionService;
 use Cartxis\Core\Services\HookService;
@@ -204,7 +204,7 @@ class CoreServiceProvider extends ServiceProvider
             $themeService->discover();
 
             // Load asset paths and hooks for the currently active theme
-            $activeTheme = $themeService->active();
+            $activeTheme = $themeService->reconcileActiveTheme() ?? $themeService->active();
 
             if ($activeTheme) {
                 config(['theme.active' => $activeTheme->slug]);

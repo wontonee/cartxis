@@ -3,6 +3,8 @@
 namespace Cartxis\Shop\Providers;
 
 use Illuminate\Support\ServiceProvider;
+use Cartxis\Shop\Models\Order;
+use Cartxis\Shop\Observers\OrderObserver;
 
 class ShopServiceProvider extends ServiceProvider
 {
@@ -37,6 +39,8 @@ class ShopServiceProvider extends ServiceProvider
         $this->publishes([
             __DIR__ . '/../Resources/assets' => public_path('vendor/shop'),
         ], 'shop-assets');
+
+        Order::observe(OrderObserver::class);
         
         // Register middleware for frontend data sharing
         $this->registerMiddleware();

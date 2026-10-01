@@ -20,6 +20,7 @@ class Product extends Model
     const TYPE_CONFIGURABLE = 'configurable';
     const TYPE_VIRTUAL = 'virtual';
     const TYPE_DOWNLOADABLE = 'downloadable';
+    const TYPE_QUOTE = 'quote';
 
     protected $fillable = [
         'sku',
@@ -352,7 +353,7 @@ class Product extends Model
      */
     public function isPhysical(): bool
     {
-        return in_array($this->type, [self::TYPE_SIMPLE, self::TYPE_CONFIGURABLE]);
+        return in_array($this->type, [self::TYPE_SIMPLE, self::TYPE_CONFIGURABLE], true);
     }
 
     /**
@@ -372,6 +373,14 @@ class Product extends Model
     }
 
     /**
+     * Check if product is quote / RFQ only (no cart purchase)
+     */
+    public function isQuote(): bool
+    {
+        return $this->type === self::TYPE_QUOTE;
+    }
+
+    /**
      * Check if product requires shipping
      */
     public function requiresShipping(): bool
@@ -380,11 +389,27 @@ class Product extends Model
     }
 
     /**
+     * Check if product is purchasable via cart/checkout
+     */
+    public function isPurchasable(): bool
+    {
+        return ! $this->isQuote();
+    }
+
+    /**
      * Check if product is configurable (has variants)
      */
     public function isConfigurable(): bool
     {
         return $this->type === self::TYPE_CONFIGURABLE;
+    }
+
+    /**
+     * Downloadable files attached to this product.
+     */
+    public function downloads(): HasMany
+    {
+        return $this->hasMany(ProductDownload::class)->orderBy('sort_order');
     }
 
     /**

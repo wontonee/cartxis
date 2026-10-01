@@ -38,7 +38,7 @@ return [
     |--------------------------------------------------------------------------
     */
     
-    'product_types' => ['simple', 'configurable', 'virtual', 'downloadable'],
+    'product_types' => ['simple', 'configurable', 'virtual', 'downloadable', 'quote'],
     
     /*
     |--------------------------------------------------------------------------

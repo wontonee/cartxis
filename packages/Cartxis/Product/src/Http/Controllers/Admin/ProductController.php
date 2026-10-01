@@ -122,7 +122,7 @@ class ProductController extends Controller
             'manage_stock' => 'boolean',
             'min_quantity' => 'nullable|integer|min:1',
             'max_quantity' => 'nullable|integer|min:1',
-            'type' => 'required|in:simple,configurable,virtual,downloadable',
+            'type' => 'required|in:simple,configurable,virtual,downloadable,quote',
             'weight' => 'nullable|string',
             'meta_title' => 'nullable|string|max:255',
             'meta_description' => 'nullable|string',
@@ -182,7 +182,7 @@ class ProductController extends Controller
      */
     public function edit(Product $product, SettingService $settings): Response
     {
-        $product->load(['categories', 'images', 'attributeValues.attribute', 'attributeValues.option']);
+        $product->load(['categories', 'images', 'downloads', 'attributeValues.attribute', 'attributeValues.option']);
 
         // Load recent inventory adjustments
         $adjustmentHistory = InventoryAdjustment::where('product_id', $product->id)
@@ -252,7 +252,7 @@ class ProductController extends Controller
             'manage_stock' => 'boolean',
             'min_quantity' => 'nullable|integer|min:1',
             'max_quantity' => 'nullable|integer|min:1',
-            'type' => 'required|in:simple,configurable,virtual,downloadable',
+            'type' => 'required|in:simple,configurable,virtual,downloadable,quote',
             'weight' => 'nullable|string',
             'meta_title' => 'nullable|string|max:255',
             'meta_description' => 'nullable|string',

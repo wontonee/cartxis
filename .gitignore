@@ -4,6 +4,7 @@ Agents.md
 /bootstrap/ssr
 /node_modules
 /public/build
+/dist
 /public/hot
 /public/storage
 /storage/*.key

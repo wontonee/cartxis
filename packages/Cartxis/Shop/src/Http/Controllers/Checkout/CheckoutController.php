@@ -8,6 +8,7 @@ use Inertia\Inertia;
 use Inertia\Response;
 use Cartxis\Cart\Services\CartTaxCalculator;
 use Cartxis\Cart\Services\CartShippingCalculator;
+use Cartxis\Cart\Support\CartTypeHelper;
 use Cartxis\Shop\Services\CheckoutService;
 use Cartxis\Shop\Models\ShippingMethod;
 use Cartxis\Shop\Models\Order;
@@ -110,22 +111,27 @@ class CheckoutController extends Controller
         // Calculate taxes
         $taxResult = $this->taxCalculator->calculate($items, []);
 
-        // Calculate shipping options
-        $shippingResult = $this->shippingCalculator->calculate($items, []);
-
-        // Get selected shipping from session or use default
-        $selectedShippingId = Session::get('checkout.shipping_method_id');
+        $requiresShipping = CartTypeHelper::cartRequiresShipping($items);
+        $shippingResult = ['options' => [], 'default' => null];
         $selectedShipping = null;
+        $shippingCost = 0;
 
-        if ($selectedShippingId) {
-            $selectedShipping = collect($shippingResult['options'])->firstWhere('id', $selectedShippingId);
+        if ($requiresShipping) {
+            $shippingResult = $this->shippingCalculator->calculate($items, []);
+
+            $selectedShippingId = Session::get('checkout.shipping_method_id');
+
+            if ($selectedShippingId) {
+                $selectedShipping = collect($shippingResult['options'])->firstWhere('id', $selectedShippingId);
+            }
+
+            if (! $selectedShipping) {
+                $selectedShipping = $shippingResult['default'] ?? null;
+            }
+
+            $shippingCost = $selectedShipping['cost'] ?? 0;
         }
 
-        if (!$selectedShipping) {
-            $selectedShipping = $shippingResult['default'] ?? null;
-        }
-
-        $shippingCost = $selectedShipping['cost'] ?? 0;
         $couponData = Session::get('cart_coupon');
         $discountAmount = $couponData['discount_amount'] ?? 0;
         $grandTotal = $subtotal + $taxResult['total'] + $shippingCost - $discountAmount;
@@ -206,6 +212,7 @@ class CheckoutController extends Controller
                 'subtotal' => round($subtotal, 2),
                 'discount' => round($discountAmount, 2),
                 'coupon' => $couponData,
+                'requires_shipping' => $requiresShipping,
                 'taxes' => [
                     'breakdown' => $taxResult['breakdown'],
                     'total' => round($taxResult['total'], 2),
@@ -233,35 +240,61 @@ class CheckoutController extends Controller
      */
     public function store(Request $request)
     {
-        $validated = $request->validate([
+        $items = $this->getCartItems();
+
+        if (empty($items)) {
+            return back()->with('error', 'Your cart is empty');
+        }
+
+        $requiresShipping = CartTypeHelper::cartRequiresShipping($items);
+
+        $rules = [
             'email' => 'required|email',
             'phone' => 'nullable|string',
-            'shipping_address' => 'required|array',
-            'shipping_address.first_name' => 'required|string',
-            'shipping_address.last_name' => 'required|string',
-            'shipping_address.address_line1' => 'required|string',
-            'shipping_address.city' => 'required|string',
-            'shipping_address.state' => 'required|string',
-            'shipping_address.postal_code' => 'required|string',
-            'shipping_address.country' => 'required|string',
-            'shipping_address.phone' => 'required|string',
-            'shipping_method_id' => 'required|exists:shipping_methods,id',
             'payment_method' => 'required|string',
             'billing_same_as_shipping' => 'boolean',
-            'billing_address' => 'required_if:billing_same_as_shipping,false|array',
             'terms_accepted' => 'required|accepted',
             'newsletter_signup' => 'boolean',
             'order_notes' => 'nullable|string',
-            // Account creation fields
             'create_account' => 'boolean',
             'password' => 'required_if:create_account,true|nullable|string|min:8|confirmed',
             'password_confirmation' => 'required_with:password|nullable|string',
-        ]);
+        ];
+
+        if ($requiresShipping) {
+            $rules = array_merge($rules, [
+                'shipping_address' => 'required|array',
+                'shipping_address.first_name' => 'required|string',
+                'shipping_address.last_name' => 'required|string',
+                'shipping_address.address_line1' => 'required|string',
+                'shipping_address.city' => 'required|string',
+                'shipping_address.state' => 'required|string',
+                'shipping_address.postal_code' => 'required|string',
+                'shipping_address.country' => 'required|string',
+                'shipping_address.phone' => 'required|string',
+                'shipping_method_id' => 'required|exists:shipping_methods,id',
+                'billing_address' => 'required_if:billing_same_as_shipping,false|array',
+            ]);
+        } else {
+            $rules = array_merge($rules, [
+                'billing_address' => 'required|array',
+                'billing_address.first_name' => 'required|string',
+                'billing_address.last_name' => 'required|string',
+                'billing_address.address_line1' => 'nullable|string',
+                'billing_address.city' => 'nullable|string',
+                'billing_address.state' => 'nullable|string',
+                'billing_address.postal_code' => 'nullable|string',
+                'billing_address.country' => 'nullable|string',
+                'billing_address.phone' => 'nullable|string',
+            ]);
+        }
+
+        $validated = $request->validate($rules);
 
         $requireAccount = (bool) $this->settingService->get('checkout_require_account', false);
         $allowGuest = (bool) $this->settingService->get('checkout_allow_guest', true);
 
-        if ($requireAccount && !$allowGuest && !Auth::check()) {
+        if ($requireAccount && ! $allowGuest && ! Auth::check()) {
             $request->validate([
                 'create_account' => 'accepted',
                 'password' => 'required|string|min:8|confirmed',
@@ -270,29 +303,26 @@ class CheckoutController extends Controller
             ]);
         }
 
-        // Get cart items from session
-        $items = $this->getCartItems();
-
-        if (empty($items)) {
-            return back()->with('error', 'Your cart is empty');
-        }
-
         // Calculate totals
         $subtotal = collect($items)->sum(function ($item) {
             return $item['quantity'] * $item['price'];
         });
 
         $taxResult = $this->taxCalculator->calculate($items, []);
-        $shippingResult = $this->shippingCalculator->calculate($items, []);
+        $shippingCost = 0;
+        $selectedShipping = null;
 
-        $selectedShipping = collect($shippingResult['options'])
-            ->firstWhere('id', $validated['shipping_method_id']);
+        if ($requiresShipping) {
+            $shippingResult = $this->shippingCalculator->calculate($items, []);
+            $selectedShipping = collect($shippingResult['options'])
+                ->firstWhere('id', $validated['shipping_method_id']);
 
-        if (!$selectedShipping) {
-            return back()->with('error', 'Invalid shipping method');
+            if (! $selectedShipping) {
+                return back()->with('error', 'Invalid shipping method');
+            }
+
+            $shippingCost = $selectedShipping['cost'];
         }
-
-        $shippingCost = $selectedShipping['cost'];
 
         // Apply coupon discount from session
         $couponData = Session::get('cart_coupon');
@@ -300,28 +330,32 @@ class CheckoutController extends Controller
 
         $grandTotal = $subtotal + $taxResult['total'] + $shippingCost - $discountAmount;
 
+        $billingAddress = $requiresShipping
+            ? (($validated['billing_same_as_shipping'] ?? true)
+                ? $validated['shipping_address']
+                : ($validated['billing_address'] ?? $validated['shipping_address']))
+            : $validated['billing_address'];
+
         // Prepare order data
         $orderData = [
             'user_id' => Auth::id(),
             'customer_email' => $validated['email'],
-            'customer_phone' => $validated['phone'] ?? null,
+            'customer_phone' => $validated['phone'] ?? ($billingAddress['phone'] ?? null),
             'payment_method' => $validated['payment_method'],
-            'shipping_method' => $selectedShipping['name'],
-            'shipping_address' => $validated['shipping_address'],
-            'billing_address' => ($validated['billing_same_as_shipping'] ?? true)
-                ? $validated['shipping_address'] 
-                : ($validated['billing_address'] ?? $validated['shipping_address']),
-            'same_as_shipping' => $validated['billing_same_as_shipping'] ?? true,
+            'shipping_method' => $selectedShipping['name'] ?? null,
+            'shipping_address' => $requiresShipping ? $validated['shipping_address'] : null,
+            'billing_address' => $billingAddress,
+            'same_as_shipping' => $requiresShipping ? ($validated['billing_same_as_shipping'] ?? true) : false,
             'notes' => $validated['order_notes'] ?? null,
             'subtotal' => $subtotal,
             'tax' => $taxResult['total'],
             'shipping_cost' => $shippingCost,
             'discount' => round($discountAmount, 2),
             'total' => round(max(0, $grandTotal), 2),
-            // Account creation fields
             'create_account' => $validated['create_account'] ?? false,
             'password' => $validated['password'] ?? null,
             'newsletter_subscribed' => $validated['newsletter_signup'] ?? false,
+            'requires_shipping' => $requiresShipping,
         ];
 
         // Create order
@@ -423,8 +457,11 @@ class CheckoutController extends Controller
             $template = EmailTemplate::findByCode('order_placed');
             
             if ($template) {
-                $customerName = $validated['shipping_address']['first_name'] . ' ' . 
-                               $validated['shipping_address']['last_name'];
+                $customerName = trim(
+                    ($validated['shipping_address']['first_name'] ?? $validated['billing_address']['first_name'] ?? '')
+                    .' '
+                    .($validated['shipping_address']['last_name'] ?? $validated['billing_address']['last_name'] ?? '')
+                ) ?: 'Customer';
                 
                 $template->send($order->customer_email, [
                     'customer_name' => $customerName,
@@ -614,18 +651,20 @@ class CheckoutController extends Controller
     private function getCartItems(): array
     {
         $items = Session::get('cart', []);
-        
-        // Enrich items with product data if needed
+
         foreach ($items as &$item) {
-            if (!isset($item['tax_class_id']) || !isset($item['weight'])) {
+            if (! isset($item['tax_class_id']) || ! isset($item['weight']) || ! isset($item['type']) || ! array_key_exists('requires_shipping', $item)) {
                 $product = Product::find($item['product_id']);
                 if ($product) {
-                    $item['tax_class_id'] = $product->tax_class_id;
-                    $item['weight'] = $product->weight;
+                    $item['tax_class_id'] = $item['tax_class_id'] ?? $product->tax_class_id;
+                    $item['weight'] = $item['weight'] ?? $product->weight;
+                    $snapshot = CartTypeHelper::snapshotFromProduct($product);
+                    $item['type'] = $item['type'] ?? $snapshot['type'];
+                    $item['requires_shipping'] = $item['requires_shipping'] ?? $snapshot['requires_shipping'];
                 }
             }
         }
-        
+
         return $items;
     }
 }

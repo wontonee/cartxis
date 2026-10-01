@@ -23,6 +23,8 @@ class AdminMenuSyncService
 
         $marketingId = $this->parentId('marketing');
         $appearanceId = $this->parentId('appearance');
+        $settingsId = $this->parentId('settings');
+        $catalogId = $this->parentId('catalog');
 
         if ($marketingId) {
             $this->syncMarketingChildren($marketingId);
@@ -31,6 +33,14 @@ class AdminMenuSyncService
 
         if ($appearanceId) {
             $this->syncAppearanceTemplateZone($appearanceId);
+        }
+
+        if ($settingsId) {
+            $this->syncSettingsMcp($settingsId);
+        }
+
+        if ($catalogId) {
+            $this->syncCatalogQuoteRequests($catalogId);
         }
     }
 
@@ -141,5 +151,54 @@ class AdminMenuSyncService
                 'created_at' => now(),
             ]
         );
+    }
+
+    private function syncSettingsMcp(int $settingsId): void
+    {
+        DB::table('menu_items')->updateOrInsert(
+            ['key' => 'settings-mcp'],
+            [
+                'title' => 'MCP',
+                'icon' => 'cable',
+                'route' => 'admin.settings.mcp.index',
+                'url' => null,
+                'parent_id' => $settingsId,
+                'order' => 9,
+                'permission' => null,
+                'location' => 'admin',
+                'active' => true,
+                'updated_at' => now(),
+                'created_at' => now(),
+            ]
+        );
+    }
+
+    private function syncCatalogQuoteRequests(int $catalogId): void
+    {
+        DB::table('menu_items')->updateOrInsert(
+            ['key' => 'catalog-quote-requests'],
+            [
+                'title' => 'Quote Requests',
+                'icon' => 'file-text',
+                'route' => 'admin.catalog.quote-requests.index',
+                'url' => null,
+                'parent_id' => $catalogId,
+                'order' => 5,
+                'permission' => null,
+                'location' => 'admin',
+                'active' => true,
+                'updated_at' => now(),
+                'created_at' => now(),
+            ]
+        );
+
+        // Older installs had Reviews at order 5; keep it after Quote Requests.
+        DB::table('menu_items')
+            ->where('key', 'catalog-reviews')
+            ->where('location', 'admin')
+            ->update([
+                'order' => 6,
+                'updated_at' => now(),
+            ]);
     }
 }

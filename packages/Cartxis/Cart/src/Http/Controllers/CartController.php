@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\Session;
 use Cartxis\Core\Services\ThemeViewResolver;
 use Cartxis\Cart\Services\CartTaxCalculator;
 use Cartxis\Cart\Services\CartShippingCalculator;
+use Cartxis\Cart\Support\CartTypeHelper;
 use Cartxis\Product\Models\Product;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -50,25 +51,31 @@ class CartController extends Controller
         // Calculate taxes
         $taxCalculator = new CartTaxCalculator();
         $taxResult = $taxCalculator->calculate($items, $customerAddress);
-        
-        // Calculate shipping
-        $shippingCalculator = new CartShippingCalculator();
-        $shippingResult = $shippingCalculator->calculate($items, $customerAddress);
-        
-        // Get default shipping (cheapest option)
-        $selectedShipping = $shippingResult['default'] ?? null;
-        $shippingCost = $selectedShipping['cost'] ?? 0;
-        
+
+        $requiresShipping = CartTypeHelper::cartRequiresShipping($items);
+        $shippingCost = 0;
+        $shippingResult = ['options' => [], 'default' => null];
+
+        if ($requiresShipping) {
+            $shippingCalculator = new CartShippingCalculator();
+            $shippingResult = $shippingCalculator->calculate($items, $customerAddress);
+            $selectedShipping = $shippingResult['default'] ?? null;
+            $shippingCost = $selectedShipping['cost'] ?? 0;
+        } else {
+            $selectedShipping = null;
+        }
+
         // Calculate grand total
         $taxTotal = $taxResult['total'];
         $grandTotal = $subtotal + $taxTotal + $shippingCost - $discountAmount;
-        
+
         return Inertia::render($this->themeResolver->resolve('Cart/Index'), [
             'pageTitle' => 'Shopping Cart',
             'cartSummary' => [
                 'subtotal' => round($subtotal, 2),
                 'discount' => round($discountAmount, 2),
                 'coupon' => $couponData,
+                'requires_shipping' => $requiresShipping,
                 'taxes' => [
                     'breakdown' => $taxResult['breakdown'],
                     'total' => round($taxTotal, 2),
@@ -92,15 +99,18 @@ class CartController extends Controller
         
         // Enrich items with product data if needed
         foreach ($items as &$item) {
-            if (!isset($item['tax_class_id']) || !isset($item['weight'])) {
+            if (! isset($item['tax_class_id']) || ! isset($item['weight']) || ! isset($item['type']) || ! array_key_exists('requires_shipping', $item)) {
                 $product = Product::find($item['product_id']);
                 if ($product) {
-                    $item['tax_class_id'] = $product->tax_class_id;
-                    $item['weight'] = $product->weight;
+                    $item['tax_class_id'] = $item['tax_class_id'] ?? $product->tax_class_id;
+                    $item['weight'] = $item['weight'] ?? $product->weight;
+                    $snapshot = CartTypeHelper::snapshotFromProduct($product);
+                    $item['type'] = $item['type'] ?? $snapshot['type'];
+                    $item['requires_shipping'] = $item['requires_shipping'] ?? $snapshot['requires_shipping'];
                 }
             }
         }
-        
+
         return $items;
     }
     
@@ -115,25 +125,35 @@ class CartController extends Controller
         ]);
         
         $product = Product::with('mainImage')->find($request->product_id);
-        
-        if (!$product || $product->status !== 'enabled') {
+
+        if (! $product || $product->status !== 'enabled') {
             if ($request->expectsJson()) {
                 return response()->json(['message' => 'Product not available'], 400);
             }
+
             return back()->with('error', 'Product not available');
         }
-        
+
+        if (! CartTypeHelper::canAddToCart($product)) {
+            if ($request->expectsJson()) {
+                return response()->json(['message' => 'This product requires a quote request and cannot be added to the cart'], 400);
+            }
+
+            return back()->with('error', 'This product requires a quote request and cannot be added to the cart');
+        }
+
         // Check stock
-        if ($product->track_inventory && $product->quantity < $request->quantity) {
+        if (CartTypeHelper::hasInsufficientStock($product, (int) $request->quantity)) {
             if ($request->expectsJson()) {
                 return response()->json(['message' => 'Insufficient stock available'], 400);
             }
+
             return back()->with('error', 'Insufficient stock');
         }
-        
+
         // Get existing cart
         $cart = Session::get('cart', []);
-        
+
         // Check if product already in cart
         $found = false;
         foreach ($cart as &$item) {
@@ -143,9 +163,10 @@ class CartController extends Controller
                 break;
             }
         }
-        
+
         // Add new item if not found
-        if (!$found) {
+        if (! $found) {
+            $snapshot = CartTypeHelper::snapshotFromProduct($product);
             $cart[] = [
                 'id' => uniqid('cart_'),
                 'product_id' => $product->id,
@@ -157,9 +178,11 @@ class CartController extends Controller
                 'image' => $product->mainImage?->url,
                 'tax_class_id' => $product->tax_class_id,
                 'weight' => $product->weight,
+                'type' => $snapshot['type'],
+                'requires_shipping' => $snapshot['requires_shipping'],
             ];
         }
-        
+
         Session::put('cart', $cart);
         
         if ($request->expectsJson()) {

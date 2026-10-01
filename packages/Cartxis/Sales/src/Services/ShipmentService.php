@@ -86,10 +86,15 @@ class ShipmentService
 
             $shipment = Shipment::create($shipmentData);
 
-            // Create shipment items
+            // Create shipment items (physical lines only)
             foreach ($data['items'] as $item) {
                 $orderItemId = $item['order_item_id'];
                 $quantity = $item['quantity'];
+
+                $orderItem = $order->items->find($orderItemId);
+                if ($orderItem && method_exists($orderItem, 'requiresShipping') && ! $orderItem->requiresShipping()) {
+                    throw new Exception("Item #{$orderItemId} does not require shipping");
+                }
 
                 // Validate quantity
                 $remainingQty = $order->getRemainingQuantityToShip($orderItemId);
