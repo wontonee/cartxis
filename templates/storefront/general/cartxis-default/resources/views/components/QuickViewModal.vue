@@ -108,19 +108,24 @@
 
                                     <!-- Price -->
                                     <div class="flex items-baseline gap-3">
-                                        <span class="text-4xl font-bold text-gray-900">
-                                            {{ formatPrice(product.special_price || product.price) }}
+                                        <span v-if="product.type === 'quote'" class="text-3xl font-bold text-gray-900">
+                                            Price on request
                                         </span>
-                                        <span v-if="product.special_price" class="text-xl text-gray-400 line-through">
-                                            {{ formatPrice(product.price) }}
-                                        </span>
-                                        <span v-if="product.special_price" class="px-3 py-1 bg-red-100 text-red-700 text-sm font-semibold rounded-full">
-                                            Save {{ formatPrice(product.price - product.special_price) }}
-                                        </span>
+                                        <template v-else>
+                                            <span class="text-4xl font-bold text-gray-900">
+                                                {{ formatPrice(product.special_price || product.price) }}
+                                            </span>
+                                            <span v-if="product.special_price" class="text-xl text-gray-400 line-through">
+                                                {{ formatPrice(product.price) }}
+                                            </span>
+                                            <span v-if="product.special_price" class="px-3 py-1 bg-red-100 text-red-700 text-sm font-semibold rounded-full">
+                                                Save {{ formatPrice(product.price - product.special_price) }}
+                                            </span>
+                                        </template>
                                     </div>
 
                                     <!-- Stock Status -->
-                                    <div>
+                                    <div v-if="product.type !== 'quote'">
                                         <span
                                             v-if="product.in_stock"
                                             class="inline-flex items-center gap-2 px-4 py-2 bg-green-100 text-green-700 rounded-lg font-medium"
@@ -138,6 +143,11 @@
                                                 <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd" />
                                             </svg>
                                             Out of Stock
+                                        </span>
+                                    </div>
+                                    <div v-else>
+                                        <span class="inline-flex items-center gap-2 px-4 py-2 bg-amber-100 text-amber-800 rounded-lg font-medium">
+                                            Sold by quote
                                         </span>
                                     </div>
 
@@ -226,8 +236,19 @@
                                         </div>
                                     </div>
 
-                                    <!-- Quantity & Add to Cart -->
-                                    <div class="flex items-center gap-4 pt-4">
+                                    <!-- Quantity & Add to Cart / Quote CTA -->
+                                    <div v-if="product.type === 'quote'" class="pt-4 space-y-3">
+                                        <p class="text-sm text-amber-800 bg-amber-50 border border-amber-200 rounded-lg px-3 py-2">
+                                            This product is sold by quote. Open the product page to submit a request.
+                                        </p>
+                                        <a
+                                            :href="`/product/${product.slug}`"
+                                            class="w-full inline-flex items-center justify-center px-8 py-3 bg-amber-600 text-white rounded-lg font-semibold hover:bg-amber-500 transition-colors"
+                                        >
+                                            Request Quote
+                                        </a>
+                                    </div>
+                                    <div v-else class="flex items-center gap-4 pt-4">
                                         <div class="flex items-center border border-gray-300 rounded-lg overflow-hidden">
                                             <button
                                                 @click="quantity > 1 && quantity--"
@@ -270,7 +291,7 @@
                                     <!-- View Full Details Link -->
                                     <div class="pt-4 border-t border-gray-200">
                                         <a
-                                            :href="`/products/${product.slug}`"
+                                            :href="`/product/${product.slug}`"
                                             class="inline-flex items-center gap-2 text-indigo-600 hover:text-indigo-700 font-medium cursor-pointer"
                                         >
                                             View Full Details
@@ -341,6 +362,7 @@ interface Product {
     name: string;
     slug: string;
     sku: string;
+    type?: string;
     price: number;
     special_price: number | null;
     short_description: string | null;

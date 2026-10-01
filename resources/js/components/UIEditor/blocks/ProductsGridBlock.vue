@@ -45,10 +45,19 @@ const {
         <div class="p-3">
           <p class="text-sm font-medium text-gray-900 dark:text-white truncate">{{ product.name }}</p>
           <p v-if="settings.show_price" class="text-sm font-bold text-indigo-600 dark:text-indigo-400 mt-1">
-            {{ formatPrice(typeof product.price === 'string' ? parseFloat(product.price) : product.price) }}
+            {{ product.type === 'quote'
+              ? 'Price on request'
+              : formatPrice(typeof product.price === 'string' ? parseFloat(product.price) : product.price) }}
           </p>
+          <a
+            v-if="settings.show_cart && product.type === 'quote'"
+            :href="`/product/${product.slug}`"
+            class="mt-2 w-full py-3 px-4 rounded-lg font-semibold transition-all flex items-center justify-center gap-2 bg-amber-600 hover:bg-amber-500 text-white hover:shadow-lg"
+          >
+            Request Quote
+          </a>
           <button
-            v-if="settings.show_cart"
+            v-else-if="settings.show_cart"
             @click="handleAddToCart(product)"
             :disabled="addingToCart[product.id] || !!addedToCart[product.id]"
             class="mt-2 w-full py-3 px-4 rounded-lg font-semibold transition-all flex items-center justify-center gap-2"

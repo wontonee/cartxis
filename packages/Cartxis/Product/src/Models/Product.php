@@ -316,12 +316,29 @@ class Product extends Model
     }
 
     /**
-     * Scope: In stock
+     * Scope: In stock (respects manage_stock and quote products)
      */
     public function scopeInStock($query)
     {
-        return $query->where('stock_status', 'in_stock')
-            ->where('quantity', '>', 0);
+        return $query->where(function ($q) {
+            $q->where('type', self::TYPE_QUOTE)
+                ->orWhere('manage_stock', false)
+                ->orWhere(function ($inner) {
+                    $inner->where('quantity', '>', 0)
+                        ->where('stock_status', 'in_stock');
+                });
+        });
+    }
+
+    /**
+     * Scope: Visible in storefront catalog listings
+     */
+    public function scopeAvailableForCatalog($query)
+    {
+        return $query->enabled()->inStock()->where(function ($q) {
+            $q->where('type', self::TYPE_QUOTE)
+                ->orWhere('price', '>', 0);
+        });
     }
 
     /**

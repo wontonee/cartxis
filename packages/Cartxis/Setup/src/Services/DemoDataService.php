@@ -12,41 +12,97 @@ use Illuminate\Support\Facades\Log;
 class DemoDataService
 {
     /**
-     * Available business types with their demo data seeders
+     * Available catalog starters for setup.
+     *
+     * Groups:
+     * - physical: shippable retail verticals with demo seeders
+     * - digital: downloadable / virtual catalog starter
+     * - services: quote / RFQ catalog starter
+     * - blank: empty catalog (no demo seeder)
      */
     private const BUSINESS_TYPES = [
         'retail' => [
             'name' => 'Retail Store',
-            'description' => 'General retail shopping with clothing, electronics, and accessories',
+            'description' => 'General retail with clothing, electronics, and accessories',
+            'group' => 'physical',
+            'group_label' => 'Physical retail',
+            'has_demo' => true,
             'seeders' => [
-                    \Cartxis\Setup\Database\Seeders\RetailDemoSeeder::class,
+                \Cartxis\Setup\Database\Seeders\RetailDemoSeeder::class,
             ],
         ],
         'kirana' => [
-            'name' => 'Kirana/Grocery Store',
+            'name' => 'Kirana / Grocery',
             'description' => 'Grocery and daily essentials for neighborhood stores',
+            'group' => 'physical',
+            'group_label' => 'Physical retail',
+            'has_demo' => true,
             'seeders' => [
-                    \Cartxis\Setup\Database\Seeders\KiranaDemoSeeder::class,
+                \Cartxis\Setup\Database\Seeders\KiranaDemoSeeder::class,
             ],
         ],
         'electronics' => [
             'name' => 'Electronics Store',
             'description' => 'Consumer electronics, gadgets, and tech accessories',
+            'group' => 'physical',
+            'group_label' => 'Physical retail',
+            'has_demo' => true,
             'seeders' => [
-                    \Cartxis\Setup\Database\Seeders\ElectronicsDemoSeeder::class,
+                \Cartxis\Setup\Database\Seeders\ElectronicsDemoSeeder::class,
             ],
         ],
         'fashion' => [
             'name' => 'Fashion & Apparel',
             'description' => 'Clothing, shoes, and fashion accessories',
+            'group' => 'physical',
+            'group_label' => 'Physical retail',
+            'has_demo' => true,
             'seeders' => [
-                    \Cartxis\Setup\Database\Seeders\FashionDemoSeeder::class,
+                \Cartxis\Setup\Database\Seeders\FashionDemoSeeder::class,
             ],
+        ],
+        'digital' => [
+            'name' => 'Digital & Downloads',
+            'description' => 'Sell ebooks, software, courses, and other downloadable products',
+            'group' => 'digital',
+            'group_label' => 'Digital products',
+            'has_demo' => true,
+            'seeders' => [
+                \Cartxis\Setup\Database\Seeders\DigitalDemoSeeder::class,
+            ],
+        ],
+        'rfq' => [
+            'name' => 'Quote / RFQ',
+            'description' => 'B2B and custom pricing — customers request quotes instead of buying online',
+            'group' => 'services',
+            'group_label' => 'Quotes & services',
+            'has_demo' => true,
+            'seeders' => [
+                \Cartxis\Setup\Database\Seeders\QuoteDemoSeeder::class,
+            ],
+        ],
+        'blank' => [
+            'name' => 'Start Blank',
+            'description' => 'Empty catalog — add your own products, downloads, or quote items later',
+            'group' => 'blank',
+            'group_label' => 'Empty catalog',
+            'has_demo' => false,
+            'seeders' => [],
         ],
     ];
 
     /**
-     * Get all available business types
+     * Allowed business type ids (for validation).
+     *
+     * @return list<string>
+     */
+    public function allowedTypeIds(): array
+    {
+        return array_keys(self::BUSINESS_TYPES);
+    }
+
+    /**
+     * Get all available business types for the setup UI.
      */
     public function getBusinessTypes(): array
     {
@@ -55,16 +111,24 @@ class DemoDataService
                 'id' => $key,
                 'name' => $data['name'],
                 'description' => $data['description'],
+                'group' => $data['group'],
+                'group_label' => $data['group_label'],
+                'has_demo' => (bool) $data['has_demo'],
             ];
         }, array_keys(self::BUSINESS_TYPES), self::BUSINESS_TYPES);
     }
 
+    public function hasDemo(string $businessType): bool
+    {
+        return (bool) (self::BUSINESS_TYPES[$businessType]['has_demo'] ?? false);
+    }
+
     /**
-     * Import demo data for the selected business type
+     * Import demo data for the selected business type.
      */
     public function importDemoData(string $businessType, bool $importProducts = true): array
     {
-        if (!isset(self::BUSINESS_TYPES[$businessType])) {
+        if (! isset(self::BUSINESS_TYPES[$businessType])) {
             throw new \InvalidArgumentException("Invalid business type: {$businessType}");
         }
 
@@ -77,43 +141,43 @@ class DemoDataService
         try {
             DB::beginTransaction();
 
-            if ($importProducts) {
-                $config = self::BUSINESS_TYPES[$businessType];
-                
-                // Run the seeders for this business type
+            $config = self::BUSINESS_TYPES[$businessType];
+            $shouldImport = $importProducts && ! empty($config['seeders']);
+
+            if ($shouldImport) {
                 foreach ($config['seeders'] as $seederClass) {
                     Log::info("Running seeder: {$seederClass}");
-                    
-                    // Check if seeder class exists
-                    if (!class_exists($seederClass)) {
+
+                    if (! class_exists($seederClass)) {
                         throw new \Exception("Seeder class not found: {$seederClass}. Run 'composer dump-autoload' on the server.");
                     }
-                    
+
                     $exitCode = Artisan::call('db:seed', [
                         '--class' => $seederClass,
-                        '--force' => true, // Required for production
+                        '--force' => true,
                     ]);
-                    
+
                     $output = Artisan::output();
                     Log::info("Seeder output: {$output}, Exit code: {$exitCode}");
-                    
+
                     if ($exitCode !== 0) {
                         throw new \Exception("Seeder failed with exit code {$exitCode}: {$output}");
                     }
                 }
 
-                // Get import statistics
                 $results['stats'] = $this->getImportStatistics();
                 $results['message'] = "Demo data imported successfully for {$config['name']}";
 
-                // Sync storefront category menu to match imported catalog
                 $sync = app(StorefrontMenuSyncService::class);
                 $sync->fixDealsUrls();
                 $synced = $sync->syncCategoryMenuItems();
                 Log::info("Storefront category menu synced: {$synced} item(s)");
+            } else {
+                $results['message'] = $businessType === 'blank'
+                    ? 'Blank catalog selected — no sample products imported'
+                    : "Catalog type saved as {$config['name']} without sample products";
             }
 
-            // Save the selected business type in settings
             DB::table('settings')->updateOrInsert(
                 ['key' => 'business_type'],
                 [
@@ -133,15 +197,12 @@ class DemoDataService
             ]);
 
             $results['success'] = false;
-            $results['message'] = 'Failed to import demo data: ' . $e->getMessage();
+            $results['message'] = 'Failed to import demo data: '.$e->getMessage();
         }
 
         return $results;
     }
 
-    /**
-     * Get import statistics
-     */
     private function getImportStatistics(): array
     {
         return [
@@ -153,9 +214,6 @@ class DemoDataService
         ];
     }
 
-    /**
-     * Mark setup as complete
-     */
     public function markSetupComplete(): void
     {
         DB::table('settings')->updateOrInsert(

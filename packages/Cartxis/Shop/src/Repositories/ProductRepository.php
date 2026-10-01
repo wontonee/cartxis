@@ -26,9 +26,8 @@ class ProductRepository extends ShopRepository implements ProductRepositoryInter
     public function getFeaturedProducts($limit = 12)
     {
         return $this->model
+            ->availableForCatalog()
             ->where('featured', 1)
-            ->where('status', 'enabled')
-            ->where('quantity', '>', 0)
             ->with(['images', 'mainImage', 'categories'])
             ->limit($limit)
             ->get();
@@ -43,8 +42,7 @@ class ProductRepository extends ShopRepository implements ProductRepositoryInter
     public function getNewProducts($limit = 12)
     {
         return $this->model
-            ->where('status', 'enabled')
-            ->where('quantity', '>', 0)
+            ->availableForCatalog()
             ->with(['images', 'mainImage', 'categories'])
             ->orderBy('created_at', 'desc')
             ->limit($limit)
@@ -57,8 +55,7 @@ class ProductRepository extends ShopRepository implements ProductRepositoryInter
     public function getOnSaleProducts($limit = 12)
     {
         return $this->model
-            ->where('status', 'enabled')
-            ->where('quantity', '>', 0)
+            ->availableForCatalog()
             ->whereNotNull('special_price')
             ->whereColumn('special_price', '<', 'price')
             ->with(['images', 'mainImage', 'categories'])
@@ -88,8 +85,7 @@ class ProductRepository extends ShopRepository implements ProductRepositoryInter
         }
 
         $products = $this->model
-            ->where('status', 'enabled')
-            ->where('quantity', '>', 0)
+            ->availableForCatalog()
             ->with(['images', 'mainImage', 'categories'])
             ->where(function ($query) use ($ids, $slugs) {
                 if ($ids !== []) {
@@ -149,12 +145,10 @@ class ProductRepository extends ShopRepository implements ProductRepositoryInter
     public function getByCategory($categoryId, $perPage = 12)
     {
         return $this->model
+            ->availableForCatalog()
             ->whereHas('categories', function ($query) use ($categoryId) {
                 $query->where('category_id', $categoryId);
             })
-            ->where('status', 'enabled')
-            ->where('price', '>', 0)
-            ->where('quantity', '>', 0)
             ->paginate($perPage);
     }
 
@@ -168,9 +162,7 @@ class ProductRepository extends ShopRepository implements ProductRepositoryInter
     public function search($query, $perPage = 12)
     {
         return $this->model
-            ->where('status', 'enabled')
-            ->where('price', '>', 0)
-            ->where('quantity', '>', 0)
+            ->availableForCatalog()
             ->where(function ($q) use ($query) {
                 $q->where('name', 'like', "%{$query}%")
                   ->orWhere('description', 'like', "%{$query}%")
@@ -197,12 +189,11 @@ class ProductRepository extends ShopRepository implements ProductRepositoryInter
         $categoryIds = $product->categories->pluck('id')->toArray();
 
         return $this->model
+            ->availableForCatalog()
             ->whereHas('categories', function ($query) use ($categoryIds) {
                 $query->whereIn('category_id', $categoryIds);
             })
             ->where('id', '!=', $productId)
-            ->where('status', 'enabled')
-            ->where('quantity', '>', 0)
             ->inRandomOrder()
             ->limit($limit)
             ->get();

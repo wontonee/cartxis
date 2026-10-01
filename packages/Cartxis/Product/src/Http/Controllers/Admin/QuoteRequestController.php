@@ -27,9 +27,18 @@ class QuoteRequestController extends Controller
             $query->where('status', $status);
         }
 
+        $stats = [
+            'total' => QuoteRequest::query()->count(),
+            'new' => QuoteRequest::query()->where('status', 'new')->count(),
+            'reviewed' => QuoteRequest::query()->where('status', 'reviewed')->count(),
+            'quoted' => QuoteRequest::query()->where('status', 'quoted')->count(),
+            'closed' => QuoteRequest::query()->where('status', 'closed')->count(),
+        ];
+
         return Inertia::render('Admin/QuoteRequests/Index', [
             'quotes' => $query->paginate(20)->withQueryString(),
             'filters' => $request->only(['search', 'status']),
+            'stats' => $stats,
         ]);
     }
 

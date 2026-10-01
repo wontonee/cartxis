@@ -52,7 +52,11 @@ class SetupController extends Controller
      */
     public function businessSettings(Request $request): Response
     {
-        $businessType = $request->query('type', 'retail');
+        $allowed = $this->demoDataService->allowedTypeIds();
+        $businessType = (string) $request->query('type', 'blank');
+        if (! in_array($businessType, $allowed, true)) {
+            $businessType = 'blank';
+        }
 
         $countries = Country::active()->ordered()->get(['name', 'code'])->toArray();
 
@@ -90,7 +94,7 @@ class SetupController extends Controller
     public function saveBusinessSettings(Request $request)
     {
         $validated = $request->validate([
-            'business_type' => 'required|string',
+            'business_type' => 'required|string|in:'.implode(',', $this->demoDataService->allowedTypeIds()),
             'store_name' => 'required|string|max:255',
             'contact_phone' => 'nullable|string|max:50',
             'store_address' => 'nullable|string',
@@ -153,11 +157,16 @@ class SetupController extends Controller
      */
     public function demoData(Request $request): Response
     {
-        $businessType = $request->query('type', 'retail');
+        $allowed = $this->demoDataService->allowedTypeIds();
+        $businessType = (string) $request->query('type', 'blank');
+        if (! in_array($businessType, $allowed, true)) {
+            $businessType = 'blank';
+        }
 
         return Inertia::render('Setup/DemoData', [
             'businessType' => $businessType,
             'businessTypes' => $this->demoDataService->getBusinessTypes(),
+            'hasDemo' => $this->demoDataService->hasDemo($businessType),
         ]);
     }
 
@@ -167,7 +176,7 @@ class SetupController extends Controller
     public function importDemoData(Request $request)
     {
         $validated = $request->validate([
-            'business_type' => 'required|string|in:retail,kirana,electronics,fashion',
+            'business_type' => 'required|string|in:'.implode(',', $this->demoDataService->allowedTypeIds()),
             'import_products' => 'boolean',
         ]);
 

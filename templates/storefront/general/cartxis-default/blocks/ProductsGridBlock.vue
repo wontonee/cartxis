@@ -26,7 +26,7 @@ function mapProduct(product: GridProduct) {
         name: product.name,
         slug: product.slug,
         sku: '',
-        type: 'simple',
+        type: product.type ?? 'simple',
         price: product.price,
         special_price: null,
         image: product.thumbnail,
