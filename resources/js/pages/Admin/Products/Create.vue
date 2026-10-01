@@ -447,12 +447,14 @@ const saveDraft = () => {
                     <option value="configurable">Configurable Product (Variants)</option>
                     <option value="virtual">Virtual Product (No Shipping)</option>
                     <option value="downloadable">Downloadable Product (Digital)</option>
+                    <option value="quote">Quote / RFQ Product</option>
                   </select>
                   <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">
                     <span v-if="form.type === 'simple'">Physical product with no variants</span>
                     <span v-else-if="form.type === 'configurable'">Product with options like size, color, etc.</span>
                     <span v-else-if="form.type === 'virtual'">Non-physical product (no shipping required)</span>
                     <span v-else-if="form.type === 'downloadable'">Digital file product with download links</span>
+                    <span v-else-if="form.type === 'quote'">Customers request a quote instead of buying</span>
                   </p>
                   <p v-if="errors?.type" class="mt-1 text-sm text-red-600">{{ errors.type }}</p>
                 </div>
@@ -815,18 +817,11 @@ const saveDraft = () => {
                   <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Any file type up to 50MB</p>
                 </div>
 
-                <div class="bg-yellow-50 dark:bg-yellow-900/30 border border-yellow-200 dark:border-yellow-800 rounded-md p-4">
-                  <div class="flex">
-                    <svg class="h-5 w-5 text-yellow-400 dark:text-yellow-500 mr-3 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-                    </svg>
-                    <div>
-                      <p class="text-sm text-yellow-800 dark:text-yellow-200 font-medium">File Management Coming Soon</p>
-                      <p class="text-sm text-yellow-700 dark:text-yellow-300 mt-1">
-                        Downloadable file upload and management will be available in the next update. For now, you can create the product and add files later.
-                      </p>
-                    </div>
-                  </div>
+                <div class="bg-blue-50 dark:bg-blue-900/30 border border-blue-200 dark:border-blue-800 rounded-md p-4">
+                  <p class="text-sm text-blue-800 dark:text-blue-200 font-medium">Upload files after saving</p>
+                  <p class="text-sm text-blue-700 dark:text-blue-300 mt-1">
+                    Create the downloadable product first, then open it for editing to upload digital files.
+                  </p>
                 </div>
               </div>
             </div>

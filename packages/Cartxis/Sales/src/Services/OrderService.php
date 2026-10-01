@@ -501,7 +501,7 @@ class OrderService
     protected function reduceStock(Order $order): void
     {
         foreach ($order->items as $item) {
-            if ($item->product) {
+            if ($item->product && $item->product->manage_stock) {
                 $item->product->decrement('quantity', $item->quantity);
             }
         }
@@ -516,7 +516,7 @@ class OrderService
     protected function restoreStock(Order $order): void
     {
         foreach ($order->items as $item) {
-            if ($item->product) {
+            if ($item->product && $item->product->manage_stock) {
                 $item->product->increment('quantity', $item->quantity);
             }
         }

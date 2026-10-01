@@ -272,9 +272,40 @@ class Order extends Model
      */
     public function canBeShipped(): bool
     {
-        return $this->isPaid() && 
-               !$this->isCancelled() && 
-               !$this->isFullyShipped();
+        if (! $this->isPaid() || $this->isCancelled()) {
+            return false;
+        }
+
+        $shippableQty = $this->shippableItems()->sum('quantity');
+
+        return $shippableQty > 0 && ! $this->isFullyShipped();
+    }
+
+    /**
+     * Order items that require physical shipping.
+     */
+    public function shippableItems()
+    {
+        return $this->items->filter(function ($item) {
+            if ($item->requires_shipping !== null) {
+                return (bool) $item->requires_shipping;
+            }
+
+            return in_array($item->product_type, ['simple', 'configurable'], true)
+                || ($item->product_type === null && $item->product?->requiresShipping());
+        });
+    }
+
+    /**
+     * Whether the order contains only digital (non-shippable) items.
+     */
+    public function isDigitalOnly(): bool
+    {
+        if ($this->items->isEmpty()) {
+            return false;
+        }
+
+        return $this->shippableItems()->isEmpty();
     }
 
     /**
@@ -284,18 +315,20 @@ class Order extends Model
      */
     public function isFullyShipped(): bool
     {
-        // Get total quantity ordered
-        $orderedQuantity = $this->items->sum('quantity');
-        
-        // Get total quantity shipped
+        $orderedQuantity = $this->shippableItems()->sum('quantity');
+
+        if ($orderedQuantity <= 0) {
+            return true;
+        }
+
         $shippedQuantity = 0;
         foreach ($this->shipments as $shipment) {
-            if (!in_array($shipment->status, ['cancelled', 'failed'])) {
+            if (! in_array($shipment->status, ['cancelled', 'failed'], true)) {
                 $shippedQuantity += $shipment->shipmentItems->sum('quantity');
             }
         }
-        
-        return $orderedQuantity > 0 && $shippedQuantity >= $orderedQuantity;
+
+        return $shippedQuantity >= $orderedQuantity;
     }
 
     /**
@@ -326,26 +359,34 @@ class Order extends Model
     public function getRemainingQuantityToShip(int $orderItemId): int
     {
         $orderItem = $this->items->find($orderItemId);
-        if (!$orderItem) {
+        if (! $orderItem) {
             return 0;
         }
-        
+
+        if (method_exists($orderItem, 'requiresShipping') && ! $orderItem->requiresShipping()) {
+            return 0;
+        }
+
+        if ($orderItem->requires_shipping === false) {
+            return 0;
+        }
+
         $orderedQuantity = $orderItem->quantity;
-        
+
         // Calculate shipped quantity from all valid shipments
         $shippedQuantity = 0;
         foreach ($this->shipments as $shipment) {
-            if (!in_array($shipment->status, ['cancelled', 'failed'])) {
+            if (! in_array($shipment->status, ['cancelled', 'failed'], true)) {
                 $shipmentItem = $shipment->shipmentItems
                     ->where('order_item_id', $orderItemId)
                     ->first();
-                    
+
                 if ($shipmentItem) {
                     $shippedQuantity += $shipmentItem->quantity;
                 }
             }
         }
-        
+
         return max(0, $orderedQuantity - $shippedQuantity);
     }
 

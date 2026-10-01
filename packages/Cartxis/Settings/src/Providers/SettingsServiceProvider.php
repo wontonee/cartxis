@@ -2,6 +2,7 @@
 
 namespace Cartxis\Settings\Providers;
 
+use Cartxis\Settings\Mcp\McpToolRegistry;
 use Illuminate\Support\ServiceProvider;
 
 class SettingsServiceProvider extends ServiceProvider
@@ -11,7 +12,7 @@ class SettingsServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        //
+        $this->app->singleton(McpToolRegistry::class);
     }
 
     /**
@@ -19,7 +20,7 @@ class SettingsServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        // Load routes
-        $this->loadRoutesFrom(__DIR__ . '/../Routes/admin.php');
+        $this->loadRoutesFrom(__DIR__.'/../Routes/admin.php');
+        $this->loadRoutesFrom(__DIR__.'/../Routes/mcp.php');
     }
 }

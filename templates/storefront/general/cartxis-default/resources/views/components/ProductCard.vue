@@ -60,7 +60,9 @@ const displayPrice = computed(() => {
     return typeof price === 'string' ? parseFloat(price) : price;
 });
 
-const hasDiscount = computed(() => props.product.special_price !== null);
+const isQuoteProduct = computed(() => props.product.type === 'quote');
+
+const hasDiscount = computed(() => !isQuoteProduct.value && props.product.special_price !== null);
 
 const discountPercentage = computed(() => {
     if (!hasDiscount.value) return 0;
@@ -74,6 +76,10 @@ const discountPercentage = computed(() => {
 const showRatings = computed(() => !props.compact || props.product.reviews_count > 0);
 
 const handleAddToCart = async () => {
+    if (isQuoteProduct.value) {
+        return;
+    }
+
     if (props.product.has_configurable_attributes) {
         emit('quickView', props.product.slug);
         return;
@@ -139,14 +145,15 @@ const handleWishlistToggle = async () => {
                     </span>
 
                     <span
-                        v-if="product.type && (product.type === 'virtual' || product.type === 'downloadable')"
+                        v-if="product.type && (product.type === 'virtual' || product.type === 'downloadable' || product.type === 'quote')"
                         class="px-3 py-1 text-xs font-medium rounded-full inline-flex items-center"
                         :class="{
                             'bg-blue-500 text-white': product.type === 'virtual',
                             'bg-cyan-500 text-white': product.type === 'downloadable',
+                            'bg-amber-500 text-white': product.type === 'quote',
                         }"
                     >
-                        {{ product.type === 'downloadable' ? 'Digital' : 'Virtual' }}
+                        {{ product.type === 'downloadable' ? 'Digital' : product.type === 'quote' ? 'Quote' : 'Virtual' }}
                     </span>
                 </div>
 
@@ -210,16 +217,29 @@ const handleWishlistToggle = async () => {
 
             <div class="mb-3">
                 <div class="flex items-baseline gap-2">
-                    <span class="text-2xl font-bold text-gray-900">
-                        {{ formatPrice(displayPrice) }}
+                    <span v-if="isQuoteProduct" class="text-xl font-bold text-gray-900">
+                        Price on request
                     </span>
-                    <span v-if="hasDiscount" class="text-sm text-gray-500 line-through">
-                        {{ formatPrice(typeof product.price === 'string' ? parseFloat(product.price) : product.price) }}
-                    </span>
+                    <template v-else>
+                        <span class="text-2xl font-bold text-gray-900">
+                            {{ formatPrice(displayPrice) }}
+                        </span>
+                        <span v-if="hasDiscount" class="text-sm text-gray-500 line-through">
+                            {{ formatPrice(typeof product.price === 'string' ? parseFloat(product.price) : product.price) }}
+                        </span>
+                    </template>
                 </div>
             </div>
 
+            <Link
+                v-if="isQuoteProduct"
+                :href="`/product/${product.slug}`"
+                class="w-full py-3 px-4 rounded-lg font-semibold transition-all flex items-center justify-center gap-2 cursor-pointer text-white hover:shadow-lg bg-amber-600 hover:bg-amber-500"
+            >
+                Request Quote
+            </Link>
             <button
+                v-else
                 @click="handleAddToCart"
                 :disabled="!product.in_stock || addingToCart"
                 class="w-full py-3 px-4 rounded-lg font-semibold transition-all disabled:cursor-not-allowed flex items-center justify-center gap-2 cursor-pointer text-white hover:shadow-lg"

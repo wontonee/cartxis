@@ -16,7 +16,7 @@ class ThemePathResolver
 
     public function storefrontRoot(): string
     {
-        return $this->catalogRoot() . DIRECTORY_SEPARATOR . 'storefront';
+        return $this->catalogRoot().DIRECTORY_SEPARATOR.'storefront';
     }
 
     /**
@@ -26,7 +26,7 @@ class ThemePathResolver
     public function resolve(string $slug, ?string $category = null): ?string
     {
         if ($category !== null && $category !== '') {
-            $direct = $this->storefrontRoot() . DIRECTORY_SEPARATOR . $category . DIRECTORY_SEPARATOR . $slug;
+            $direct = $this->storefrontRoot().DIRECTORY_SEPARATOR.$category.DIRECTORY_SEPARATOR.$slug;
 
             if ($this->isValidPackage($direct)) {
                 return $direct;
@@ -36,7 +36,7 @@ class ThemePathResolver
         $theme = Theme::query()->where('slug', $slug)->value('category');
 
         if (is_string($theme) && $theme !== '') {
-            $fromDb = $this->storefrontRoot() . DIRECTORY_SEPARATOR . $theme . DIRECTORY_SEPARATOR . $slug;
+            $fromDb = $this->storefrontRoot().DIRECTORY_SEPARATOR.$theme.DIRECTORY_SEPARATOR.$slug;
 
             if ($this->isValidPackage($fromDb)) {
                 return $fromDb;
@@ -48,7 +48,11 @@ class ThemePathResolver
         }
 
         foreach (File::directories($this->storefrontRoot()) as $categoryPath) {
-            $candidate = $categoryPath . DIRECTORY_SEPARATOR . $slug;
+            if (in_array(basename($categoryPath), ['__MACOSX', '.git'], true)) {
+                continue;
+            }
+
+            $candidate = $categoryPath.DIRECTORY_SEPARATOR.$slug;
 
             if ($this->isValidPackage($candidate)) {
                 return $candidate;
@@ -63,7 +67,12 @@ class ThemePathResolver
         $path = $this->resolve($slug, $category);
 
         if ($path === null) {
-            throw new \RuntimeException("Storefront template '{$slug}' was not found under templates/storefront/.");
+            throw new \RuntimeException(
+                "Storefront template '{$slug}' was not found under templates/storefront/. "
+                .'Install it from Admin → Appearance → Browse Themes, run '
+                ."`php artisan template:install {$slug}`, or activate another theme with "
+                .'`php artisan theme:activate cartxis-default`.'
+            );
         }
 
         return $path;
@@ -76,7 +85,11 @@ class ThemePathResolver
         }
 
         foreach (File::directories($this->storefrontRoot()) as $categoryPath) {
-            $candidate = $categoryPath . DIRECTORY_SEPARATOR . $slug;
+            if (in_array(basename($categoryPath), ['__MACOSX', '.git'], true)) {
+                continue;
+            }
+
+            $candidate = $categoryPath.DIRECTORY_SEPARATOR.$slug;
 
             if ($this->isValidPackage($candidate)) {
                 return basename($categoryPath);
@@ -88,7 +101,7 @@ class ThemePathResolver
 
     public function installPath(string $category, string $slug): string
     {
-        return $this->storefrontRoot() . DIRECTORY_SEPARATOR . $category . DIRECTORY_SEPARATOR . $slug;
+        return $this->storefrontRoot().DIRECTORY_SEPARATOR.$category.DIRECTORY_SEPARATOR.$slug;
     }
 
     public function isInstalled(string $slug, ?string $category = null): bool
@@ -98,14 +111,14 @@ class ThemePathResolver
 
     public function publicPath(string $slug): string
     {
-        return public_path('templates/' . $slug);
+        return public_path('templates/'.$slug);
     }
 
     public function publicAssetUrl(string $slug, string $path = ''): string
     {
-        $suffix = $path !== '' ? '/' . ltrim($path, '/') : '';
+        $suffix = $path !== '' ? '/'.ltrim($path, '/') : '';
 
-        return asset('templates/' . $slug . $suffix);
+        return asset('templates/'.$slug.$suffix);
     }
 
     public function inertiaComponentPath(string $slug, string $view): string
@@ -116,17 +129,17 @@ class ThemePathResolver
     public function pageViewPath(string $slug, string $view, ?string $category = null): string
     {
         return $this->resolveOrFail($slug, $category)
-            . '/resources/views/pages/'
-            . $view
-            . '.vue';
+            .'/resources/views/pages/'
+            .$view
+            .'.vue';
     }
 
     public function isValidPackage(string $path): bool
     {
         return is_dir($path)
-            && file_exists($path . '/theme.json')
-            && is_dir($path . '/resources/views/pages')
-            && is_dir($path . '/resources/views/components')
-            && is_dir($path . '/resources/views/layouts');
+            && file_exists($path.'/theme.json')
+            && is_dir($path.'/resources/views/pages')
+            && is_dir($path.'/resources/views/components')
+            && is_dir($path.'/resources/views/layouts');
     }
 }

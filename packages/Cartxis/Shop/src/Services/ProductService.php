@@ -121,9 +121,7 @@ class ProductService extends ShopService
         try {
             // Use the Product model directly to start the query
             $query = \Cartxis\Product\Models\Product::query()
-                ->where('status', 'enabled')
-                ->where('price', '>', 0)
-                ->where('quantity', '>', 0);
+                ->availableForCatalog();
 
             // Filter by category
             if (!empty($filters['category'])) {
@@ -160,8 +158,7 @@ class ProductService extends ShopService
 
             // Filter by stock
             if (!empty($filters['in_stock'])) {
-                $query->where('quantity', '>', 0)
-                      ->where('stock_status', 'in_stock');
+                $query->inStock();
             }
 
             // Filter by on-sale (special_price set and lower than regular price)

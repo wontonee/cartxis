@@ -17,6 +17,7 @@ use Cartxis\Core\Models\PaymentMethod;
 use Cartxis\Core\Models\Currency;
 use Cartxis\Core\Services\PaymentGatewayManager;
 use Cartxis\Cart\Services\CartShippingCalculator;
+use Cartxis\Cart\Support\CartTypeHelper;
 use Cartxis\Core\Models\EmailTemplate;
 use Illuminate\Support\Facades\DB;
 use Stripe\Stripe;
@@ -491,20 +492,36 @@ class CheckoutController extends Controller
             return ApiResponse::error('No payment methods available', null, 400, 'NO_PAYMENT_METHODS');
         }
 
-        $validator = Validator::make($request->all(), [
-            'shipping_address_id' => 'required|exists:customer_addresses,id',
-            'payment_method' => 'required|string|in:' . implode(',', $availablePaymentMethods),
-            'notes' => 'nullable|string|max:500',
-        ]);
-
-        if ($validator->fails()) {
-            return ApiResponse::validationError($validator);
-        }
-
         $cart = Cart::with(['items.product'])->where('user_id', $request->user()->id)->first();
 
         if (!$cart || $cart->items->isEmpty()) {
             return ApiResponse::error('Cart is empty', null, 400, 'CART_EMPTY');
+        }
+
+        $cartTypeItems = $cart->items->map(function ($item) {
+            $product = $item->product;
+            return [
+                'type' => $product?->type ?? 'simple',
+                'requires_shipping' => $product?->requiresShipping() ?? true,
+            ];
+        })->toArray();
+
+        $requiresShipping = CartTypeHelper::cartRequiresShipping($cartTypeItems);
+
+        $rules = [
+            'payment_method' => 'required|string|in:' . implode(',', $availablePaymentMethods),
+            'notes' => 'nullable|string|max:500',
+            'billing_address_id' => 'nullable|exists:customer_addresses,id',
+        ];
+
+        if ($requiresShipping) {
+            $rules['shipping_address_id'] = 'required|exists:customer_addresses,id';
+        }
+
+        $validator = Validator::make($request->all(), $rules);
+
+        if ($validator->fails()) {
+            return ApiResponse::validationError($validator);
         }
 
         // Get customer for this user
@@ -514,30 +531,43 @@ class CheckoutController extends Controller
             return ApiResponse::error('Customer profile not found', null, 400, 'CUSTOMER_NOT_FOUND');
         }
 
-        // Verify shipping address belongs to customer
-        $shippingAddress = CustomerAddress::where('id', $request->shipping_address_id)
-            ->where('customer_id', $customer->id)
-            ->first();
-            
-        if (!$shippingAddress) {
-            return ApiResponse::error('Invalid shipping address', null, 400, 'INVALID_ADDRESS');
+        $shippingAddress = null;
+        if ($requiresShipping) {
+            $shippingAddress = CustomerAddress::where('id', $request->shipping_address_id)
+                ->where('customer_id', $customer->id)
+                ->first();
+
+            if (!$shippingAddress) {
+                return ApiResponse::error('Invalid shipping address', null, 400, 'INVALID_ADDRESS');
+            }
         }
+
+        $billingAddress = null;
+        if ($request->billing_address_id) {
+            $billingAddress = CustomerAddress::where('id', $request->billing_address_id)
+                ->where('customer_id', $customer->id)
+                ->first();
+        }
+        $billingAddress = $billingAddress ?: $shippingAddress;
 
         // Calculate totals
         $subtotal = $cart->items->sum(function ($item) {
             return $item->price * $item->quantity;
         });
 
-        $cartItemsArray = $cart->items->map(fn($i) => ['price' => $i->price, 'quantity' => $i->quantity])->toArray();
-        $shippingOption = app(CartShippingCalculator::class)->getCheapestOption($cartItemsArray, [
-            'country' => $shippingAddress->country,
-            'state'   => $shippingAddress->state,
-        ]);
-        $shippingCost = $shippingOption['cost'] ?? 0.00;
-        $tax = 0.00; // Tax calculated by TaxService at order review
+        $shippingCost = 0.00;
+        if ($requiresShipping && $shippingAddress) {
+            $cartItemsArray = $cart->items->map(fn($i) => ['price' => $i->price, 'quantity' => $i->quantity])->toArray();
+            $shippingOption = app(CartShippingCalculator::class)->getCheapestOption($cartItemsArray, [
+                'country' => $shippingAddress->country,
+                'state'   => $shippingAddress->state,
+            ]);
+            $shippingCost = $shippingOption['cost'] ?? 0.00;
+        }
+        $tax = 0.00;
         $total = $subtotal + $shippingCost + $tax;
 
-        $order = DB::transaction(function () use ($request, $cart, $customer, $shippingAddress, $subtotal, $shippingCost, $tax, $total) {
+        $order = DB::transaction(function () use ($request, $cart, $customer, $shippingAddress, $billingAddress, $subtotal, $shippingCost, $tax, $total, $requiresShipping) {
             $order = Order::create([
                 'user_id' => $request->user()->id,
                 'customer_id' => $customer->id,
@@ -550,7 +580,7 @@ class CheckoutController extends Controller
                 'total' => $total,
                 'notes' => $request->notes,
                 'customer_email' => $customer->email ?? $request->user()->email,
-                'customer_phone' => $shippingAddress->phone ?? null,
+                'customer_phone' => $shippingAddress->phone ?? $billingAddress->phone ?? $customer->phone ?? null,
                 'source_channel' => 'mobile_app',
             ]);
 
@@ -563,6 +593,8 @@ class CheckoutController extends Controller
                     'product_sku' => $product?->sku ?? '',
                     'product_name' => $product?->name ?? $cartItem->product_name ?? 'Product',
                     'product_image' => $product?->mainImage?->url ?? null,
+                    'product_type' => $product?->type ?? 'simple',
+                    'requires_shipping' => $product?->requiresShipping() ?? true,
                     'quantity' => $cartItem->quantity,
                     'price' => $cartItem->price,
                     'total' => $cartItem->price * $cartItem->quantity,
@@ -571,43 +603,46 @@ class CheckoutController extends Controller
                 ]);
             }
 
-            // Create polymorphic shipping address for the order
-            Address::create([
-                'addressable_type' => Order::class,
-                'addressable_id' => $order->id,
-                'type' => Address::TYPE_SHIPPING,
-                'first_name' => $shippingAddress->first_name,
-                'last_name' => $shippingAddress->last_name,
-                'company' => $shippingAddress->company ?? null,
-                'phone' => $shippingAddress->phone,
-                'email' => $customer->email ?? $request->user()->email,
-                'address_line1' => $shippingAddress->address_line_1,
-                'address_line2' => $shippingAddress->address_line_2 ?? null,
-                'city' => $shippingAddress->city,
-                'state' => $shippingAddress->state,
-                'postal_code' => $shippingAddress->postal_code,
-                'country' => $shippingAddress->country,
-                'is_default' => true,
-            ]);
+            if ($requiresShipping && $shippingAddress) {
+                Address::create([
+                    'addressable_type' => Order::class,
+                    'addressable_id' => $order->id,
+                    'type' => Address::TYPE_SHIPPING,
+                    'first_name' => $shippingAddress->first_name,
+                    'last_name' => $shippingAddress->last_name,
+                    'company' => $shippingAddress->company ?? null,
+                    'phone' => $shippingAddress->phone,
+                    'email' => $customer->email ?? $request->user()->email,
+                    'address_line1' => $shippingAddress->address_line_1,
+                    'address_line2' => $shippingAddress->address_line_2 ?? null,
+                    'city' => $shippingAddress->city,
+                    'state' => $shippingAddress->state,
+                    'postal_code' => $shippingAddress->postal_code,
+                    'country' => $shippingAddress->country,
+                    'is_default' => true,
+                ]);
+            }
 
-            // Use shipping address as billing address
-            Address::create([
-                'addressable_type' => Order::class,
-                'addressable_id' => $order->id,
-                'type' => Address::TYPE_BILLING,
-                'first_name' => $shippingAddress->first_name,
-                'last_name' => $shippingAddress->last_name,
-                'company' => $shippingAddress->company ?? null,
-                'phone' => $shippingAddress->phone,
-                'email' => $customer->email ?? $request->user()->email,
-                'address_line1' => $shippingAddress->address_line_1,
-                'address_line2' => $shippingAddress->address_line_2 ?? null,
-                'city' => $shippingAddress->city,
-                'state' => $shippingAddress->state,
-                'postal_code' => $shippingAddress->postal_code,
-                'country' => $shippingAddress->country,
-                'is_default' => true,
-            ]);
+            $billFrom = $billingAddress ?: $shippingAddress;
+            if ($billFrom) {
+                Address::create([
+                    'addressable_type' => Order::class,
+                    'addressable_id' => $order->id,
+                    'type' => Address::TYPE_BILLING,
+                    'first_name' => $billFrom->first_name,
+                    'last_name' => $billFrom->last_name,
+                    'company' => $billFrom->company ?? null,
+                    'phone' => $billFrom->phone,
+                    'email' => $customer->email ?? $request->user()->email,
+                    'address_line1' => $billFrom->address_line_1,
+                    'address_line2' => $billFrom->address_line_2 ?? null,
+                    'city' => $billFrom->city,
+                    'state' => $billFrom->state,
+                    'postal_code' => $billFrom->postal_code,
+                    'country' => $billFrom->country,
+                    'is_default' => true,
+                ]);
+            }
 
             // Clear cart
             $cart->items()->delete();
@@ -616,7 +651,8 @@ class CheckoutController extends Controller
             try {
                 $template = EmailTemplate::findByCode('order_placed');
                 if ($template) {
-                    $customerName = $shippingAddress->first_name . ' ' . $shippingAddress->last_name;
+                    $customerName = trim(($billFrom->first_name ?? '').' '.($billFrom->last_name ?? ''))
+                        ?: ($customer->first_name ?? 'Customer');
                     $template->send($order->customer_email, [
                         'customer_name' => $customerName,
                         'order_number'  => $order->order_number,

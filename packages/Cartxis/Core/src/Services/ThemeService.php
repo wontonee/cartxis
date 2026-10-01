@@ -157,6 +157,42 @@ class ThemeService
         return Theme::active();
     }
 
+    /**
+     * If the active theme has no files on disk, fall back to the default bundled theme.
+     */
+    public function reconcileActiveTheme(): ?Theme
+    {
+        $active = Theme::active();
+
+        if ($active === null) {
+            return null;
+        }
+
+        if ($active->exists()) {
+            return $active;
+        }
+
+        $defaultSlug = (string) config('theme.default', 'cartxis-default');
+
+        logger()->warning('Active theme files missing on disk; falling back to default theme.', [
+            'missing_slug' => $active->slug,
+            'missing_category' => $active->category,
+            'fallback' => $defaultSlug,
+        ]);
+
+        Theme::query()->update(['is_active' => false]);
+
+        $default = Theme::where('slug', $defaultSlug)->first();
+
+        if ($default !== null && $default->exists()) {
+            $default->activate();
+
+            return $default->fresh();
+        }
+
+        return null;
+    }
+
     public function activate(string $slug): bool
     {
         $theme = Theme::where('slug', $slug)->first();

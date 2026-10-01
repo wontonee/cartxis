@@ -33,6 +33,9 @@ Route::group([
     Route::get('/products', [Cartxis\Shop\Http\Controllers\ProductController::class, 'index'])->name('shop.products.index');
     Route::get('/products/{slug}/quick-view', [Cartxis\Shop\Http\Controllers\ProductController::class, 'quickView'])->name('shop.products.quick-view');
     Route::get('/product/{slug}', [Cartxis\Shop\Http\Controllers\ProductController::class, 'show'])->name('shop.products.show');
+    Route::post('/product/{slug}/quote', [Cartxis\Shop\Http\Controllers\QuoteRequestController::class, 'store'])
+        ->middleware('throttle:10,1')
+        ->name('shop.products.quote');
 
     /*
     |--------------------------------------------------------------------------
@@ -83,6 +86,8 @@ Route::group([
         Route::post('/wishlist/item/{id}/move-to-cart', [Cartxis\Shop\Http\Controllers\Account\WishlistController::class, 'moveToCart'])->name('wishlist.move-to-cart');
         Route::post('/wishlist/{product}', [Cartxis\Shop\Http\Controllers\Account\WishlistController::class, 'toggle'])->name('wishlist.toggle');
         Route::delete('/wishlist/{product}', [Cartxis\Shop\Http\Controllers\Account\WishlistController::class, 'destroy'])->name('wishlist.destroy');
+        Route::get('/downloads', [Cartxis\Shop\Http\Controllers\Account\DownloadController::class, 'index'])->name('downloads.index');
+        Route::get('/downloads/{token}', [Cartxis\Shop\Http\Controllers\Account\DownloadController::class, 'download'])->name('downloads.file');
         Route::get('/profile', [Cartxis\Shop\Http\Controllers\Account\ProfileController::class, 'show'])->name('profile.show');
         Route::put('/profile', [Cartxis\Shop\Http\Controllers\Account\ProfileController::class, 'update'])->name('profile.update');
         Route::put('/password', [Cartxis\Shop\Http\Controllers\Account\ProfileController::class, 'updatePassword'])->name('password.update');

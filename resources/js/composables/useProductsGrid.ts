@@ -7,6 +7,7 @@ export interface GridProduct {
     id: number
     name: string
     slug: string
+    type?: string
     price: number
     thumbnail: string | null
     formatted_price?: string

@@ -37,7 +37,7 @@ Route::group([
         $currency = Currency::getDefault();
         $symbol   = $currency?->symbol ?? '₹';
         $decimals = $currency?->decimal_places ?? 2;
-        $products = Product::select(['id', 'name', 'slug', 'price', 'main_image_id'])
+        $products = Product::select(['id', 'name', 'slug', 'price', 'type', 'main_image_id'])
             ->with('mainImage:id,path,thumbnail_path')
             ->where('status', 'enabled')
             ->whereIn('id', $ids)
@@ -46,9 +46,12 @@ Route::group([
                 'id'              => $p->id,
                 'name'            => $p->name,
                 'slug'            => $p->slug,
+                'type'            => $p->type,
                 'price'           => (float) $p->price,
                 'thumbnail'       => $p->mainImage ? (filter_var($p->mainImage->thumbnail_path ?? $p->mainImage->path, FILTER_VALIDATE_URL) ? ($p->mainImage->thumbnail_path ?? $p->mainImage->path) : asset('storage/' . ($p->mainImage->thumbnail_path ?? $p->mainImage->path))) : null,
-                'formatted_price' => $symbol . number_format((float) $p->price, $decimals),
+                'formatted_price' => $p->type === 'quote'
+                    ? 'Price on request'
+                    : $symbol . number_format((float) $p->price, $decimals),
             ]);
         return response()->json(['data' => $products]);
     })->name('products.by-ids');
@@ -59,7 +62,7 @@ Route::group([
         $currency = Currency::getDefault();
         $symbol   = $currency?->symbol ?? '₹';
         $decimals = $currency?->decimal_places ?? 2;
-        $products = Product::select(['id', 'name', 'slug', 'price', 'main_image_id'])
+        $products = Product::select(['id', 'name', 'slug', 'price', 'type', 'main_image_id'])
             ->with('mainImage:id,path,thumbnail_path')
             ->where('status', 'enabled')
             ->where('featured', true)
@@ -70,9 +73,12 @@ Route::group([
                 'id'              => $p->id,
                 'name'            => $p->name,
                 'slug'            => $p->slug,
+                'type'            => $p->type,
                 'price'           => (float) $p->price,
                 'thumbnail'       => $p->mainImage ? (filter_var($p->mainImage->thumbnail_path ?? $p->mainImage->path, FILTER_VALIDATE_URL) ? ($p->mainImage->thumbnail_path ?? $p->mainImage->path) : asset('storage/' . ($p->mainImage->thumbnail_path ?? $p->mainImage->path))) : null,
-                'formatted_price' => $symbol . number_format((float) $p->price, $decimals),
+                'formatted_price' => $p->type === 'quote'
+                    ? 'Price on request'
+                    : $symbol . number_format((float) $p->price, $decimals),
             ]);
         return response()->json(['data' => $products]);
     })->name('products.featured');
@@ -83,7 +89,7 @@ Route::group([
         $currency = Currency::getDefault();
         $symbol   = $currency?->symbol ?? '₹';
         $decimals = $currency?->decimal_places ?? 2;
-        $products = Product::select(['id', 'name', 'slug', 'price', 'main_image_id'])
+        $products = Product::select(['id', 'name', 'slug', 'price', 'type', 'main_image_id'])
             ->with('mainImage:id,path,thumbnail_path')
             ->where('status', 'enabled')
             ->latest()
@@ -93,9 +99,12 @@ Route::group([
                 'id'              => $p->id,
                 'name'            => $p->name,
                 'slug'            => $p->slug,
+                'type'            => $p->type,
                 'price'           => (float) $p->price,
                 'thumbnail'       => $p->mainImage ? (filter_var($p->mainImage->thumbnail_path ?? $p->mainImage->path, FILTER_VALIDATE_URL) ? ($p->mainImage->thumbnail_path ?? $p->mainImage->path) : asset('storage/' . ($p->mainImage->thumbnail_path ?? $p->mainImage->path))) : null,
-                'formatted_price' => $symbol . number_format((float) $p->price, $decimals),
+                'formatted_price' => $p->type === 'quote'
+                    ? 'Price on request'
+                    : $symbol . number_format((float) $p->price, $decimals),
             ]);
         return response()->json(['data' => $products]);
     })->name('products.latest');

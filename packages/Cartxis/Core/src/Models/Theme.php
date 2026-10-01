@@ -75,7 +75,15 @@ class Theme extends Model
      */
     public function getPath(): string
     {
-        return app(ThemePathResolver::class)->resolveOrFail($this->slug, $this->category);
+        $resolver = app(ThemePathResolver::class);
+
+        $path = $resolver->resolve($this->slug);
+
+        if ($path !== null) {
+            return $path;
+        }
+
+        return $resolver->resolveOrFail($this->slug);
     }
 
     /**
@@ -91,8 +99,8 @@ class Theme extends Model
      */
     public function getConfig(): array
     {
-        $configPath = $this->getPath() . '/theme.json';
-        
+        $configPath = $this->getPath().'/theme.json';
+
         if (file_exists($configPath)) {
             return json_decode(file_get_contents($configPath), true) ?? [];
         }

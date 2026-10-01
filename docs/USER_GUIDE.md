@@ -51,7 +51,8 @@
     - [Tax Rules](#117-tax-rules)
     - [Email Settings](#118-email-settings)
     - [AI Settings](#119-ai-settings)
-    - [Appearance & Themes](#1110-appearance--themes)
+    - [MCP](#1110-mcp)
+    - [Appearance & Themes](#1111-appearance--themes)
 12. [System Administration](#12-system-administration)
     - [Cache Management](#121-cache-management)
     - [Menu Configuration](#122-menu-configuration)
@@ -86,11 +87,36 @@ Cartxis is a modern, full-featured e-commerce platform built on **Laravel 12** w
 
 ## 2. Installation & Setup
 
+Cartxis supports two install paths. **Shared hosting merchants should use the release zip** (no Node.js). Developers cloning from git still need Node to build Vite assets.
+
+### Path A — Shared Hosting (recommended for merchants)
+
+No Node.js required. Download the pre-built zip that includes `public/build` and `vendor`.
+
+| Requirement | Minimum |
+|---|---|
+| PHP | 8.3+ |
+| MySQL / MariaDB | 8.0+ / 10.6+ |
+| Document root | Must be `public/` |
+| Node.js | Not required |
+
+Full steps: **[SHARED_HOSTING.md](./SHARED_HOSTING.md)**
+
+```text
+1. Download cartxis-{version}-shared-hosting.zip from GitHub Releases
+2. Upload & extract; set document root to public/
+3. Copy .env.example → .env and set APP_URL + DB_*
+4. php artisan key:generate
+5. php artisan cartxis:install   # or open /setup after DB is ready
+```
+
+### Path B — Developer / source install (needs Node)
+
 ### Prerequisites
 
 | Requirement | Minimum Version |
 |---|---|
-| PHP | 8.2+ |
+| PHP | 8.3+ |
 | Node.js | 18+ |
 | Composer | 2.x |
 | MySQL / MariaDB | 8.0+ / 10.6+ |
@@ -121,19 +147,17 @@ php artisan key:generate
 #    DB_USERNAME=root
 #    DB_PASSWORD=
 
-# 6. Run migrations and seed data
-php artisan migrate --seed
+# 6. Run the installer (migrations, seed, assets)
+php artisan cartxis:install
 
-# 7. Create storage symlink
-php artisan storage:link
-
-# 8. Build frontend assets
-npm run build        # Production build
-npm run dev          # Development with HMR
-
-# 9. Start the development server
-php artisan serve
+#    Or manually:
+#    php artisan migrate --seed
+#    php artisan storage:link
+#    npm run build
+#    php artisan serve
 ```
+
+> **Note:** `public/build` is not in git. Without `npm run build` or the Shared Hosting zip, you will see a friendly “Frontend assets are missing” page instead of `/setup`.
 
 ### Theme directory (Browse Themes)
 
@@ -183,7 +207,7 @@ The sidebar provides access to all modules:
 | **Marketing** | Coupons, Promotions |
 | **Content** | Pages, Storefront Menus, Blocks, Media Library |
 | **Reports** | Sales Reports, Product Reports, Customer Reports |
-| **Settings** | General, Store Config, Locales & Currencies, Channels, Payment Methods, Shipping Methods, Tax Rules, Email Settings, AI Settings |
+| **Settings** | General, Store Config, Locales & Currencies, Channels, Payment Methods, Shipping Methods, Tax Rules, Email Settings, AI Settings, MCP |
 | **Appearance** | Browse Themes, Themes list, active theme customization (colors, layout, features) |
 | **System** | Cache Management, Menu Configuration, Extensions, Permissions, Maintenance Mode, Data Migration, API Sync, Backups |
 
@@ -1424,7 +1448,24 @@ Global AI feature toggles and default assignments.
 
 ---
 
-### 11.10 Appearance & Themes
+### 11.10 MCP
+
+Connect AI clients (Cursor, Claude Code, VS Code, ChatGPT, etc.) to manage catalog, orders, customers, and safe store settings via the Model Context Protocol.
+
+**Navigation:** Settings → MCP
+
+| Action | Description |
+|--------|-------------|
+| Enable MCP | Master toggle — when off, `/mcp` returns HTTP 503 |
+| Create token | Issue a Sanctum Bearer token with the `mcp` ability (shown once) |
+| Revoke token | Invalidate a token so clients can no longer connect |
+| Connection snippets | Copy-ready configs for Cursor, Claude, and VS Code |
+
+**Detailed guide:** [MCP.md](./MCP.md)
+
+---
+
+### 11.11 Appearance & Themes
 
 Manage the storefront look and feel: install themes from the catalog, activate templates, and customize colors, layout, and features.
 

@@ -9,6 +9,7 @@ use Cartxis\API\Helpers\ApiResponse;
 use Cartxis\API\Http\Resources\CartResource;
 use Cartxis\Cart\Models\Cart;
 use Cartxis\Cart\Models\CartItem;
+use Cartxis\Cart\Support\CartTypeHelper;
 use Cartxis\Marketing\Services\CouponService;
 use Cartxis\Product\Models\Product;
 
@@ -48,8 +49,12 @@ class CartController extends Controller
             return ApiResponse::error('Product not available', null, 400, 'PRODUCT_UNAVAILABLE');
         }
 
+        if (! CartTypeHelper::canAddToCart($product)) {
+            return ApiResponse::error('This product requires a quote request', null, 400, 'QUOTE_ONLY_PRODUCT');
+        }
+
         // Check stock
-        if ($product->track_inventory && $product->quantity < $request->quantity) {
+        if (CartTypeHelper::hasInsufficientStock($product, (int) $request->quantity)) {
             return ApiResponse::error('Insufficient stock', null, 400, 'INSUFFICIENT_STOCK');
         }
 
@@ -104,7 +109,7 @@ class CartController extends Controller
         }
 
         // Check stock
-        if ($cartItem->product->track_inventory && $cartItem->product->quantity < $request->quantity) {
+        if ($cartItem->product && CartTypeHelper::hasInsufficientStock($cartItem->product, (int) $request->quantity)) {
             return ApiResponse::error('Insufficient stock', null, 400, 'INSUFFICIENT_STOCK');
         }
 

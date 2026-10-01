@@ -6,6 +6,7 @@ namespace Cartxis\Core\Console\Commands;
 
 use Cartxis\Admin\Services\AdminMenuSyncService;
 use Cartxis\Core\Services\ThemeDirectoryEnvConfigurator;
+use Cartxis\Core\Support\FrontendAssetManifest;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\DB;
 use PDO;
@@ -13,7 +14,8 @@ use PDOException;
 
 class InstallCommand extends Command
 {
-    protected $signature = 'cartxis:install';
+    protected $signature = 'cartxis:install
+                            {--skip-assets : Allow incomplete frontend assets (CI/dev only; not for production browser use)}';
 
     protected $description = 'Run the Cartxis installation wizard';
 
@@ -140,12 +142,38 @@ class InstallCommand extends Command
         $this->call('storage:link');
 
         // ── Step 9: Frontend assets ──────────────────────────────────────────
+        $assetResult = $this->ensureFrontendAssets();
+
+        if ($assetResult['status'] === 'failed') {
+            return self::FAILURE;
+        }
+
+        // ── Done ─────────────────────────────────────────────────────────────
+        $this->renderSuccessBanner(
+            $appUrl,
+            $adminEmail,
+            $adminPassword,
+            $assetResult['status'],
+        );
+
+        return self::SUCCESS;
+    }
+
+    /**
+     * Ensure production Vite assets exist (npm build or shared-hosting prebuild).
+     *
+     * @return array{status: 'built'|'prebuilt'|'skipped'|'failed'}
+     */
+    private function ensureFrontendAssets(): array
+    {
         $this->newLine();
         $this->line('<fg=yellow>━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━</fg=yellow>');
         $this->line('<fg=yellow>  Frontend Assets</fg=yellow>');
         $this->line('<fg=yellow>━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━</fg=yellow>');
 
+        $skipAssets = (bool) $this->option('skip-assets');
         $npmBin = $this->detectNodePackageManager();
+
         // Ensure the binary name is from the known-good allowlist before passing to shell
         if (! in_array($npmBin, ['pnpm', 'yarn', 'npm'], true)) {
             $npmBin = null;
@@ -154,38 +182,73 @@ class InstallCommand extends Command
         if ($npmBin) {
             $this->line("  Using <fg=cyan>{$npmBin}</fg=cyan> to build frontend assets...");
 
-            // Delete any stale pre-built assets (e.g. from the source repo)
-            // so the new build is guaranteed clean.
+            // Delete any stale pre-built assets so the new build is clean.
+            // If the build fails, we fail hard below unless --skip-assets.
             $buildDir = public_path('build');
             if (is_dir($buildDir)) {
                 $this->line('  Removing stale build files...');
                 passthru('rm -rf '.escapeshellarg($buildDir));
             }
 
+            $installCode = 1;
+            $buildCode = 1;
+
             $this->line("  Running {$npmBin} install...");
-            passthru("{$npmBin} install");
+            passthru("{$npmBin} install", $installCode);
             $this->newLine();
             $this->line("  Running {$npmBin} run build...");
-            passthru("{$npmBin} run build");
+            passthru("{$npmBin} run build", $buildCode);
             $this->newLine();
-            $this->line('  <fg=green>✔</fg=green> Frontend assets built');
-        } else {
-            $this->newLine();
-            $this->line('<fg=red>━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━</fg=red>');
-            $this->line('<fg=red>  ⚠  Node.js / npm not found!</fg=red>');
-            $this->line('<fg=red>━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━</fg=red>');
-            $this->line('  The admin panel and storefront will NOT work until you');
-            $this->line('  build the frontend assets. Once Node.js is installed run:');
-            $this->newLine();
-            $this->line('      <fg=cyan>npm install && npm run build</fg=cyan>');
-            $this->newLine();
+
+            if (FrontendAssetManifest::exists() && $installCode === 0 && $buildCode === 0) {
+                $this->line('  <fg=green>✔</fg=green> Frontend assets built');
+
+                return ['status' => 'built'];
+            }
+
+            $this->error('  Frontend asset build failed or public/build/manifest.json is missing.');
+            $this->line('  Run <fg=cyan>npm install && npm run build</fg=cyan>, or download the Shared Hosting release zip.');
+
+            if ($skipAssets) {
+                $this->warn('  Continuing because --skip-assets was passed (CI/dev only).');
+
+                return ['status' => 'skipped'];
+            }
+
+            return ['status' => 'failed'];
         }
 
-        // ── Done ─────────────────────────────────────────────────────────────
-        $assetsBuilt = $npmBin && file_exists(public_path('build/manifest.json'));
-        $this->renderSuccessBanner($appUrl, $adminEmail, $adminPassword, $assetsBuilt);
+        // No Node/npm — shared hosting or incomplete source checkout
+        if (FrontendAssetManifest::exists()) {
+            $this->line('  <fg=green>✔</fg=green> Using pre-built frontend assets (shared hosting package)');
 
-        return self::SUCCESS;
+            return ['status' => 'prebuilt'];
+        }
+
+        $this->newLine();
+        $this->line('<fg=red>━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━</fg=red>');
+        $this->line('<fg=red>  ⚠  Frontend assets missing (no Node.js / npm)</fg=red>');
+        $this->line('<fg=red>━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━</fg=red>');
+        $this->line('  public/build/manifest.json was not found. The admin panel and');
+        $this->line('  storefront cannot load in a browser without built assets.');
+        $this->newLine();
+        $this->line('  Preferred (shared hosting — no Node required):');
+        $this->line('    Download the <fg=cyan>Shared Hosting</fg=cyan> release zip from GitHub Releases');
+        $this->line('    (includes public/build). See <fg=cyan>docs/SHARED_HOSTING.md</fg=cyan>.');
+        $this->newLine();
+        $this->line('  Or build on a machine with Node.js 18+:');
+        $this->line('      <fg=cyan>npm install && npm run build</fg=cyan>');
+        $this->newLine();
+
+        if ($skipAssets) {
+            $this->warn('  Continuing because --skip-assets was passed (CI/dev only).');
+
+            return ['status' => 'skipped'];
+        }
+
+        $this->error('  Installation incomplete for browser use. Fix assets, then re-run or open /setup.');
+
+        return ['status' => 'failed'];
     }
 
     // ── Helpers ───────────────────────────────────────────────────────────────
@@ -209,8 +272,15 @@ class InstallCommand extends Command
         $this->newLine();
     }
 
-    private function renderSuccessBanner(string $appUrl, string $adminEmail, string $adminPassword, bool $assetsBuilt = true): void
-    {
+    /**
+     * @param  'built'|'prebuilt'|'skipped'|'failed'  $assetStatus
+     */
+    private function renderSuccessBanner(
+        string $appUrl,
+        string $adminEmail,
+        string $adminPassword,
+        string $assetStatus = 'built',
+    ): void {
         $this->newLine();
         $this->line('<fg=green>════════════════════════════════════════════════════</fg=green>');
         $this->line('<fg=green>  ✔  Cartxis installation complete!</fg=green>');
@@ -221,11 +291,18 @@ class InstallCommand extends Command
         $this->line('  Password    : <fg=cyan>'.$adminPassword.'</fg=cyan>');
         $this->newLine();
 
-        if (! $assetsBuilt) {
-            $this->line('<fg=yellow>  ⚠  Frontend assets not built.</fg=yellow>');
-            $this->line('<fg=yellow>     The app will not load correctly until you run:</fg=yellow>');
+        if ($assetStatus === 'prebuilt') {
+            $this->line('  Pre-built assets detected (shared hosting package).');
+            $this->line('  Next step: open <fg=cyan>'.rtrim($appUrl, '/').'/setup</fg=cyan> in your browser');
+            $this->line('  to finish the storefront setup wizard.');
             $this->newLine();
-            $this->line('       <fg=cyan>npm install && npm run build</fg=cyan>');
+
+            return;
+        }
+
+        if ($assetStatus === 'skipped') {
+            $this->line('<fg=yellow>  ⚠  Frontend assets were skipped (--skip-assets).</fg=yellow>');
+            $this->line('<fg=yellow>     Do not use this install for production browser traffic.</fg=yellow>');
             $this->newLine();
         }
 

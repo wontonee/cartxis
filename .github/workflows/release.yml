@@ -1,0 +1,88 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version label for artifact name (optional; defaults to composer.json version)'
+        required: false
+        type: string
+
+permissions:
+  contents: write
+
+jobs:
+  shared-hosting-zip:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
+          tools: composer:v2
+          extensions: mbstring, xml, ctype, json, bcmath, tokenizer, openssl, pdo
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'npm'
+
+      - name: Install Node dependencies
+        run: npm ci
+
+      - name: Build frontend assets
+        run: npm run build
+
+      - name: Assert Vite manifest exists
+        run: |
+          test -f public/build/manifest.json
+          echo "✔ public/build/manifest.json present"
+
+      - name: Make package script executable
+        run: chmod +x scripts/package-release.sh
+
+      - name: Package shared-hosting zip
+        run: ./scripts/package-release.sh --with-vendor --skip-npm
+
+      - name: Resolve version and zip path
+        id: meta
+        run: |
+          VERSION="${{ inputs.version }}"
+          if [ -z "$VERSION" ]; then
+            VERSION="$(php -r 'echo json_decode(file_get_contents("composer.json"))->version;')"
+          fi
+          ZIP="dist/cartxis-${VERSION}-shared-hosting.zip"
+          test -f "$ZIP"
+          echo "version=${VERSION}" >> "$GITHUB_OUTPUT"
+          echo "zip=${ZIP}" >> "$GITHUB_OUTPUT"
+          echo "name=$(basename "$ZIP")" >> "$GITHUB_OUTPUT"
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: cartxis-shared-hosting-${{ steps.meta.outputs.version }}
+          path: ${{ steps.meta.outputs.zip }}
+          if-no-files-found: error
+
+      - name: Create / update GitHub Release and attach zip
+        if: startsWith(github.ref, 'refs/tags/')
+        uses: softprops/action-gh-release@v2
+        with:
+          files: ${{ steps.meta.outputs.zip }}
+          generate_release_notes: true
+          body: |
+            ## Shared Hosting package
+
+            Download **`${{ steps.meta.outputs.name }}`** for hosts without Node.js (includes `public/build` and `vendor`).
+
+            Document root must point to `public/`. See [docs/SHARED_HOSTING.md](https://github.com/cartxis/cartxis/blob/main/docs/SHARED_HOSTING.md).
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

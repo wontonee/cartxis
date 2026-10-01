@@ -22,6 +22,7 @@ import {
   Store
 } from 'lucide-vue-next'
 
+/** @deprecated Page titles belong in each page body; kept so existing `title` props are not applied to the DOM. */
 defineProps<{
   title?: string
 }>()
@@ -603,7 +604,7 @@ onUnmounted(() => {
                   >
                     <component 
                       :is="getIcon(child.icon)" 
-                      v-if="child.icon"
+                      v-if="getIcon(child.icon)"
                       :class="[
                         'w-3.5 h-3.5 transition-colors',
                         isActive(child) ? 'text-blue-400' : 'text-slate-600 group-hover/child:text-slate-400'
@@ -649,7 +650,7 @@ onUnmounted(() => {
                     >
                       <component 
                         :is="getIcon(child.icon)" 
-                        v-if="child.icon"
+                        v-if="getIcon(child.icon)"
                         class="w-3.5 h-3.5" 
                       />
                       <span>{{ child.title }}</span>
@@ -684,13 +685,10 @@ onUnmounted(() => {
               <Menu class="w-6 h-6" />
             </button>
 
-            <!-- Page title -->
-            <h1 class="text-xl font-semibold text-gray-900 dark:text-white">
-              {{ title || 'Dashboard' }}
-            </h1>
+            <div class="hidden lg:block flex-1" aria-hidden="true" />
 
-            <!-- Right side -->
-            <div class="flex items-center space-x-4">
+            <!-- Toolbar -->
+            <div class="flex items-center space-x-4 ml-auto">
               <!-- Theme Toggle -->
               <button
                 @click="toggleAppearance"
