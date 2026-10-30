@@ -133,7 +133,7 @@ class ProductController extends Controller
             'brand',
             'categories',
             'variants',
-            'attributes',
+            'attributeValues',
             'reviews' => fn($q) => $q->latest()->limit(5),
         ])->find($id);
 

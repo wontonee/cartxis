@@ -72,12 +72,11 @@ class ProductResource extends JsonResource
                     'in_stock' => $variant->quantity > 0,
                 ])
             ),
-            'attributes' => $this->whenLoaded('attributes', fn() => 
-                $this->attributes->map(fn($attr) => [
+            'attributes' => $this->whenLoaded('attributeValues', fn() =>
+                $this->attributeValues->map(fn($attr) => [
                     'id' => $attr->id,
-                    'code' => $attr->code,
-                    'name' => $attr->name,
-                    'value' => $attr->pivot->value,
+                    'attribute_id' => $attr->attribute_id,
+                    'value' => $attr->value,
                 ])
             ),
             'reviews_summary' => [
