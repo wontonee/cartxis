@@ -291,6 +291,17 @@ class CheckoutController extends Controller
 
         $validated = $request->validate($rules);
 
+        if ($requiresShipping && isset($validated['shipping_address']) && function_exists('apply_filters')) {
+            $addressCheck = apply_filters('checkout.address.validate', [
+                'valid' => true,
+                'message' => null,
+            ], $validated['shipping_address'], $items);
+
+            if (is_array($addressCheck) && ($addressCheck['valid'] ?? true) === false) {
+                return back()->with('error', $addressCheck['message'] ?? 'Shipping address is not serviceable.');
+            }
+        }
+
         $requireAccount = (bool) $this->settingService->get('checkout_require_account', false);
         $allowGuest = (bool) $this->settingService->get('checkout_allow_guest', true);
 

@@ -45,6 +45,12 @@ return [
             'driver' => 'session',
             'provider' => 'users',
         ],
+
+        // Used by commercial Multi-Vendor extension (`cartxis-multivendor`)
+        'vendor' => [
+            'driver' => 'session',
+            'provider' => 'users',
+        ],
     ],
 
     /*

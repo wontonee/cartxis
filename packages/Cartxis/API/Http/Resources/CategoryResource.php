@@ -14,22 +14,28 @@ class CategoryResource extends JsonResource
      */
     public function toArray($request)
     {
+        if (method_exists($this->resource, 'translate')) {
+            $this->resource->loadMissing('translations');
+            $this->resource->translate(app()->getLocale());
+        }
+
         return [
             'id' => $this->id,
             'name' => $this->name,
             'slug' => $this->slug,
             'description' => $this->description,
+            'locale' => app()->getLocale(),
             'image' => $this->image ? \Storage::url($this->image) : null,
             'icon' => $this->icon,
             'position' => $this->position,
             'products_count' => $this->products_count ?? 0,
             'parent_id' => $this->parent_id,
-            'parent' => $this->whenLoaded('parent', fn() => [
+            'parent' => $this->whenLoaded('parent', fn () => [
                 'id' => $this->parent->id,
                 'name' => $this->parent->name,
                 'slug' => $this->parent->slug,
             ]),
-            'children' => $this->whenLoaded('children', fn() => 
+            'children' => $this->whenLoaded('children', fn () =>
                 self::collection($this->children)
             ),
             'meta' => [

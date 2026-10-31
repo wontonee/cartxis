@@ -8,6 +8,7 @@ import { createApp, h } from 'vue';
 import { createPinia } from 'pinia';
 import { initializeTheme } from './composables/useAppearance';
 import { resolveTemplatePage } from './lib/resolveTemplatePage';
+import { createCartxisI18n, syncI18nFromPageProps } from './plugins/i18n';
 
 const appName = import.meta.env.VITE_APP_NAME || 'Laravel';
 const pinia = createPinia();
@@ -46,9 +47,27 @@ createInertiaApp({
         )
     },
     setup({ el, App, props, plugin }) {
+        const pageProps = (props.initialPage?.props || {}) as Record<string, unknown>;
+        const i18nProps = (pageProps.i18n || {}) as {
+            locale?: string;
+            fallbackLocale?: string;
+            messages?: Record<string, unknown>;
+        };
+
+        const i18n = createCartxisI18n({
+            locale: i18nProps.locale || 'en',
+            fallbackLocale: i18nProps.fallbackLocale || 'en',
+            messages: i18nProps.locale && i18nProps.messages
+                ? { [i18nProps.locale]: i18nProps.messages }
+                : undefined,
+        });
+
+        syncI18nFromPageProps(pageProps);
+
         createApp({ render: () => h(App, props) })
             .use(plugin)
             .use(pinia)
+            .use(i18n)
             .mount(el);
     },
     progress: {
@@ -66,22 +85,15 @@ if (forceLightStorefront) {
     initializeTheme();
 }
 
-// Permanently fix 419 PAGE EXPIRED errors caused by stale CSRF tokens in the
-// Inertia SPA. Inertia v2 uses Axios internally but does NOT inject CSRF headers
-// itself — it relies on Axios's XSRF-TOKEN cookie auto-read, which can silently
-// fail when using full absolute URLs (Axios same-origin check).  
-//
-// The robust solution: after every Inertia navigation (including the first), pull
-// the fresh token from the server's shared props and inject it DIRECTLY into
-// Axios's default headers. Because Inertia's own getHeaders() is merged with
-// axios.defaults, this X-CSRF-TOKEN arrives on every subsequent POST/PUT/DELETE.
+// Sync locale + CSRF after every Inertia navigation.
 router.on('navigate', (event) => {
-    const token = (event.detail.page.props as Record<string, unknown>).csrf_token as string | undefined;
+    const pageProps = event.detail.page.props as Record<string, unknown>;
+    syncI18nFromPageProps(pageProps);
+
+    const token = pageProps.csrf_token as string | undefined;
     if (token) {
-        // 1. Keep <meta name="csrf-token"> in sync (used by non-Inertia forms)
         const meta = document.querySelector<HTMLMetaElement>('meta[name="csrf-token"]');
         if (meta) meta.content = token;
-        // 2. Inject into Axios defaults so every Inertia XHR carries the header
         axios.defaults.headers.common['X-CSRF-TOKEN'] = token;
     }
 });

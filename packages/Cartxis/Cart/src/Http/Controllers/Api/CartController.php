@@ -66,6 +66,25 @@ class CartController extends Controller
         $readableAttributes = $this->convertAttributesToReadable($productAttributes);
         $snapshot = CartTypeHelper::snapshotFromProduct($product);
 
+        $items = $this->getCartItems();
+        if (function_exists('apply_filters')) {
+            $items = apply_filters('cart.items', $items);
+        }
+
+        $itemPayload = [
+            'product' => $product,
+            'quantity' => (int) $quantity,
+            'request' => $request,
+            'attributes' => $productAttributes,
+        ];
+
+        if (function_exists('do_action')) {
+            do_action('cart.item.adding', $itemPayload, $items);
+        }
+        if (function_exists('apply_filters')) {
+            $itemPayload = apply_filters('cart.item.adding', $itemPayload, $items);
+        }
+
         $cartItem = [
             'id' => uniqid('cart_'),
             'product_id' => $product->id,
@@ -73,7 +92,7 @@ class CartController extends Controller
             'product_slug' => $product->slug,
             'product_image' => $product->image,
             'price' => $product->special_price ?? $product->price,
-            'quantity' => $quantity,
+            'quantity' => $itemPayload['quantity'] ?? $quantity,
             'attributes' => $readableAttributes,
             'tax_class_id' => $product->tax_class_id,
             'weight' => $product->weight,
@@ -81,7 +100,13 @@ class CartController extends Controller
             'requires_shipping' => $snapshot['requires_shipping'],
         ];
 
-        $items = $this->getCartItems();
+        if (isset($itemPayload['vendor_id'])) {
+            $cartItem['vendor_id'] = $itemPayload['vendor_id'];
+        }
+
+        if (function_exists('apply_filters')) {
+            $cartItem = apply_filters('cart.item.added', $cartItem, $product, $itemPayload);
+        }
 
         // Check if product already exists in cart
         $existingKey = $this->findExistingCartItem($items, $product->id, $productAttributes);
@@ -92,6 +117,10 @@ class CartController extends Controller
         } else {
             // Add new item
             $items[] = $cartItem;
+        }
+
+        if (function_exists('apply_filters')) {
+            $items = apply_filters('cart.items', $items);
         }
 
         $this->saveCartItems($items);

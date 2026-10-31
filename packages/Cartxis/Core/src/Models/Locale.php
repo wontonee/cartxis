@@ -2,6 +2,7 @@
 
 namespace Cartxis\Core\Models;
 
+use Cartxis\Core\Services\LocaleService;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
@@ -50,6 +51,14 @@ class Locale extends Model
             }
         });
 
+        static::saved(function () {
+            try {
+                app(LocaleService::class)->clearCache();
+            } catch (\Throwable) {
+                //
+            }
+        });
+
         // Ensure at least one locale is default
         static::deleted(function ($locale) {
             if ($locale->is_default) {
@@ -60,6 +69,12 @@ class Locale extends Model
                 if ($newDefault) {
                     $newDefault->update(['is_default' => true]);
                 }
+            }
+
+            try {
+                app(LocaleService::class)->clearCache();
+            } catch (\Throwable) {
+                //
             }
         });
     }

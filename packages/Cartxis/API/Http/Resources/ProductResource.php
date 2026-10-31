@@ -14,6 +14,11 @@ class ProductResource extends JsonResource
      */
     public function toArray($request)
     {
+        if (method_exists($this->resource, 'translate')) {
+            $this->resource->loadMissing('translations');
+            $this->resource->translate(app()->getLocale());
+        }
+
         return [
             'id' => $this->id,
             'sku' => $this->sku,
@@ -21,6 +26,7 @@ class ProductResource extends JsonResource
             'slug' => $this->slug,
             'description' => $this->description,
             'short_description' => $this->short_description,
+            'locale' => app()->getLocale(),
             'price' => (float) $this->price,
             'special_price' => $this->special_price ? (float) $this->special_price : null,
             'final_price' => (float) ($this->special_price ?: $this->price),

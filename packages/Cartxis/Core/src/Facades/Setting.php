@@ -8,7 +8,7 @@ use Cartxis\Core\Models\Setting as SettingModel;
 
 /**
  * @method static mixed get(string $key, $default = null)
- * @method static SettingModel set(string $key, $value, string $type = 'string', string|null $group = null)
+ * @method static SettingModel set(string $key, $value, string $type = 'string', string|null $group = null, string|null $extensionCode = null)
  * @method static bool has(string $key)
  * @method static bool delete(string $key)
  * @method static Collection getGroup(string $group)

@@ -129,8 +129,15 @@ class CategoryController extends Controller
      */
     public function edit(Category $category): Response
     {
+        $category->load('translations');
+
         return Inertia::render('Admin/Categories/Edit', [
             'category' => $category,
+            'availableLocales' => \Cartxis\Core\Models\Locale::query()
+                ->active()
+                ->orderBy('sort_order')
+                ->get(['code', 'name', 'native_name', 'direction', 'is_default']),
+            'translations' => $category->translations->keyBy('locale'),
             'parentCategories' => Category::whereNull('parent_id')
                 ->where('id', '!=', $category->id)
                 ->get(['id', 'name']),
@@ -153,7 +160,18 @@ class CategoryController extends Controller
             'meta_description' => 'nullable|string',
             'meta_keywords' => 'nullable|string',
             'image' => 'nullable|file|image|max:2048',
+            'translations' => 'nullable',
         ]);
+
+        $translations = $validated['translations'] ?? [];
+        if (is_string($translations)) {
+            $decoded = json_decode($translations, true);
+            $translations = is_array($decoded) ? $decoded : [];
+        }
+        if (! is_array($translations)) {
+            $translations = [];
+        }
+        unset($validated['translations']);
 
         // Handle image upload
         if ($request->hasFile('image')) {
@@ -179,6 +197,22 @@ class CategoryController extends Controller
         }
 
         $category->update($validated);
+
+        if (! empty($translations) && is_array($translations)) {
+            foreach ($translations as $locale => &$payload) {
+                if (! is_array($payload)) {
+                    continue;
+                }
+                if (! empty($payload['description'])) {
+                    $payload['description'] = Purifier::clean($payload['description']);
+                }
+                if (empty($payload['slug']) && ! empty($payload['name'])) {
+                    $payload['slug'] = Str::slug($payload['name']);
+                }
+            }
+            unset($payload);
+            $category->syncTranslations($translations);
+        }
 
         // Flash the message to session
         session()->flash('success', 'Category updated successfully.');

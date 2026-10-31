@@ -6,6 +6,7 @@ import ConfirmDeleteModal from '@/components/Admin/ConfirmDeleteModal.vue';
 import TiptapEditor from '@/components/Admin/TiptapEditor.vue';
 import ImageUploader from '@/components/Admin/ImageUploader.vue';
 import InventoryTracker from '@/components/Admin/InventoryTracker.vue';
+import TranslationEditor from '@/components/Admin/TranslationEditor.vue';
 import * as productRoutes from '@/routes/admin/catalog/products';
 import axios from '@/lib/axios';
 import { useCurrency } from '@/composables/useCurrency';
@@ -132,10 +133,20 @@ interface Props {
     created_at: string;
     user?: { id: number; name: string };
   }>;
+  availableLocales?: Array<{
+    code: string;
+    name: string;
+    native_name?: string | null;
+    is_default?: boolean;
+  }>;
+  translations?: Record<string, Record<string, string | null>>;
   errors?: Record<string, string>;
 }
 
 const props = defineProps<Props>();
+const translationForm = ref<Record<string, Record<string, string | null | undefined>>>(
+  { ...(props.translations || {}) },
+);
 
 interface PriceComparisonOption {
   variation: string;
@@ -658,7 +669,8 @@ onMounted(() => {
 const submitForm = () => {
   const formData = {
     ...form.value,
-    attribute_values: attributeValues.value
+    attribute_values: attributeValues.value,
+    translations: translationForm.value,
   };
   
   router.put(productRoutes.update({ product: props.product.id }), formData);
@@ -739,6 +751,22 @@ const deleteProduct = () => {
           </button>
         </div>
       </div>
+
+      <TranslationEditor
+        v-if="(availableLocales?.length || 0) > 1"
+        v-model="translationForm"
+        :locales="availableLocales || []"
+        :exclude-default="true"
+        :fields="[
+          { key: 'name', label: 'Name' },
+          { key: 'slug', label: 'Slug' },
+          { key: 'short_description', label: 'Short description', type: 'textarea' },
+          { key: 'description', label: 'Description', type: 'textarea' },
+          { key: 'meta_title', label: 'Meta title' },
+          { key: 'meta_description', label: 'Meta description', type: 'textarea' },
+          { key: 'meta_keywords', label: 'Meta keywords' },
+        ]"
+      />
 
       <!-- Main Content -->
       <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">

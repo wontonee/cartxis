@@ -601,7 +601,7 @@ For billing, licensing, or partnership enquiries, contact us at **dev@wontonee.c
 - [ ] Multi-vendor marketplace
 - [ ] Subscription products
 - [ ] Advanced SEO tools
-- [ ] Multi-language support (i18n)
+- [x] Multi-language support (i18n) — see [docs/I18N.md](docs/I18N.md) (ME / Europe / Africa + RTL)
 - [ ] Advanced analytics dashboard
 - [ ] Integration marketplace
 

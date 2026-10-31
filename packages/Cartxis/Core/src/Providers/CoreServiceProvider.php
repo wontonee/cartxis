@@ -32,6 +32,7 @@ use Cartxis\Core\Services\ThemeLifecycleService;
 use Cartxis\Core\Services\ThemePathResolver;
 use Cartxis\Core\Services\ThemeService;
 use Cartxis\Core\Services\ThemeViewResolver;
+use Cartxis\Core\Services\LocaleService;
 use Cartxis\UIEditor\Services\LayoutService;
 use Illuminate\Contracts\Http\Kernel;
 use Illuminate\Support\ServiceProvider;
@@ -58,13 +59,25 @@ class CoreServiceProvider extends ServiceProvider
             return new SettingService;
         });
 
+        $this->app->singleton(LocaleService::class, function () {
+            return new LocaleService;
+        });
+        $this->app->alias(LocaleService::class, 'cartxis.locale');
+
         // Register ExtensionService as singleton
         $this->app->singleton('cartxis.extension', function ($app) {
             return new ExtensionService(
                 $app->make('cartxis.hook'),
-                $app->make('cartxis.menu')
+                $app->make('cartxis.menu'),
+                $app->make('cartxis.setting')
             );
         });
+
+        // Legacy Vortex aliases (extensions / SalesChat still resolve these)
+        $this->app->alias('cartxis.hook', 'vortex.hook');
+        $this->app->alias('cartxis.setting', 'vortex.setting');
+        $this->app->alias('cartxis.menu', 'vortex.menu');
+        $this->app->alias('cartxis.extension', 'vortex.extension');
 
         $this->app->singleton(ThemePathResolver::class, function () {
             return new ThemePathResolver;
@@ -168,6 +181,7 @@ class CoreServiceProvider extends ServiceProvider
 
         // Load routes
         $this->loadRoutesFrom(__DIR__.'/../Routes/admin.php');
+        $this->loadRoutesFrom(__DIR__.'/../Routes/web.php');
 
         // Load translations
         $this->loadTranslationsFrom(__DIR__.'/../Resources/lang', 'core');

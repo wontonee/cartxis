@@ -6,6 +6,8 @@ import axios from '@/lib/axios'
 import Toast from '@/components/Toast.vue'
 import { useMenuIcons } from '@/composables/useMenuIcons'
 import { useAppearance } from '@/composables/useAppearance'
+import { useAdminI18n } from '@/composables/useAdminI18n'
+import LanguageSwitcher from '@/components/LanguageSwitcher.vue'
 import {
   Menu,
   ChevronDown,
@@ -29,6 +31,7 @@ defineProps<{
 
 const page = usePage()
 const { getIcon } = useMenuIcons()
+const { menuTitle, chrome } = useAdminI18n()
 const sidebarOpen = ref(false)
 const sidebarCollapsed = ref(false)
 const userMenuOpen = ref(false)
@@ -110,8 +113,9 @@ const searchResults = computed(() => {
   const results: any[] = []
   const walk = (items: any[]) => {
     items.forEach((item) => {
-      if (item.full_url && item.title?.toLowerCase().includes(query)) {
-        results.push(item)
+      const title = menuTitle(item).toLowerCase()
+      if (item.full_url && (title.includes(query) || item.title?.toLowerCase().includes(query))) {
+        results.push({ ...item, displayTitle: menuTitle(item) })
       }
       if (item.children && item.children.length) {
         walk(item.children)
@@ -528,18 +532,18 @@ onUnmounted(() => {
                 ? 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-md shadow-blue-500/20'
                 : 'text-slate-400 hover:text-white hover:bg-white/[0.06]'
             ]"
-            :title="sidebarCollapsed ? item.title : ''"
+            :title="sidebarCollapsed ? menuTitle(item) : ''"
           >
             <component 
               :is="getIcon(item.icon)" 
-              v-if="item.icon"
+              v-if="getIcon(item.icon)"
               class="flex-shrink-0 transition-colors"
               :class="[
                 sidebarCollapsed ? 'w-5 h-5' : 'w-[18px] h-[18px]',
                 isActive(item) ? 'text-white' : 'text-slate-500 group-hover:text-slate-300'
               ]" 
             />
-            <span v-if="!sidebarCollapsed" class="text-[15px] font-medium">{{ item.title }}</span>
+            <span v-if="!sidebarCollapsed" class="text-[15px] font-medium">{{ menuTitle(item) }}</span>
           </Link>
 
           <!-- Parent Menu with children (Expandable) -->
@@ -559,18 +563,18 @@ onUnmounted(() => {
                   ? 'text-white bg-white/[0.06]'
                   : 'text-slate-400 hover:text-white hover:bg-white/[0.06]'
               ]"
-              :title="sidebarCollapsed ? item.title : ''"
+              :title="sidebarCollapsed ? menuTitle(item) : ''"
             >
               <component 
                 :is="getIcon(item.icon)" 
-                v-if="item.icon"
+                v-if="getIcon(item.icon)"
                 class="flex-shrink-0 transition-colors"
                 :class="[
                   sidebarCollapsed ? 'w-5 h-5' : 'w-[18px] h-[18px]',
                   (isMenuOpen(item.id) || hasActiveChild(item)) ? 'text-blue-400' : 'text-slate-500 group-hover:text-slate-300'
                 ]" 
               />
-              <span v-if="!sidebarCollapsed" class="flex-1 text-left text-[15px] font-medium">{{ item.title }}</span>
+              <span v-if="!sidebarCollapsed" class="flex-1 text-start text-[15px] font-medium">{{ menuTitle(item) }}</span>
               <ChevronDown 
                 v-if="!sidebarCollapsed" 
                 :class="[
@@ -610,7 +614,7 @@ onUnmounted(() => {
                         isActive(child) ? 'text-blue-400' : 'text-slate-600 group-hover/child:text-slate-400'
                       ]" 
                     />
-                    <span class="text-[13px]">{{ child.title }}</span>
+                    <span class="text-[13px]">{{ menuTitle(child) }}</span>
                   </Link>
                 </div>
               </div>
@@ -634,7 +638,7 @@ onUnmounted(() => {
                   @mouseleave="hoveredMenuId = null"
                 >
                   <div class="px-3.5 py-2 border-b border-white/[0.06]">
-                    <p class="text-xs font-semibold text-white">{{ item.title }}</p>
+                    <p class="text-xs font-semibold text-white">{{ menuTitle(item) }}</p>
                   </div>
                   <div class="py-1">
                     <Link 
@@ -653,7 +657,7 @@ onUnmounted(() => {
                         v-if="getIcon(child.icon)"
                         class="w-3.5 h-3.5" 
                       />
-                      <span>{{ child.title }}</span>
+                      <span>{{ menuTitle(child) }}</span>
                     </Link>
                   </div>
                 </div>
@@ -666,7 +670,7 @@ onUnmounted(() => {
       </nav>
 
       <div class="border-t border-white/[0.06] text-slate-400" :class="sidebarCollapsed ? 'px-2 py-3' : 'px-4 py-3'">
-        <span v-if="!sidebarCollapsed" class="text-xs">Version {{ appVersion || '--' }}</span>
+        <span v-if="!sidebarCollapsed" class="text-xs">{{ chrome('version') }} {{ appVersion || '--' }}</span>
         <span v-else class="text-[10px] font-semibold uppercase block text-center">{{ versionLabel }}</span>
       </div>
     </aside>
@@ -688,13 +692,15 @@ onUnmounted(() => {
             <div class="hidden lg:block flex-1" aria-hidden="true" />
 
             <!-- Toolbar -->
-            <div class="flex items-center space-x-4 ml-auto">
+            <div class="flex items-center space-x-4 ms-auto">
+              <LanguageSwitcher compact />
+
               <!-- Theme Toggle -->
               <button
                 @click="toggleAppearance"
                 class="text-gray-500 hover:text-gray-600 dark:text-gray-400 dark:hover:text-gray-300"
-                :aria-label="isDarkMode ? 'Switch to light mode' : 'Switch to dark mode'"
-                :title="isDarkMode ? 'Switch to light mode' : 'Switch to dark mode'"
+                :aria-label="isDarkMode ? chrome('lightMode') : chrome('darkMode')"
+                :title="isDarkMode ? chrome('lightMode') : chrome('darkMode')"
               >
                 <Sun v-if="isDarkMode" class="w-5 h-5" />
                 <Moon v-else class="w-5 h-5" />
@@ -704,6 +710,8 @@ onUnmounted(() => {
               <button
                 @click="openSearch"
                 class="text-gray-500 hover:text-gray-600 dark:text-gray-400 dark:hover:text-gray-300"
+                :aria-label="chrome('search')"
+                :title="chrome('search')"
               >
                 <Search class="w-5 h-5" />
               </button>
@@ -714,8 +722,8 @@ onUnmounted(() => {
                 target="_blank"
                 rel="noopener noreferrer"
                 class="text-gray-500 hover:text-gray-600 dark:text-gray-400 dark:hover:text-gray-300"
-                aria-label="Visit store"
-                title="Visit Store"
+                :aria-label="chrome('visitStore')"
+                :title="chrome('visitStore')"
               >
                 <Store class="w-5 h-5" />
               </a>
@@ -726,8 +734,8 @@ onUnmounted(() => {
                   @click="toggleNotifications"
                   class="relative text-gray-500 hover:text-gray-600 dark:text-gray-400 dark:hover:text-gray-300 transition-transform duration-300"
                   :class="hasNotificationPulse ? 'animate-bounce text-blue-600 dark:text-blue-400' : ''"
-                  aria-label="Notifications"
-                  title="Notifications"
+                  :aria-label="chrome('notifications')"
+                  :title="chrome('notifications')"
                 >
                   <Bell class="w-5 h-5" />
                   <span
@@ -755,7 +763,7 @@ onUnmounted(() => {
                     class="absolute right-0 top-full mt-2 w-96 max-w-[92vw] bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 overflow-hidden z-50"
                   >
                     <div class="px-4 py-3 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between">
-                      <p class="text-sm font-semibold text-gray-900 dark:text-white">Notifications</p>
+                      <p class="text-sm font-semibold text-gray-900 dark:text-white">{{ chrome('notifications') }}</p>
                       <div class="flex items-center gap-3">
                         <a
                           href="/admin/activity-logs"
@@ -768,7 +776,7 @@ onUnmounted(() => {
                           @click="markAllNotificationsAsRead"
                           class="text-xs font-medium text-blue-600 dark:text-blue-400 hover:underline"
                         >
-                          Mark all as read
+                          {{ chrome('markAllRead') }}
                         </button>
                       </div>
                     </div>
@@ -778,7 +786,7 @@ onUnmounted(() => {
                     </div>
 
                     <div v-else-if="notifications.length === 0" class="px-4 py-8 text-sm text-gray-500 dark:text-gray-400 text-center">
-                      No notifications yet.
+                      {{ chrome('noNotifications') }}
                     </div>
 
                     <div v-else class="max-h-[360px] overflow-y-auto">
@@ -881,7 +889,7 @@ onUnmounted(() => {
                       class="w-full flex items-center px-4 py-2 text-sm text-red-600 dark:text-red-400 hover:bg-gray-100 dark:hover:bg-gray-700"
                     >
                       <LogOut class="w-4 h-4 mr-3" />
-                      Logout
+                      {{ chrome('logout') }}
                     </Link>
                   </div>
                 </Transition>
@@ -923,7 +931,7 @@ onUnmounted(() => {
             id="admin-search-input"
             v-model="searchQuery"
             type="text"
-            placeholder="Search modules, pages, settings..."
+            :placeholder="chrome('searchPlaceholder')"
             class="w-full bg-transparent text-sm text-gray-900 dark:text-white placeholder:text-gray-400 dark:placeholder:text-gray-500 focus:outline-none"
           />
           <button
@@ -949,7 +957,7 @@ onUnmounted(() => {
               @click="closeSearch"
               class="block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
             >
-              <div class="font-medium text-gray-900 dark:text-white">{{ item.title }}</div>
+              <div class="font-medium text-gray-900 dark:text-white">{{ item.displayTitle || menuTitle(item) }}</div>
               <div class="text-xs text-gray-500 dark:text-gray-400">{{ item.full_url }}</div>
             </Link>
           </div>

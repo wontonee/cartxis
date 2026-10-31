@@ -29,12 +29,21 @@ class ExtensionService
      */
     protected MenuService $menuService;
 
-    public function __construct(HookService $hookService, MenuService $menuService)
-    {
+    /**
+     * Setting service instance.
+     */
+    protected SettingService $settingService;
+
+    public function __construct(
+        HookService $hookService,
+        MenuService $menuService,
+        SettingService $settingService
+    ) {
         $this->extensionsPath = config('core.extensions_path', base_path('extension'));
         $this->bundledExtensionsPath = config('core.bundled_extensions_path', base_path('packages/Cartxis'));
         $this->hookService = $hookService;
         $this->menuService = $menuService;
+        $this->settingService = $settingService;
     }
 
     /**
@@ -168,8 +177,9 @@ class ExtensionService
         // Run uninstall hook
         $this->runExtensionMethod($code, 'uninstall');
 
-        // Remove extension menus
+        // Remove extension menus and settings
         $this->menuService->removeByExtension($code);
+        $this->settingService->deleteByExtension($code);
 
         $this->hookService->doAction('extension.uninstalled', $extension);
 

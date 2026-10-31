@@ -153,12 +153,29 @@ class CartController extends Controller
 
         // Get existing cart
         $cart = Session::get('cart', []);
+        if (function_exists('apply_filters')) {
+            $cart = apply_filters('cart.items', $cart);
+        }
+
+        $itemPayload = [
+            'product' => $product,
+            'quantity' => (int) $request->quantity,
+            'request' => $request,
+        ];
+
+        if (function_exists('do_action')) {
+            do_action('cart.item.adding', $itemPayload, $cart);
+        }
+
+        if (function_exists('apply_filters')) {
+            $itemPayload = apply_filters('cart.item.adding', $itemPayload, $cart);
+        }
 
         // Check if product already in cart
         $found = false;
         foreach ($cart as &$item) {
             if ($item['product_id'] == $request->product_id) {
-                $item['quantity'] += $request->quantity;
+                $item['quantity'] += $itemPayload['quantity'];
                 $found = true;
                 break;
             }
@@ -167,20 +184,34 @@ class CartController extends Controller
         // Add new item if not found
         if (! $found) {
             $snapshot = CartTypeHelper::snapshotFromProduct($product);
-            $cart[] = [
+            $newItem = [
                 'id' => uniqid('cart_'),
                 'product_id' => $product->id,
                 'name' => $product->name,
                 'slug' => $product->slug,
                 'sku' => $product->sku,
                 'price' => $product->special_price ?? $product->price,
-                'quantity' => $request->quantity,
+                'quantity' => $itemPayload['quantity'],
                 'image' => $product->mainImage?->url,
                 'tax_class_id' => $product->tax_class_id,
                 'weight' => $product->weight,
                 'type' => $snapshot['type'],
                 'requires_shipping' => $snapshot['requires_shipping'],
             ];
+
+            if (isset($itemPayload['vendor_id'])) {
+                $newItem['vendor_id'] = $itemPayload['vendor_id'];
+            }
+
+            if (function_exists('apply_filters')) {
+                $newItem = apply_filters('cart.item.added', $newItem, $product, $itemPayload);
+            }
+
+            $cart[] = $newItem;
+        }
+
+        if (function_exists('apply_filters')) {
+            $cart = apply_filters('cart.items', $cart);
         }
 
         Session::put('cart', $cart);

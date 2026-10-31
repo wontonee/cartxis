@@ -33,22 +33,35 @@ class SettingService
 
     /**
      * Set a setting value.
+     *
+     * @param  string|null  $extensionCode  Tag for clean uninstall via deleteByExtension()
      */
-    public function set(string $key, $value, string $type = 'string', ?string $group = null): Setting
-    {
+    public function set(
+        string $key,
+        $value,
+        string $type = 'string',
+        ?string $group = null,
+        ?string $extensionCode = null
+    ): Setting {
         $storedValue = $value;
 
         if (in_array($type, ['json', 'array'], true)) {
             $storedValue = is_string($value) ? $value : json_encode($value);
         }
 
+        $attributes = [
+            'value' => $storedValue,
+            'type' => $type,
+            'group' => $group,
+        ];
+
+        if ($extensionCode !== null) {
+            $attributes['extension_code'] = $extensionCode;
+        }
+
         $setting = Setting::updateOrCreate(
             ['key' => $key],
-            [
-                'value' => $storedValue,
-                'type' => $type,
-                'group' => $group,
-            ]
+            $attributes
         );
 
         // Clear cache

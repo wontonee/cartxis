@@ -2,12 +2,33 @@
 import { Link, usePage } from '@inertiajs/vue3';
 import { ref, computed, onMounted, onUnmounted, watch } from 'vue';
 import CartIcon from './CartIcon.vue';
+import LanguageSwitcher from '@/components/LanguageSwitcher.vue';
 import { useStorefrontMenu } from '@/composables/useStorefrontMenu';
 import { useWishlist } from '@/composables/useWishlist';
 import { Heart, Menu, Search, X } from 'lucide-vue-next';
 import axios from 'axios';
 import { useCurrency } from '@/composables/useCurrency';
 import { useThemeSettings } from '@/composables/useThemeSettings';
+import { useI18n } from 'vue-i18n';
+
+const { t, te } = useI18n();
+
+/** Map common English CMS menu titles to i18n keys. */
+const menuTitle = (title: string | null | undefined): string => {
+    if (!title) return '';
+    const map: Record<string, string> = {
+        Shop: 'common.shop',
+        Categories: 'common.categories',
+        Deals: 'common.deals',
+        About: 'common.about',
+        'About Us': 'common.about',
+        Blog: 'common.blog',
+        Home: 'common.home',
+        Products: 'common.products',
+    };
+    const key = map[title];
+    return key && te(key) ? String(t(key)) : title;
+};
 
 interface SearchSuggestion {
     id: number;
@@ -307,7 +328,7 @@ onUnmounted(() => {
                                 :href="getMenuUrl(item)" 
                                 class="text-gray-700 hover:text-gray-900 transition-colors"
                             >
-                                {{ item.title }}
+                                {{ menuTitle(item.title) }}
                             </Link>
 
                             <!-- Menu Item with Dropdown -->
@@ -316,7 +337,7 @@ onUnmounted(() => {
                                 @click="toggleDropdown(item.id)"
                                 class="text-gray-700 hover:text-gray-900 transition-colors flex items-center space-x-1"
                             >
-                                <span>{{ item.title }}</span>
+                                <span>{{ menuTitle(item.title) }}</span>
                                 <svg 
                                     class="w-4 h-4 transition-transform"
                                     :class="{ 'rotate-180': activeDropdown === item.id }"
@@ -354,7 +375,7 @@ onUnmounted(() => {
                                             :href="getMenuUrl(child)"
                                             class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900"
                                         >
-                                            {{ child.title }}
+                                            {{ menuTitle(child.title) }}
                                         </Link>
                                     </template>
                                 </div>
@@ -365,7 +386,7 @@ onUnmounted(() => {
                     <!-- Fallback to hardcoded menu while loading -->
                     <template v-else>
                         <Link href="/products" class="text-gray-700 hover:text-gray-900 transition-colors">
-                            Shop
+                            {{ t('common.shop') }}
                         </Link>
                         
                         <!-- Categories Dropdown -->
@@ -374,7 +395,7 @@ onUnmounted(() => {
                                 @click="toggleCategoriesDropdown"
                                 class="text-gray-700 hover:text-gray-900 transition-colors flex items-center space-x-1"
                             >
-                                <span>Categories</span>
+                                <span>{{ t('common.categories') }}</span>
                                 <svg 
                                     class="w-4 h-4 transition-transform duration-200" 
                                     :class="{ 'rotate-180': showCategoriesDropdown }"
@@ -412,24 +433,24 @@ onUnmounted(() => {
                                             class="block px-4 py-2 text-sm font-medium transition-colors hover:bg-gray-100"
                                             :style="{ color: primary }"
                                         >
-                                            View All Categories →
+                                            {{ t('common.viewAllCategories') }} →
                                         </Link>
                                     </template>
                                     <div v-else class="px-4 py-3 text-sm text-gray-500">
-                                        No categories available
+                                        {{ t('common.noCategories') }}
                                     </div>
                                 </div>
                             </div>
                         </div>
                         
                         <Link href="/products?on_sale=1" class="text-gray-700 hover:text-gray-900 transition-colors">
-                            Deals
+                            {{ t('common.deals') }}
                         </Link>
                         <Link href="/blog" class="text-gray-700 hover:text-gray-900 transition-colors">
-                            Blog
+                            {{ t('common.blog') }}
                         </Link>
                         <Link href="/about-us" class="text-gray-700 hover:text-gray-900 transition-colors">
-                            About
+                            {{ t('common.about') }}
                         </Link>
                     </template>
                 </nav>
@@ -440,7 +461,7 @@ onUnmounted(() => {
                     <button
                         type="button"
                         class="md:hidden p-2 rounded-lg text-slate-700 hover:bg-slate-100"
-                        aria-label="Search"
+                        :aria-label="t('common.search')"
                         @click="mobileSearchOpen = !mobileSearchOpen"
                     >
                         <Search class="w-5 h-5" />
@@ -452,8 +473,8 @@ onUnmounted(() => {
                             ref="searchInputRef"
                             v-model="searchQuery"
                             type="text"
-                            placeholder="Search products..."
-                            class="w-64 rounded-lg border border-gray-300 px-4 py-2 pl-10 pr-10 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                            :placeholder="t('common.searchPlaceholder')"
+                            class="w-64 rounded-lg border border-gray-300 px-4 py-2 ps-10 pe-10 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                             @input="onSearchInput"
                             @keydown="handleKeyDown"
                             @focus="searchQuery.length >= 2 && fetchSuggestions()"
@@ -542,6 +563,8 @@ onUnmounted(() => {
                         </div>
                     </div>
 
+                    <LanguageSwitcher class="hidden sm:inline-flex" />
+
                     <!-- Cart Icon (Reusable) -->
                     <CartIcon />
 
@@ -550,12 +573,12 @@ onUnmounted(() => {
                         v-if="user && wishlistEnabled"
                         href="/account/wishlist"
                         class="relative p-2 text-gray-700 hover:text-red-500 transition-colors"
-                        title="Wishlist"
+                        :title="t('common.wishlist')"
                     >
                         <Heart class="w-6 h-6" />
                         <span 
                             v-if="wishlistCount > 0"
-                            class="absolute -top-1 -right-1 bg-red-500 text-white text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center"
+                            class="absolute -top-1 -end-1 bg-red-500 text-white text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center"
                         >
                             {{ wishlistCount }}
                         </span>
@@ -568,14 +591,14 @@ onUnmounted(() => {
                             class="hidden sm:inline-flex rounded-lg px-4 py-2 text-sm font-medium text-white hover:opacity-90 transition-opacity"
                             :style="{ backgroundColor: primary }"
                         >
-                            Login
+                            {{ t('common.login') }}
                         </Link>
                         <Link
                             href="/register"
                             class="hidden sm:inline-flex rounded-lg border-2 px-4 py-2 text-sm font-medium hover:bg-gray-50 transition-colors"
                             :style="{ borderColor: primary, color: primary }"
                         >
-                            Register
+                            {{ t('common.register') }}
                         </Link>
                     </template>
 
@@ -672,8 +695,8 @@ onUnmounted(() => {
                     <input
                         v-model="searchQuery"
                         type="text"
-                        placeholder="Search products..."
-                        class="w-full rounded-lg border border-gray-300 px-4 py-2 pl-10 pr-4 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        :placeholder="t('common.searchPlaceholder')"
+                        class="w-full rounded-lg border border-gray-300 px-4 py-2 ps-10 pe-4 focus:outline-none focus:ring-2 focus:ring-blue-500"
                         @input="onSearchInput"
                         @keydown="handleKeyDown"
                         autocomplete="off"
@@ -725,12 +748,12 @@ onUnmounted(() => {
                                 </template>
                             </template>
                             <template v-else>
-                                <Link href="/products" class="block px-3 py-3 rounded-lg text-slate-700 hover:bg-blue-50 font-medium" @click="closeMobileMenu">Shop</Link>
-                                <Link href="/products?on_sale=1" class="block px-3 py-3 rounded-lg text-slate-700 hover:bg-blue-50 font-medium" @click="closeMobileMenu">Deals</Link>
-                                <Link href="/blog" class="block px-3 py-3 rounded-lg text-slate-700 hover:bg-blue-50 font-medium" @click="closeMobileMenu">Blog</Link>
-                                <Link href="/about-us" class="block px-3 py-3 rounded-lg text-slate-700 hover:bg-blue-50 font-medium" @click="closeMobileMenu">About</Link>
+                                <Link href="/products" class="block px-3 py-3 rounded-lg text-slate-700 hover:bg-blue-50 font-medium" @click="closeMobileMenu">{{ t('common.shop') }}</Link>
+                                <Link href="/products?on_sale=1" class="block px-3 py-3 rounded-lg text-slate-700 hover:bg-blue-50 font-medium" @click="closeMobileMenu">{{ t('common.deals') }}</Link>
+                                <Link href="/blog" class="block px-3 py-3 rounded-lg text-slate-700 hover:bg-blue-50 font-medium" @click="closeMobileMenu">{{ t('common.blog') }}</Link>
+                                <Link href="/about-us" class="block px-3 py-3 rounded-lg text-slate-700 hover:bg-blue-50 font-medium" @click="closeMobileMenu">{{ t('common.about') }}</Link>
                                 <div v-if="categories?.length" class="pt-2">
-                                    <p class="px-3 py-2 text-xs font-semibold uppercase tracking-wide text-slate-400">Categories</p>
+                                    <p class="px-3 py-2 text-xs font-semibold uppercase tracking-wide text-slate-400">{{ t('common.categories') }}</p>
                                     <Link
                                         v-for="category in categories"
                                         :key="category.id"
@@ -752,7 +775,7 @@ onUnmounted(() => {
                                     :style="{ backgroundColor: primary }"
                                     @click="closeMobileMenu"
                                 >
-                                    Login
+                                    {{ t('common.login') }}
                                 </Link>
                                 <Link
                                     href="/register"
@@ -760,11 +783,14 @@ onUnmounted(() => {
                                     :style="{ borderColor: primary, color: primary }"
                                     @click="closeMobileMenu"
                                 >
-                                    Create Account
+                                    {{ t('common.register') }}
                                 </Link>
+                                <div class="flex justify-center pt-2">
+                                    <LanguageSwitcher />
+                                </div>
                             </template>
                             <Link v-else href="/account" class="block w-full text-center rounded-lg bg-slate-100 px-4 py-3 text-sm font-medium text-slate-800" @click="closeMobileMenu">
-                                My Account
+                                {{ t('account.myAccount') }}
                             </Link>
                         </div>
                     </aside>

@@ -135,11 +135,25 @@ class ProductController extends Controller
     {
         $product = $this->productService->getProductBySlug($slug);
 
+        if (! $product) {
+            $product = \Cartxis\Product\Models\Product::query()
+                ->whereHas('translations', fn ($q) => $q->where('slug', $slug)->where('locale', app()->getLocale()))
+                ->where('status', 'enabled')
+                ->first();
+        }
+
         if (!$product) {
             abort(404, 'Product not found');
         }
 
+        $product->loadMissing('translations');
+        $product->translate(app()->getLocale());
+
         $relatedProducts = $this->productService->getRelatedProducts($product->id);
+        $relatedProducts->each(function ($related) {
+            $related->loadMissing('translations');
+            $related->translate(app()->getLocale());
+        });
 
         // Get configurable attributes if product has them
         $configurableAttributes = [];

@@ -51,6 +51,11 @@ import {
   Palette,
   Paintbrush,
   SlidersHorizontal,
+  Map,
+  MapPin,
+  Bike,
+  Wallet,
+  Split,
 } from 'lucide-vue-next'
 
 export interface IconMap {
@@ -111,9 +116,18 @@ export function useMenuIcons() {
     'layout': Layout,
     'monitor': Monitor,
     'layout-template': LayoutTemplate,
+    // Delivery / Multi-Vendor extension menus
+    'map': Map,
+    'map-pin': MapPin,
+    'bike': Bike,
+    'wallet': Wallet,
+    'split': Split,
   }
 
-  const getIcon = (iconName: string): Component | null => {
+  const getIcon = (iconName?: string | null): Component | null => {
+    if (!iconName) {
+      return null
+    }
     return iconMap[iconName] || null
   }
 

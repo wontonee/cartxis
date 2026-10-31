@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue';
+// computed used for i18n titles below
 import { Head, router, usePage } from '@inertiajs/vue3';
 import AdminLayout from '@/layouts/AdminLayout.vue';
 import ConfirmDeleteModal from '@/components/Admin/ConfirmDeleteModal.vue';
@@ -20,6 +21,10 @@ import {
     CheckCircle,
     MoreHorizontal
 } from 'lucide-vue-next';
+import { useAdminI18n } from '@/composables/useAdminI18n';
+
+const { common: tCommon, menuTitle } = useAdminI18n();
+const localesPageTitle = computed(() => `${menuTitle('settings-locales')} & ${tCommon('countries')}`);
 
 interface Locale {
     id: number;
@@ -302,15 +307,15 @@ const confirmDelete = () => {
 </script>
 
 <template>
-    <AdminLayout title="Locales & Countries">
-        <Head title="Locales & Countries" />
+    <AdminLayout :title="localesPageTitle">
+        <Head :title="localesPageTitle" />
         
         <div class="space-y-6">
             <!-- Header -->
             <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                 <div>
-                    <h1 class="text-2xl font-bold text-gray-900 dark:text-white">Locales & Countries</h1>
-                    <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">Manage countries, languages and currencies for your store</p>
+                    <h1 class="text-2xl font-bold text-gray-900 dark:text-white">{{ localesPageTitle }}</h1>
+                    <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">{{ tCommon('manageLocalesDescription') }}</p>
                 </div>
                 <div class="flex gap-3">
                     <button
@@ -319,7 +324,7 @@ const confirmDelete = () => {
                         class="inline-flex items-center px-4 py-2 bg-blue-600 border border-transparent rounded-lg font-semibold text-xs text-white uppercase tracking-widest hover:bg-blue-700 focus:bg-blue-700 active:bg-blue-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition ease-in-out duration-150"
                     >
                         <Plus class="w-4 h-4 mr-2" />
-                        Add Country
+                        {{ tCommon('addCountry') }}
                     </button>
                     <button
                         v-if="activeTab === 'languages'"
@@ -327,7 +332,7 @@ const confirmDelete = () => {
                         class="inline-flex items-center px-4 py-2 bg-blue-600 border border-transparent rounded-lg font-semibold text-xs text-white uppercase tracking-widest hover:bg-blue-700 focus:bg-blue-700 active:bg-blue-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition ease-in-out duration-150"
                     >
                         <Plus class="w-4 h-4 mr-2" />
-                        Add Language
+                        {{ tCommon('addLanguage') }}
                     </button>
                     <button
                         v-if="activeTab === 'currencies'"
@@ -335,7 +340,7 @@ const confirmDelete = () => {
                         class="inline-flex items-center px-4 py-2 bg-blue-600 border border-transparent rounded-lg font-semibold text-xs text-white uppercase tracking-widest hover:bg-blue-700 focus:bg-blue-700 active:bg-blue-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition ease-in-out duration-150"
                     >
                         <Plus class="w-4 h-4 mr-2" />
-                        Add Currency
+                        {{ tCommon('addCurrency') }}
                     </button>
                 </div>
             </div>
@@ -354,7 +359,7 @@ const confirmDelete = () => {
                             ]"
                         >
                             <Globe class="w-4 h-4 mr-2" :class="activeTab === 'countries' ? 'text-blue-500' : 'text-gray-400 group-hover:text-gray-500'" />
-                            Countries
+                            {{ tCommon('countries') }}
                         </button>
                         <button
                             @click="activeTab = 'languages'"
@@ -366,7 +371,7 @@ const confirmDelete = () => {
                             ]"
                         >
                             <Languages class="w-4 h-4 mr-2" :class="activeTab === 'languages' ? 'text-blue-500' : 'text-gray-400 group-hover:text-gray-500'" />
-                            Languages
+                            {{ tCommon('languages') }}
                         </button>
                         <button
                             @click="activeTab = 'currencies'"
@@ -378,7 +383,7 @@ const confirmDelete = () => {
                             ]"
                         >
                             <Coins class="w-4 h-4 mr-2" :class="activeTab === 'currencies' ? 'text-blue-500' : 'text-gray-400 group-hover:text-gray-500'" />
-                            Currencies
+                            {{ tCommon('currencies') }}
                         </button>
                     </div>
                 </div>
@@ -394,7 +399,7 @@ const confirmDelete = () => {
                                 <input
                                     v-model="countrySearch"
                                     type="text"
-                                    placeholder="Search by name, code or phone code..."
+                                    :placeholder="tCommon('searchCountries')"
                                     class="w-full pl-10 pr-4 py-2.5 bg-gray-50 dark:bg-gray-700/50 border border-gray-200 dark:border-gray-600 rounded-lg text-sm text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all placeholder:text-gray-400"
                                 />
                             </div>
@@ -404,9 +409,9 @@ const confirmDelete = () => {
                                     v-model="countryStatusFilter"
                                     class="w-full pl-10 pr-8 py-2.5 bg-gray-50 dark:bg-gray-700/50 border border-gray-200 dark:border-gray-600 rounded-lg text-sm text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all appearance-none cursor-pointer"
                                 >
-                                    <option value="">All Status</option>
-                                    <option value="1">Active</option>
-                                    <option value="0">Inactive</option>
+                                    <option value="">{{ tCommon('allStatus') }}</option>
+                                    <option value="1">{{ tCommon('active') }}</option>
+                                    <option value="0">{{ tCommon('inactive') }}</option>
                                 </select>
                                 <div class="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none">
                                     <ChevronDown class="w-3 h-3 text-gray-400" />
@@ -451,12 +456,12 @@ const confirmDelete = () => {
                                                 class="rounded border-gray-300 dark:border-gray-600 text-blue-600 focus:ring-blue-500 bg-white dark:bg-gray-700 w-4 h-4"
                                             />
                                         </th>
-                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Code</th>
-                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Name</th>
-                                        <th class="hidden md:table-cell px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Phone</th>
-                                        <th class="hidden md:table-cell px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Currency</th>
-                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Status</th>
-                                        <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Actions</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">{{ tCommon('code') }}</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">{{ tCommon('name') }}</th>
+                                        <th class="hidden md:table-cell px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">{{ tCommon('phone') }}</th>
+                                        <th class="hidden md:table-cell px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">{{ tCommon('currency') }}</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">{{ tCommon('status') }}</th>
+                                        <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">{{ tCommon('actions') }}</th>
                                     </tr>
                                 </thead>
                                 <tbody class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
@@ -485,14 +490,14 @@ const confirmDelete = () => {
                                                 class="px-2.5 py-0.5 inline-flex items-center text-xs font-medium rounded-full cursor-pointer hover:opacity-75 transition-opacity"
                                             >
                                                 <span class="w-1.5 h-1.5 rounded-full mr-1.5" :class="country.is_active ? 'bg-green-500' : 'bg-gray-500'"></span>
-                                                {{ country.is_active ? 'Active' : 'Inactive' }}
+                                                {{ country.is_active ? tCommon('active') : tCommon('inactive') }}
                                             </button>
                                         </td>
                                         <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium space-x-2">
-                                            <button @click="openEditCountryModal(country)" class="text-gray-400 hover:text-blue-600 dark:text-gray-400 dark:hover:text-blue-400 p-1.5 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-lg transition-colors" title="Edit">
+                                            <button @click="openEditCountryModal(country)" class="text-gray-400 hover:text-blue-600 dark:text-gray-400 dark:hover:text-blue-400 p-1.5 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-lg transition-colors" :title="tCommon('edit')">
                                                 <Edit class="w-4 h-4" />
                                             </button>
-                                            <button @click="deleteTarget = { type: 'country', item: country }; showDeleteModal = true" class="text-gray-400 hover:text-red-600 dark:text-gray-400 dark:hover:text-red-400 p-1.5 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors" title="Delete">
+                                            <button @click="deleteTarget = { type: 'country', item: country }; showDeleteModal = true" class="text-gray-400 hover:text-red-600 dark:text-gray-400 dark:hover:text-red-400 p-1.5 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors" :title="tCommon('delete')">
                                                 <Trash2 class="w-4 h-4" />
                                             </button>
                                         </td>
@@ -500,7 +505,7 @@ const confirmDelete = () => {
                                 </tbody>
                             </table>
                         </div>
-                        <p class="mt-3 text-xs text-gray-400 dark:text-gray-500">Showing {{ filteredCountries.length }} of {{ countries.length }} countries</p>
+                        <p class="mt-3 text-xs text-gray-400 dark:text-gray-500">{{ tCommon('showingOf', '', { filtered: filteredCountries.length, total: countries.length }) }}</p>
                     </div>
 
                     <!-- Languages Tab -->
@@ -509,12 +514,12 @@ const confirmDelete = () => {
                             <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
                                 <thead class="bg-gray-50 dark:bg-gray-700/50">
                                     <tr>
-                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Code</th>
-                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Name</th>
-                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Native Name</th>
-                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Direction</th>
-                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Status</th>
-                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Default</th>
+                                        <th class="px-6 py-3 text-start text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">{{ tCommon('code') }}</th>
+                                        <th class="px-6 py-3 text-start text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">{{ tCommon('name') }}</th>
+                                        <th class="px-6 py-3 text-start text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">{{ tCommon('nativeName') }}</th>
+                                        <th class="px-6 py-3 text-start text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">{{ tCommon('direction') }}</th>
+                                        <th class="px-6 py-3 text-start text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">{{ tCommon('status') }}</th>
+                                        <th class="px-6 py-3 text-start text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">{{ tCommon('default') }}</th>
                                         <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Actions</th>
                                     </tr>
                                 </thead>
@@ -527,7 +532,7 @@ const confirmDelete = () => {
                                         <td class="px-6 py-4 whitespace-nowrap">
                                             <span :class="locale.is_active ? 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300' : 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300'" class="px-2.5 py-0.5 inline-flex items-center text-xs font-medium rounded-full">
                                                 <span class="w-1.5 h-1.5 rounded-full mr-1.5" :class="locale.is_active ? 'bg-green-500' : 'bg-gray-500'"></span>
-                                                {{ locale.is_active ? 'Active' : 'Inactive' }}
+                                                {{ locale.is_active ? tCommon('active') : tCommon('inactive') }}
                                             </span>
                                         </td>
                                         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white">
@@ -591,7 +596,7 @@ const confirmDelete = () => {
                                         <td class="px-6 py-4 whitespace-nowrap">
                                             <span :class="currency.is_active ? 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300' : 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300'" class="px-2.5 py-0.5 inline-flex items-center text-xs font-medium rounded-full">
                                                 <span class="w-1.5 h-1.5 rounded-full mr-1.5" :class="currency.is_active ? 'bg-green-500' : 'bg-gray-500'"></span>
-                                                {{ currency.is_active ? 'Active' : 'Inactive' }}
+                                                {{ currency.is_active ? tCommon('active') : tCommon('inactive') }}
                                             </span>
                                         </td>
                                         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white">
