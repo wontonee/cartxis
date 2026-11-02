@@ -538,7 +538,7 @@ const confirmDelete = () => {
                                         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white">
                                             <span v-if="locale.is_default" class="inline-flex items-center text-blue-600 dark:text-blue-400 font-medium text-xs bg-blue-50 dark:bg-blue-900/20 px-2 py-1 rounded">
                                                 <Check class="w-3 h-3 mr-1" />
-                                                Default
+                                                {{ tCommon('default') }}
                                             </span>
                                         </td>
                                         <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium space-x-2">
@@ -602,7 +602,7 @@ const confirmDelete = () => {
                                         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white">
                                             <span v-if="currency.is_default" class="inline-flex items-center text-blue-600 dark:text-blue-400 font-medium text-xs bg-blue-50 dark:bg-blue-900/20 px-2 py-1 rounded">
                                                 <Check class="w-3 h-3 mr-1" />
-                                                Default
+                                                {{ tCommon('default') }}
                                             </span>
                                         </td>
                                         <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium space-x-2">

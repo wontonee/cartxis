@@ -8,6 +8,7 @@ use Cartxis\Core\Database\Seeders\LocaleSeeder;
 use Cartxis\Core\Models\Locale;
 use Cartxis\Core\Services\LocaleService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\File;
 
 uses(RefreshDatabase::class);
 
@@ -83,4 +84,64 @@ test('spa locale switch returns json i18n payload without redirect', function ()
         ->assertJsonPath('i18n.messages.common.login', 'Giriş yap');
 
     expect(session(LocaleService::SESSION_KEY))->toBe('tr');
+});
+
+test('ui messages merge discovered extension locale catalogs with english fallback', function () {
+    $code = 'cartxis-i18n-fixture';
+    $path = base_path("extension/{$code}");
+
+    File::ensureDirectoryExists("{$path}/resources/locales");
+    File::put("{$path}/extension.json", json_encode([
+        'code' => $code,
+        'name' => 'I18n Fixture',
+        'version' => '1.0.0',
+    ], JSON_THROW_ON_ERROR));
+    File::put("{$path}/resources/locales/en.json", json_encode([
+        'extensions' => [
+            'cartxis_i18n_fixture' => [
+                'hello' => 'Hello from extension',
+                'only_en' => 'English only',
+            ],
+        ],
+    ], JSON_THROW_ON_ERROR));
+    File::put("{$path}/resources/locales/tr.json", json_encode([
+        'extensions' => [
+            'cartxis_i18n_fixture' => [
+                'hello' => 'Eklentiden merhaba',
+            ],
+        ],
+    ], JSON_THROW_ON_ERROR));
+
+    try {
+        $en = app(LocaleService::class)->uiMessages('en');
+        expect($en['extensions']['cartxis_i18n_fixture']['hello'] ?? null)->toBe('Hello from extension');
+
+        $tr = app(LocaleService::class)->uiMessages('tr');
+        expect($tr['extensions']['cartxis_i18n_fixture']['hello'] ?? null)->toBe('Eklentiden merhaba')
+            ->and($tr['extensions']['cartxis_i18n_fixture']['only_en'] ?? null)->toBe('English only');
+    } finally {
+        File::deleteDirectory($path);
+    }
+});
+
+test('flat extension locale json is auto-namespaced under extensions snake code', function () {
+    $code = 'flat-locale-pack';
+    $path = base_path("extension/{$code}");
+
+    File::ensureDirectoryExists("{$path}/resources/locales");
+    File::put("{$path}/extension.json", json_encode([
+        'code' => $code,
+        'name' => 'Flat Pack',
+        'version' => '1.0.0',
+    ], JSON_THROW_ON_ERROR));
+    File::put("{$path}/resources/locales/en.json", json_encode([
+        'title' => 'Flat title',
+    ], JSON_THROW_ON_ERROR));
+
+    try {
+        $messages = app(LocaleService::class)->uiMessages('en');
+        expect($messages['extensions']['flat_locale_pack']['title'] ?? null)->toBe('Flat title');
+    } finally {
+        File::deleteDirectory($path);
+    }
 });

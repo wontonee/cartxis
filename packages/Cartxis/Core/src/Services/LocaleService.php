@@ -8,6 +8,7 @@ use Cartxis\Core\Models\Locale;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Schema;
+use Illuminate\Support\Str;
 
 class LocaleService
 {
@@ -126,12 +127,31 @@ class LocaleService
     /**
      * Frontend UI message catalog for vue-i18n.
      *
+     * Core catalogs live in `resources/js/locales/{locale}.json`.
+     * Discovered extensions may ship packs under:
+     * - `{extension}/resources/locales/{locale}.json` (preferred)
+     * - `{extension}/Resources/locales/{locale}.json`
+     *
+     * Prefer nesting keys under `extensions.{snake_code}` so packs never collide
+     * with core strings. Flat JSON without an `extensions` root is auto-wrapped.
+     *
+     * Extensions can also mutate the final tree via `add_filter('cartxis.i18n.messages', ...)`.
+     *
      * @return array<string, mixed>
      */
     public function uiMessages(string $locale): array
     {
         $fallback = $this->loadJsonCatalog('en');
         $messages = $locale === 'en' ? $fallback : array_replace_recursive($fallback, $this->loadJsonCatalog($locale));
+
+        $messages = $this->mergeExtensionCatalogs($messages, $locale);
+
+        if (function_exists('apply_filters')) {
+            $filtered = apply_filters('cartxis.i18n.messages', $messages, $locale);
+            if (is_array($filtered)) {
+                $messages = $filtered;
+            }
+        }
 
         return $messages;
     }
@@ -141,8 +161,90 @@ class LocaleService
      */
     public function loadJsonCatalog(string $locale): array
     {
-        $path = resource_path("js/locales/{$locale}.json");
+        return $this->decodeLocaleJson(resource_path("js/locales/{$locale}.json"));
+    }
 
+    /**
+     * Merge locale JSON from every discovered filesystem / bundled extension.
+     *
+     * @param  array<string, mixed>  $messages
+     * @return array<string, mixed>
+     */
+    public function mergeExtensionCatalogs(array $messages, string $locale): array
+    {
+        try {
+            $discovered = app(ExtensionService::class)->discover();
+        } catch (\Throwable) {
+            return $messages;
+        }
+
+        foreach ($discovered as $item) {
+            $path = $item['path'] ?? null;
+            $code = $item['manifest']['code'] ?? null;
+
+            if (! is_string($path) || ! is_string($code) || $code === '') {
+                continue;
+            }
+
+            $english = $this->loadExtensionJsonCatalog($path, 'en');
+            $localized = $locale === 'en'
+                ? $english
+                : array_replace_recursive($english, $this->loadExtensionJsonCatalog($path, $locale));
+
+            if ($localized === []) {
+                continue;
+            }
+
+            if (isset($localized['extensions']) && is_array($localized['extensions'])) {
+                $messages = array_replace_recursive($messages, $localized);
+
+                continue;
+            }
+
+            $namespace = $this->extensionLocaleNamespace($code);
+            $messages = array_replace_recursive($messages, [
+                'extensions' => [
+                    $namespace => $localized,
+                ],
+            ]);
+        }
+
+        return $messages;
+    }
+
+    /**
+     * Stable vue-i18n namespace for an extension code (`my-feature` → `my_feature`).
+     */
+    public function extensionLocaleNamespace(string $code): string
+    {
+        return Str::snake(str_replace(['-', '.'], '_', $code));
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    public function loadExtensionJsonCatalog(string $extensionPath, string $locale): array
+    {
+        $candidates = [
+            $extensionPath.'/resources/locales/'.$locale.'.json',
+            $extensionPath.'/Resources/locales/'.$locale.'.json',
+        ];
+
+        foreach ($candidates as $candidate) {
+            $decoded = $this->decodeLocaleJson($candidate);
+            if ($decoded !== []) {
+                return $decoded;
+            }
+        }
+
+        return [];
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    private function decodeLocaleJson(string $path): array
+    {
         if (! File::exists($path)) {
             return [];
         }

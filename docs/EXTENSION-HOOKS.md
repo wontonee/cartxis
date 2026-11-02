@@ -32,5 +32,10 @@ When `$extensionCode` is set, uninstall via `cartxis:extensions:uninstall` delet
 | `cart.item.added` | new cart line | `$product`, `$itemPayload` |
 | `product.query` | Eloquent builder | `$request` |
 | `product.saving` | `$validated` array | `$product\|null`, `$request` |
+| `cartxis.i18n.messages` | vue-i18n message tree (array) | `$locale` |
 
 Existing: `cart.shipping`, `cart.taxes`, `theme.shared_data`, `storefront.body.end`, `extension.*`.
+
+### Extension UI locales
+
+Ship JSON under `resources/locales/{locale}.json` (auto-merged). Use `cartxis.i18n.messages` only when you need runtime / dynamic strings. Full guide: [I18N.md](./I18N.md#extension-language-packs).

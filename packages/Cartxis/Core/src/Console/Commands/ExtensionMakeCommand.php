@@ -167,18 +167,79 @@ class ExtensionMakeCommand extends Command
             }
         }
 
+        $this->writeLocaleStubs($targetPath, $code, $name);
+
         $this->newLine();
         $this->info('Extension scaffold created successfully.');
         $this->line("Path: {$targetPath}");
         $this->line("Code: {$code}");
         $this->line("Provider: {$namespace}\\Providers\\{$providerClass}");
+        $localeNs = Str::snake(str_replace(['-', '.'], '_', $code));
+        $this->line("UI locales: resources/locales/{en,ar,...}.json → \$t('extensions.{$localeNs}.*')");
         $this->newLine();
         $this->line('Next steps:');
         $this->line('1) php artisan cartxis:extensions:sync');
         $this->line("2) php artisan cartxis:extensions:install {$code}");
         $this->line("3) php artisan cartxis:extensions:activate {$code}");
+        $this->line('4) Translate resources/locales/en.json into other codes (see docs/I18N.md)');
 
         return self::SUCCESS;
+    }
+
+    /**
+     * Seed vue-i18n packs under resources/locales so authors know the convention.
+     */
+    protected function writeLocaleStubs(string $targetPath, string $code, string $name): void
+    {
+        $namespace = Str::snake(str_replace(['-', '.'], '_', $code));
+        $dir = $targetPath . '/resources/locales';
+        File::ensureDirectoryExists($dir);
+
+        $enPath = $dir . '/en.json';
+        if (! File::exists($enPath)) {
+            $catalog = [
+                'extensions' => [
+                    $namespace => [
+                        'name' => $name,
+                        'settings' => 'Settings',
+                        'description' => "Manage {$name}",
+                    ],
+                ],
+            ];
+
+            File::put(
+                $enPath,
+                json_encode($catalog, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) . PHP_EOL
+            );
+        }
+
+        $readmePath = $dir . '/README.md';
+        if (! File::exists($readmePath)) {
+            File::put($readmePath, <<<MD
+# Extension UI languages
+
+Add one JSON file per locale code (`en.json`, `ar.json`, `tr.json`, …).
+
+Cartxis merges these into the storefront/admin `vue-i18n` catalog automatically
+when the extension is discovered. Prefer the `extensions.{$namespace}` namespace:
+
+```json
+{
+  "extensions": {
+    "{$namespace}": {
+      "settings": "Settings"
+    }
+  }
+}
+```
+
+In Vue: `t('extensions.{$namespace}.settings')`
+
+See `docs/I18N.md` → Extension language packs.
+
+MD
+            );
+        }
     }
 
     protected function rewriteManifest(
