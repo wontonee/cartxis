@@ -23,6 +23,7 @@ A modern, extensible eCommerce platform built with **Laravel 13**, **Inertia.js*
 - **Customer Accounts** — Registration, authentication, profile, order history, and digital downloads
 - **Theme System** — Flexible theme architecture with easy customization
 - **Friendly Setup Wizard** — Start with retail, grocery, electronics, fashion, digital downloads, RFQ, or a blank catalog
+- **Multi-language & RTL** — Storefront + admin UI packs for Middle East, Europe, and Africa; Arabic/Hebrew/Persian RTL; product & category translations; language switcher; extension authors can ship their own locale JSON ([docs/I18N.md](docs/I18N.md))
 
 ### 🎛️ Admin Features
 - **Dashboard** — Analytics and key insights at a glance
@@ -30,7 +31,8 @@ A modern, extensible eCommerce platform built with **Laravel 13**, **Inertia.js*
 - **Quote Requests Inbox** — Review and update RFQ submissions from Catalog → Quote Requests
 - **Order Processing** — Complete order lifecycle with status management
 - **Customer Management** — Profiles, addresses, and notes
-- **Settings** — Store configuration, payment methods, shipping rates, and tax rules
+- **Settings** — Store configuration, locales & currencies, payment methods, shipping rates, and tax rules
+- **Admin language** — Same locale packs as the storefront for sidebar, chrome, and Locales settings
 - **MCP Server** — Connect Cursor, Claude Code, VS Code, and other AI clients to manage catalog, orders, customers, and safe settings ([docs/MCP.md](docs/MCP.md))
 - **AI Agents** — Create and manage custom AI agents for commerce workflows
 - **Email Templates** — Customizable transactional email templates
@@ -93,6 +95,7 @@ In the **Google Play Console → App content → Data safety**, paste this URL i
 - **Two-Factor Authentication** — Enhanced security with 2FA
 - **Email Verification** — Built-in email verification workflow
 - **Fortify Integration** — Laravel Fortify for authentication
+- **Internationalization** — `vue-i18n` catalogs, Inertia locale share, API `Accept-Language` / `X-Locale`, and extension language packs
 
 ---
 
@@ -557,6 +560,7 @@ Please follow PSR-12 for PHP, write tests for new features, and update documenta
 | [docs/THEMES.md](docs/THEMES.md) | Install, activate, customize & troubleshoot themes |
 | [docs/THEME_DIRECTORY_API.md](docs/THEME_DIRECTORY_API.md) | Remote theme catalog API & env vars |
 | [docs/USER_GUIDE.md](docs/USER_GUIDE.md) | Full admin user manual |
+| [docs/I18N.md](docs/I18N.md) | Multi-language, RTL, and extension locale packs |
 | [docs/QUICK_REFERENCE.md](docs/QUICK_REFERENCE.md) | Developer commands & architecture |
 | [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) | Package map & data flows |
 | [docs/UPGRADE.md](docs/UPGRADE.md) | Version upgrades |
@@ -594,6 +598,7 @@ For billing, licensing, or partnership enquiries, contact us at **dev@wontonee.c
 - [x] Mobile app — Android ([Google Play](https://play.google.com/store/apps/details?id=com.cartxis.app)) · [Open source](https://github.com/wontonee/cartxis-mobile)
 - [x] Interactive CLI installer (`php artisan cartxis:install`)
 - [x] Composer create-project support
+- [x] Multi-language support (i18n) — storefront + admin, ME / Europe / Africa packs, RTL, product translations, extension locale packs — [docs/I18N.md](docs/I18N.md)
 
 ### 🔜 Upcoming
 - [ ] iOS mobile app
@@ -601,7 +606,6 @@ For billing, licensing, or partnership enquiries, contact us at **dev@wontonee.c
 - [ ] Multi-vendor marketplace
 - [ ] Subscription products
 - [ ] Advanced SEO tools
-- [x] Multi-language support (i18n) — see [docs/I18N.md](docs/I18N.md) (ME / Europe / Africa + RTL)
 - [ ] Advanced analytics dashboard
 - [ ] Integration marketplace
 
