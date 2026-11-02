@@ -16,8 +16,9 @@ Route::middleware('web')->group(function () {
     });
 
     // Display page by slug
-    // Exclude auth routes and other system routes
+    // Exclude auth routes, admin, and marketplace/extension portals (vendor, delivery, …)
     Route::get('/{slug}', [PageController::class, 'show'])
         ->name('page.show')
-        ->where('slug', '^(?!register|login|logout|forgot-password|reset-password|verify-email|dashboard|settings|admin|api)[a-z0-9-]+$');
+        ->where('slug', '^(?!register|login|logout|forgot-password|reset-password|verify-email|dashboard|settings|admin|api|vendor|vendors|rider|riders|delivery)[a-z0-9-]+$');
 });
+

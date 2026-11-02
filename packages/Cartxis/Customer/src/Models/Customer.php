@@ -30,6 +30,7 @@ class Customer extends Model
         'is_verified',
         'is_guest',
         'newsletter_subscribed',
+        'preferred_locale',
         'total_orders',
         'total_spent',
         'average_order_value',

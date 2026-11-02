@@ -42,6 +42,7 @@ class DatabaseSeeder extends Seeder
             // Core Package Seeders
             CountrySeeder::class,
             CurrencySeeder::class,
+            LocaleSeeder::class,
             PaymentMethodsTableSeeder::class,
             ShippingMethodSeeder::class,
             TaxSeeder::class,

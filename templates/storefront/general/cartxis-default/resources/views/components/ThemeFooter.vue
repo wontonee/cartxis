@@ -104,7 +104,7 @@ const footerSections = computed(() => {
                     <span class="text-xs">Visa · Mastercard · PayPal · Stripe</span>
                 </div>
                 <div class="text-center text-sm">
-                    <p>&copy; {{ currentYear }} {{ siteConfig.name }}. All rights reserved.</p>
+                    <p>&copy; {{ currentYear }} {{ siteConfig.name }}. {{ $t('footer.rightsReserved') }}</p>
                     <p v-if="showPlatformBranding" class="mt-1 text-slate-500">
                         Powered by <span class="text-slate-400 font-medium">Cartxis</span>
                     </p>

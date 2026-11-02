@@ -19,6 +19,11 @@ export function useCurrency() {
         return (page.props.currency as Currency) || null;
     });
 
+    const numberLocale = computed(() => {
+        const i18n = page.props.i18n as { intlLocale?: string; locale?: string } | undefined;
+        return i18n?.intlLocale || i18n?.locale || 'en-US';
+    });
+
     /**
      * Format a price with the default currency
      * @param amount - The amount to format
@@ -29,10 +34,11 @@ export function useCurrency() {
         showSymbol?: boolean;
     }): string => {
         const curr = currency.value;
+        const localeTag = numberLocale.value;
         
         if (!curr) {
             // Fallback if no currency is set
-            return new Intl.NumberFormat('en-US', {
+            return new Intl.NumberFormat(localeTag, {
                 style: 'currency',
                 currency: 'USD',
                 minimumFractionDigits: options?.decimals ?? 2,
@@ -43,8 +49,8 @@ export function useCurrency() {
         const decimals = options?.decimals ?? curr.decimalPlaces;
         const showSymbol = options?.showSymbol !== false;
         
-        // Format the number
-        const formattedAmount = new Intl.NumberFormat('en-US', {
+        // Format the number using the active storefront locale
+        const formattedAmount = new Intl.NumberFormat(localeTag, {
             minimumFractionDigits: decimals,
             maximumFractionDigits: decimals,
         }).format(amount);

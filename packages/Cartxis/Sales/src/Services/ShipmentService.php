@@ -287,13 +287,19 @@ class ShipmentService
                 $updateData['delivered_at'] = now();
             }
 
+            $oldStatus = $shipment->status;
             $shipment->update($updateData);
+            $shipment->refresh();
 
             // Send emails based on status change
             if ($status === Shipment::STATUS_SHIPPED) {
                 $this->sendShipmentShippedEmail($shipment);
             } elseif ($status === Shipment::STATUS_DELIVERED) {
                 $this->sendShipmentDeliveredEmail($shipment);
+            }
+
+            if (function_exists('do_action')) {
+                do_action('shipment.status.updated', $shipment, $oldStatus, $status);
             }
 
             DB::commit();

@@ -1136,7 +1136,7 @@ Additional store behavior configuration options.
 
 ### 11.3 Locales & Currencies
 
-Manage the languages and currencies your store supports.
+Manage the languages and currencies your store supports. Cartxis includes multi-language storefront UI packs (Middle East, Europe, Africa) with RTL for Arabic/Hebrew/Persian. See [I18N.md](./I18N.md).
 
 #### Locales
 
@@ -1148,6 +1148,8 @@ Manage the languages and currencies your store supports.
 | **Direction** | Text direction — `LTR` (left-to-right) or `RTL` (right-to-left) |
 | **Status** | Active or Inactive |
 | **Default** | Whether this is the default locale |
+
+Active locales appear in the storefront language switcher. Product and category edit screens include a Translations panel for non-default languages.
 
 #### Currencies
 

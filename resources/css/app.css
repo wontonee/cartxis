@@ -14,6 +14,10 @@
 @source '../../themes/**/*.js';
 @source '../../themes/**/*.ts';
 @source '../../themes/**/*.vue';
+@source '../../extension/**/*.vue';
+@source '../../extension/**/*.ts';
+@source '../../extension/**/*.js';
+
 
 @custom-variant dark (&:is(.dark *));
 

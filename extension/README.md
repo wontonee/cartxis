@@ -2,6 +2,8 @@
 
 This guide explains how to create a Cartxis extension (plugin) that can be installed/activated/deactivated via the `extensions` table.
 
+**Commercial extensions** (e.g. Multi-Vendor `cartxis-multivendor`, Delivery `cartxis-delivery`) are sold separately. Cursor specialists: `@cartxis-marketplace` (skill + implementor) owns both. They are **not** included in the public Cartxis git tree — after purchase, drop the package into `extension/<code>/`, then `sync` → `install` → `activate`. Those folders are gitignored so they never ship with OSS Cartxis.
+
 Cartxis supports two extension sources:
 
 1. **Bundled extensions** (first-party): discovered from `packages/Cartxis/*/extension.json`.

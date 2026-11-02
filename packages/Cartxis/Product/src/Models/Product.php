@@ -2,6 +2,7 @@
 
 namespace Cartxis\Product\Models;
 
+use Cartxis\Product\Support\ResolvesTranslations;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -11,7 +12,7 @@ use Illuminate\Support\Str;
 
 class Product extends Model
 {
-    use HasFactory, SoftDeletes;
+    use HasFactory, SoftDeletes, ResolvesTranslations;
 
     /**
      * Product type constants
@@ -100,6 +101,27 @@ class Product extends Model
                 $product->sku = 'PRD-' . strtoupper(Str::random(8));
             }
         });
+    }
+
+    public function translations(): HasMany
+    {
+        return $this->hasMany(ProductTranslation::class);
+    }
+
+    /**
+     * @return list<string>
+     */
+    protected function translatableAttributes(): array
+    {
+        return [
+            'name',
+            'slug',
+            'short_description',
+            'description',
+            'meta_title',
+            'meta_description',
+            'meta_keywords',
+        ];
     }
 
     /**

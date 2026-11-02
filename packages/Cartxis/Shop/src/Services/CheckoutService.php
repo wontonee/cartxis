@@ -75,6 +75,10 @@ class CheckoutService extends ShopService
             // Generate unique order number
             $orderNumber = Order::generateOrderNumber();
 
+            if (function_exists('do_action')) {
+                do_action('checkout.order.creating', $data, $cartItems, $totals);
+            }
+
             // Handle customer and user account creation
             $userId = $data['user_id'] ?? null;
             $customerId = null;
@@ -191,6 +195,11 @@ class CheckoutService extends ShopService
             // Session::forget('cart');
 
             $this->dispatchOrderCreatedEvent($order);
+
+            if (function_exists('do_action')) {
+                do_action('checkout.order.created', $order, $data, $cartItems);
+                do_action('checkout.order.placed', $order, $data, $cartItems);
+            }
 
             DB::commit();
 

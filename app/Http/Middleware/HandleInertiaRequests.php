@@ -6,6 +6,7 @@ use Illuminate\Foundation\Inspiring;
 use Illuminate\Http\Request;
 use Inertia\Middleware;
 use Cartxis\Core\Models\Currency;
+use Cartxis\Core\Services\LocaleService;
 use Cartxis\Core\Services\MenuService;
 use Cartxis\Core\Services\SettingService;
 use Cartxis\Admin\Services\AdminNotificationService;
@@ -83,12 +84,22 @@ class HandleInertiaRequests extends Middleware
                 'ziggy' => fn () => [
                     'location' => $request->url(),
                 ],
+                'i18n' => [
+                    'locale' => config('app.locale', 'en'),
+                    'fallbackLocale' => config('app.fallback_locale', 'en'),
+                    'direction' => 'ltr',
+                    'availableLocales' => [],
+                    'messages' => [],
+                ],
             ]);
         }
 
         $menuService = app(MenuService::class);
         $settingService = app(SettingService::class);
         $adminNotificationService = app(AdminNotificationService::class);
+        $localeService = app(LocaleService::class);
+        $currentLocale = app()->getLocale();
+        $direction = $request->attributes->get('cartxis_direction', $localeService->directionFor($currentLocale));
 
         // Build menu trees with error handling
         $adminMenu = [];
@@ -196,6 +207,15 @@ class HandleInertiaRequests extends Middleware
                     return null;
                 }
             },
+            'i18n' => [
+                'locale' => $currentLocale,
+                'fallbackLocale' => config('app.fallback_locale', 'en'),
+                'direction' => $direction,
+                'intlLocale' => $localeService->intlLocale($currentLocale),
+                'availableLocales' => $localeService->availableLocales(),
+                // Full catalogs for storefront; admin can ignore and stay English in Phase A.
+                'messages' => $localeService->uiMessages($currentLocale),
+            ],
             // Note: Theme-specific data (theme, contactInfo, socialLinks) is shared
             // by ShareFrontendData middleware via the hook system. Each theme registers
             // only the shared props it needs through its hooks.php file.

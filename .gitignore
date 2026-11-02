@@ -15,6 +15,9 @@ Agents.md
 /specificationandtask
 /specification
 /extension/cartxis-saleschat
+# Commercial extensions — do not ship with OSS Cartxis
+/extension/cartxis-multivendor
+/extension/cartxis-delivery
 /.github/agents/*
 /.github/copilot/*
 /example-shop

@@ -9,6 +9,7 @@ use Cartxis\Product\Models\InventoryAdjustment;
 use Cartxis\Core\Models\Currency;
 use Cartxis\Core\Services\SettingService;
 use Illuminate\Http\Request;
+use Illuminate\Support\Str;
 use Inertia\Inertia;
 use Inertia\Response;
 use Mews\Purifier\Facades\Purifier;
@@ -53,6 +54,10 @@ class ProductController extends Controller
         $sortBy = $request->input('sort_by', 'created_at');
         $sortOrder = $request->input('sort_order', 'desc');
         $query->orderBy($sortBy, $sortOrder);
+
+        if (function_exists('apply_filters')) {
+            $query = apply_filters('product.query', $query, $request);
+        }
 
         $products = $query->paginate(15)->withQueryString();
 
@@ -144,6 +149,13 @@ class ProductController extends Controller
             $validated['short_description'] = Purifier::clean($validated['short_description']);
         }
 
+        if (function_exists('do_action')) {
+            do_action('product.saving', $validated, null, $request);
+        }
+        if (function_exists('apply_filters')) {
+            $validated = apply_filters('product.saving', $validated, null, $request);
+        }
+
         $product = Product::create($validated);
 
         if (!empty($categoryIds)) {
@@ -171,6 +183,10 @@ class ProductController extends Controller
             }
         }
 
+        if (function_exists('do_action')) {
+            do_action('product.saved', $product, $request, true);
+        }
+
         // Flash the message to session
         session()->flash('success', 'Product created successfully!');
 
@@ -182,7 +198,7 @@ class ProductController extends Controller
      */
     public function edit(Product $product, SettingService $settings): Response
     {
-        $product->load(['categories', 'images', 'downloads', 'attributeValues.attribute', 'attributeValues.option']);
+        $product->load(['categories', 'images', 'downloads', 'attributeValues.attribute', 'attributeValues.option', 'translations']);
 
         // Load recent inventory adjustments
         $adjustmentHistory = InventoryAdjustment::where('product_id', $product->id)
@@ -194,8 +210,15 @@ class ProductController extends Controller
         // Get default currency
         $currency = Currency::getDefault();
 
+        $availableLocales = \Cartxis\Core\Models\Locale::query()
+            ->active()
+            ->orderBy('sort_order')
+            ->get(['code', 'name', 'native_name', 'direction', 'is_default']);
+
         return Inertia::render('Admin/Products/Edit', [
             'product' => $product,
+            'availableLocales' => $availableLocales,
+            'translations' => $product->translations->keyBy('locale'),
             'categories' => Category::enabled()->with('children')->whereNull('parent_id')->orderBy('name')->get(),
             'brands' => \Cartxis\Product\Models\Brand::where('status', true)->orderBy('name')->get(['id', 'name']),
             'taxClasses' => \Cartxis\Core\Models\TaxClass::orderBy('name')->get(['id', 'name', 'code']),
@@ -261,11 +284,21 @@ class ProductController extends Controller
             'category_ids' => 'nullable|array',
             'category_ids.*' => 'exists:categories,id',
             'attribute_values' => 'nullable|array',
+            'translations' => 'nullable|array',
+            'translations.*' => 'array',
+            'translations.*.name' => 'nullable|string|max:255',
+            'translations.*.slug' => 'nullable|string|max:255',
+            'translations.*.short_description' => 'nullable|string',
+            'translations.*.description' => 'nullable|string',
+            'translations.*.meta_title' => 'nullable|string|max:255',
+            'translations.*.meta_description' => 'nullable|string',
+            'translations.*.meta_keywords' => 'nullable|string',
         ]);
 
         $categoryIds = $validated['category_ids'] ?? [];
         $attributeValues = $validated['attribute_values'] ?? [];
-        unset($validated['category_ids'], $validated['attribute_values']);
+        $translations = $validated['translations'] ?? [];
+        unset($validated['category_ids'], $validated['attribute_values'], $validated['translations']);
 
         // Track inventory changes
         $oldQuantity = $product->quantity;
@@ -278,9 +311,35 @@ class ProductController extends Controller
             $validated['short_description'] = Purifier::clean($validated['short_description']);
         }
 
+        if (function_exists('do_action')) {
+            do_action('product.saving', $validated, $product, $request);
+        }
+        if (function_exists('apply_filters')) {
+            $validated = apply_filters('product.saving', $validated, $product, $request);
+        }
+
         $product->update($validated);
 
         $product->categories()->sync($categoryIds);
+
+        if (! empty($translations) && is_array($translations)) {
+            foreach ($translations as $locale => &$payload) {
+                if (! is_array($payload)) {
+                    continue;
+                }
+                if (! empty($payload['description'])) {
+                    $payload['description'] = Purifier::clean($payload['description']);
+                }
+                if (! empty($payload['short_description'])) {
+                    $payload['short_description'] = Purifier::clean($payload['short_description']);
+                }
+                if (empty($payload['slug']) && ! empty($payload['name'])) {
+                    $payload['slug'] = Str::slug($payload['name']);
+                }
+            }
+            unset($payload);
+            $product->syncTranslations($translations);
+        }
 
         // Update attribute values
         // First, get all current attribute IDs for this product
@@ -375,6 +434,10 @@ class ProductController extends Controller
         // Record inventory adjustment if quantity changed
         if ($oldQuantity != $newQuantity && auth()->check()) {
             $this->recordInventoryAdjustment($product, $oldQuantity, $newQuantity, $request);
+        }
+
+        if (function_exists('do_action')) {
+            do_action('product.saved', $product->fresh(), $request, false);
         }
 
         // Flash the message to session

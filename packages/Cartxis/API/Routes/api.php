@@ -13,9 +13,11 @@ use Cartxis\API\Http\Controllers\V1\WishlistController;
 use Cartxis\API\Http\Controllers\V1\ReviewController;
 use Cartxis\API\Http\Controllers\V1\SearchController;
 use Cartxis\API\Http\Controllers\V1\CurrencyController;
+use Cartxis\API\Http\Controllers\V1\LocaleController;
 use Cartxis\API\Http\Controllers\V1\ApiSyncController;
 use Cartxis\API\Http\Controllers\V1\ProductAiController;
 use Cartxis\API\Http\Controllers\V1\AppSettingsController;
+use Cartxis\API\Http\Middleware\SetApiLocale;
 use Cartxis\API\Http\Middleware\TrackApiSync;
 
 /*
@@ -29,7 +31,7 @@ use Cartxis\API\Http\Middleware\TrackApiSync;
 |
 */
 
-Route::prefix('api/v1')->group(function () {
+Route::prefix('api/v1')->middleware([SetApiLocale::class])->group(function () {
     
     /*
     |--------------------------------------------------------------------------
@@ -75,6 +77,12 @@ Route::prefix('api/v1')->group(function () {
     Route::prefix('currency')->group(function () {
         Route::get('/default', [CurrencyController::class, 'default']);
         Route::get('/', [CurrencyController::class, 'index']);
+    });
+
+    // Locales (Public)
+    Route::prefix('locales')->group(function () {
+        Route::get('/default', [LocaleController::class, 'default']);
+        Route::get('/', [LocaleController::class, 'index']);
     });
 
     // Search (Public)

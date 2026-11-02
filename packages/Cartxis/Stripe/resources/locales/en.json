@@ -1,0 +1,9 @@
+{
+  "extensions": {
+    "cartxis_stripe": {
+      "name": "Stripe",
+      "settings": "Stripe settings",
+      "description": "Accept payments via Stripe"
+    }
+  }
+}

@@ -2,6 +2,7 @@
 
 namespace Cartxis\Product\Models;
 
+use Cartxis\Product\Support\ResolvesTranslations;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -12,7 +13,7 @@ use Illuminate\Support\Str;
 
 class Category extends Model
 {
-    use HasFactory, SoftDeletes;
+    use HasFactory, SoftDeletes, ResolvesTranslations;
 
     protected $fillable = [
         'parent_id',
@@ -75,6 +76,26 @@ class Category extends Model
                 $category->slug = Str::slug($category->name);
             }
         });
+    }
+
+    public function translations(): HasMany
+    {
+        return $this->hasMany(CategoryTranslation::class);
+    }
+
+    /**
+     * @return list<string>
+     */
+    protected function translatableAttributes(): array
+    {
+        return [
+            'name',
+            'slug',
+            'description',
+            'meta_title',
+            'meta_description',
+            'meta_keywords',
+        ];
     }
 
     /**

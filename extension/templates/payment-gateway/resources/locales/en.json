@@ -1,0 +1,9 @@
+{
+  "extensions": {
+    "acme_example": {
+      "name": "Acme Example Gateway",
+      "settings": "Settings",
+      "description": "Manage Acme Example Gateway"
+    }
+  }
+}

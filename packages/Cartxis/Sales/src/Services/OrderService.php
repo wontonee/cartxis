@@ -78,6 +78,10 @@ class OrderService
                 ]
             );
 
+            if (function_exists('do_action')) {
+                do_action('order.status.updated', $order, $oldStatus, $newStatus, $comment);
+            }
+
             DB::commit();
             return true;
 
@@ -146,6 +150,10 @@ class OrderService
                     'comment' => $comment,
                 ]
             );
+
+            if (function_exists('do_action')) {
+                do_action('order.payment.updated', $order, $oldPaymentStatus, $newPaymentStatus, $comment);
+            }
 
             DB::commit();
             return true;

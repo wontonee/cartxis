@@ -3,6 +3,7 @@ import { Head, Link, useForm, usePage } from '@inertiajs/vue3';
 import AdminLayout from '@/layouts/AdminLayout.vue';
 import ImageUploader from '@/components/Admin/ImageUploader.vue';
 import ConfirmDeleteModal from '@/components/Admin/ConfirmDeleteModal.vue';
+import TranslationEditor from '@/components/Admin/TranslationEditor.vue';
 import { ref } from 'vue';
 import axios from 'axios';
 import { router } from '@inertiajs/vue3';
@@ -32,9 +33,19 @@ interface ParentCategory {
 interface Props {
   category: Category;
   parentCategories: ParentCategory[];
+  availableLocales?: Array<{
+    code: string;
+    name: string;
+    native_name?: string | null;
+    is_default?: boolean;
+  }>;
+  translations?: Record<string, Record<string, string | null>>;
 }
 
 const props = defineProps<Props>();
+const translationForm = ref<Record<string, Record<string, string | null | undefined>>>(
+  { ...(props.translations || {}) },
+);
 
 const page = usePage();
 const activeTab = ref<'general' | 'seo'>('general');
@@ -85,6 +96,7 @@ const submit = () => {
     formData.append('meta_title', form.meta_title);
     formData.append('meta_description', form.meta_description);
     formData.append('meta_keywords', form.meta_keywords);
+    formData.append('translations', JSON.stringify(translationForm.value));
     formData.append('image', images.value[0]);
     formData.append('_method', 'PUT');
     
@@ -120,6 +132,7 @@ const submit = () => {
     form.transform((data) => ({
       ...data,
       status: data.status ? 'enabled' : 'disabled', // Convert boolean to enum
+      translations: translationForm.value,
     })).put(categoryRoutes.update(props.category.id).url, {
       preserveScroll: true,
       onSuccess: () => {
@@ -147,6 +160,22 @@ const deleteCategory = () => {
 
 <template>
   <AdminLayout title="Edit Category">
+    <TranslationEditor
+      v-if="(availableLocales?.length || 0) > 1"
+      class="mb-6"
+      v-model="translationForm"
+      :locales="availableLocales || []"
+      :exclude-default="true"
+      :fields="[
+        { key: 'name', label: 'Name' },
+        { key: 'slug', label: 'Slug' },
+        { key: 'description', label: 'Description', type: 'textarea' },
+        { key: 'meta_title', label: 'Meta title' },
+        { key: 'meta_description', label: 'Meta description', type: 'textarea' },
+        { key: 'meta_keywords', label: 'Meta keywords' },
+      ]"
+    />
+
     <Head :title="`Edit ${category.name}`" />
 
     <div class="py-6">

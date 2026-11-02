@@ -14,6 +14,9 @@ const theme = computed(() => page.props.theme);
 const siteConfig = computed(() => page.props.siteConfig);
 const categories = computed(() => page.props.categories || []);
 const footerRaw = computed(() => (page.props as Record<string, unknown>).footerRegion ?? null);
+const i18nMeta = computed(() => (page.props as Record<string, unknown>).i18n as { direction?: string } | undefined);
+const textDirection = computed(() => i18nMeta.value?.direction || 'ltr');
+const isRtl = computed(() => textDirection.value === 'rtl');
 
 function parseRegion(v: unknown): Record<string, unknown> | null {
     if (!v) return null;
@@ -51,7 +54,9 @@ onUnmounted(() => {
 <template>
     <div
         class="min-h-screen bg-slate-50 flex flex-col theme-root"
+        :class="{ 'theme-rtl': isRtl }"
         :style="cssVars"
+        :dir="textDirection"
     >
         <ThemeHeader
             :theme="theme"
@@ -79,9 +84,9 @@ onUnmounted(() => {
         <button
             v-if="backToTop && showBackToTop"
             type="button"
-            class="fixed bottom-6 right-6 z-50 flex h-11 w-11 items-center justify-center rounded-full text-white shadow-lg transition-all hover:scale-105 hover:shadow-xl"
+            class="fixed bottom-6 end-6 z-50 flex h-11 w-11 items-center justify-center rounded-full text-white shadow-lg transition-all hover:scale-105 hover:shadow-xl"
             style="background-color: var(--theme-primary)"
-            aria-label="Back to top"
+            :aria-label="$t('common.backToTop')"
             @click="scrollToTop"
         >
             <ChevronUp class="h-5 w-5" />
@@ -92,5 +97,8 @@ onUnmounted(() => {
 <style scoped>
 .theme-root {
     font-family: var(--theme-font, Inter, sans-serif);
+}
+.theme-rtl {
+    font-family: var(--theme-font-rtl, "Noto Naskh Arabic", "Segoe UI", Tahoma, sans-serif);
 }
 </style>
