@@ -1,3 +1,16 @@
+# 1.0.18 — Locale catalog on upgrade (patch)
+
+Follow-up to 1.0.17: existing stores that only ran `php artisan migrate` now get ME / Europe / Africa locale rows via migration `2026_11_03_000001_seed_i18n_locale_catalog` (does not reset store default / active flags). `LocaleSeeder` is safe to re-run.
+
+Upgrade:
+
+```bash
+php artisan migrate
+php artisan cache:clear
+```
+
+---
+
 # 1.0.17 — Multi-language support
 
 Cartxis 1.0.17 ships first-class internationalization for storefront, admin, API, and extensions.

@@ -1,6 +1,6 @@
 # Cartxis E-Commerce Platform — User Guide
 
-**Version:** 1.0.17
+**Version:** 1.0.18
 **Last Updated:** October 2026
 **Platform:** Cartxis E-Commerce Platform
 **Stack:** Laravel 12 · Inertia.js · Vue 3 · TypeScript · Tailwind CSS
