@@ -36,22 +36,41 @@ class LocaleSeeder extends Seeder
         ];
 
         foreach ($locales as $locale) {
-            Locale::query()->updateOrCreate(
-                ['code' => $locale['code']],
-                [
+            $existing = Locale::query()->where('code', $locale['code'])->first();
+
+            if ($existing) {
+                // Preserve merchant is_default / is_active when re-seeding or upgrading.
+                $existing->fill([
                     'name' => $locale['name'],
                     'native_name' => $locale['native_name'],
                     'direction' => $locale['direction'],
-                    'is_default' => $locale['is_default'],
-                    'is_active' => true,
                     'sort_order' => $locale['sort_order'],
-                ]
-            );
+                ])->save();
+
+                continue;
+            }
+
+            Locale::query()->create([
+                'code' => $locale['code'],
+                'name' => $locale['name'],
+                'native_name' => $locale['native_name'],
+                'direction' => $locale['direction'],
+                'is_default' => (bool) $locale['is_default'],
+                'is_active' => true,
+                'sort_order' => $locale['sort_order'],
+            ]);
         }
 
-        // Ensure exactly one default
+        // Ensure exactly one default on empty / first install.
         if (! Locale::query()->where('is_default', true)->exists()) {
             Locale::query()->where('code', 'en')->update(['is_default' => true]);
+        }
+
+        // Avoid multiple defaults if a fresh seed created en as default while another existed.
+        $defaults = Locale::query()->where('is_default', true)->orderBy('id')->get();
+        if ($defaults->count() > 1) {
+            $keepId = $defaults->first()->id;
+            Locale::query()->where('is_default', true)->where('id', '!=', $keepId)->update(['is_default' => false]);
         }
 
         app(LocaleService::class)->clearCache();

@@ -13,10 +13,16 @@ Cartxis 1.0.17 ships first-class internationalization for storefront, admin, API
 
 ## Merchant setup
 
-1. Settings → Locales — activate languages and set the store default
-2. Use the header language switcher (or visit `/locale/{code}`)
-3. Translate products/categories in the admin Translations panel
-4. Translate CMS / UI Editor / menu copy in the language you author them
+1. After upgrading, run `php artisan migrate` (seeds the locale catalog if missing)
+2. Settings → Locales — activate languages and set the store default
+3. Use the header language switcher (or visit `/locale/{code}`)
+4. Translate products/categories in the admin Translations panel
+5. Translate CMS / UI Editor / menu copy in the language you author them
+
+> **Note:** 1.0.17 shipped the UI packs + `LocaleSeeder` for new installs. Existing
+> stores that only pulled files without a catalog migration may still show only
+> English until they migrate (patch includes `seed_i18n_locale_catalog`) or run:
+> `php artisan db:seed --class=Cartxis\\Core\\Database\\Seeders\\LocaleSeeder`
 
 ## Developers / extension authors
 

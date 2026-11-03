@@ -22,6 +22,16 @@ test('locale seeder creates middle east europe and africa languages', function (
         ->and(Locale::query()->whereIn('code', ['fr', 'de', 'es', 'sw', 'am'])->count())->toBe(5);
 });
 
+test('locale seeder preserves merchant default when re-run', function () {
+    Locale::query()->where('code', 'tr')->update(['is_default' => true]);
+    Locale::query()->where('code', '!=', 'tr')->update(['is_default' => false]);
+
+    $this->seed(LocaleSeeder::class);
+
+    expect(Locale::query()->where('code', 'tr')->where('is_default', true)->exists())->toBeTrue()
+        ->and(Locale::query()->where('is_default', true)->count())->toBe(1);
+});
+
 test('locale switch sets session cookie and app locale', function () {
     $response = $this->from(url('/'))->get('/locale/ar?redirect='.urlencode(url('/')));
 
